@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "name": "UnicodeArtJs",
+    "description": "将文本和图片转换为Unicode字符画"
+  },
+  "commands": {
+    "image": {
+      "description": "将图片转换为字符画",
+      "processing": "🎨 正在处理图片...",
+      "completed": "✅ 完成于 ${duration}ms",
+      "size": "   尺寸: ${rows} 行 × ${cols} 列",
+      "saved": "💾 已保存到: ${path}"
+    },
+    "text": {
+      "description": "将文本转换为字符画",
+      "processing": "🎨 正在处理文本...",
+      "completed": "✅ 完成于 ${duration}ms",
+      "size": "   尺寸: ${rows} 行 × ${cols} 列"
+    },
+    "output": {
+      "saved": "💾 已保存到: ${path}"
+    }
+  },
+  "errors": {
+    "fileNotFound": "文件不存在: ${path}",
+    "invalidConfig": "配置文件无效: ${message}",
+    "processingFailed": "处理失败: ${message}"
+  },
+  "warnings": {
+    "configLoadFailed": "⚠️  加载配置失败，使用默认值",
+    "canvasNotInstalled": "⚠️  canvas未安装，文本渲染可能不可用"
+  },
+  "info": {
+    "configLoaded": "📄 配置加载自: ${path}"
+  }
+}

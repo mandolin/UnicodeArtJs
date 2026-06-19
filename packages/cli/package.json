@@ -1,0 +1,39 @@
+{
+  "name": "unicode-art-cli",
+  "version": "1.0.0",
+  "description": "Unicode Art CLI - Convert text and images to character art",
+  "main": "src/console.js",
+  "bin": {
+    "unicode-art": "src/console.js"
+  },
+  "scripts": {
+    "start": "node src/console.js",
+    "test": "node tests/e2e-test.js",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "unicode",
+    "ascii",
+    "art",
+    "cli",
+    "character-art"
+  ],
+  "author": "Qoder",
+  "license": "MIT",
+  "dependencies": {
+    "unicode-art-js": "file:../core",
+    "commander": "^12.0.0",
+    "cosmiconfig": "^9.0.0",
+    "chalk": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "src/",
+    "locales/",
+    "config.yml",
+    "README.md",
+    "docs/"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "name": "UnicodeArtJs",
+    "description": "Convert text and images to Unicode character art"
+  },
+  "commands": {
+    "image": {
+      "description": "Convert image to character art",
+      "processing": "🎨 Processing image...",
+      "completed": "✅ Completed in ${duration}ms",
+      "size": "   Size: ${rows} rows × ${cols} cols",
+      "saved": "💾 Saved to: ${path}"
+    },
+    "text": {
+      "description": "Convert text to character art",
+      "processing": "🎨 Processing text...",
+      "completed": "✅ Completed in ${duration}ms",
+      "size": "   Size: ${rows} rows × ${cols} cols"
+    },
+    "output": {
+      "saved": "💾 Saved to: ${path}"
+    }
+  },
+  "errors": {
+    "fileNotFound": "File not found: ${path}",
+    "invalidConfig": "Invalid config: ${message}",
+    "processingFailed": "Processing failed: ${message}"
+  },
+  "warnings": {
+    "configLoadFailed": "⚠️  Failed to load config, using defaults",
+    "canvasNotInstalled": "⚠️  canvas not installed, text rendering may be unavailable"
+  },
+  "info": {
+    "configLoaded": "📄 Config loaded from: ${path}"
+  }
+}

@@ -1,0 +1,543 @@
+/**
+ * ============================================================================
+ * 🟦 配置选项类型定义模块
+ * ============================================================================
+ * 
+ * 🔶 模块职责
+ * 定义字符画生成的所有配置选项，包括：
+ * - 尺寸配置（height, width）
+ * - 采样配置（matrixSize, ratio, interpolation）
+ * - 字符集配置（charset）
+ * - 字体配置（font, fontStyle, fontReduce）
+ * - 文本布局配置（textAlign, lineSpacing, heightMode）
+ * - 输出配置（invert, trimTrailingSpaces）
+ * - 性能配置（enableEarlyTermination, maxParallelTasks）
+ * 
+ * 🔶 设计原则
+ * - 所有配置项都有合理的默认值
+ * - 支持部分配置覆盖（使用Partial<T>）
+ * - 明确的参数验证规则
+ * 
+ * 🔶 关键参数说明
+ * - ratio: 垂直水平比例，大多数字体高度≈2×宽度
+ * - matrixSize: 采样矩阵大小，平衡质量和速度（默认6）
+ * - enableEarlyTermination: 早期终止优化，大幅提升SAD匹配速度
+ * 
+ * @module types/config
+ * @author Qoder
+ * @since 0.1.0
+ * @see {@link https://github.com/mandolin/UnicodeArt/doc/algorithms/performance-notes.md}
+ * ============================================================================
+ */
+
+//#region 🟦 枚举类型定义
+
+import type { CharsetConfig } from './charset';
+import { PresetCharset } from './charset';
+import { OutputFormat } from './output';
+
+/**
+ * 🟢 插值算法枚举
+ * 
+ * 🔹 图像缩放时使用的插值算法。
+ * 🔹 不同算法在速度和质量之间有不同的权衡。
+ * 
+ * @enum {string} Interpolation
+ * 
+ * @example
+ * ```typescript
+ * const config: ArtConfig = {
+ *   interpolation: Interpolation.BICUBIC // 高质量
+ * };
+ * ```
+ * 
+ * @remarks
+ * - NEAREST: 最快，质量最低（锯齿明显）
+ * - BILINEAR: 速度快，质量中等
+ * - BICUBIC: 速度中等，质量高（推荐）
+ * - LANCZOS: 速度最慢，质量最高
+ * 
+ * @performance
+ * - 速度排序: NEAREST > BILINEAR > BICUBIC > LANCZOS
+ * - 质量排序: LANCZOS > BICUBIC > BILINEAR > NEAREST
+ * - 默认选择BICUBIC是速度和质量的平衡点
+ */
+export enum Interpolation {
+  /** 最近邻插值（最快，质量最低） */
+  NEAREST = 'nearest',
+  
+  /** 双线性插值（速度快，质量中等） */
+  BILINEAR = 'bilinear',
+  
+  /** 双三次插值（速度中等，质量高，推荐） */
+  BICUBIC = 'bicubic',
+  
+  /** Lanczos插值（速度最慢，质量最高） */
+  LANCZOS = 'lanczos'
+}
+
+/**
+ * 🟢 字体样式枚举
+ * 
+ * 🔹 指定字体的样式变体。
+ * 
+ * @enum {string} FontStyle
+ * 
+ * @example
+ * ```typescript
+ * const config: ArtConfig = {
+ *   font: 'Arial',
+ *   fontStyle: FontStyle.BOLD
+ * };
+ * ```
+ * 
+ * @remarks
+ * - 需要字体文件支持对应的样式
+ * - 如不支持会自动回退到regular
+ */
+export enum FontStyle {
+  /** 常规体 */
+  REGULAR = 'regular',
+  
+  /** 粗体 */
+  BOLD = 'bold',
+  
+  /** 斜体 */
+  ITALIC = 'italic',
+  
+  /** 粗斜体 */
+  BOLD_ITALIC = 'bold-italic'
+}
+
+/**
+ * 🟢 文本对齐方式枚举
+ * 
+ * 🔹 多行文本的对齐方式。
+ * 
+ * @enum {string} TextAlign
+ */
+export enum TextAlign {
+  /** 左对齐 */
+  LEFT = 'left',
+  
+  /** 居中对齐 */
+  CENTER = 'center',
+  
+  /** 右对齐 */
+  RIGHT = 'right'
+}
+
+/**
+ * 🟢 高度模式枚举
+ * 
+ * 🔹 指定height参数的含义。
+ * 
+ * @enum {string} HeightMode
+ * 
+ * @example
+ * ```typescript
+ * // line模式: height=10表示每行10像素高
+ * const config1: ArtConfig = {
+ *   height: 10,
+ *   heightMode: HeightMode.LINE
+ * };
+ * 
+ * // total模式: height=100表示总高度100像素
+ * const config2: ArtConfig = {
+ *   height: 100,
+ *   heightMode: HeightMode.TOTAL
+ * };
+ * ```
+ * 
+ * @remarks
+ * - LINE: height表示每行的高度（像素）
+ * - TOTAL: height表示整个输出的总高度（像素）
+ * - 默认使用LINE模式，更符合直觉
+ */
+export enum HeightMode {
+  /** height表示每行的高度 */
+  LINE = 'line',
+  
+  /** height表示总高度 */
+  TOTAL = 'total'
+}
+
+//#endregion
+
+//#region 🟦 核心配置接口
+
+/**
+ * 🟢 艺术生成配置接口
+ * 
+ * 🔹 包含字符画生成的所有配置选项。
+ * 🔹 所有字段都是可选的，未指定的字段使用默认值。
+ * 
+ * @interface ArtConfig
+ * 
+ * @example
+ * ```typescript
+ * // 最小配置（使用所有默认值）
+ * const minimalConfig: ArtConfig = {};
+ * 
+ * // 完整配置
+ * const fullConfig: ArtConfig = {
+ *   height: 20,
+ *   matrixSize: 6,
+ *   ratio: 2.0,
+ *   charset: {
+ *     type: PresetCharset.ASCII
+ *   },
+ *   font: 'Arial',
+ *   invert: false,
+ *   enableEarlyTermination: true
+ * };
+ * 
+ * // 图片转字符画
+ * const imageArt = await imageToArt('photo.jpg', fullConfig);
+ * 
+ * // 文本转字符画
+ * const textArt = await textToArt('Hello', {
+ *   ...fullConfig,
+ *   font: 'SimSun',
+ *   height: 15
+ * });
+ * ```
+ * 
+ * @remarks
+ * - height和width至少指定一个
+ * - 同时指定时，以height为准，width作为参考
+ * - matrixSize越大，细节越丰富，但速度越慢
+ * - ratio影响字符的宽高比，大多数字体为2.0
+ * 
+ * @validation
+ * - height: 必须 > 0（如果指定）
+ * - width: 必须 > 0（如果指定）
+ * - matrixSize: 范围 [2, 20]，推荐 [4, 8]
+ * - ratio: 范围 [1.0, 3.0]，推荐 2.0
+ * - fontReduce: 范围 [0, 10]，推荐 0
+ * - charSpace: 范围 [0, 5]，推荐 1
+ */
+export interface ArtConfig {
+  //#region 🔶 尺寸配置
+  
+  /** 
+   * 输出高度（行数/像素数）
+   * - 与width二选一，或同时指定
+   * - 含义取决于heightMode
+   * - 默认值: 无（必须指定height或width之一）
+   * 
+   * @example
+   * height: 20 // 输出20行字符
+   */
+  height?: number;
+  
+  /** 
+   * 输出宽度（列数/像素数）
+   * - 与height二选一，或同时指定
+   * - 如同时指定，以height为准
+   * - 默认值: 无
+   * 
+   * @example
+   * width: 80 // 输出80列字符
+   */
+  width?: number;
+  
+  //#endregion
+  
+  //#region 🔶 采样配置
+  
+  /** 
+   * 采样矩阵大小
+   * - 每个采样块缩放的尺寸
+   * - 范围: [2, 20]
+   * - 推荐: [4, 8]
+   * - 默认值: 6
+   * 
+   * @remarks
+   * - 值越大，细节越丰富
+   * - 但计算量呈平方增长 O(M²)
+   * - 6是质量和速度的平衡点
+   * 
+   * @example
+   * matrixSize: 6 // 每个块缩放为6×6像素
+   */
+  matrixSize: number;
+  
+  /** 
+   * 垂直水平比例（字体高度/宽度）
+   * - 范围: [1.0, 3.0]
+   * - 推荐: 2.0
+   * - 默认值: 2.0
+   * 
+   * @remarks
+   * - 大多数字体的高度约为宽度的2倍
+   * - 等宽字体可能接近1.5-1.8
+   * - 特殊字体可能需要调整
+   * 
+   * @example
+   * ratio: 2.0 // 字体高度是宽度的2倍
+   */
+  ratio: number;
+  
+  /** 
+   * 插值算法
+   * - 用于图像缩放
+   * - 默认值: Interpolation.BICUBIC
+   * 
+   * @see {@link Interpolation} 可用的插值算法
+   */
+  interpolation: Interpolation;
+  
+  //#endregion
+  
+  //#region 🔶 字符集配置
+  
+  /** 
+   * 字符集配置
+   * - 决定使用哪些字符进行匹配
+   * - 默认值: ASCII字符集
+   * 
+   * @example
+   * charset: {
+   *   type: PresetCharset.EXTENDED
+   * }
+   */
+  charset: CharsetConfig;
+  
+  //#endregion
+  
+  //#region 🔶 字体配置（仅文本模式）
+  
+  /** 
+   * 字体名称或路径
+   * - 系统字体: 直接使用字体名称（如'Arial'）
+   * - 自定义字体: 提供字体文件路径（如'/path/to/font.ttf'）
+   * - 默认值: 'Arial'（系统默认）
+   * 
+   * @example
+   * font: 'SimSun' // 使用中文字体
+   * font: './fonts/custom.ttf' // 使用自定义字体文件
+   */
+  font?: string;
+  
+  /** 
+   * 字体样式
+   * - 需要字体文件支持对应样式
+   * - 默认值: FontStyle.REGULAR
+   * 
+   * @see {@link FontStyle}
+   */
+  fontStyle?: FontStyle;
+  
+  /** 
+   * 字体缩减量（像素）
+   * - 减少字体渲染时的边距
+   * - 范围: [0, 10]
+   * - 推荐: 0
+   * - 默认值: 0
+   * 
+   * @remarks
+   * - 值越大，字符间距越紧凑
+   * - 过大会导致字符裁剪
+   * - 一般保持0即可
+   */
+  fontReduce?: number;
+  
+  /** 
+   * 字符间距（像素）
+   * - 字符之间的额外空白
+   * - 范围: [0, 5]
+   * - 推荐: 1
+   * - 默认值: 1
+   * 
+   * @example
+   * charSpace: 2 // 增加字符间距
+   */
+  charSpace?: number;
+  
+  //#endregion
+  
+  //#region 🔶 文本布局配置
+  
+  /** 
+   * 文本对齐方式
+   * - 仅对多行文本有效
+   * - 默认值: TextAlign.LEFT
+   * 
+   * @see {@link TextAlign}
+   */
+  textAlign?: TextAlign;
+  
+  /** 
+   * 行间距（像素）
+   * - 多行文本的行间空白
+   * - 范围: [0, 20]
+   * - 推荐: 0
+   * - 默认值: 0
+   * 
+   * @example
+   * lineSpacing: 5 // 增加行间距
+   */
+  lineSpacing?: number;
+  
+  /** 
+   * 高度模式
+   * - 决定height参数的含义
+   * - 默认值: HeightMode.LINE
+   * 
+   * @see {@link HeightMode}
+   */
+  heightMode?: HeightMode;
+  
+  //#endregion
+  
+  //#region 🔶 输出配置
+  
+  
+  /** 
+   * 是否反转颜色（黑底白字）
+   * - false: 白底黑字（默认）
+   * - true: 黑底白字
+   * - 默认值: false
+   * 
+   * @example
+   * invert: true // 反转为黑底效果
+   */
+  invert: boolean;
+
+  /**
+   * 输出格式
+   * - 默认值: OutputFormat.PLAIN_TEXT
+   * - HTML和ANSI格式由assembler模块统一处理
+   *
+   * @see {@link OutputFormat}
+   */
+  outputFormat?: OutputFormat;
+  
+  /** 
+   * 是否去除行尾空格
+   * - 减少输出文件的体积
+   * - 可能影响对齐
+   * - 默认值: false
+   * 
+   * @remarks
+   * - 启用后，每行末尾的空格会被删除
+   * - 对于固定宽度的终端显示可能不合适
+   */
+  trimTrailingSpaces?: boolean;
+  
+  //#endregion
+  
+  //#region 🔶 性能配置
+
+  /**
+   * 宽字符匹配比例阈值
+   * - 当 wideSAD < normalSAD × wideCharRatio 时选择宽字符
+   * - 默认值: 1.5
+   *
+   * @remarks
+   * - 值越小越保守，越不容易选择宽字符
+   * - 值越大越激进，越容易选择宽字符
+   */
+  wideCharRatio?: number;
+  
+  /** 
+   * 是否启用早期终止优化
+   * - 大幅提升SAD匹配速度
+   * - 不影响结果准确性
+   * - 默认值: true
+   * 
+   * @remarks
+   * - 原理: 当累计SAD超过当前最优值时提前退出
+   * - 加速比: 通常2-5倍
+   * - 强烈建议保持启用
+   * 
+   * @performance
+   * - 启用: O(N × M²) 平均情况
+   * - 禁用: O(N × M²) 最坏情况
+   * - N = 字符集大小, M = matrixSize
+   */
+  enableEarlyTermination?: boolean;
+  
+  /** 
+   * 最大并行任务数
+   * - 0表示自动检测CPU核心数
+   * - 仅在Node.js环境有效
+   * - 默认值: 0
+   * 
+   * @remarks
+   * - 浏览器环境使用Web Workers
+   * - Node.js环境使用worker_threads
+   * - 设置为1可禁用并行
+   * 
+   * @performance
+   * - 理想值: CPU核心数
+   * - 过高会导致线程切换开销
+   */
+  maxParallelTasks?: number;
+  
+  //#endregion
+}
+
+//#endregion
+
+//#region 🟦 默认配置
+
+/**
+ * 🟢 默认配置常量
+ * 
+ * 🔹 提供所有配置项的合理默认值。
+ * 🔹 可作为用户配置的基准。
+ * 
+ * @constant {Partial<ArtConfig>} DEFAULT_CONFIG
+ * 
+ * @example
+ * ```typescript
+ * // 使用默认配置
+ * const config: ArtConfig = {
+ *   ...DEFAULT_CONFIG,
+ *   height: 20, // 仅覆盖需要的项
+ *   charset: {
+ *     type: PresetCharset.EXTENDED
+ *   }
+ * };
+ * ```
+ * 
+ * @remarks
+ * - matrixSize=6: 平衡质量和速度
+ * - ratio=2.0: 适合大多数字体
+ * - enableEarlyTermination=true: 性能优化
+ * - 其他项根据实际需要覆盖
+ */
+export const DEFAULT_CONFIG: Partial<ArtConfig> = {
+  // 采样配置
+  matrixSize: 6,
+  ratio: 2.0,
+  interpolation: Interpolation.BILINEAR,
+  
+  // 字符集配置
+  charset: {
+    type: PresetCharset.ASCII
+  },
+  
+  // 字体配置
+  fontReduce: 0,
+  charSpace: 1,
+  
+  // 文本布局配置
+  textAlign: TextAlign.LEFT,
+  lineSpacing: 0,
+  heightMode: HeightMode.LINE,
+  
+  // 输出配置
+  outputFormat: OutputFormat.PLAIN_TEXT,
+  invert: false,
+  trimTrailingSpaces: false,
+
+  // 性能配置
+  wideCharRatio: 2.0,
+  enableEarlyTermination: true,
+  maxParallelTasks: 0
+};
+
+//#endregion

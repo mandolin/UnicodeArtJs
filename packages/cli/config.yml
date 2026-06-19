@@ -1,0 +1,49 @@
+# UnicodeArtJs 默认配置文件
+# 文件名: .unicode-artrc.yml 或 unicode-art.config.js
+
+# 输出配置
+output:
+  format: plain          # plain | html | ansi
+  trimTrailingSpaces: false
+
+# 尺寸配置
+size:
+  height: 20             # 默认高度（行数）
+  # width: 80            # 可选：固定宽度
+
+# 字符集配置
+charset:
+  type: ASCII            # ASCII | EXTENDED | CHINESE_SIMPLE
+  # customChars: " .:-=+*#%@"
+
+# 字体配置
+font:
+  name: Arial            # 字体名称或路径
+  style: regular         # regular | bold | italic | bold-italic
+  reduce: 0.8            # 字体缩放比例
+
+# 算法配置
+algorithm:
+  matrixSize: 6          # 字符矩阵大小
+  ratio: 2.0             # 垂直/水平比例
+  interpolation: bilinear # nearest | bilinear | bicubic
+  wideCharRatio: 1.5     # 宽字符匹配阈值
+  enableEarlyTermination: true  # 启用早期终止优化
+
+# 颜色配置
+color:
+  invert: false          # 是否反转颜色
+
+# 文本配置（仅text命令）
+text:
+  align: left            # left | center | right
+  lineSpacing: 1.0       # 行间距倍数
+  heightMode: line       # line | total
+
+# 性能配置
+performance:
+  maxParallelTasks: 0    # 最大并行任务数（0=自动）
+
+# 国际化
+i18n:
+  lang: zh-CN            # zh-CN | en-US
