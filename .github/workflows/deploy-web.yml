@@ -17,16 +17,13 @@ on:
     paths:
       - 'packages/core/**'
       - 'packages/web/**'
-  # 也支持手动触发
   workflow_dispatch:
 
-# 权限设置
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 并发控制
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -45,15 +42,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: |
-            packages/core/package-lock.json
-            packages/web/package-lock.json
+          node-version: 22
 
       - name: Install Core dependencies
         working-directory: ./packages/core
-        run: npm ci
+        run: npm install
 
       - name: Build Core library
         working-directory: ./packages/core
@@ -61,7 +54,7 @@ jobs:
 
       - name: Install Web dependencies
         working-directory: ./packages/web
-        run: npm ci
+        run: npm install
 
       - name: Build Web application
         working-directory: ./packages/web
