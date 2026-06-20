@@ -16,6 +16,8 @@ npm install canvas
 
 ## Usage
 
+### Node.js
+
 ```typescript
 import {
   imageToArt,
@@ -41,10 +43,55 @@ const imageResult = await imageToArt('photo.png', {
 console.log(imageResult.content);
 ```
 
+### Browser Bundlers
+
+Use the browser entry in Vite/Webpack/Rollup projects:
+
+```typescript
+import {
+  clearBrowserAdapterCache,
+  getBrowserAdapterCacheStats,
+  getBrowserRuntimeCapabilities,
+  imageToArt,
+  OutputFormat,
+  PresetCharset
+} from 'unicode-art-js/browser';
+
+const file = document.querySelector<HTMLInputElement>('#file')!.files![0];
+const controller = new AbortController();
+const capabilities = getBrowserRuntimeCapabilities();
+
+const result = await imageToArt(file, {
+  width: 80,
+  matrixSize: 6,
+  font: 'Consolas',
+  outputFormat: OutputFormat.PLAIN_TEXT,
+  charset: {
+    type: PresetCharset.CUSTOM,
+    customChars: ' .:-=+*#%@'
+  }
+}, {
+  signal: controller.signal,
+  maxInputPixels: 16_000_000,
+  maxOutputCells: 300_000,
+  progress: (event) => {
+    console.log(event.stage, event.progress);
+  }
+});
+
+document.querySelector<HTMLPreElement>('#preview')!.textContent = result.content;
+console.log(capabilities, getBrowserAdapterCacheStats());
+clearBrowserAdapterCache({ glyphs: true, charData: true });
+```
+
+The browser entry targets Chrome 120+ and does not import `sharp`, `canvas`, or Node filesystem APIs. URL image loading is subject to normal browser CORS rules. Browser APIs include glyph/font caches, cache statistics, runtime capability checks, progress callbacks, cancellation, and large-image limits.
+
 ## Main APIs
 
 - `textToArt(text, config)` converts text into Unicode art. Requires `canvas` in Node.js.
 - `imageToArt(imagePath, config)` converts an image file into Unicode art. Uses `sharp`.
+- `unicode-art-js/browser` exports browser `imageToArt()`, browser `textToArt()`, `browserPlatformAdapter`, `loadBrowserFont`, cache controls, runtime capability checks, and pure conversion APIs for browser projects.
+- `unicode-art-js/pure` exports platform-independent sampling, matching, assembly, box, and `imageDataToArt()` APIs.
 - `validateConfig(config)` validates and fills defaults.
 - `isWideChar(char)` detects East Asian wide characters.
 - `getPresetChars(type)` returns preset character sets.

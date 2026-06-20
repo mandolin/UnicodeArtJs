@@ -1,0 +1,54 @@
+{
+  "name": "@unicode-art/web",
+  "version": "0.1.0-alpha",
+  "description": "UnicodeArtJs Web Application - Convert images and text to Unicode art in browser",
+  "type": "module",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "files": [
+    "dist/",
+    "public/",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tests/unit.test.js",
+    "test:e2e": "node tests/e2e-smoke.mjs",
+    "lint": "echo \"No linter configured\" && exit 0",
+    "lint:fix": "echo \"No linter configured\" && exit 0",
+    "check": "npm run build && npm test"
+  },
+  "keywords": [
+    "unicode",
+    "ascii",
+    "art",
+    "web",
+    "browser",
+    "image",
+    "text"
+  ],
+  "author": "UnicodeArtJs Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mandolin/UnicodeArtJs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mandolin/UnicodeArtJs/issues"
+  },
+  "homepage": "https://github.com/mandolin/UnicodeArtJs#readme",
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "unicode-art-js": "file:../core"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

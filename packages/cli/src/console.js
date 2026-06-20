@@ -87,7 +87,9 @@ const {
   Interpolation,
   FontStyle,
   TextAlign,
-  HeightMode
+  HeightMode,
+  isBoxStyleName,
+  normalizeBoxOptions
 } = require('unicode-art-js');
 
 //#region 🟩 国际化管理
@@ -163,7 +165,7 @@ program
   .option('--charset <type>', 'Preset charset (ASCII|EXTENDED|CHINESE_SIMPLE)')
   .option('-f, --font <name>', 'Font name or path')
   .option('--font-style <style>', 'Font style (regular|bold|italic|bold-italic)')
-  .option('--font-reduce <number>', 'Font size reduction', parseInt)
+  .option('--font-reduce <number>', 'Visual font inset/reduction', parseInt)
   .option('-m, --matrix <size>', 'Matrix size', parseInt)
   .option('-r, --ratio <number>', 'Vertical/horizontal ratio', parseFloat)
   .option('-v, --invert', 'Invert colors')
@@ -174,6 +176,7 @@ program
   .option('--height-mode <mode>', 'Height mode (line|total)')
   .option('--trim-trailing-spaces', 'Trim trailing spaces')
   .option('--format <format>', 'Output format (plain|html|ansi)')
+  .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
   .option('--lang <locale>', 'Language (zh-CN|en-US)')
@@ -215,7 +218,7 @@ program
   .option('--charset <type>', 'Preset charset (ASCII|EXTENDED|CHINESE_SIMPLE)')
   .option('-f, --font <name>', 'Font name or path')
   .option('--font-style <style>', 'Font style (regular|bold|italic|bold-italic)')
-  .option('--font-reduce <number>', 'Font size reduction', parseInt)
+  .option('--font-reduce <number>', 'Visual font inset/reduction', parseInt)
   .option('-m, --matrix <size>', 'Matrix size', parseInt)
   .option('-r, --ratio <number>', 'Vertical/horizontal ratio', parseFloat)
   .option('-v, --invert', 'Invert colors')
@@ -223,6 +226,7 @@ program
   .option('--wide-char-ratio <number>', 'Wide character matching ratio', parseFloat)
   .option('--trim-trailing-spaces', 'Trim trailing spaces')
   .option('--format <format>', 'Output format (plain|html|ansi)')
+  .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
   .option('--lang <locale>', 'Language (zh-CN|en-US)')
@@ -252,7 +256,7 @@ program
   .option('--charset <type>', 'Preset charset (ASCII|EXTENDED|CHINESE_SIMPLE)')
   .option('-f, --font <name>', 'Font name or path')
   .option('--font-style <style>', 'Font style (regular|bold|italic|bold-italic)')
-  .option('--font-reduce <number>', 'Font size reduction', parseInt)
+  .option('--font-reduce <number>', 'Visual font inset/reduction', parseInt)
   .option('-m, --matrix <size>', 'Matrix size', parseInt)
   .option('-r, --ratio <number>', 'Vertical/horizontal ratio', parseFloat)
   .option('-v, --invert', 'Invert colors')
@@ -263,6 +267,7 @@ program
   .option('--height-mode <mode>', 'Height mode (line|total)')
   .option('--trim-trailing-spaces', 'Trim trailing spaces')
   .option('--format <format>', 'Output format (plain|html|ansi)')
+  .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
   .option('--lang <locale>', 'Language (zh-CN|en-US)')
@@ -418,6 +423,12 @@ function mergeConfig(fileConfig, cliOptions) {
   // 命令行参数覆盖配置文件
   if (hasOption(cliOptions, 'height')) merged.height = requireFiniteNumber(cliOptions.height, 'height');
   if (hasOption(cliOptions, 'width')) merged.width = requireFiniteNumber(cliOptions.width, 'width');
+  
+  // 🔹 如果未指定height和width，提供默认值（避免Core库验证失败）
+  if (!merged.height && !merged.width) {
+    merged.height = 10; // 默认高度为10行
+  }
+  
   if (hasOption(cliOptions, 'chars')) {
     merged.charset = {
       type: PresetCharset.CUSTOM,
@@ -449,6 +460,7 @@ function mergeConfig(fileConfig, cliOptions) {
     merged.lineSpacing = requireFiniteNumber(cliOptions.lineSpacing, 'line-spacing');
   }
   if (hasOption(cliOptions, 'heightMode')) merged.heightMode = normalizeHeightMode(cliOptions.heightMode);
+  if (hasOption(cliOptions, 'box')) merged.box = parseBoxOption(cliOptions.box);
   if (hasOption(cliOptions, 'lang')) merged.lang = cliOptions.lang;
   
   return merged;
@@ -487,6 +499,7 @@ function normalizeConfig(fileConfig = {}) {
   if (hasOption(fileConfig, 'outputFormat')) normalized.outputFormat = fileConfig.outputFormat;
   if (hasOption(fileConfig, 'invert')) normalized.invert = fileConfig.invert;
   if (hasOption(fileConfig, 'trimTrailingSpaces')) normalized.trimTrailingSpaces = fileConfig.trimTrailingSpaces;
+  if (hasOption(fileConfig, 'box')) normalized.box = normalizeBoxConfig(fileConfig.box);
   if (hasOption(fileConfig, 'wideCharRatio')) normalized.wideCharRatio = fileConfig.wideCharRatio;
   if (hasOption(fileConfig, 'enableEarlyTermination')) {
     normalized.enableEarlyTermination = fileConfig.enableEarlyTermination;
@@ -502,6 +515,7 @@ function normalizeConfig(fileConfig = {}) {
     if (hasOption(fileConfig.output, 'trimTrailingSpaces')) {
       normalized.trimTrailingSpaces = fileConfig.output.trimTrailingSpaces;
     }
+    if (hasOption(fileConfig.output, 'box')) normalized.box = normalizeBoxConfig(fileConfig.output.box);
   }
   if (fileConfig.algorithm) {
     if (hasOption(fileConfig.algorithm, 'matrixSize')) normalized.matrixSize = fileConfig.algorithm.matrixSize;
@@ -532,6 +546,82 @@ function normalizeConfig(fileConfig = {}) {
  * @param {Object|string} charsetConfig - 字符集配置
  * @returns {Object} core字符集配置
  */
+/**
+ * 🔶 解析命令行 box 参数
+ *
+ * 支持 `true`、`false`、内置样式名和 JSON 对象字符串。
+ *
+ * @param {string|boolean} value - CLI 输入值
+ * @returns {false|Object} core BoxOptions 或 false
+ */
+function parseBoxOption(value) {
+  if (typeof value === 'boolean') {
+    return value ? {} : false;
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error('Invalid box option: expected true, false, style name, or JSON object');
+  }
+
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    throw new Error('Invalid box option: value cannot be empty');
+  }
+
+  if (trimmed === 'true') {
+    return {};
+  }
+
+  if (trimmed === 'false') {
+    return false;
+  }
+
+  if (isBoxStyleName(trimmed)) {
+    return { enabled: true, style: trimmed };
+  }
+
+  if (trimmed.startsWith('{')) {
+    try {
+      return normalizeBoxConfig(JSON.parse(trimmed));
+    } catch (error) {
+      throw new Error(`Invalid box option: ${error.message}`);
+    }
+  }
+
+  throw new Error(
+    `Invalid box option: "${trimmed}". Expected true, false, a built-in style, or a JSON object.`
+  );
+}
+
+/**
+ * 🔶 规范化配置文件 box 节点
+ *
+ * 配置文件可以直接写对象，也允许写 true/false 或样式名。
+ *
+ * @param {unknown} value - 配置文件 box 值
+ * @returns {false|Object} core BoxOptions 或 false
+ */
+function normalizeBoxConfig(value) {
+  if (typeof value === 'string' || typeof value === 'boolean') {
+    return parseBoxOption(value);
+  }
+
+  if (value === false) {
+    return false;
+  }
+
+  if (value === true) {
+    return {};
+  }
+
+  if (value && typeof value === 'object') {
+    normalizeBoxOptions(value);
+    return value;
+  }
+
+  throw new Error('Invalid box config: expected false, true, style name, or object');
+}
+
 function normalizeCharset(charsetConfig) {
   if (typeof charsetConfig === 'string') {
     return { type: charsetConfig };

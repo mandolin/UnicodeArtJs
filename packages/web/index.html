@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="UnicodeArtJs - 免费在线Unicode字符画生成器，将图片和文本转换为精美的Unicode字符画。支持多种字符集、字体、裱框样式和主题。">
+  <meta name="keywords" content="unicode, ascii, art, character, image, text, conversion, 字符画, ASCII艺术">
+  <meta name="author" content="UnicodeArtJs Team">
+  <meta property="og:title" content="UnicodeArtJs - Unicode字符画生成器">
+  <meta property="og:description" content="免费在线Unicode字符画生成器，图片转字符画、文字Banner、裱框装饰">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mandolin.github.io/UnicodeArtJs/">
+  <meta name="robots" content="index, follow">
+
+  <title>UnicodeArtJs - 免费在线Unicode字符画生成器</title>
+
+  <!-- 自定义样式（无外部依赖） -->
+  <link rel="stylesheet" href="./src/styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <!--#region 🟩 Header -->
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">🎨</span>
+        <span class="logo-text">UnicodeArtJs</span>
+      </div>
+      <nav class="header-nav">
+        <div class="theme-selector">
+          <label for="themeSelect" class="theme-label">主题</label>
+          <select id="themeSelect" class="theme-dropdown">
+            <option value="default">🌙 默认（现代简约）</option>
+            <option value="dark">☀️ 暗黑</option>
+            <option value="high-contrast">🎨 高对比度</option>
+            <option value="solarized-light">🌅 Solarized 浅色</option>
+            <option value="nord">❄️ Nord 极冰</option>
+          </select>
+        </div>
+        <a href="https://github.com/mandolin/UnicodeArtJs" target="_blank" rel="noopener noreferrer" class="nav-link" title="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+      </nav>
+    </header>
+    <!--#endregion-->
+
+    <!--#region 🟩 模式切换 -->
+    <nav class="mode-switcher">
+      <button class="mode-btn active" data-mode="image">
+        <span class="mode-icon">🖼️</span>
+        <span class="mode-text">图片转字符画</span>
+      </button>
+      <button class="mode-btn" data-mode="text">
+        <span class="mode-icon">📝</span>
+        <span class="mode-text">文字Banner</span>
+      </button>
+      <button class="mode-btn disabled" data-mode="editor" title="后期实现">
+        <span class="mode-icon">✏️</span>
+        <span class="mode-text">编辑器</span>
+      </button>
+    </nav>
+    <!--#endregion-->
+
+    <!--#region 🟩 主内容区 -->
+    <main class="app-main">
+      <!-- 左侧：输入区 + 参数面板 + 裱框设置 -->
+      <aside class="sidebar">
+        <!-- 输入区域 -->
+        <section class="card">
+          <!-- 图片输入 -->
+          <div class="input-panel" id="imageInputPanel">
+            <h3 class="card-title">上传图片</h3>
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-content">
+                <span class="upload-icon">📁</span>
+                <p class="upload-text">拖拽图片到此处</p>
+                <p class="upload-hint">或点击选择文件</p>
+              </div>
+              <input type="file" id="fileInput" accept="image/*" hidden>
+            </div>
+            <div class="preview-thumb" id="imagePreview" style="display: none;">
+              <img id="previewImg" src="" alt="预览">
+              <button class="btn-clear" id="clearImage">✕</button>
+            </div>
+          </div>
+          <!-- 文字输入 -->
+          <div class="input-panel" id="textInputPanel" style="display: none;">
+            <h3 class="card-title">输入文字</h3>
+            <textarea id="textInput" class="text-input" placeholder="输入要转换的文字..." rows="4"></textarea>
+          </div>
+        </section>
+
+        <!-- 参数设置 -->
+        <section class="card">
+          <h3 class="card-title">参数设置</h3>
+          <div class="config-form">
+            <!-- 尺寸 -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="height">高度（行数）</label>
+                <input type="number" id="height" value="20" min="1" max="200">
+              </div>
+              <div class="form-group">
+                <label for="width">宽度（列数）</label>
+                <input type="number" id="width" value="" min="1" max="500" placeholder="自动">
+              </div>
+            </div>
+
+            <!-- 字符集 -->
+            <div class="form-group">
+              <label for="charset">字符集</label>
+              <select id="charset">
+                <option value="ASCII">ASCII（英文 + 符号）</option>
+                <option value="EXTENDED">扩展字符</option>
+                <option value="CHINESE_SIMPLE">简体中文常用</option>
+                <option value="__CUSTOM__">自定义 →</option>
+              </select>
+            </div>
+            <div class="form-group" id="customCharsGroup" style="display: none;">
+              <label for="customChars">自定义字符（从暗到亮排列）</label>
+              <input type="text" id="customChars" class="text-input" placeholder="例如: .:-=+*#%@" style="font-family: monospace;">
+            </div>
+
+            <!-- 视觉字体（渲染输入文本/采样用） -->
+            <div class="form-group">
+              <label for="font">视觉字体（渲染用）</label>
+              <select id="font">
+                <option value="Arial">Arial</option>
+                <option value="Consolas">Consolas</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Monaco">Monaco</option>
+                <option value="Microsoft YaHei">微软雅黑</option>
+                <option value="SimSun">宋体</option>
+                <option value="SimHei">黑体</option>
+                <option value="KaiTi">楷体</option>
+              </select>
+            </div>
+
+            <!-- 字素字体（预览区显示用） -->
+            <div class="form-group">
+              <label for="glyphFont">字素字体（显示用）</label>
+              <select id="glyphFont">
+                <option value="Consolas, 'Courier New', monospace">Consolas</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="'SimSun-ExtB', SimSun, monospace">宋体</option>
+                <option value="'NSimSun', 'SimSun', monospace">新宋体</option>
+                <option value="'Sarasa Mono SC', 'Sarasa Term SC', monospace">等距更纱黑体</option>
+                <option value="'LXGW WenKai Mono', 'LXGW WenKai', monospace">霞鹜文楷等宽</option>
+                <option value="'Fira Code', 'Consolas', monospace">Fira Code</option>
+                <option value="'JetBrains Mono', 'Consolas', monospace">JetBrains Mono</option>
+                <option value="'Source Code Pro', monospace">Source Code Pro</option>
+                <option value="monospace">系统默认等宽</option>
+              </select>
+            </div>
+
+            <!-- 高级设置折叠 -->
+            <details class="config-details">
+              <summary>高级设置</summary>
+              <div class="config-details-body">
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="matrixSize">矩阵大小</label>
+                    <input type="number" id="matrixSize" value="6" min="2" max="20">
+                  </div>
+                  <div class="form-group">
+                    <label for="ratio">宽高比</label>
+                    <input type="number" id="ratio" value="2.0" min="1.0" max="3.0" step="0.1">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="interpolation">插值算法</label>
+                  <select id="interpolation">
+                    <option value="nearest">最近邻 (nearest)</option>
+                    <option value="bilinear">双线性 (bilinear)</option>
+                    <option value="bicubic" selected>双三次 (bicubic)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="wideCharRatio">宽字符比例</label>
+                  <input type="number" id="wideCharRatio" value="2.0" min="0.1" max="10.0" step="0.1">
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="invert">
+                    <span>反转颜色</span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="trimTrailing">
+                    <span>去除行尾空格</span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="earlyTermination" checked>
+                    <span>启用早期终止优化</span>
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label for="fontReduce">视觉字体内边距/收缩</label>
+                  <input type="number" id="fontReduce" value="0" min="0" max="10">
+                </div>
+                <div class="form-group">
+                  <label for="charSpace">字符间距</label>
+                  <input type="number" id="charSpace" value="1" min="0" max="5">
+                </div>
+
+                <!-- 输出格式 -->
+                <div class="form-group">
+                  <label for="outputFormat">输出格式</label>
+                  <select id="outputFormat">
+                    <option value="plain">纯文本</option>
+                    <option value="html">HTML</option>
+                    <option value="ansi">ANSI彩色</option>
+                  </select>
+                </div>
+
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- 裱框设置 -->
+        <section class="card">
+          <h3 class="card-title">裱框设置</h3>
+          <div class="config-form">
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="boxEnabled">
+                <span>启用裱框</span>
+              </label>
+            </div>
+            <div class="box-config-body" id="boxConfigBody" style="display: none;">
+              <div class="form-group">
+                <label for="boxStyle">裱框样式</label>
+                <select id="boxStyle">
+                  <option value="single">单线 (single)</option>
+                  <option value="double">双线 (double)</option>
+                  <option value="round">圆角 (round)</option>
+                  <option value="bold">粗线 (bold)</option>
+                  <option value="classic">经典 (classic)</option>
+                  <option value="ascii">ASCII (ascii)</option>
+                  <option value="singleDouble">外粗内细 (singleDouble)</option>
+                  <option value="doubleSingle">外细内粗 (doubleSingle)</option>
+                  <option value="thick">厚框 (thick)</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="boxPadding">内边距</label>
+                  <input type="number" id="boxPadding" value="1" min="0" max="10">
+                </div>
+                <div class="form-group">
+                  <label for="boxMargin">外边距</label>
+                  <input type="number" id="boxMargin" value="0" min="0" max="10">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="boxTitle">标题（可选）</label>
+                <input type="text" id="boxTitle" class="text-input" placeholder="标题文字">
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="boxShadow">
+                  <span>启用阴影</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- 右侧：预览区 + 导出 -->
+      <section class="preview-section">
+        <div class="preview-toolbar">
+          <span class="preview-info" id="previewInfo">就绪</span>
+          <div class="preview-actions">
+            <button class="btn-icon" id="refreshBtn" title="刷新">↻</button>
+          </div>
+        </div>
+        <div class="preview-container">
+          <pre class="art-preview" id="artPreview"><code class="preview-placeholder">字符画预览区域</code></pre>
+        </div>
+        <div class="preview-meta">
+          <span id="metaInfo">宽度: -- 高度: -- 耗时: --ms</span>
+        </div>
+        <div class="export-actions">
+          <button class="btn" id="exportTxt">📄 TXT</button>
+          <button class="btn" id="exportHtml">🌐 HTML</button>
+          <button class="btn" id="exportPng">🖼️ PNG</button>
+          <button class="btn primary" id="copyBtn">📋 复制</button>
+        </div>
+      </section>
+    </main>
+    <!--#endregion-->
+
+    <!--#region 🟩 Footer -->
+    <footer class="app-footer">
+      <p>© 2026 UnicodeArtJs | MIT License | <a href="https://github.com/mandolin/UnicodeArtJs" target="_blank">GitHub</a></p>
+    </footer>
+    <!--#endregion-->
+  </div>
+
+  <!-- 加载遮罩 -->
+  <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">正在生成字符画...</p>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
+  <!-- Core (Browser) -->
+  <script type="module">
+    import { imageToArt, textToArt, boxText, previewBoxStyle, getBoxStyleNames, getBoxStyleMetadata } from 'unicode-art-js';
+    window.UnicodeArtCore = { imageToArt, textToArt, boxText, previewBoxStyle, getBoxStyleNames, getBoxStyleMetadata };
+  </script>
+
+  <!-- 应用入口 -->
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

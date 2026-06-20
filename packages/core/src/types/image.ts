@@ -79,6 +79,14 @@ export interface ImageData {
   data: Uint8Array;
 }
 
+/**
+ * Core 内部灰度图像数据。
+ *
+ * 该类型用于 browser-adapt 阶段区分 Core 自定义灰度图像与浏览器 DOM ImageData。
+ * 迁移期保留 ImageData 作为兼容名称，新代码优先使用 CoreImageData。
+ */
+export type CoreImageData = ImageData;
+
 //#endregion
 
 //#region 🟦 采样数据

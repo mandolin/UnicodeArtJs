@@ -538,6 +538,267 @@ async function testImageCommandReferenceParity() {
   }
 }
 
+/**
+ * 🔶 Test 14: CLI --box 样式快捷写法
+ */
+async function testTextCommandBoxStyleShortcut() {
+  const tempDir = createTempDir();
+  const outputPath = path.join(tempDir, 'box-style.txt');
+
+  try {
+    const result = runCli([
+      'text', 'Hi',
+      '--height', '2',
+      '--chars', ' @',
+      '--box', 'ascii',
+      '--output', outputPath,
+      '--lang', 'en-US'
+    ]);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    const actual = fs.readFileSync(outputPath, 'utf-8');
+    if (!actual.startsWith('+') || !actual.includes('|')) {
+      throw new Error(`Box style shortcut did not frame output:\n${actual}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 15: CLI --box JSON 对象写法
+ */
+async function testTextCommandBoxJson() {
+  const tempDir = createTempDir();
+  const outputPath = path.join(tempDir, 'box-json.txt');
+
+  try {
+    const result = runCli([
+      'text', 'Hi',
+      '--height', '2',
+      '--chars', ' @',
+      '--box', '{"style":"ascii","padding":{"left":1,"right":1},"width":6}',
+      '--output', outputPath,
+      '--lang', 'en-US'
+    ]);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    const actual = fs.readFileSync(outputPath, 'utf-8');
+    if (!actual.startsWith('+--------+') || !actual.includes('| ')) {
+      throw new Error(`Box JSON options did not frame output as expected:\n${actual}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 16: 配置文件 box 生效，且命令行 --box false 可覆盖关闭
+ */
+async function testConfigFileBoxAndCliOverride() {
+  const tempDir = createTempDir();
+  const boxedPath = path.join(tempDir, 'boxed.txt');
+  const unboxedPath = path.join(tempDir, 'unboxed.txt');
+
+  try {
+    fs.writeFileSync(
+      path.join(tempDir, '.unicode-artrc.yml'),
+      [
+        'size:',
+        '  height: 2',
+        'box:',
+        '  style: ascii',
+        'i18n:',
+        '  lang: en-US',
+        ''
+      ].join('\n'),
+      'utf-8'
+    );
+
+    const boxed = runCli([
+      'text', 'Hi',
+      '--chars', ' @',
+      '--output', boxedPath
+    ], { cwd: tempDir });
+
+    if (boxed.status !== 0) {
+      throw new Error(boxed.stderr || boxed.stdout);
+    }
+
+    const boxedActual = fs.readFileSync(boxedPath, 'utf-8');
+    if (!boxedActual.startsWith('+') || !boxedActual.includes('|')) {
+      throw new Error(`Config file box did not frame output:\n${boxedActual}`);
+    }
+
+    const unboxed = runCli([
+      'text', 'Hi',
+      '--chars', ' @',
+      '--box', 'false',
+      '--output', unboxedPath
+    ], { cwd: tempDir });
+
+    if (unboxed.status !== 0) {
+      throw new Error(unboxed.stderr || unboxed.stdout);
+    }
+
+    const unboxedActual = fs.readFileSync(unboxedPath, 'utf-8');
+    if (unboxedActual.includes('+') || unboxedActual.includes('|')) {
+      throw new Error(`CLI --box false did not override config file box:\n${unboxedActual}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 17: 非法 box 参数返回非 0
+ */
+async function testInvalidBoxOption() {
+  const result = runCli([
+    'text', 'Hi',
+    '--height', '2',
+    '--box', 'missing-style',
+    '--lang', 'en-US'
+  ]);
+
+  if (result.status === 0) {
+    throw new Error('Invalid box option should fail');
+  }
+
+  if (!result.stderr.includes('Invalid box option')) {
+    throw new Error(`Invalid box option error was not friendly:\n${result.stderr || result.stdout}`);
+  }
+}
+
+/**
+ * 🔶 Test 18: root --text 入口支持 --box
+ */
+async function testRootTextBoxOption() {
+  const tempDir = createTempDir();
+  const outputPath = path.join(tempDir, 'root-box.txt');
+
+  try {
+    const result = runCli([
+      '--text', 'Hi',
+      '--height', '2',
+      '--chars', ' @',
+      '--box', 'ascii',
+      '--output', outputPath,
+      '--lang', 'en-US'
+    ]);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    const actual = fs.readFileSync(outputPath, 'utf-8');
+    if (!actual.startsWith('+') || !actual.includes('|')) {
+      throw new Error(`Root --text --box did not frame output:\n${actual}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 19: image 子命令支持 --box
+ */
+async function testImageCommandBoxOption() {
+  const tempDir = createTempDir();
+  const imagePath = path.join(tempDir, 'sample.png');
+  const outputPath = path.join(tempDir, 'image-box.txt');
+
+  try {
+    createReferenceImage(imagePath);
+
+    const result = runCli([
+      'image', imagePath,
+      '--height', '2',
+      '--chars', ' @',
+      '--box', 'ascii',
+      '--output', outputPath,
+      '--lang', 'en-US'
+    ]);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    const actual = fs.readFileSync(outputPath, 'utf-8');
+    if (!actual.startsWith('+') || !actual.includes('|')) {
+      throw new Error(`Image --box did not frame output:\n${actual}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 20: CLI JSON box supports phase-4 options
+ */
+async function testCliBoxPhase4Options() {
+  const tempDir = createTempDir();
+  const outputPath = path.join(tempDir, 'box-phase4.txt');
+
+  try {
+    const result = runCli([
+      'text', 'ABCDE',
+      '--height', '2',
+      '--chars', ' @',
+      '--box', '{"style":"ascii","width":4,"overflow":"wrap","shadow":{"style":"block","offsetX":1,"offsetY":1}}',
+      '--output', outputPath,
+      '--lang', 'en-US'
+    ]);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    const actual = fs.readFileSync(outputPath, 'utf-8');
+    if (!actual.includes('█') || !actual.startsWith('+----+')) {
+      throw new Error(`CLI phase-4 box options did not render as expected:\n${actual}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 21: CLI JSON box supports phase-5 layout mode
+ */
+async function testCliBoxPhase5LayoutOptions() {
+  const tempDir = createTempDir();
+  const outputPath = path.join(tempDir, 'box-phase5.txt');
+
+  try {
+    const result = runCli([
+      'text', 'AB',
+      '--height', '1',
+      '--chars', ' @',
+      '--box', '{"renderStage":"layout","mode":"grid","style":"ascii","separators":{"rows":true,"columns":true},"cell":{"minWidth":1,"minHeight":1}}',
+      '--output', outputPath,
+      '--lang', 'en-US'
+    ]);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    const actual = fs.readFileSync(outputPath, 'utf-8');
+    if (!actual.includes('|') || !actual.startsWith('+')) {
+      throw new Error(`CLI phase-5 layout options did not render as expected:\n${actual}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
 //#endregion
 
 //#region 🟩 执行测试
@@ -556,6 +817,14 @@ async function testImageCommandReferenceParity() {
   await runTest('Test 11: CLI image command', testImageCommand);
   await runTest('Test 12: CLI text reference parity', testTextCommandReferenceParity);
   await runTest('Test 13: CLI image reference parity', testImageCommandReferenceParity);
+  await runTest('Test 14: CLI box style shortcut', testTextCommandBoxStyleShortcut);
+  await runTest('Test 15: CLI box JSON options', testTextCommandBoxJson);
+  await runTest('Test 16: CLI config file box and override', testConfigFileBoxAndCliOverride);
+  await runTest('Test 17: CLI invalid box option', testInvalidBoxOption);
+  await runTest('Test 18: CLI root text box option', testRootTextBoxOption);
+  await runTest('Test 19: CLI image box option', testImageCommandBoxOption);
+  await runTest('Test 20: CLI box phase-4 options', testCliBoxPhase4Options);
+  await runTest('Test 21: CLI box phase-5 layout options', testCliBoxPhase5LayoutOptions);
   
   console.log('\n' + '='.repeat(50));
   console.log(chalk.green(`✅ Passed: ${passed}`));

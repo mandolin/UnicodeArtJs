@@ -6,6 +6,28 @@ output:
   format: plain          # plain | html | ansi
   trimTrailingSpaces: false
 
+# 裱框配置，可设为 false、true、样式名或对象
+# box:
+#   mode: outer           # outer | lines | cells | grid
+#   renderStage: post     # post | layout
+#   style: round          # single | double | round | bold | classic | ascii | singleDouble | doubleSingle | arrow | block | thick | none
+#   padding: 1
+#   width: auto           # auto 或非负整数
+#   height: auto          # auto 或非负整数，表示内容区行数
+#   verticalAlign: top    # top | middle | bottom
+#   overflow: expand      # expand | truncate | wrap
+#   shadow: false         # false | true | { style, offsetX, offsetY }
+#   separators:
+#     rows: false         # true | false | number[]
+#     columns: false      # true | false
+#   cell:
+#     padding: 0
+#     minWidth: 0
+#     minHeight: 0
+#   title:
+#     text: UnicodeArtJs
+#     align: center
+
 # 尺寸配置
 size:
   height: 20             # 默认高度（行数）

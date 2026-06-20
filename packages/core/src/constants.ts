@@ -66,9 +66,9 @@ export const DEFAULT_MATRIX_SIZE = 6;
 export const DEFAULT_VERTICAL_HORIZONTAL_RATIO = 2.0;
 
 /**
- * 🟢 默认字体缩减量
+ * 🟢 默认视觉字体渲染内边距/收缩量
  * 
- * 🔹 字体渲染时的边距减少量（像素）。
+ * 🔹 textToArt 渲染输入文字时使用；数值越大，绘制起点越向内收缩，实际字号也会相应减小。
  * 
  * @constant {number} DEFAULT_FONT_REDUCE
  */
@@ -149,7 +149,7 @@ export const MIN_RATIO = 1.0;
 export const MAX_RATIO = 3.0;
 
 /**
- * 🟢 字体缩减量有效范围
+ * 🟢 视觉字体渲染内边距/收缩量有效范围
  * 
  * @constant {number} MAX_FONT_REDUCE
  */

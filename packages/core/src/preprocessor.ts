@@ -232,7 +232,7 @@ export function rgbaToGrayscale(
  * @param textAlign - 文本对齐方式 (left|center|right)
  * @param lineSpacing - 行间距（字符画行数）
  * @param heightMode - 高度模式 (line|total)
- * @param fontReduce - 字体缩减量（默认0）
+ * @param fontReduce - 视觉字体渲染内边距/字号收缩量（默认0）
  * @returns Promise<ImageData> 灰度图像数据
  */
 export async function renderTextToImage(
@@ -286,7 +286,7 @@ export async function renderTextToImage(
     }
     
     // 🔹 逐行绘制文本（参考Python实现）
-    let currentY = fontReduce; // ← 关键：从fontReduce开始，不是0
+    let currentY = fontReduce; // ← 关键：从fontReduce开始，形成视觉字体渲染上内边距
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -305,7 +305,7 @@ export async function renderTextToImage(
       // 🔹 计算X坐标（根据对齐方式）
       let xOffset: number;
       if (textAlign === 'left') {
-        xOffset = fontReduce; // ← 关键：从fontReduce开始
+        xOffset = fontReduce; // ← 关键：从fontReduce开始，形成视觉字体渲染左内边距
       } else if (textAlign === 'center') {
         xOffset = fontReduce + Math.floor((width - lineWidth) / 2);
       } else if (textAlign === 'right') {

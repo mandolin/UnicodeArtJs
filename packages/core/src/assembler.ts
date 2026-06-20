@@ -35,6 +35,9 @@
 import type { ArtResult, ArtMetadata } from './types/output';
 import type { ArtConfig } from './types/config';
 import { OutputFormat, UnicodeArtError, ErrorCode } from './types/output';
+import { boxText } from './box/box';
+import { getGlyphWidth } from './box/width';
+import type { BoxOptions } from './box/types';
 
 //#region 🟩 纯文本组装
 
@@ -83,7 +86,8 @@ export function assemblePlainText(
   }
   
   // 🔹 使用\n作为换行符（跨平台兼容）
-  return lines.join('\n');
+  const text = lines.join('\n');
+  return isBoxEnabled(config.box) ? boxText(text, config.box) : text;
 }
 
 /**
@@ -310,7 +314,7 @@ export function assembleANSI(
   charMatrix: string[][],
   config: ArtConfig
 ): string {
-  const lines: string[] = [];
+  const textContent = assemblePlainText(charMatrix, config);
   
   // 🔹 确定颜色代码
   const resetCode = '\x1b[0m';
@@ -318,19 +322,11 @@ export function assembleANSI(
   const whiteColor = '\x1b[38;2;255;255;255m';
   
   const fgColor = config.invert ? whiteColor : blackColor;
-  
-  for (const row of charMatrix) {
-    let line = fgColor; // 设置前景色
-    
-    for (const char of row) {
-      line += char;
-    }
-    
-    line += resetCode; // 重置颜色
-    lines.push(line);
-  }
-  
-  return lines.join('\n');
+
+  return textContent
+    .split('\n')
+    .map((line) => `${fgColor}${line}${resetCode}`)
+    .join('\n');
 }
 
 //#endregion
@@ -395,11 +391,16 @@ export function assembleOutput(
       );
   }
   
+  const metrics = isBoxEnabled(config.box) ? calculateBoxedTextMetrics(assemblePlainText(charMatrix, config)) : {
+    rows: charMatrix.length,
+    cols: charMatrix[0]?.length || 0
+  };
+
   return {
     content,
     format,
-    rows: charMatrix.length,
-    cols: charMatrix[0]?.length || 0,
+    rows: metrics.rows,
+    cols: metrics.cols,
     duration: typeof metadata?.duration === 'number' ? metadata.duration : 0,
     metadata: metadata || {
       sourceWidth: 0,
@@ -408,6 +409,80 @@ export function assembleOutput(
       matrixSize: 0
     }
   };
+}
+
+//#endregion
+
+//#region 🔶 输出尺寸计算
+
+export function assembleTextOutput(
+  text: string,
+  config: ArtConfig,
+  format: OutputFormat,
+  metadata?: ArtMetadata
+): ArtResult {
+  const plainConfig: ArtConfig = {
+    ...config,
+    box: false
+  };
+  const charMatrix = textToCharMatrix(text);
+  let content: string;
+
+  switch (format) {
+    case OutputFormat.PLAIN_TEXT:
+      content = text;
+      break;
+
+    case OutputFormat.HTML:
+      content = assembleHTML(charMatrix, plainConfig, metadata);
+      break;
+
+    case OutputFormat.ANSI:
+      content = assembleANSI(charMatrix, plainConfig);
+      break;
+
+    default:
+      throw new UnicodeArtError(
+        `不支持的输出格式: ${format}`,
+        ErrorCode.UNSUPPORTED_FORMAT,
+        { format }
+      );
+  }
+
+  const metrics = calculateBoxedTextMetrics(text);
+  return {
+    content,
+    format,
+    rows: metrics.rows,
+    cols: metrics.cols,
+    duration: typeof metadata?.duration === 'number' ? metadata.duration : 0,
+    metadata: metadata || {
+      sourceWidth: 0,
+      sourceHeight: 0,
+      charset: '',
+      matrixSize: 0
+    }
+  };
+}
+
+function isBoxEnabled(box: ArtConfig['box']): box is BoxOptions {
+  return box !== undefined &&
+    box !== false &&
+    box.enabled !== false &&
+    (box.renderStage === undefined || box.renderStage === 'post') &&
+    (box.mode === undefined || box.mode === 'outer');
+}
+
+function calculateBoxedTextMetrics(text: string): { rows: number; cols: number } {
+  const lines = text.length === 0 ? [''] : text.split('\n');
+  return {
+    rows: lines.length,
+    cols: lines.reduce((max, line) => Math.max(max, getGlyphWidth(line)), 0)
+  };
+}
+
+function textToCharMatrix(text: string): string[][] {
+  return (text.length === 0 ? [''] : text.split('\n')).map((line) => Array.from(line));
 }
 
 //#endregion

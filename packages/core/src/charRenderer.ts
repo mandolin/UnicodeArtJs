@@ -53,7 +53,7 @@ import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants
  * @param matrixSize - 目标矩阵尺寸（如6×6）
  * @param font - 字体名称或路径
  * @param fontSize - 字体大小（像素）
- * @param fontReduce - 字体缩减量（像素）
+ * @param fontReduce - 渲染内边距/字号收缩量（像素）；高层字符模板预计算通常保持0以对齐参考项目
  * @returns Float32Array 归一化的灰度矩阵（一维数组）
  * 
  * @example
@@ -69,7 +69,7 @@ import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants
  * - 背景为白色(1.0)，文字为黑色(0.0)
  * - 字符居中对齐
  * - 支持宽字符（占用2个标准宽度）
- * - fontReduce用于调整字符边距
+ * - fontReduce用于让绘制区域向内收缩，并同步减小实际字号
  * 
  * @performance
  * - 时间复杂度: O(matrixSize²)
@@ -185,7 +185,7 @@ function resizeGrayscaleToNormalized(
  * @param matrixSize - 目标矩阵尺寸
  * @param font - 字体名称或路径
  * @param fontSize - 字体大小（像素）
- * @param fontReduce - 字体缩减量（像素）
+ * @param fontReduce - 渲染内边距/字号收缩量（像素）；高层字符模板预计算通常保持0以对齐参考项目
  * @returns Promise<Map<string, CharMatrix>> 字符到矩阵的映射
  * 
  * @example

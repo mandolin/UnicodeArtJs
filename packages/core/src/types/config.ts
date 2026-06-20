@@ -35,6 +35,7 @@
 import type { CharsetConfig } from './charset';
 import { PresetCharset } from './charset';
 import { OutputFormat } from './output';
+import type { BoxOptions } from '../box/types';
 
 /**
  * 🟢 插值算法枚举
@@ -330,15 +331,15 @@ export interface ArtConfig {
   fontStyle?: FontStyle;
   
   /** 
-   * 字体缩减量（像素）
-   * - 减少字体渲染时的边距
+   * 视觉字体渲染内边距/字号收缩量（像素）
+   * - 增加视觉字体渲染时的内边距
    * - 范围: [0, 10]
    * - 推荐: 0
    * - 默认值: 0
    * 
    * @remarks
-   * - 值越大，字符间距越紧凑
-   * - 过大会导致字符裁剪
+   * - 值越小，字符间距越紧凑
+   * - 过大会导致字符显小
    * - 一般保持0即可
    */
   fontReduce?: number;
@@ -425,6 +426,15 @@ export interface ArtConfig {
    * - 对于固定宽度的终端显示可能不合适
    */
   trimTrailingSpaces?: boolean;
+
+  /**
+   * 裱框配置
+   * - false: 关闭（默认）
+   * - object: 对最终字符画文本执行外框后处理
+   *
+   * box-phase-2 仅支持 mode='outer' 与 renderStage='post'。
+   */
+  box?: false | BoxOptions;
   
   //#endregion
   
@@ -533,6 +543,7 @@ export const DEFAULT_CONFIG: Partial<ArtConfig> = {
   outputFormat: OutputFormat.PLAIN_TEXT,
   invert: false,
   trimTrailingSpaces: false,
+  box: false,
 
   // 性能配置
   wideCharRatio: 2.0,

@@ -1,0 +1,80 @@
+# GitHub Actions: 部署 Web 应用到 GitHub Pages
+#
+# 当推送到 main 分支时:
+#   1. 构建 Core 库
+#   2. 构建 Web 包
+#   3. 部署到 GitHub Pages
+#
+# 需要在仓库 Settings → Pages 中设置:
+#   Source: GitHub Actions
+
+name: Deploy Web to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/core/**'
+      - 'packages/web/**'
+  # 也支持手动触发
+  workflow_dispatch:
+
+# 权限设置
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 并发控制
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            packages/core/package-lock.json
+            packages/web/package-lock.json
+
+      - name: Install Core dependencies
+        working-directory: ./packages/core
+        run: npm ci
+
+      - name: Build Core library
+        working-directory: ./packages/core
+        run: npm run build
+
+      - name: Install Web dependencies
+        working-directory: ./packages/web
+        run: npm ci
+
+      - name: Build Web application
+        working-directory: ./packages/web
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./packages/web/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

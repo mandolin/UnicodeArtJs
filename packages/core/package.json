@@ -5,7 +5,26 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/types/index.d.ts",
-  "browser": "dist/index.umd.js",
+  "browser": "dist/browser.esm.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./pure": {
+      "types": "./dist/types/pure.d.ts",
+      "import": "./dist/pure.esm.js",
+      "require": "./dist/pure.cjs.js"
+    },
+    "./browser": {
+      "types": "./dist/types/browser.d.ts",
+      "import": "./dist/browser.esm.js",
+      "require": "./dist/browser.cjs.js",
+      "default": "./dist/browser.esm.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist/",
     "README.md",
@@ -17,6 +36,7 @@
     "build:watch": "rollup -c -w",
     "typecheck": "tsc --noEmit",
     "test": "jest",
+    "test:browser": "node tests/browser-smoke.mjs",
     "test:watch": "jest --watch",
     "benchmark": "node tools/benchmark.mjs",
     "lint": "eslint src/**/*.ts",
@@ -25,9 +45,9 @@
     "clean": "rm -rf dist/"
   },
   "dependencies": {
-    "sharp": "^0.33.2",
     "ndarray": "^1.0.19",
-    "ndarray-ops": "^1.2.2"
+    "ndarray-ops": "^1.2.2",
+    "sharp": "^0.33.2"
   },
   "optionalDependencies": {
     "canvas": "^3.2.3"
@@ -41,21 +61,22 @@
     }
   },
   "devDependencies": {
-    "typescript": "^5.3.0",
-    "@types/node": "^20.10.0",
-    "@types/ndarray": "^1.0.14",
-    "rollup": "^4.0.0",
-    "@rollup/plugin-typescript": "^11.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-commonjs": "^25.0.0",
-    "tslib": "^2.6.0",
-    "jest": "^29.7.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
     "@types/jest": "^29.5.0",
-    "ts-jest": "^29.1.0",
-    "eslint": "^8.57.1",
-    "@typescript-eslint/parser": "^7.18.0",
+    "@types/ndarray": "^1.0.14",
+    "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "prettier": "^3.1.0"
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "playwright": "^1.61.0",
+    "prettier": "^3.1.0",
+    "rollup": "^4.0.0",
+    "ts-jest": "^29.1.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.3.0"
   },
   "keywords": [
     "unicode",

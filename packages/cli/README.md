@@ -86,7 +86,7 @@ unicode-art image <input> [options]
 - `--charset <type>` - 预设字符集 (ASCII\|EXTENDED\|CHINESE_SIMPLE)
 - `-f, --font <name>` - 字体名称或路径
 - `--font-style <style>` - 字体样式 (regular\|bold\|italic\|bold-italic)
-- `--font-reduce <number>` - 字体大小缩减量
+- `--font-reduce <number>` - 视觉字体渲染内边距/字号收缩量
 - `-m, --matrix <size>` - 矩阵大小（默认6）
 - `-r, --ratio <number>` - 垂直水平比例（默认2.0）
 - `-v, --invert` - 反转颜色
@@ -94,6 +94,7 @@ unicode-art image <input> [options]
 - `--wide-char-ratio <number>` - 宽字符匹配阈值（默认1.5）
 - `--trim-trailing-spaces` - 去除行尾空格
 - `--format <format>` - 输出格式 (plain\|html\|ansi)
+- `-b, --box <json-or-style>` - 裱框配置，支持 `true`、`false`、内置样式名或 JSON 对象
 - `-d, --debug <tags>` - 调试标签，逗号分隔
 
 #### `text` 命令
@@ -210,6 +211,16 @@ unicode-art image photo.jpg -v
 
 # HTML彩色输出
 unicode-art image photo.jpg --format html -o output.html
+
+# 为输出添加外框
+unicode-art text "Hello" --box round
+unicode-art text "Hello" --box "{\"style\":\"ascii\",\"padding\":1,\"title\":\"Demo\"}"
+# PowerShell JSON 写法
+unicode-art text "Hello" --box '{\"style\":\"ascii\",\"padding\":1,\"title\":\"Demo\"}'
+# 固定宽度、换行和阴影
+unicode-art text "HelloWorld" --box '{\"style\":\"ascii\",\"width\":8,\"overflow\":\"wrap\",\"shadow\":{\"style\":\"block\"}}'
+# Layout stage 网格裱框
+unicode-art text "AB" --box '{\"renderStage\":\"layout\",\"mode\":\"grid\",\"style\":\"ascii\",\"separators\":{\"rows\":true,\"columns\":true},\"cell\":{\"minWidth\":1,\"minHeight\":1}}'
 
 # ANSI彩色终端输出
 unicode-art image photo.jpg --format ansi

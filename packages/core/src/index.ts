@@ -67,6 +67,7 @@
 
 // 图像数据类型
 export type {
+  CoreImageData,
   ImageData,
   SamplingBlock,
   SamplingArray,
@@ -89,6 +90,34 @@ export {
 export type {
   ArtConfig
 } from './types/config';
+
+export type {
+  BoxAlign,
+  BoxCellOptions,
+  BoxChars,
+  BoxMode,
+  BoxOptions,
+  BoxOverflow,
+  BoxRenderStage,
+  BoxSeparatorOptions,
+  BoxShadowOptions,
+  BoxSpacing,
+  BoxStyleMetadata,
+  BoxStyleDefinition,
+  BoxStyleName,
+  BoxTitleOptions,
+  BoxVerticalAlign,
+  NormalizedBoxOptions,
+  NormalizedBoxShadowOptions,
+  NormalizedBoxTitleOptions,
+  SpacingValue
+} from './box/types';
+import type {
+  BoxOptions,
+  BoxSeparatorOptions,
+  NormalizedBoxOptions as RuntimeBoxOptions,
+  SpacingValue
+} from './box/types';
 
 export {
   Interpolation,
@@ -163,12 +192,14 @@ import { UnicodeArtError, ErrorCode, OutputFormat } from './types/output';
 import { PresetCharset } from './types/charset';
 import { DEFAULT_ASCII_CHARS, EXTENDED_CHARS, CHINESE_SIMPLE_CHARS } from './constants';
 import { Interpolation, TextAlign, HeightMode } from './types/config';
-import { loadImage, renderTextToImage, invertPixels } from './preprocessor';
+import { invertPixels } from './preprocessor';
 import { generateSamplingArray } from './sampler';
-import { loadFont, precomputeCharData } from './charRenderer';
 import { batchMatch } from './matcher';
-import { assembleOutput } from './assembler';
+import { assembleOutput, assembleTextOutput } from './assembler';
 import { isWideChar as detectWideChar, calculateDisplayWidth } from './utils/wideCharDetector';
+import { boxText, normalizeBoxOptions as normalizeBoxConfig } from './box/box';
+import { getGlyphWidth, padToWidth, repeatToWidth } from './box/width';
+import { nodePlatformAdapter } from './platform/node/nodePlatformAdapter';
 
 export {
   loadImage,
@@ -179,6 +210,26 @@ export {
   normalizePixels,
   invertPixels
 } from './preprocessor';
+
+export type {
+  CharRenderOptions,
+  PrecomputeCharDataOptions,
+  TextMeasureOptions,
+  TextRenderOptions,
+  UnicodeArtPlatformAdapter
+} from './platform/types';
+
+export {
+  nodePlatformAdapter
+} from './platform/node/nodePlatformAdapter';
+
+export type {
+  ImageDataToArtOptions
+} from './pure/imageDataToArt';
+
+export {
+  imageDataToArt
+} from './pure/imageDataToArt';
 
 export {
   calculateOutputSize,
@@ -208,13 +259,41 @@ export {
   assembleHTML,
   escapeHTML,
   assembleANSI,
-  assembleOutput
+  assembleOutput,
+  assembleTextOutput
 } from './assembler';
 
 export {
   calculateDisplayWidth,
   detectWideCharsInText
 } from './utils/wideCharDetector';
+
+export {
+  boxText,
+  normalizeBoxOptions,
+  previewBoxStyle
+} from './box/box';
+
+export {
+  BOX_STYLES,
+  BOX_STYLE_METADATA,
+  getBoxStyleNames,
+  getBoxStyleMetadata,
+  isBoxStyleName,
+  resolveBoxChars
+} from './box/styles';
+
+export {
+  getGlyphWidth,
+  repeatToWidth,
+  padToWidth,
+  cropToWidth
+} from './box/width';
+
+export {
+  ZERO_SPACING,
+  normalizeSpacing
+} from './box/spacing';
 
 /**
  * ============================================================================
@@ -257,11 +336,15 @@ export async function textToArt(
     
     //  合并配置
     const fullConfig = validateConfig(config);
+
+    if (isLayoutBoxConfig(fullConfig)) {
+      return await textToLayoutArt(text, fullConfig, startTime);
+    }
     
     // 🔹 处理多行文本
     const lines = text.split('\n');
     const lineCount = lines.length;
-    const resolvedFont = await loadFont(fullConfig.font || 'Arial', fullConfig.fontStyle);
+    const resolvedFont = await nodePlatformAdapter.loadFont(fullConfig.font || 'Arial', fullConfig.fontStyle);
     
     //  渲染文本为图像
     // Python的字体大小计算: afont = ImageFont.truetype(font, rectunit - fontreduce*2)
@@ -293,20 +376,14 @@ export async function textToArt(
     // 正确做法：先创建一个临时canvas测量文本宽度
     let canvasWidth: number;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { createCanvas } = require('canvas');
-      const tempCanvas = createCanvas(1, 1);
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCtx.font = `${fontSize}px ${formatCanvasFontFamily(resolvedFont)}`;
-      
       // 找出最宽的一行
       let maxWidth = 0;
       for (const line of lines) {
-        const lineWidth = Array.from(line).reduce((sum, char) => {
-          const measuredWidth = tempCtx.measureText(char).width;
-          const charWidth = fontSize < 8 ? Math.round(measuredWidth) : Math.ceil(measuredWidth);
-          return sum + charWidth + fontReduce * 2;
-        }, 0);
+        const lineWidth = await nodePlatformAdapter.measureTextWidth(line, {
+          font: resolvedFont,
+          fontSize,
+          fontReduce
+        });
         if (lineWidth > maxWidth) {
           maxWidth = lineWidth;
         }
@@ -321,18 +398,20 @@ export async function textToArt(
     }
     
     
-    let imageData = await renderTextToImage(
+    let imageData = await nodePlatformAdapter.renderTextToImage(
       text,
-      resolvedFont,
-      fontSize,
-      canvasWidth,
-      canvasHeight,
-      fullConfig.textAlign,
-      fullConfig.lineSpacing,
-      fullConfig.heightMode,
-      fontReduce,
-      rectunit,
-      lineSpacingPixels
+      {
+        font: resolvedFont,
+        fontSize,
+        width: canvasWidth,
+        height: canvasHeight,
+        textAlign: fullConfig.textAlign,
+        lineSpacing: fullConfig.lineSpacing,
+        heightMode: fullConfig.heightMode,
+        fontReduce,
+        rectunit,
+        lineSpacingPixels
+      }
     );
     
 
@@ -353,16 +432,16 @@ export async function textToArt(
     // 🔹 预计算字符数据
     // Python参考: font = ImageFont.truetype(char_font_file, matrix_size)
     // 字符渲染时使用matrixSize作为字体大小，不是fontSize
-    const charDataMap = await precomputeCharData(
-      fullConfig.charset,
-      fullConfig.matrixSize,
-      resolvedFont,
-      fullConfig.matrixSize, // ← 修正：使用matrixSize而不是fontSize
-      0, // Python get_char_data does not apply fontreduce to character templates
-      fullConfig.interpolation,
-      fullConfig.ratio,
-      fullConfig.fontStyle
-    );
+    const charDataMap = await nodePlatformAdapter.precomputeCharData({
+      charset: fullConfig.charset,
+      matrixSize: fullConfig.matrixSize,
+      font: resolvedFont,
+      fontSize: fullConfig.matrixSize, // ← 修正：使用matrixSize而不是fontSize
+      fontReduce: 0, // Python get_char_data does not apply fontreduce to character templates
+      interpolation: fullConfig.interpolation,
+      ratio: fullConfig.ratio,
+      fontStyle: fullConfig.fontStyle
+    });
 
     // 🔹 批量匹配
     const charMatrix = await batchMatch(samplingArray, charDataMap, fullConfig);
@@ -397,6 +476,256 @@ export async function textToArt(
     );
   }
 }
+
+//#region 🔶 Layout-stage box rendering
+
+function isLayoutBoxConfig(config: ArtConfig): config is ArtConfig & { box: BoxOptions } {
+  return config.box !== undefined &&
+    config.box !== false &&
+    config.box.enabled !== false &&
+    config.box.renderStage === 'layout';
+}
+
+async function textToLayoutArt(
+  text: string,
+  config: ArtConfig & { box: BoxOptions },
+  startTime: number
+): Promise<ArtResult> {
+  const normalized = normalizeBoxConfig(config.box);
+  const plainConfig: ArtConfig = {
+    ...config,
+    box: false,
+    outputFormat: OutputFormat.PLAIN_TEXT
+  };
+
+  const blocks = await buildLayoutBlocks(text, plainConfig, normalized);
+  const layoutText = renderLayoutBlocks(blocks, normalized, config.box);
+  const duration = Date.now() - startTime;
+
+  return assembleTextOutput(
+    layoutText,
+    {
+      ...config,
+      box: false
+    },
+    config.outputFormat || OutputFormat.PLAIN_TEXT,
+    {
+      sourceWidth: 0,
+      sourceHeight: 0,
+      charset: config.charset.type || 'custom',
+      matrixSize: config.matrixSize,
+      font: config.font,
+      charsetSize: 0,
+      duration
+    }
+  );
+}
+
+async function buildLayoutBlocks(
+  text: string,
+  config: ArtConfig,
+  box: RuntimeBoxOptions
+): Promise<string[][][]> {
+  if (box.mode === 'lines') {
+    const lines = text.split('\n');
+    const rendered = await Promise.all(lines.map((line) => renderTextBlock(line, config)));
+    return rendered.map((block) => [block]);
+  }
+
+  if (box.mode === 'cells' || box.mode === 'grid') {
+    const rows = text.split('\n');
+    return Promise.all(rows.map(async (row) => {
+      const glyphs = Array.from(row.length === 0 ? ' ' : row);
+      return Promise.all(glyphs.map((glyph) => renderTextBlock(glyph, config)));
+    }));
+  }
+
+  return [[await renderTextBlock(text, config)]];
+}
+
+async function renderTextBlock(text: string, config: ArtConfig): Promise<string[]> {
+  const result = await textToArt(text.length === 0 ? ' ' : text, config);
+  return result.content.split('\n');
+}
+
+function renderLayoutBlocks(
+  rows: string[][][],
+  box: RuntimeBoxOptions,
+  rawBox: BoxOptions
+): string {
+  const separator = resolveLayoutSeparator(box, rawBox.separators);
+  const normalizedRows = rows.map((row) => normalizeLayoutRow(row, box, rawBox.cell));
+  const bodyLines: string[] = [];
+
+  normalizedRows.forEach((row, rowIndex) => {
+    if (rowIndex > 0 && shouldRenderRowSeparator(separator, rowIndex)) {
+      bodyLines.push(renderRowSeparator(row, box));
+    }
+
+    bodyLines.push(...combineLayoutRow(row, separator.columns, box.chars.vertical || '|'));
+  });
+
+  const outerBox = toOuterBoxOptions(rawBox);
+  return boxText(bodyLines.join('\n'), outerBox);
+}
+
+function normalizeLayoutRow(
+  row: string[][],
+  box: RuntimeBoxOptions,
+  cell: BoxOptions['cell']
+): string[][] {
+  const minWidth = normalizeOptionalNonNegativeInteger(cell?.minWidth, 0, 'cell.minWidth');
+  const minHeight = normalizeOptionalNonNegativeInteger(cell?.minHeight, 0, 'cell.minHeight');
+  const cellPadding = normalizeCellPadding(cell?.padding);
+  const maxWidth = Math.max(
+    minWidth,
+    ...row.map((block) => block.reduce((max, line) => Math.max(max, getGlyphWidth(line)), 0))
+  );
+  const maxHeight = Math.max(minHeight, ...row.map((block) => block.length));
+
+  return row.map((block) => normalizeLayoutBlock(block, maxWidth, maxHeight, box, cellPadding));
+}
+
+function normalizeLayoutBlock(
+  block: string[],
+  width: number,
+  height: number,
+  box: RuntimeBoxOptions,
+  padding: { top: number; right: number; bottom: number; left: number }
+): string[] {
+  const aligned = block.map((line) => padToWidth(line, width, box.align));
+  const extra = Math.max(0, height - aligned.length);
+  const before = box.verticalAlign === 'bottom'
+    ? extra
+    : box.verticalAlign === 'middle'
+      ? Math.floor(extra / 2)
+      : 0;
+  const after = extra - before;
+  const empty = ' '.repeat(width);
+  const content = [
+    ...Array.from({ length: before }, () => empty),
+    ...aligned,
+    ...Array.from({ length: after }, () => empty)
+  ];
+  const paddedWidth = width + padding.left + padding.right;
+
+  return [
+    ...Array.from({ length: padding.top }, () => ' '.repeat(paddedWidth)),
+    ...content.map((line) => `${' '.repeat(padding.left)}${line}${' '.repeat(padding.right)}`),
+    ...Array.from({ length: padding.bottom }, () => ' '.repeat(paddedWidth))
+  ];
+}
+
+function combineLayoutRow(row: string[][], columnSeparator: boolean, separatorChar: string): string[] {
+  const height = Math.max(...row.map((block) => block.length));
+  const result: string[] = [];
+
+  for (let lineIndex = 0; lineIndex < height; lineIndex++) {
+    result.push(row.map((block) => block[lineIndex] ?? '').join(columnSeparator ? separatorChar : ''));
+  }
+
+  return result;
+}
+
+function renderRowSeparator(row: string[][], box: RuntimeBoxOptions): string {
+  return row.map((block) => repeatToWidth(box.chars.horizontal || '-', getGlyphWidth(block[0] ?? ''))).join(
+    box.chars.cross || '+'
+  );
+}
+
+function resolveLayoutSeparator(box: RuntimeBoxOptions, separators: BoxSeparatorOptions | undefined): {
+  rows: boolean | number[];
+  columns: boolean;
+} {
+  if (box.mode === 'lines') {
+    return {
+      rows: separators?.rows ?? true,
+      columns: false
+    };
+  }
+
+  if (box.mode === 'cells' || box.mode === 'grid') {
+    return {
+      rows: separators?.rows ?? box.mode === 'grid',
+      columns: separators?.columns !== undefined ? Boolean(separators.columns) : true
+    };
+  }
+
+  return {
+    rows: false,
+    columns: false
+  };
+}
+
+function shouldRenderRowSeparator(separator: { rows: boolean | number[] }, rowIndex: number): boolean {
+  if (Array.isArray(separator.rows)) {
+    return separator.rows.includes(rowIndex);
+  }
+
+  return separator.rows;
+}
+
+function toOuterBoxOptions(box: BoxOptions): BoxOptions {
+  const {
+    mode,
+    renderStage,
+    separators,
+    cell,
+    ...outer
+  } = box;
+
+  void mode;
+  void renderStage;
+  void separators;
+  void cell;
+
+  return {
+    ...outer,
+    mode: 'outer',
+    renderStage: 'post'
+  };
+}
+
+function normalizeCellPadding(value: SpacingValue | undefined): {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+} {
+  if (value === undefined) {
+    return { top: 0, right: 0, bottom: 0, left: 0 };
+  }
+
+  if (typeof value === 'number') {
+    return { top: value, right: value, bottom: value, left: value };
+  }
+
+  return {
+    top: value.top ?? 0,
+    right: value.right ?? 0,
+    bottom: value.bottom ?? 0,
+    left: value.left ?? 0
+  };
+}
+
+function normalizeOptionalNonNegativeInteger(
+  value: number | undefined,
+  fallback: number,
+  name: string
+): number {
+  const candidate = value ?? fallback;
+  if (!Number.isInteger(candidate) || candidate < 0) {
+    throw new UnicodeArtError(
+      `${name}必须为非负整数`,
+      ErrorCode.INVALID_CONFIG,
+      { [name]: value }
+    );
+  }
+
+  return candidate;
+}
+
+//#endregion
 
 /**
  * 🟢 图片转字符画
@@ -448,7 +777,7 @@ export async function imageToArt(
     const fullConfig = validateConfig(config);
     
     // 🔹 加载图像
-    const imageData = await loadImage(imagePath);
+    const imageData = await nodePlatformAdapter.loadImage(imagePath);
     
     // 🔹 反转像素（如果启用）
     let processedImage = imageData;
@@ -460,16 +789,16 @@ export async function imageToArt(
     const samplingArray = generateSamplingArray(processedImage, fullConfig);
     
     // 🔹 预计算字符数据
-    const charDataMap = await precomputeCharData(
-      fullConfig.charset,
-      fullConfig.matrixSize,
-      fullConfig.font || 'Arial',
-      fullConfig.matrixSize,
-      0, // Python get_char_data does not apply fontreduce to character templates
-      fullConfig.interpolation,
-      fullConfig.ratio,
-      fullConfig.fontStyle
-    );
+    const charDataMap = await nodePlatformAdapter.precomputeCharData({
+      charset: fullConfig.charset,
+      matrixSize: fullConfig.matrixSize,
+      font: fullConfig.font || 'Arial',
+      fontSize: fullConfig.matrixSize,
+      fontReduce: 0, // Python get_char_data does not apply fontreduce to character templates
+      interpolation: fullConfig.interpolation,
+      ratio: fullConfig.ratio,
+      fontStyle: fullConfig.fontStyle
+    });
     
     // 🔹 批量匹配
     const charMatrix = await batchMatch(samplingArray, charDataMap, fullConfig);
@@ -544,6 +873,7 @@ export function validateConfig(
     outputFormat: config.outputFormat || OutputFormat.PLAIN_TEXT,
     invert: config.invert !== undefined ? config.invert : false,
     trimTrailingSpaces: config.trimTrailingSpaces !== undefined ? config.trimTrailingSpaces : false,
+    box: config.box !== undefined ? config.box : false,
     wideCharRatio: config.wideCharRatio !== undefined ? config.wideCharRatio : 2.0,
     enableEarlyTermination: config.enableEarlyTermination !== undefined ? config.enableEarlyTermination : true,
     maxParallelTasks: config.maxParallelTasks !== undefined ? config.maxParallelTasks : 0
@@ -608,6 +938,16 @@ export function validateConfig(
       'wideCharRatio必须在0-10之间',
       ErrorCode.INVALID_CONFIG,
       { wideCharRatio: fullConfig.wideCharRatio }
+    );
+  }
+
+  try {
+    normalizeBoxConfig(fullConfig.box);
+  } catch (error) {
+    throw new UnicodeArtError(
+      `box配置无效: ${error instanceof Error ? error.message : String(error)}`,
+      ErrorCode.INVALID_CONFIG,
+      { box: fullConfig.box }
     );
   }
   
@@ -684,11 +1024,6 @@ export function getPresetChars(type: PresetCharset): string {
  */
 export function calcDisplayWidth(text: string): number {
   return calculateDisplayWidth(text);
-}
-
-function formatCanvasFontFamily(font: string): string {
-  const escapedFont = font.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `"${escapedFont}"`;
 }
 
 //#endregion
