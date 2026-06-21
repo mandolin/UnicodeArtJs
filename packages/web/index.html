@@ -205,20 +205,6 @@
                   <label for="fontReduce">视觉字体内边距/收缩</label>
                   <input type="number" id="fontReduce" value="0" min="0" max="10">
                 </div>
-                <div class="form-group">
-                  <label for="charSpace">字符间距</label>
-                  <input type="number" id="charSpace" value="1" min="0" max="5">
-                </div>
-
-                <!-- 输出格式 -->
-                <div class="form-group">
-                  <label for="outputFormat">输出格式</label>
-                  <select id="outputFormat">
-                    <option value="plain">纯文本</option>
-                    <option value="html">HTML</option>
-                    <option value="ansi">ANSI彩色</option>
-                  </select>
-                </div>
 
               </div>
             </details>
@@ -315,8 +301,10 @@
   <!-- Toast -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- jQuery -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <!-- jQuery: GitHub Pages优先使用CDN；二次开发/离线打包由main.js动态导入本地jquery兜底 -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"
+          integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+          crossorigin="anonymous"></script>
 
   <!-- Core (Browser) -->
   <script type="module">

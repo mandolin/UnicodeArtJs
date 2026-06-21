@@ -3,9 +3,7 @@
   "version": "0.1.0-alpha",
   "description": "UnicodeArtJs Web Application - Convert images and text to Unicode art in browser",
   "type": "module",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
-  "browser": "dist/index.umd.js",
+  "private": true,
   "files": [
     "dist/",
     "public/",
@@ -17,9 +15,9 @@
     "preview": "vite preview",
     "test": "node tests/unit.test.js",
     "test:e2e": "node tests/e2e-smoke.mjs",
-    "lint": "echo \"No linter configured\" && exit 0",
-    "lint:fix": "echo \"No linter configured\" && exit 0",
-    "check": "npm run build && npm test"
+    "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\" \"tests/**/*.mjs\"",
+    "lint:fix": "eslint \"src/**/*.js\" \"tests/**/*.js\" \"tests/**/*.mjs\" --fix",
+    "check": "npm run lint && npm run build && npm test && npm run test:e2e"
   },
   "keywords": [
     "unicode",
@@ -45,8 +43,9 @@
     "unicode-art-js": "file:../core"
   },
   "devDependencies": {
-    "vite": "^5.4.0",
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.1",
+    "playwright": "^1.61.0",
+    "vite": "^5.4.0"
   },
   "engines": {
     "node": ">=18.0.0"

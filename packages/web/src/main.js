@@ -12,6 +12,18 @@
 
 //#region 🟩 应用状态
 
+let $ = window.jQuery || window.$;
+
+async function ensureJQuery() {
+  if (!$) {
+    const jqueryModule = await import('jquery');
+    $ = jqueryModule.default;
+    window.jQuery = $;
+    window.$ = $;
+  }
+  return $;
+}
+
 const AppState = {
   mode: 'image',
   imageFile: null,
@@ -120,31 +132,31 @@ class ThemeManager {
         key: 'default',
         label: '默认（现代简约）',
         icon: '🌙',
-        desc: '浅色亮色调，适合日间使用'
+        desc: '浅色亮色调，适合日间使用',
       },
       {
         key: 'dark',
         label: '暗黑',
         icon: '☀️',
-        desc: '深色护眼，适合低光环境'
+        desc: '深色护眼，适合低光环境',
       },
       {
         key: 'high-contrast',
         label: '高对比度',
         icon: '🎨',
-        desc: '黑白分明，对比度最高'
+        desc: '黑白分明，对比度最高',
       },
       {
         key: 'solarized-light',
         label: 'Solarized 浅色',
         icon: '🌅',
-        desc: '温暖柔和的浅色调'
+        desc: '温暖柔和的浅色调',
       },
       {
         key: 'nord',
         label: 'Nord 极冰',
         icon: '❄️',
-        desc: '冷色调，来自Nord调色板'
+        desc: '冷色调，来自Nord调色板',
       },
     ];
 
@@ -239,39 +251,46 @@ class CoreAdapter {
 class ArtGenerator {
   constructor() { this.coreAdapter = new CoreAdapter(); }
 
+  /**
+   * 从 UI 配置构建 Core 可消费的配置对象
+   */
+  buildCoreConfig() {
+    const cfg = AppState.config;
+    const charsetType = cfg.charset === '__CUSTOM__' ? 'CUSTOM' : cfg.charset;
+    return {
+      height: parseInt(cfg.height) || 20,
+      width: cfg.width ? parseInt(cfg.width) : undefined,
+      charset: charsetType === 'CUSTOM'
+        ? { type: 'CUSTOM', customChars: cfg.customChars || ' .:-=+*#%@' }
+        : { type: charsetType },
+      font: cfg.font,
+      matrixSize: parseInt(cfg.matrixSize) || 6,
+      ratio: parseFloat(cfg.ratio) || 2.0,
+      interpolation: cfg.interpolation,
+      wideCharRatio: parseFloat(cfg.wideCharRatio) || 2.0,
+      invert: cfg.invert,
+      trimTrailingSpaces: cfg.trimTrailing,
+      enableEarlyTermination: cfg.earlyTermination !== false,
+      fontReduce: parseInt(cfg.fontReduce) || 0,
+      charSpace: parseInt(cfg.charSpace) || 1,
+      outputFormat: 'plain', // 预览统一用plain，导出时再切换
+      box: cfg.boxEnabled
+        ? {
+            enabled: true,
+            style: cfg.boxStyle,
+            padding: parseInt(cfg.boxPadding) || 1,
+            margin: parseInt(cfg.boxMargin) || 0,
+            title: cfg.boxTitle || undefined,
+            shadow: cfg.boxShadow ? { enabled: true } : false,
+          }
+        : false,
+    };
+  }
+
   async generate() {
     const t0 = performance.now();
     try {
-      const cfg = AppState.config;
-      const charsetType = cfg.charset === '__CUSTOM__' ? 'CUSTOM' : cfg.charset;
-      const coreConfig = {
-        height: parseInt(cfg.height) || 20,
-        width: cfg.width ? parseInt(cfg.width) : undefined,
-        charset: charsetType === 'CUSTOM'
-          ? { type: 'CUSTOM', customChars: cfg.customChars || ' .:-=+*#%@' }
-          : { type: charsetType },
-        font: cfg.font,
-        matrixSize: parseInt(cfg.matrixSize) || 6,
-        ratio: parseFloat(cfg.ratio) || 2.0,
-        interpolation: cfg.interpolation,
-        wideCharRatio: parseFloat(cfg.wideCharRatio) || 2.0,
-        invert: cfg.invert,
-        trimTrailingSpaces: cfg.trimTrailing,
-        fontReduce: parseInt(cfg.fontReduce) || 0,
-        charSpace: parseInt(cfg.charSpace) || 1,
-        outputFormat: cfg.outputFormat || 'plain',
-        box: cfg.boxEnabled
-          ? {
-              enabled: true,
-              style: cfg.boxStyle,
-              padding: parseInt(cfg.boxPadding) || 1,
-              margin: parseInt(cfg.boxMargin) || 0,
-              title: cfg.boxTitle || undefined,
-              shadow: cfg.boxShadow ? { enabled: true } : false,
-            }
-          : false,
-      };
-
+      const coreConfig = this.buildCoreConfig();
       let result;
       if (AppState.mode === 'image' && AppState.imageFile) {
         result = await this.coreAdapter.imageToArt(AppState.imageFile, coreConfig);
@@ -280,7 +299,6 @@ class ArtGenerator {
       } else {
         return null;
       }
-
       const duration = Math.round(performance.now() - t0);
       return { ...result, duration };
     } catch (error) {
@@ -398,7 +416,6 @@ class AppController {
     $doc.on('input', DOM.wideCharRatio, (e) => { this.setConfigQuiet('wideCharRatio', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('input', DOM.fontReduce, (e) => { this.setNumConfigQuiet('fontReduce', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('input', DOM.charSpace, (e) => { this.setNumConfigQuiet('charSpace', $(e.target).val()); this.debouncedRefresh(); });
-    $doc.on('change', DOM.outputFormat, (e) => { this.setConfigQuiet('outputFormat', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('change', DOM.invertCheckbox, (e) => { this.setConfigQuiet('invert', $(e.target).prop('checked')); this.debouncedRefresh(); });
     $doc.on('change', DOM.trimTrailing, (e) => { this.setConfigQuiet('trimTrailing', $(e.target).prop('checked')); this.debouncedRefresh(); });
     $doc.on('change', DOM.earlyTermination, (e) => { this.setConfigQuiet('earlyTermination', $(e.target).prop('checked')); this.debouncedRefresh(); });
@@ -542,7 +559,7 @@ class AppController {
         const c = JSON.parse(saved);
         Object.assign(AppState.config, c);
         this.syncUIFromConfig();
-      } catch (_) {}
+      }       catch (e) { /* 陈旧配置忽略 */ }
     }
     this.applyGlyphFont();
   }
@@ -565,7 +582,6 @@ class AppController {
     $(DOM.earlyTermination).prop('checked', c.earlyTermination);
     $(DOM.fontReduce).val(c.fontReduce);
     $(DOM.charSpace).val(c.charSpace);
-    $(DOM.outputFormat).val(c.outputFormat);
     $(DOM.boxEnabled).prop('checked', c.boxEnabled);
     $(DOM.boxConfigBody).toggle(c.boxEnabled);
     $(DOM.boxStyle).val(c.boxStyle);
@@ -577,7 +593,6 @@ class AppController {
     if (c.themeName && c.themeName !== 'default') {
       document.documentElement.setAttribute('data-theme', c.themeName);
     }
-    // 同步主题下拉
     $(DOM.themeSelect).val(c.themeName || 'default');
   }
 
@@ -591,7 +606,6 @@ class AppController {
     if (AppState.mode === 'image' && !AppState.imageFile) { this.setPlaceholder('请上传图片'); return; }
     if (AppState.mode === 'text' && !AppState.textContent.trim()) { this.setPlaceholder('请输入文字'); return; }
 
-    // 参数校验
     const validation = this.validateParams();
     if (!validation.valid) {
       this.toastManager.warning(validation.message);
@@ -599,11 +613,19 @@ class AppController {
       return;
     }
 
+    // 取消上一次请求
+    if (this._abortController) {
+      this._abortController.abort();
+    }
+    this._abortController = new AbortController();
+    const signal = this._abortController.signal;
+
     this.showLoading(true);
     $(DOM.previewInfo).text('正在生成...');
 
     try {
       const result = await this.artGenerator.generate();
+      if (signal.aborted) return; // 旧请求忽略
       if (result) {
         AppState.result = result;
         this.displayResult(result);
@@ -611,10 +633,13 @@ class AppController {
         this.setPlaceholder('预览区域');
       }
     } catch (error) {
+      if (signal.aborted) return;
       this.toastManager.error('生成失败: ' + error.message);
       this.setPlaceholder('生成失败');
     } finally {
-      this.showLoading(false);
+      if (!signal.aborted) {
+        this.showLoading(false);
+      }
     }
   }
 
@@ -711,40 +736,46 @@ class AppController {
   async exportPng() {
     if (!AppState.result) { this.toastManager.warning('请先生成字符画'); return; }
 
-    // 使用Canvas渲染字符画并导出PNG
     try {
       const content = this.getExportContent();
       const lines = content.split('\n');
-      const maxLineLen = Math.max(...lines.map(l => l.length));
       const lineCount = lines.length;
       const glyphFont = AppState.config.glyphFont;
 
-      // 估算字符尺寸
       const fontSize = 14;
-      const charWidth = fontSize * 0.65;
-      const charHeight = fontSize * 1.25;
+      const padding = 20;
+      const lineHeight = fontSize * 1.35;
+
+      // 用临时 canvas 逐行测宽
+      const measureCanvas = document.createElement('canvas');
+      const measureCtx = measureCanvas.getContext('2d');
+      if (!measureCtx) { this.toastManager.error('浏览器不支持Canvas'); return; }
+      measureCtx.font = fontSize + 'px ' + glyphFont;
+
+      let maxWidth = 0;
+      const lineWidths = lines.map(function(l) { return Math.ceil(measureCtx.measureText(l).width); });
+      lineWidths.forEach(function(w) { if (w > maxWidth) maxWidth = w; });
 
       const canvas = document.createElement('canvas');
-      const padding = 20;
-      canvas.width = Math.ceil(maxLineLen * charWidth + padding * 2);
-      canvas.height = Math.ceil(lineCount * charHeight + padding * 2);
+      canvas.width = Math.ceil(maxWidth + padding * 2);
+      canvas.height = Math.ceil(lineCount * lineHeight + padding * 2);
 
       const ctx = canvas.getContext('2d');
+      if (!ctx) { this.toastManager.error('浏览器不支持Canvas'); return; }
 
       // 白底
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 渲染文字
+      // 渲染文字（逐行居左）
       ctx.fillStyle = '#1a1a2e';
       ctx.font = fontSize + 'px ' + glyphFont;
       ctx.textBaseline = 'top';
 
       lines.forEach((line, i) => {
-        ctx.fillText(line, padding, padding + i * charHeight);
+        ctx.fillText(line, padding, padding + i * lineHeight);
       });
 
-      // 导出
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       if (blob) {
         this.downloadBlob(blob, 'unicode-art.png');
@@ -814,7 +845,11 @@ class AppController {
 
 //#endregion
 
-$(document).ready(() => {
-  if (!window.UnicodeArtCore) console.error('Core库未加载');
-  window.app = new AppController();
+ensureJQuery().then(($ready) => {
+  $ready(document).ready(() => {
+    if (!window.UnicodeArtCore) console.error('Core库未加载');
+    window.app = new AppController();
+  });
+}).catch((error) => {
+  console.error('jQuery加载失败:', error);
 });
