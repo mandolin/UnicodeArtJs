@@ -78,6 +78,12 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
           <input id="font" type="text">
         </div>
 
+        <div class="field">
+          <label for="glyphFont">Glyph Font</label>
+          <input id="glyphFont" type="text" list="glyphFontOptions" placeholder="Consolas, 'Courier New', monospace">
+          <datalist id="glyphFontOptions"></datalist>
+        </div>
+
         <div class="grid two">
           <div class="field">
             <label for="matrixSize">Matrix</label>

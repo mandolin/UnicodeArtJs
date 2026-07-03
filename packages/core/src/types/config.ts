@@ -36,7 +36,7 @@ import type { CharsetConfig } from './charset';
 import { PresetCharset } from './charset';
 import { OutputFormat } from './output';
 import type { BoxOptions } from '../box/types';
-import type { SupportedLocale } from '../i18n';
+import { normalizeLocale, type SupportedLocale } from '../i18n';
 
 /**
  * 🟢 插值算法枚举
@@ -109,6 +109,63 @@ export enum FontStyle {
   
   /** 粗斜体 */
   BOLD_ITALIC = 'bold-italic'
+}
+
+//#endregion
+
+//#region 🟦 统一配置模型类型
+
+/**
+ * 🟢 输出目标环境
+ *
+ * 🔹 用于描述字符画最终展示或消费的位置。
+ * 🔹 该字段不直接改变核心采样算法，主要供多端配置、导出、提示和后续环境差异处理使用。
+ */
+export type OutputTarget =
+  | 'plain'
+  | 'terminal'
+  | 'web'
+  | 'vscode'
+  | 'electron'
+  | 'html'
+  | 'ansi';
+
+/**
+ * 🟢 视觉字体配置
+ *
+ * 🔹 视觉字体指输入文字渲染成中间图像时使用的字体。
+ * 🔹 旧字段 `font` / `fontStyle` / `fontReduce` 会继续保留，并映射到这里。
+ */
+export interface VisualFontConfig {
+  /** 字体名称或字体文件路径。 */
+  family?: string;
+  /** 字体样式。 */
+  style?: FontStyle;
+  /** 统一视觉字体渲染内边距/字号收缩量。 */
+  reduce?: number;
+  /** 后续用于视觉字体顶部手动纠偏，当前仅作为配置契约保留。 */
+  reduceTop?: number;
+  /** 后续用于视觉字体右侧手动纠偏，当前仅作为配置契约保留。 */
+  reduceRight?: number;
+  /** 后续用于视觉字体底部手动纠偏，当前仅作为配置契约保留。 */
+  reduceBottom?: number;
+  /** 后续用于视觉字体左侧手动纠偏，当前仅作为配置契约保留。 */
+  reduceLeft?: number;
+}
+
+/**
+ * 🟢 字素字体配置
+ *
+ * 🔹 字素字体指字符画生成后，输出字素在终端、Web、VSCode、Electron 中实际显示的字体。
+ * 🔹 `widthProfile` / `wideCharRegex` 是后续字素宽度字典的入口，本阶段先冻结契约。
+ */
+export interface GlyphFontConfig {
+  /** 输出字素展示字体，例如新宋体、等距更纱黑体 SC、Consolas 等。 */
+  family?: string;
+  /** 字素宽度 profile 名称，后续用于按字体选择宽字素规则。 */
+  widthProfile?: string;
+  /** 用户自定义宽字素正则字符串，后续优先级高于 widthProfile。 */
+  wideCharRegex?: string;
 }
 
 /**
@@ -309,9 +366,23 @@ export interface ArtConfig {
   //#endregion
   
   //#region 🔶 字体配置（仅文本模式）
+
+  /**
+   * 视觉字体配置（推荐新字段）
+   * - 用于输入文字渲染成中间图像
+   * - 旧字段 font/fontStyle/fontReduce 会作为兼容别名映射到此对象
+   *
+   * @example
+   * visualFont: {
+   *   family: 'SimSun',
+   *   style: FontStyle.REGULAR,
+   *   reduce: 0
+   * }
+   */
+  visualFont?: VisualFontConfig;
   
   /** 
-   * 字体名称或路径
+   * 字体名称或路径（兼容旧字段，语义等同于 visualFont.family）
    * - 系统字体: 直接使用字体名称（如'Arial'）
    * - 自定义字体: 提供字体文件路径（如'/path/to/font.ttf'）
    * - 默认值: 'Arial'（系统默认）
@@ -323,7 +394,7 @@ export interface ArtConfig {
   font?: string;
   
   /** 
-   * 字体样式
+   * 字体样式（兼容旧字段，语义等同于 visualFont.style）
    * - 需要字体文件支持对应样式
    * - 默认值: FontStyle.REGULAR
    * 
@@ -332,7 +403,7 @@ export interface ArtConfig {
   fontStyle?: FontStyle;
   
   /** 
-   * 视觉字体渲染内边距/字号收缩量（像素）
+   * 视觉字体渲染内边距/字号收缩量（像素，兼容旧字段，语义等同于 visualFont.reduce）
    * - 增加视觉字体渲染时的内边距
    * - 范围: [0, 10]
    * - 推荐: 0
@@ -356,6 +427,33 @@ export interface ArtConfig {
    * charSpace: 2 // 增加字符间距
    */
   charSpace?: number;
+
+  /**
+   * 字素字体配置（推荐新字段）
+   * - 用于描述字符画输出后实际显示字素的字体
+   * - 不参与输入文字渲染，不应与 visualFont 混用
+   * - 当前阶段主要用于多端配置统一和后续宽字素 profile 接入
+   */
+  glyphFont?: GlyphFontConfig;
+
+  /**
+   * 字素字体名称（兼容便捷字段，语义等同于 glyphFont.family）
+   * - Web / VSCode / Electron 可用它控制预览区域字体
+   * - Core 默认不猜测用户实际显示字体
+   */
+  glyphFontFamily?: string;
+
+  /**
+   * 字素宽度 profile 名称（兼容便捷字段，语义等同于 glyphFont.widthProfile）
+   * - 后续用于按字素字体选择宽字符判定规则
+   */
+  glyphWidthProfile?: string;
+
+  /**
+   * 用户自定义宽字素正则字符串（兼容便捷字段，语义等同于 glyphFont.wideCharRegex）
+   * - 后续优先级高于 glyphWidthProfile
+   */
+  wideCharRegex?: string;
   
   //#endregion
   
@@ -415,6 +513,20 @@ export interface ArtConfig {
    * @see {@link OutputFormat}
    */
   outputFormat?: OutputFormat;
+
+  /**
+   * 输出目标环境
+   * - plain: 普通文本
+   * - terminal: 终端
+   * - web: Web 页面
+   * - vscode: VSCode 插件
+   * - electron: Electron 客户端
+   * - html/ansi: 与特定输出格式相关的环境
+   *
+   * @remarks
+   * - 该字段主要用于多端配置统一和后续环境特化，不直接改变当前采样结果。
+   */
+  outputTarget?: OutputTarget;
   
   /** 
    * 是否去除行尾空格
@@ -547,6 +659,18 @@ export const DEFAULT_CONFIG: Partial<ArtConfig> = {
   },
   
   // 字体配置
+  visualFont: {
+    family: 'Arial',
+    style: FontStyle.REGULAR,
+    reduce: 0
+  },
+  glyphFont: {
+    family: undefined,
+    widthProfile: 'default',
+    wideCharRegex: undefined
+  },
+  font: 'Arial',
+  fontStyle: FontStyle.REGULAR,
   fontReduce: 0,
   charSpace: 1,
   
@@ -557,6 +681,7 @@ export const DEFAULT_CONFIG: Partial<ArtConfig> = {
   
   // 输出配置
   outputFormat: OutputFormat.PLAIN_TEXT,
+  outputTarget: 'plain',
   invert: false,
   trimTrailingSpaces: false,
   box: false,
@@ -569,5 +694,65 @@ export const DEFAULT_CONFIG: Partial<ArtConfig> = {
   // 本地化配置
   locale: 'zh-CN'
 };
+
+//#endregion
+
+//#region 🟦 配置归一化工具
+
+/**
+ * 🟢 归一化统一配置模型别名
+ *
+ * 🔹 旧 API 仍然可以继续传 `font` / `fontStyle` / `fontReduce`。
+ * 🔹 新 API 推荐传 `visualFont` / `glyphFont` / `outputTarget`。
+ * 🔹 返回对象会同时补齐旧字段和新字段，方便当前算法与后续多端 UI 共用。
+ */
+export function normalizeArtConfigAliases(config: Partial<ArtConfig>): Partial<ArtConfig> {
+  const visualFont = normalizeVisualFontConfig(config);
+  const glyphFont = normalizeGlyphFontConfig(config);
+
+  return {
+    ...config,
+    visualFont,
+    glyphFont,
+    font: visualFont.family,
+    fontStyle: visualFont.style,
+    fontReduce: visualFont.reduce,
+    glyphFontFamily: glyphFont.family,
+    glyphWidthProfile: glyphFont.widthProfile,
+    wideCharRegex: glyphFont.wideCharRegex,
+    outputTarget: config.outputTarget || inferOutputTarget(config.outputFormat),
+    locale: normalizeLocale(config.locale)
+  };
+}
+
+function normalizeVisualFontConfig(config: Partial<ArtConfig>): VisualFontConfig {
+  const source = config.visualFont || {};
+  return {
+    ...source,
+    family: source.family ?? config.font ?? DEFAULT_CONFIG.font,
+    style: source.style ?? config.fontStyle ?? DEFAULT_CONFIG.fontStyle,
+    reduce: source.reduce ?? config.fontReduce ?? DEFAULT_CONFIG.fontReduce
+  };
+}
+
+function normalizeGlyphFontConfig(config: Partial<ArtConfig>): GlyphFontConfig {
+  const source = config.glyphFont || {};
+  return {
+    ...source,
+    family: source.family ?? config.glyphFontFamily,
+    widthProfile: source.widthProfile ?? config.glyphWidthProfile ?? 'default',
+    wideCharRegex: source.wideCharRegex ?? config.wideCharRegex
+  };
+}
+
+function inferOutputTarget(outputFormat: OutputFormat | undefined): OutputTarget {
+  if (outputFormat === OutputFormat.HTML) {
+    return 'html';
+  }
+  if (outputFormat === OutputFormat.ANSI) {
+    return 'ansi';
+  }
+  return 'plain';
+}
 
 //#endregion

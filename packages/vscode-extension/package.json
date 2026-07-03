@@ -112,7 +112,27 @@
         "unicodeArtJs.font": {
           "type": "string",
           "default": "Arial",
+          "description": "Legacy alias for unicodeArtJs.visualFont."
+        },
+        "unicodeArtJs.visualFont": {
+          "type": "string",
+          "default": "Arial",
           "description": "Visual font used when rendering input text before conversion."
+        },
+        "unicodeArtJs.glyphFont": {
+          "type": "string",
+          "default": "Consolas, 'Courier New', monospace",
+          "description": "Glyph display font used for preview and downstream rendering."
+        },
+        "unicodeArtJs.glyphWidthProfile": {
+          "type": "string",
+          "default": "default",
+          "description": "Glyph width profile name. Reserved for future wide glyph rules."
+        },
+        "unicodeArtJs.wideCharRegex": {
+          "type": "string",
+          "default": "",
+          "description": "Custom wide glyph regular expression. Reserved for future wide glyph rules."
         },
         "unicodeArtJs.matrixSize": {
           "type": "number",

@@ -86,7 +86,11 @@ unicode-art image <input> [options]
 - `-w, --width <number>` - 输出宽度（列数）
 - `-a, --chars <string>` - 自定义字符集
 - `--charset <type>` - 预设字符集 (ASCII\|EXTENDED\|CHINESE_SIMPLE)
-- `-f, --font <name>` - 字体名称或路径
+- `-f, --font <name>` - 视觉字体名称或路径（兼容旧参数）
+- `--visual-font <name>` - 视觉字体名称或路径
+- `--glyph-font <name>` - 字素显示字体
+- `--glyph-width-profile <name>` - 字素宽度 profile 名称（为后续宽字素规则预留）
+- `--wide-char-regex <regex>` - 自定义宽字素正则（为后续宽字素规则预留）
 - `--font-style <style>` - 字体样式 (regular\|bold\|italic\|bold-italic)
 - `--font-reduce <number>` - 视觉字体渲染内边距/字号收缩量
 - `-m, --matrix <size>` - 矩阵大小（默认6）
@@ -96,6 +100,7 @@ unicode-art image <input> [options]
 - `--wide-char-ratio <number>` - 宽字符匹配阈值（默认1.5）
 - `--trim-trailing-spaces` - 去除行尾空格
 - `--format <format>` - 输出格式 (plain\|html\|ansi)
+- `--output-target <target>` - 输出目标环境 (plain\|terminal\|web\|vscode\|electron\|html\|ansi)
 - `-b, --box <json-or-style>` - 裱框配置，支持 `true`、`false`、内置样式名或 JSON 对象
 - `-d, --debug <tags>` - 调试标签，逗号分隔
 
@@ -143,6 +148,16 @@ font:
   name: Arial
   style: regular
   reduce: 0.8
+
+# 统一配置模型（推荐新写法）
+visualFont:
+  family: Arial
+  style: regular
+  reduce: 0
+glyphFont:
+  family: "Consolas, Courier New, monospace"
+  widthProfile: default
+  wideCharRegex: ""
 
 # 算法配置
 algorithm:

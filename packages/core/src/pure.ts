@@ -34,7 +34,10 @@ export {
 } from './types/charset';
 
 export type {
-  ArtConfig
+  ArtConfig,
+  GlyphFontConfig,
+  OutputTarget,
+  VisualFontConfig
 } from './types/config';
 
 export {
@@ -42,6 +45,7 @@ export {
   FontStyle,
   HeightMode,
   Interpolation,
+  normalizeArtConfigAliases,
   TextAlign
 } from './types/config';
 

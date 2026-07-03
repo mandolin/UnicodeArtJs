@@ -22,6 +22,8 @@
     customCharsWrap: document.getElementById('customCharsWrap'),
     customChars: document.getElementById('customChars'),
     font: document.getElementById('font'),
+    glyphFont: document.getElementById('glyphFont'),
+    glyphFontOptions: document.getElementById('glyphFontOptions'),
     matrixSize: document.getElementById('matrixSize'),
     ratio: document.getElementById('ratio'),
     invert: document.getElementById('invert'),
@@ -78,6 +80,15 @@
     });
   }
 
+  function fillDatalist(datalist, values) {
+    datalist.textContent = '';
+    values.forEach((value) => {
+      const option = document.createElement('option');
+      option.value = value;
+      datalist.appendChild(option);
+    });
+  }
+
   function applyInitialState(payload) {
     state.config = payload.config;
     const config = payload.config;
@@ -85,11 +96,13 @@
     fillSelect(elements.charset, payload.options.charsets, config.charset);
     fillSelect(elements.boxStyle, payload.options.boxStyles, config.box && config.box.style ? config.box.style : 'round');
     fillSelect(elements.insertMode, payload.options.insertModes, config.insertMode);
+    fillDatalist(elements.glyphFontOptions, payload.options.glyphFonts || []);
 
     elements.height.value = String(config.height);
     elements.width.value = config.width === undefined ? '' : String(config.width);
     elements.customChars.value = config.customChars || '';
-    elements.font.value = config.font;
+    elements.font.value = config.visualFont || config.font;
+    elements.glyphFont.value = config.glyphFont || "Consolas, 'Courier New', monospace";
     elements.matrixSize.value = String(config.matrixSize);
     elements.ratio.value = String(config.ratio);
     elements.invert.checked = Boolean(config.invert);
@@ -102,6 +115,7 @@
     elements.boxMargin.value = config.box && config.box.margin !== undefined ? String(config.box.margin) : '0';
     updateCustomCharsVisibility();
     updateModeVisibility();
+    applyGlyphFont();
     setStatus('Ready', 0);
     setBusy(false);
   }
@@ -113,7 +127,13 @@
       width: optionalNumber(elements.width.value),
       charset: elements.charset.value,
       customChars: elements.customChars.value,
+      // 视觉字体用于输入文字渲染，保留 font 作为旧配置别名。
+      visualFont: elements.font.value,
       font: elements.font.value,
+      // 字素字体用于 Converter 预览和后续 HTML 导出显示。
+      glyphFont: elements.glyphFont.value,
+      glyphWidthProfile: state.config ? state.config.glyphWidthProfile : 'default',
+      wideCharRegex: state.config ? state.config.wideCharRegex : '',
       matrixSize: numberOr(elements.matrixSize.value, 6),
       ratio: numberOr(elements.ratio.value, 2),
       invert: elements.invert.checked,
@@ -131,6 +151,8 @@
         : false,
       insertMode: elements.insertMode.value,
       preset: state.config ? state.config.preset : 'default',
+      locale: state.config ? state.config.locale : 'zh-CN',
+      outputTarget: 'vscode',
     };
   }
 
@@ -172,6 +194,10 @@
     const imageMode = elements.mode.value === 'image';
     elements.input.parentElement.hidden = imageMode;
     elements.imageInputWrap.hidden = !imageMode;
+  }
+
+  function applyGlyphFont() {
+    elements.output.style.fontFamily = elements.glyphFont.value || "Consolas, 'Courier New', monospace";
   }
 
   function convert() {
@@ -231,6 +257,7 @@
   });
   elements.mode.addEventListener('change', updateModeVisibility);
   elements.charset.addEventListener('change', updateCustomCharsVisibility);
+  elements.glyphFont.addEventListener('input', applyGlyphFont);
   elements.imageInput.addEventListener('change', () => {
     const file = elements.imageInput.files && elements.imageInput.files[0];
     if (!file) {
@@ -268,7 +295,11 @@
     post('savePreset', { config });
   });
   elements.saveTxt.addEventListener('click', () => post('save', { content: state.currentResult, format: 'txt' }));
-  elements.saveHtml.addEventListener('click', () => post('save', { content: state.currentResult, format: 'html' }));
+  elements.saveHtml.addEventListener('click', () => post('save', {
+    content: state.currentResult,
+    format: 'html',
+    glyphFont: collectConfig().glyphFont,
+  }));
 
   window.addEventListener('message', (event) => {
     const message = event.data;
@@ -281,6 +312,7 @@
         break;
       case 'result':
         state.currentResult = message.payload.content;
+        applyGlyphFont();
         elements.output.textContent = message.payload.content;
         elements.resultMeta.textContent = `${message.payload.source} | ${message.payload.cols} cols x ${message.payload.rows} rows | ${formatBytes(message.payload.content.length)}`;
         state.activeRequestId = '';

@@ -14,7 +14,7 @@ export * from './pure';
 import type { CharMatrix } from './types/charset';
 import { PresetCharset } from './types/charset';
 import type { ArtConfig } from './types/config';
-import { HeightMode } from './types/config';
+import { HeightMode, normalizeArtConfigAliases } from './types/config';
 import type { ArtResult } from './types/output';
 import { ErrorCode, UnicodeArtError } from './types/output';
 import type { CoreImageData } from './types/image';
@@ -83,20 +83,21 @@ export async function imageToArt(
   config: Partial<ArtConfig>,
   options: BrowserArtOptions = {}
 ): Promise<ArtResult> {
+  const coreConfig = normalizeArtConfigAliases(config);
   assertBrowserNotAborted(options);
   reportBrowserProgress(options, 'start', 0, 'Starting browser image conversion');
 
   const imageData = await browserPlatformAdapter.loadImage(input);
   assertBrowserNotAborted(options);
-  enforceBrowserImageLimits(imageData, config, options);
+  enforceBrowserImageLimits(imageData, coreConfig, options);
   reportBrowserProgress(options, 'loadImage', 0.25, 'Image loaded');
 
-  const charDataMap = options.charDataMap ?? await precomputeBrowserChars(config);
+  const charDataMap = options.charDataMap ?? await precomputeBrowserChars(coreConfig);
   assertBrowserNotAborted(options);
   reportBrowserProgress(options, 'precomputeChars', 0.55, 'Character data ready');
 
   reportBrowserProgress(options, 'convert', 0.7, 'Converting image data');
-  const result = imageDataToArt(imageData, config, { charDataMap });
+  const result = imageDataToArt(imageData, coreConfig, { charDataMap });
   reportBrowserProgress(options, 'done', 1, 'Browser image conversion complete');
   return result;
 }
@@ -106,6 +107,7 @@ export async function textToArt(
   config: Partial<ArtConfig>,
   options: BrowserArtOptions = {}
 ): Promise<ArtResult> {
+  const coreConfig = normalizeArtConfigAliases(config);
   if (!text || text.length === 0) {
     throw new UnicodeArtError(
       'text must not be empty',
@@ -117,14 +119,14 @@ export async function textToArt(
   assertBrowserNotAborted(options);
   reportBrowserProgress(options, 'start', 0, 'Starting browser text conversion');
 
-  const matrixSize = config.matrixSize || 6;
+  const matrixSize = coreConfig.matrixSize || 6;
   const lines = text.split('\n');
   const lineCount = lines.length;
-  const font = await browserPlatformAdapter.loadFont(config.font || 'monospace', config.fontStyle);
-  const fontReduce = config.fontReduce ?? 0;
-  const lineSpacingPixels = (config.lineSpacing || 0) * matrixSize;
-  const heightInRows = config.height || lineCount;
-  const heightMode = config.heightMode || HeightMode.LINE;
+  const font = await browserPlatformAdapter.loadFont(coreConfig.font || 'monospace', coreConfig.fontStyle);
+  const fontReduce = coreConfig.fontReduce ?? 0;
+  const lineSpacingPixels = (coreConfig.lineSpacing || 0) * matrixSize;
+  const heightInRows = coreConfig.height || lineCount;
+  const heightMode = coreConfig.heightMode || HeightMode.LINE;
   let canvasHeight: number;
   let rectunit: number;
 
@@ -147,19 +149,20 @@ export async function textToArt(
     fontSize,
     width: canvasWidth,
     height: canvasHeight,
-    textAlign: config.textAlign,
-    lineSpacing: config.lineSpacing,
+    textAlign: coreConfig.textAlign,
+    lineSpacing: coreConfig.lineSpacing,
     heightMode,
     fontReduce,
     rectunit,
     lineSpacingPixels
   });
   assertBrowserNotAborted(options);
-  enforceBrowserImageLimits(imageData, config, options);
+  enforceBrowserImageLimits(imageData, coreConfig, options);
   reportBrowserProgress(options, 'renderText', 0.35, 'Text rendered');
 
   const charDataMap = options.charDataMap ?? await precomputeBrowserChars({
     ...config,
+    ...coreConfig,
     matrixSize,
     font
   });
@@ -171,6 +174,7 @@ export async function textToArt(
     imageData,
     {
       ...config,
+      ...coreConfig,
       height: canvasHeight / matrixSize,
       matrixSize
     },

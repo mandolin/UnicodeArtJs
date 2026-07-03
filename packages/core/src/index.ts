@@ -88,7 +88,10 @@ export {
 
 // 配置类型
 export type {
-  ArtConfig
+  ArtConfig,
+  GlyphFontConfig,
+  OutputTarget,
+  VisualFontConfig
 } from './types/config';
 
 export type {
@@ -124,7 +127,8 @@ export {
   FontStyle,
   TextAlign,
   HeightMode,
-  DEFAULT_CONFIG
+  DEFAULT_CONFIG,
+  normalizeArtConfigAliases
 } from './types/config';
 
 // 输出和错误类型
@@ -206,7 +210,7 @@ import type { ArtResult } from './types/output';
 import { UnicodeArtError, ErrorCode, OutputFormat } from './types/output';
 import { PresetCharset } from './types/charset';
 import { DEFAULT_ASCII_CHARS, EXTENDED_CHARS, CHINESE_SIMPLE_CHARS } from './constants';
-import { Interpolation, TextAlign, HeightMode } from './types/config';
+import { Interpolation, TextAlign, HeightMode, normalizeArtConfigAliases } from './types/config';
 import { invertPixels } from './preprocessor';
 import { generateSamplingArray } from './sampler';
 import { batchMatch } from './matcher';
@@ -873,60 +877,67 @@ export async function imageToArt(
 export function validateConfig(
   config: Partial<ArtConfig>
 ): ArtConfig {
-  const locale = normalizeLocale(config.locale);
+  const normalizedConfig = normalizeArtConfigAliases(config);
+  const locale = normalizeLocale(normalizedConfig.locale);
 
   // 🔹 从DEFAULT_CONFIG开始
   const fullConfig: ArtConfig = {
-    matrixSize: config.matrixSize || 6,
-    ratio: config.ratio || 2.0,
-    interpolation: config.interpolation || Interpolation.BILINEAR,
-    charset: config.charset || { type: PresetCharset.ASCII },
-    font: config.font,
-    fontStyle: config.fontStyle,
-    fontReduce: config.fontReduce !== undefined ? config.fontReduce : 0,
-    charSpace: config.charSpace !== undefined ? config.charSpace : 1,
-    textAlign: config.textAlign || TextAlign.LEFT,
-    lineSpacing: config.lineSpacing !== undefined ? config.lineSpacing : 0,
-    heightMode: config.heightMode || HeightMode.LINE,
-    outputFormat: config.outputFormat || OutputFormat.PLAIN_TEXT,
-    invert: config.invert !== undefined ? config.invert : false,
-    trimTrailingSpaces: config.trimTrailingSpaces !== undefined ? config.trimTrailingSpaces : false,
-    box: config.box !== undefined ? config.box : false,
-    wideCharRatio: config.wideCharRatio !== undefined ? config.wideCharRatio : 2.0,
-    enableEarlyTermination: config.enableEarlyTermination !== undefined ? config.enableEarlyTermination : true,
-    maxParallelTasks: config.maxParallelTasks !== undefined ? config.maxParallelTasks : 0,
+    matrixSize: normalizedConfig.matrixSize || 6,
+    ratio: normalizedConfig.ratio || 2.0,
+    interpolation: normalizedConfig.interpolation || Interpolation.BILINEAR,
+    charset: normalizedConfig.charset || { type: PresetCharset.ASCII },
+    visualFont: normalizedConfig.visualFont,
+    glyphFont: normalizedConfig.glyphFont,
+    font: normalizedConfig.font,
+    fontStyle: normalizedConfig.fontStyle,
+    fontReduce: normalizedConfig.fontReduce !== undefined ? normalizedConfig.fontReduce : 0,
+    glyphFontFamily: normalizedConfig.glyphFontFamily,
+    glyphWidthProfile: normalizedConfig.glyphWidthProfile,
+    wideCharRegex: normalizedConfig.wideCharRegex,
+    charSpace: normalizedConfig.charSpace !== undefined ? normalizedConfig.charSpace : 1,
+    textAlign: normalizedConfig.textAlign || TextAlign.LEFT,
+    lineSpacing: normalizedConfig.lineSpacing !== undefined ? normalizedConfig.lineSpacing : 0,
+    heightMode: normalizedConfig.heightMode || HeightMode.LINE,
+    outputFormat: normalizedConfig.outputFormat || OutputFormat.PLAIN_TEXT,
+    outputTarget: normalizedConfig.outputTarget,
+    invert: normalizedConfig.invert !== undefined ? normalizedConfig.invert : false,
+    trimTrailingSpaces: normalizedConfig.trimTrailingSpaces !== undefined ? normalizedConfig.trimTrailingSpaces : false,
+    box: normalizedConfig.box !== undefined ? normalizedConfig.box : false,
+    wideCharRatio: normalizedConfig.wideCharRatio !== undefined ? normalizedConfig.wideCharRatio : 2.0,
+    enableEarlyTermination: normalizedConfig.enableEarlyTermination !== undefined ? normalizedConfig.enableEarlyTermination : true,
+    maxParallelTasks: normalizedConfig.maxParallelTasks !== undefined ? normalizedConfig.maxParallelTasks : 0,
     locale
   };
   
   // 🔹 处理height和width
-  if (config.height) {
-    if (config.height <= 0) {
+  if (normalizedConfig.height) {
+    if (normalizedConfig.height <= 0) {
       throw new UnicodeArtError(
         translateCoreMessage('config.height.positive', {}, locale),
         ErrorCode.INVALID_CONFIG,
         {
-          details: { height: config.height },
+          details: { height: normalizedConfig.height },
           messageKey: 'config.height.positive',
           locale
         }
       );
     }
-    fullConfig.height = config.height;
+    fullConfig.height = normalizedConfig.height;
   }
   
-  if (config.width) {
-    if (config.width <= 0) {
+  if (normalizedConfig.width) {
+    if (normalizedConfig.width <= 0) {
       throw new UnicodeArtError(
         translateCoreMessage('config.width.positive', {}, locale),
         ErrorCode.INVALID_CONFIG,
         {
-          details: { width: config.width },
+          details: { width: normalizedConfig.width },
           messageKey: 'config.width.positive',
           locale
         }
       );
     }
-    fullConfig.width = config.width;
+    fullConfig.width = normalizedConfig.width;
   }
   
   // 🔹 至少指定一个维度

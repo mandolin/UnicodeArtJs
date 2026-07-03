@@ -163,7 +163,12 @@ program
   .option('-w, --width <number>', 'Output width in columns', parseInt)
   .option('-a, --chars <string>', 'Custom character set')
   .option('--charset <type>', 'Preset charset (ASCII|EXTENDED|CHINESE_SIMPLE)')
-  .option('-f, --font <name>', 'Font name or path')
+  .option('-f, --font <name>', 'Visual font name or path (legacy alias)')
+  .option('--visual-font <name>', 'Visual font name or path')
+  .option('--glyph-font <name>', 'Glyph display font family')
+  .option('--glyph-width-profile <name>', 'Glyph width profile name')
+  .option('--wide-char-regex <regex>', 'Custom wide glyph regular expression')
+  .option('--output-target <target>', 'Output target (plain|terminal|web|vscode|electron|html|ansi)')
   .option('--font-style <style>', 'Font style (regular|bold|italic|bold-italic)')
   .option('--font-reduce <number>', 'Visual font inset/reduction', parseInt)
   .option('-m, --matrix <size>', 'Matrix size', parseInt)
@@ -216,7 +221,12 @@ program
   .option('-w, --width <number>', 'Output width in columns', parseInt)
   .option('-a, --chars <string>', 'Custom character set')
   .option('--charset <type>', 'Preset charset (ASCII|EXTENDED|CHINESE_SIMPLE)')
-  .option('-f, --font <name>', 'Font name or path')
+  .option('-f, --font <name>', 'Visual font name or path (legacy alias)')
+  .option('--visual-font <name>', 'Visual font name or path')
+  .option('--glyph-font <name>', 'Glyph display font family')
+  .option('--glyph-width-profile <name>', 'Glyph width profile name')
+  .option('--wide-char-regex <regex>', 'Custom wide glyph regular expression')
+  .option('--output-target <target>', 'Output target (plain|terminal|web|vscode|electron|html|ansi)')
   .option('--font-style <style>', 'Font style (regular|bold|italic|bold-italic)')
   .option('--font-reduce <number>', 'Visual font inset/reduction', parseInt)
   .option('-m, --matrix <size>', 'Matrix size', parseInt)
@@ -254,7 +264,12 @@ program
   .option('-w, --width <number>', 'Output width in columns', parseInt)
   .option('-a, --chars <string>', 'Custom character set')
   .option('--charset <type>', 'Preset charset (ASCII|EXTENDED|CHINESE_SIMPLE)')
-  .option('-f, --font <name>', 'Font name or path')
+  .option('-f, --font <name>', 'Visual font name or path (legacy alias)')
+  .option('--visual-font <name>', 'Visual font name or path')
+  .option('--glyph-font <name>', 'Glyph display font family')
+  .option('--glyph-width-profile <name>', 'Glyph width profile name')
+  .option('--wide-char-regex <regex>', 'Custom wide glyph regular expression')
+  .option('--output-target <target>', 'Output target (plain|terminal|web|vscode|electron|html|ansi)')
   .option('--font-style <style>', 'Font style (regular|bold|italic|bold-italic)')
   .option('--font-reduce <number>', 'Visual font inset/reduction', parseInt)
   .option('-m, --matrix <size>', 'Matrix size', parseInt)
@@ -444,9 +459,22 @@ function mergeConfig(fileConfig, cliOptions) {
     };
   }
   if (hasOption(cliOptions, 'font')) merged.font = cliOptions.font;
+  if (hasOption(cliOptions, 'visualFont')) merged.visualFont = { ...(merged.visualFont || {}), family: cliOptions.visualFont };
   if (hasOption(cliOptions, 'fontStyle')) merged.fontStyle = normalizeFontStyle(cliOptions.fontStyle);
   if (hasOption(cliOptions, 'fontReduce')) {
     merged.fontReduce = requireFiniteNumber(cliOptions.fontReduce, 'font-reduce');
+  }
+  if (hasOption(cliOptions, 'glyphFont')) {
+    merged.glyphFont = { ...(merged.glyphFont || {}), family: cliOptions.glyphFont };
+    merged.glyphFontFamily = cliOptions.glyphFont;
+  }
+  if (hasOption(cliOptions, 'glyphWidthProfile')) {
+    merged.glyphFont = { ...(merged.glyphFont || {}), widthProfile: cliOptions.glyphWidthProfile };
+    merged.glyphWidthProfile = cliOptions.glyphWidthProfile;
+  }
+  if (hasOption(cliOptions, 'wideCharRegex')) {
+    merged.glyphFont = { ...(merged.glyphFont || {}), wideCharRegex: cliOptions.wideCharRegex };
+    merged.wideCharRegex = cliOptions.wideCharRegex;
   }
   if (hasOption(cliOptions, 'matrix')) merged.matrixSize = requireFiniteNumber(cliOptions.matrix, 'matrix');
   if (hasOption(cliOptions, 'ratio')) merged.ratio = requireFiniteNumber(cliOptions.ratio, 'ratio');
@@ -457,6 +485,7 @@ function mergeConfig(fileConfig, cliOptions) {
   }
   if (hasOption(cliOptions, 'trimTrailingSpaces')) merged.trimTrailingSpaces = cliOptions.trimTrailingSpaces;
   if (hasOption(cliOptions, 'format')) merged.outputFormat = cliOptions.format;
+  if (hasOption(cliOptions, 'outputTarget')) merged.outputTarget = cliOptions.outputTarget;
   if (hasOption(cliOptions, 'textAlign')) merged.textAlign = cliOptions.textAlign;
   if (hasOption(cliOptions, 'lineSpacing')) {
     merged.lineSpacing = requireFiniteNumber(cliOptions.lineSpacing, 'line-spacing');
@@ -492,13 +521,28 @@ function normalizeConfig(fileConfig = {}) {
       if (hasOption(fileConfig.font, 'reduce')) normalized.fontReduce = fileConfig.font.reduce;
     }
   }
+  if (hasOption(fileConfig, 'visualFont')) {
+    normalized.visualFont = typeof fileConfig.visualFont === 'string'
+      ? { family: fileConfig.visualFont }
+      : {
+          ...fileConfig.visualFont,
+          style: fileConfig.visualFont?.style ? normalizeFontStyle(fileConfig.visualFont.style) : fileConfig.visualFont?.style,
+        };
+  }
   if (hasOption(fileConfig, 'fontStyle')) normalized.fontStyle = normalizeFontStyle(fileConfig.fontStyle);
   if (hasOption(fileConfig, 'fontReduce')) normalized.fontReduce = fileConfig.fontReduce;
+  if (hasOption(fileConfig, 'glyphFont')) {
+    normalized.glyphFont = { ...fileConfig.glyphFont };
+  }
+  if (hasOption(fileConfig, 'glyphFontFamily')) normalized.glyphFontFamily = fileConfig.glyphFontFamily;
+  if (hasOption(fileConfig, 'glyphWidthProfile')) normalized.glyphWidthProfile = fileConfig.glyphWidthProfile;
+  if (hasOption(fileConfig, 'wideCharRegex')) normalized.wideCharRegex = fileConfig.wideCharRegex;
   if (hasOption(fileConfig, 'charSpace')) normalized.charSpace = fileConfig.charSpace;
   if (hasOption(fileConfig, 'textAlign')) normalized.textAlign = fileConfig.textAlign;
   if (hasOption(fileConfig, 'lineSpacing')) normalized.lineSpacing = fileConfig.lineSpacing;
   if (hasOption(fileConfig, 'heightMode')) normalized.heightMode = normalizeHeightMode(fileConfig.heightMode);
   if (hasOption(fileConfig, 'outputFormat')) normalized.outputFormat = fileConfig.outputFormat;
+  if (hasOption(fileConfig, 'outputTarget')) normalized.outputTarget = fileConfig.outputTarget;
   if (hasOption(fileConfig, 'invert')) normalized.invert = fileConfig.invert;
   if (hasOption(fileConfig, 'trimTrailingSpaces')) normalized.trimTrailingSpaces = fileConfig.trimTrailingSpaces;
   if (hasOption(fileConfig, 'box')) normalized.box = normalizeBoxConfig(fileConfig.box);
@@ -514,6 +558,7 @@ function normalizeConfig(fileConfig = {}) {
   }
   if (fileConfig.output) {
     if (hasOption(fileConfig.output, 'format')) normalized.outputFormat = fileConfig.output.format;
+    if (hasOption(fileConfig.output, 'target')) normalized.outputTarget = fileConfig.output.target;
     if (hasOption(fileConfig.output, 'trimTrailingSpaces')) {
       normalized.trimTrailingSpaces = fileConfig.output.trimTrailingSpaces;
     }

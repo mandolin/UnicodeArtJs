@@ -10,12 +10,14 @@ This extension is built on the MIT-licensed `unicode-art-js` core package. Unico
 - Convert local image files from the command palette or Explorer context menu.
 - Open a built-in converter WebView with text and image modes.
 - Configure height, width, charset, visual font, matrix size, ratio, invert, trim, and font reduce.
+- Keep visual font, glyph font, locale, and output target aligned with the Core unified configuration model.
 - Enable Box rendering with style, padding, margin, title, and shadow.
 - Insert output into the active editor, open a new document, or copy to clipboard.
 - Save generated output as `.txt` or `.html`.
 - Remember the most recent configuration.
 - Open the converter from the VSCode status bar.
 - Pass VSCode language into Core locale for localized Core errors.
+- Choose a separate glyph font in the Converter preview and HTML export.
 
 ## Commands
 
@@ -43,7 +45,11 @@ Common settings:
 - `unicodeArtJs.width`
 - `unicodeArtJs.charset`
 - `unicodeArtJs.customChars`
-- `unicodeArtJs.font`
+- `unicodeArtJs.font` legacy visual font alias
+- `unicodeArtJs.visualFont`
+- `unicodeArtJs.glyphFont`
+- `unicodeArtJs.glyphWidthProfile`
+- `unicodeArtJs.wideCharRegex`
 - `unicodeArtJs.matrixSize`
 - `unicodeArtJs.ratio`
 - `unicodeArtJs.invert`
@@ -68,6 +74,7 @@ The panel supports:
 
 - Text Banner mode.
 - Image mode.
+- Separate visual font and glyph font options.
 - Preview, copy, insert, save TXT, save HTML.
 - Save current options as the recent preset.
 - Basic progress and cancellation UI.

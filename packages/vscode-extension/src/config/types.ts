@@ -8,7 +8,11 @@ export interface ExtensionArtConfig {
   width: number | undefined;
   charset: string;
   customChars: string;
+  visualFont: string;
   font: string;
+  glyphFont: string;
+  glyphWidthProfile: string;
+  wideCharRegex: string;
   matrixSize: number;
   ratio: number;
   invert: boolean;
@@ -18,4 +22,5 @@ export interface ExtensionArtConfig {
   insertMode: InsertMode;
   preset: string;
   locale: ExtensionLocale;
+  outputTarget: 'vscode';
 }

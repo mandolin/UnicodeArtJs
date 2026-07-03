@@ -11,6 +11,13 @@ import { isWebviewMessage, type ExtensionMessage, type SaveFormat } from './prot
 const CHARSETS = ['ASCII', 'EXTENDED', 'CHINESE_SIMPLE', 'CUSTOM'];
 const BOX_STYLES = ['single', 'double', 'round', 'bold', 'classic', 'ascii', 'singleDouble', 'doubleSingle', 'arrow', 'block', 'thick', 'none'];
 const INSERT_MODES = ['replaceSelection', 'beforeSelection', 'afterSelection', 'previousLine', 'nextLine', 'newDocument', 'clipboardOnly'] as const;
+const GLYPH_FONTS = [
+  "Consolas, 'Courier New', monospace",
+  'NSimSun, 新宋体, monospace',
+  "'Sarasa Mono SC', 等距更纱黑体 SC, monospace",
+  "'LXGW WenKai Mono', 霞鹜文楷等宽, monospace",
+  "Menlo, Monaco, 'Courier New', monospace"
+];
 const canceledRequests = new WeakMap<vscode.WebviewPanel, Set<string>>();
 
 export async function handleWebviewMessage(
@@ -35,6 +42,7 @@ export async function handleWebviewMessage(
             charsets: CHARSETS,
             boxStyles: BOX_STYLES,
             insertModes: [...INSERT_MODES],
+            glyphFonts: GLYPH_FONTS,
           },
         },
       });
@@ -143,7 +151,7 @@ export async function handleWebviewMessage(
       break;
     }
     case 'save':
-      await saveContent(message.payload.content, message.payload.format);
+      await saveContent(message.payload.content, message.payload.format, message.payload.glyphFont);
       await post(panel, { type: 'notice', payload: { message: 'Saved file.' } });
       break;
     default:
@@ -159,7 +167,7 @@ async function postError(panel: vscode.WebviewPanel, message: string, code?: str
   await post(panel, { type: 'error', payload: { message, code } });
 }
 
-async function saveContent(content: string, format: SaveFormat): Promise<void> {
+async function saveContent(content: string, format: SaveFormat, glyphFont?: string): Promise<void> {
   const defaultName = format === 'html' ? 'unicode-art.html' : 'unicode-art.txt';
   const uri = await vscode.window.showSaveDialog({
     defaultUri: vscode.Uri.file(defaultName),
@@ -170,23 +178,30 @@ async function saveContent(content: string, format: SaveFormat): Promise<void> {
   if (!uri) return;
 
   const body = format === 'html'
-    ? toHtmlDocument(content)
+    ? toHtmlDocument(content, glyphFont)
     : content;
   await vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(body));
 }
 
-function toHtmlDocument(content: string): string {
+function toHtmlDocument(content: string, glyphFont?: string): string {
+  const safeGlyphFont = sanitizeCssFontFamily(glyphFont || "Consolas, 'Courier New', monospace");
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <title>UnicodeArtJs Output</title>
-  <style>pre { white-space: pre; font-family: monospace; }</style>
+  <style>pre { white-space: pre; font-family: ${safeGlyphFont}; }</style>
 </head>
 <body>
   <pre>${escapeHtml(content)}</pre>
 </body>
 </html>`;
+}
+
+function sanitizeCssFontFamily(value: string): string {
+  // 只保留字体族列表常见字符，避免把 WebView 输入直接写成任意 CSS。
+  const cleaned = value.replace(/[^a-zA-Z0-9\u4e00-\u9fff\s'",._#-]/g, '').trim();
+  return cleaned.length > 0 ? cleaned : "Consolas, 'Courier New', monospace";
 }
 
 function escapeHtml(value: string): string {

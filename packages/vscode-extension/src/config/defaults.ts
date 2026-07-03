@@ -5,7 +5,11 @@ export const DEFAULT_EXTENSION_CONFIG: ExtensionArtConfig = {
   width: undefined,
   charset: 'ASCII',
   customChars: '',
+  visualFont: 'Arial',
   font: 'Arial',
+  glyphFont: "Consolas, 'Courier New', monospace",
+  glyphWidthProfile: 'default',
+  wideCharRegex: '',
   matrixSize: 6,
   ratio: 2,
   invert: false,
@@ -15,4 +19,5 @@ export const DEFAULT_EXTENSION_CONFIG: ExtensionArtConfig = {
   insertMode: 'replaceSelection',
   preset: 'default',
   locale: 'zh-CN',
+  outputTarget: 'vscode',
 };

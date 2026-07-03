@@ -7,6 +7,7 @@ export interface InitialWebviewState {
     charsets: string[];
     boxStyles: string[];
     insertModes: InsertMode[];
+    glyphFonts: string[];
   };
 }
 
@@ -33,7 +34,7 @@ export type WebviewMessage =
   | { type: 'savePreset'; payload: { config: ExtensionArtConfig } }
   | { type: 'copy'; payload: { content: string } }
   | { type: 'insert'; payload: { content: string; mode: InsertMode } }
-  | { type: 'save'; payload: { content: string; format: SaveFormat } };
+  | { type: 'save'; payload: { content: string; format: SaveFormat; glyphFont?: string } };
 
 export type ExtensionMessage =
   | { type: 'readyAck'; payload: InitialWebviewState }

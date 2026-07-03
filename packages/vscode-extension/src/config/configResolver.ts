@@ -17,7 +17,11 @@ export function resolveArtConfig(context?: vscode.ExtensionContext): ExtensionAr
     width: normalizeOptionalNumber(config.get<number | null>('width', null)),
     charset: config.get<string>('charset', DEFAULT_EXTENSION_CONFIG.charset),
     customChars: config.get<string>('customChars', DEFAULT_EXTENSION_CONFIG.customChars),
+    visualFont: config.get<string>('visualFont', config.get<string>('font', DEFAULT_EXTENSION_CONFIG.visualFont)),
     font: config.get<string>('font', DEFAULT_EXTENSION_CONFIG.font),
+    glyphFont: config.get<string>('glyphFont', DEFAULT_EXTENSION_CONFIG.glyphFont),
+    glyphWidthProfile: config.get<string>('glyphWidthProfile', DEFAULT_EXTENSION_CONFIG.glyphWidthProfile),
+    wideCharRegex: config.get<string>('wideCharRegex', DEFAULT_EXTENSION_CONFIG.wideCharRegex),
     matrixSize: config.get<number>('matrixSize', DEFAULT_EXTENSION_CONFIG.matrixSize),
     ratio: config.get<number>('ratio', DEFAULT_EXTENSION_CONFIG.ratio),
     invert: config.get<boolean>('invert', DEFAULT_EXTENSION_CONFIG.invert),
@@ -36,6 +40,7 @@ export function resolveArtConfig(context?: vscode.ExtensionContext): ExtensionAr
     insertMode: config.get<ExtensionArtConfig['insertMode']>('insertMode', DEFAULT_EXTENSION_CONFIG.insertMode),
     preset: config.get<string>('preset', DEFAULT_EXTENSION_CONFIG.preset),
     locale: resolveLocale(),
+    outputTarget: 'vscode',
   };
 
   const recent = context ? loadRecentConfig(context) : undefined;

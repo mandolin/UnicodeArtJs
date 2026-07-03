@@ -14,6 +14,23 @@ export interface CoreAdapter {
   convertImage(imagePath: string, config: ExtensionArtConfig): Promise<ArtResult>;
 }
 
+type CoreUnifiedConfig = Partial<ArtConfig> & {
+  visualFont?: {
+    family?: string;
+    reduce?: number;
+  };
+  glyphFont?: {
+    family?: string;
+    widthProfile?: string;
+    wideCharRegex?: string;
+  };
+  glyphFontFamily?: string;
+  glyphWidthProfile?: string;
+  wideCharRegex?: string;
+  outputTarget?: string;
+  locale?: string;
+};
+
 export function createCoreAdapter(): CoreAdapter {
   return {
     async convertText(text: string, config: ExtensionArtConfig): Promise<ArtResult> {
@@ -26,11 +43,23 @@ export function createCoreAdapter(): CoreAdapter {
 }
 
 function toCoreConfig(config: ExtensionArtConfig): Partial<ArtConfig> {
-  const coreConfig: Partial<ArtConfig> & { locale?: string } = {
+  const coreConfig: CoreUnifiedConfig = {
     height: config.height,
     width: config.width,
     charset: toCoreCharset(config),
-    font: config.font,
+    visualFont: {
+      family: config.visualFont || config.font,
+      reduce: config.fontReduce,
+    },
+    glyphFont: {
+      family: config.glyphFont,
+      widthProfile: config.glyphWidthProfile,
+      wideCharRegex: config.wideCharRegex || undefined,
+    },
+    font: config.visualFont || config.font,
+    glyphFontFamily: config.glyphFont,
+    glyphWidthProfile: config.glyphWidthProfile,
+    wideCharRegex: config.wideCharRegex || undefined,
     matrixSize: config.matrixSize,
     ratio: config.ratio,
     invert: config.invert,
@@ -38,6 +67,7 @@ function toCoreConfig(config: ExtensionArtConfig): Partial<ArtConfig> {
     trimTrailingSpaces: config.trimTrailingSpaces,
     box: config.box,
     outputFormat: OutputFormat.PLAIN_TEXT,
+    outputTarget: config.outputTarget,
     enableEarlyTermination: true,
     locale: config.locale,
   };

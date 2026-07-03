@@ -19,7 +19,12 @@ function sanitizeConfig(config: ExtensionArtConfig): ExtensionArtConfig {
     ...config,
     width: typeof config.width === 'number' ? config.width : undefined,
     customChars: config.customChars ?? '',
+    visualFont: config.visualFont || config.font || 'Arial',
     font: config.font || 'Arial',
+    glyphFont: config.glyphFont || "Consolas, 'Courier New', monospace",
+    glyphWidthProfile: config.glyphWidthProfile || 'default',
+    wideCharRegex: config.wideCharRegex || '',
+    outputTarget: 'vscode',
     preset: config.preset || 'default',
   };
 }

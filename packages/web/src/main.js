@@ -40,6 +40,8 @@ const AppState = {
     customChars: '',
     font: 'Arial',
     glyphFont: "Consolas, 'Courier New', monospace",
+    glyphWidthProfile: 'default',
+    wideCharRegex: '',
     matrixSize: 6,
     ratio: 2.0,
     interpolation: 'bicubic',
@@ -270,6 +272,18 @@ class ArtGenerator {
         ? { type: 'CUSTOM', customChars: cfg.customChars || ' .:-=+*#%@' }
         : { type: charsetType },
       font: cfg.font,
+      visualFont: {
+        family: cfg.font,
+        reduce: parseInt(cfg.fontReduce) || 0,
+      },
+      glyphFont: {
+        family: cfg.glyphFont,
+        widthProfile: cfg.glyphWidthProfile || 'default',
+        wideCharRegex: cfg.wideCharRegex || undefined,
+      },
+      glyphFontFamily: cfg.glyphFont,
+      glyphWidthProfile: cfg.glyphWidthProfile || 'default',
+      wideCharRegex: cfg.wideCharRegex || undefined,
       matrixSize: parseInt(cfg.matrixSize) || 6,
       ratio: parseFloat(cfg.ratio) || 2.0,
       interpolation: cfg.interpolation,
@@ -281,6 +295,7 @@ class ArtGenerator {
       charSpace: parseInt(cfg.charSpace) || 1,
       locale: cfg.locale || detectCoreLocale(),
       outputFormat: 'plain', // 预览统一用plain，导出时再切换
+      outputTarget: 'web',
       box: cfg.boxEnabled
         ? {
             enabled: true,

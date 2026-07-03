@@ -108,10 +108,32 @@ Important options:
 - `matrixSize`: sample matrix size, default `6`.
 - `ratio`: vertical/horizontal ratio, default `2.0`.
 - `charset`: `PresetCharset.ASCII`, `EXTENDED`, `CHINESE_SIMPLE`, or `CUSTOM`.
+- `visualFont`: input text rendering font, replacing the old `font` / `fontStyle` / `fontReduce` naming in new integrations.
+- `glyphFont`: output glyph display font contract, including `family`, `widthProfile`, and `wideCharRegex`.
 - `outputFormat`: `OutputFormat.PLAIN_TEXT`, `HTML`, or `ANSI`.
+- `outputTarget`: host target such as `plain`, `terminal`, `web`, `vscode`, `electron`, `html`, or `ansi`.
 - `invert`: invert grayscale values before matching.
 - `wideCharRatio`: controls when wide characters win over normal characters.
 - `locale`: Core message locale, currently `zh-CN` or `en-US`. This affects errors and hints only; conversion output is unchanged.
+
+`font`, `fontStyle`, `fontReduce`, `glyphFontFamily`, `glyphWidthProfile`, and `wideCharRegex` remain supported as compatibility aliases. New host integrations should prefer the grouped shape:
+
+```typescript
+await textToArt('UnicodeArtJs', {
+  height: 20,
+  visualFont: {
+    family: 'SimSun',
+    reduce: 0
+  },
+  glyphFont: {
+    family: 'NSimSun',
+    widthProfile: 'default',
+    wideCharRegex: undefined
+  },
+  outputTarget: 'web',
+  locale: 'zh-CN'
+});
+```
 
 ## Core i18n
 

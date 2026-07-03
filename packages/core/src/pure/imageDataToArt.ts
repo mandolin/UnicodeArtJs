@@ -16,7 +16,7 @@
 import type { CharMatrix } from '../types/charset';
 import { PresetCharset } from '../types/charset';
 import type { ArtConfig } from '../types/config';
-import { HeightMode, Interpolation, TextAlign } from '../types/config';
+import { HeightMode, Interpolation, TextAlign, normalizeArtConfigAliases } from '../types/config';
 import type { CoreImageData } from '../types/image';
 import type { ArtResult } from '../types/output';
 import { ErrorCode, OutputFormat, UnicodeArtError } from '../types/output';
@@ -163,47 +163,55 @@ function validateCharDataMap(charDataMap: Map<string, CharMatrix>): void {
 }
 
 function validatePureConfig(config: Partial<ArtConfig>): ArtConfig {
+  const normalizedConfig = normalizeArtConfigAliases(config);
   const fullConfig: ArtConfig = {
-    matrixSize: config.matrixSize || 6,
-    ratio: config.ratio || 2.0,
-    interpolation: config.interpolation || Interpolation.BILINEAR,
-    charset: config.charset || { type: PresetCharset.ASCII },
-    font: config.font,
-    fontStyle: config.fontStyle,
-    fontReduce: config.fontReduce !== undefined ? config.fontReduce : 0,
-    charSpace: config.charSpace !== undefined ? config.charSpace : 1,
-    textAlign: config.textAlign || TextAlign.LEFT,
-    lineSpacing: config.lineSpacing !== undefined ? config.lineSpacing : 0,
-    heightMode: config.heightMode || HeightMode.LINE,
-    outputFormat: config.outputFormat || OutputFormat.PLAIN_TEXT,
-    invert: config.invert !== undefined ? config.invert : false,
-    trimTrailingSpaces: config.trimTrailingSpaces !== undefined ? config.trimTrailingSpaces : false,
-    box: config.box !== undefined ? config.box : false,
-    wideCharRatio: config.wideCharRatio !== undefined ? config.wideCharRatio : 2.0,
-    enableEarlyTermination: config.enableEarlyTermination !== undefined ? config.enableEarlyTermination : true,
-    maxParallelTasks: config.maxParallelTasks !== undefined ? config.maxParallelTasks : 0
+    matrixSize: normalizedConfig.matrixSize || 6,
+    ratio: normalizedConfig.ratio || 2.0,
+    interpolation: normalizedConfig.interpolation || Interpolation.BILINEAR,
+    charset: normalizedConfig.charset || { type: PresetCharset.ASCII },
+    visualFont: normalizedConfig.visualFont,
+    glyphFont: normalizedConfig.glyphFont,
+    font: normalizedConfig.font,
+    fontStyle: normalizedConfig.fontStyle,
+    fontReduce: normalizedConfig.fontReduce !== undefined ? normalizedConfig.fontReduce : 0,
+    glyphFontFamily: normalizedConfig.glyphFontFamily,
+    glyphWidthProfile: normalizedConfig.glyphWidthProfile,
+    wideCharRegex: normalizedConfig.wideCharRegex,
+    charSpace: normalizedConfig.charSpace !== undefined ? normalizedConfig.charSpace : 1,
+    textAlign: normalizedConfig.textAlign || TextAlign.LEFT,
+    lineSpacing: normalizedConfig.lineSpacing !== undefined ? normalizedConfig.lineSpacing : 0,
+    heightMode: normalizedConfig.heightMode || HeightMode.LINE,
+    outputFormat: normalizedConfig.outputFormat || OutputFormat.PLAIN_TEXT,
+    outputTarget: normalizedConfig.outputTarget,
+    invert: normalizedConfig.invert !== undefined ? normalizedConfig.invert : false,
+    trimTrailingSpaces: normalizedConfig.trimTrailingSpaces !== undefined ? normalizedConfig.trimTrailingSpaces : false,
+    box: normalizedConfig.box !== undefined ? normalizedConfig.box : false,
+    wideCharRatio: normalizedConfig.wideCharRatio !== undefined ? normalizedConfig.wideCharRatio : 2.0,
+    enableEarlyTermination: normalizedConfig.enableEarlyTermination !== undefined ? normalizedConfig.enableEarlyTermination : true,
+    maxParallelTasks: normalizedConfig.maxParallelTasks !== undefined ? normalizedConfig.maxParallelTasks : 0,
+    locale: normalizedConfig.locale
   };
 
-  if (config.height !== undefined) {
-    if (!Number.isFinite(config.height) || config.height <= 0) {
+  if (normalizedConfig.height !== undefined) {
+    if (!Number.isFinite(normalizedConfig.height) || normalizedConfig.height <= 0) {
       throw new UnicodeArtError(
         'height must be greater than 0',
         ErrorCode.INVALID_CONFIG,
-        { height: config.height }
+        { height: normalizedConfig.height }
       );
     }
-    fullConfig.height = config.height;
+    fullConfig.height = normalizedConfig.height;
   }
 
-  if (config.width !== undefined) {
-    if (!Number.isFinite(config.width) || config.width <= 0) {
+  if (normalizedConfig.width !== undefined) {
+    if (!Number.isFinite(normalizedConfig.width) || normalizedConfig.width <= 0) {
       throw new UnicodeArtError(
         'width must be greater than 0',
         ErrorCode.INVALID_CONFIG,
-        { width: config.width }
+        { width: normalizedConfig.width }
       );
     }
-    fullConfig.width = config.width;
+    fullConfig.width = normalizedConfig.width;
   }
 
   if (!fullConfig.height && !fullConfig.width) {
