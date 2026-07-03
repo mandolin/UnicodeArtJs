@@ -1,0 +1,70 @@
+{
+    "extensions.ignoreRecommendations": false,
+    "typescript.tsdk": "packages/core/node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        }
+    ],
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ],
+    "jest.enable": true,
+    "jest.rootPath": "packages/core",
+    "jest.jestCommandLine": "npm test -- --runInBand",
+    "playwright.reuseBrowser": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "i18n-ally.enabledFrameworks": [
+        "general"
+    ],
+    "i18n-ally.localesPaths": [
+        "packages/cli/locales",
+        "packages/core/src/i18n/locales",
+        "packages/web/src/locales",
+        "packages/vscode-extension/locales"
+    ],
+    "todo-tree.general.tags": [
+        "TODO",
+        "FIXME",
+        "HACK",
+        "NOTE",
+        "P0",
+        "P1",
+        "P2"
+    ],
+    "workbench.colorCustomizations": {
+        "titleBar.activeForeground": "#FFFFFF",
+        "titleBar.activeBackground": "#A600CC",
+        "titleBar.inactiveForeground": "#FFFFFF",
+        "titleBar.inactiveBackground": "#A400CA",
+        "activityBar.foreground": "#FFFFFF",
+        "activityBar.background": "#005EA4",
+        "activityBar.inactiveForeground": "#00B1BB",
+        "activityBarBadge.foreground": "#4A23FF",
+        "activityBarBadge.background": "#FFFFFF",
+        "statusBar.foreground": "#FFFFFF",
+        "statusBar.background": "#A600CC",
+        "statusBarItem.hoverBackground": "#D248B3",
+        "statusBarItem.remoteForeground": "#FFFFFF",
+        "statusBarItem.remoteBackground": "#D0005A",
+        "statusBar.debuggingForeground": "#FFFFFF",
+        "statusBar.debuggingBackground": "#A600CC"
+    }
+}

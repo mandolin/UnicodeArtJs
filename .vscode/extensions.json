@@ -1,0 +1,25 @@
+{
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "editorconfig.editorconfig",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml",
+        "davidanson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "lokalise.i18n-ally",
+        "ms-playwright.playwright",
+        "orta.vscode-jest",
+        "ms-vscode.extension-test-runner",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "usernamehw.errorlens",
+        "gruntfuggly.todo-tree",
+        "maptz.regionfolder",
+        "dalysoftware.unicodepalette",
+        "brunnerh.insert-unicode",
+        "adpyke.js-unicode-preview",
+        "tomashubelbauer.vscode-box-drawing",
+        "canna.figlet"
+    ]
+}

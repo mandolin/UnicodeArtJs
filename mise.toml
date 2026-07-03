@@ -1,0 +1,4 @@
+[tools]
+node = "22"
+"npm:prettier" = "3.7.4"
+pnpm = "10.27.0"

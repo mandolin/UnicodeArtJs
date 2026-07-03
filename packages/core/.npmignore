@@ -1,0 +1,11 @@
+src/
+tests/
+node_modules/
+coverage/
+*.log
+jest.config.js
+rollup.config.mjs
+tsconfig.json
+.eslintrc.cjs
+.prettierrc
+*.tsbuildinfo

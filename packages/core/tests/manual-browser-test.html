@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>UnicodeArtJs Browser 中文测试</title>
+  <style>
+    body {
+      margin: 20px;
+      font-family: system-ui, sans-serif;
+      background: #f5f5f2;
+      color: #1f2328;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    select,
+    button {
+      font-size: 14px;
+      padding: 4px 8px;
+    }
+
+    #render {
+      font-family: "NSimSun", "新宋体", monospace;
+      font-size: 14px;
+      line-height: 1;
+      letter-spacing: 0;
+      white-space: pre;
+      tab-size: 4;
+      font-variant-ligatures: none;
+      font-feature-settings: "liga" 0, "clig" 0;
+      background: #ffffff;
+      border: 1px solid #d0d7de;
+      padding: 16px;
+      overflow: auto;
+      min-height: 360px;
+    }
+
+    #meta {
+      margin-top: 12px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>UnicodeArtJs Browser 中文测试</h1>
+
+  <div class="toolbar">
+    <label>
+      字素字体:
+      <select id="font">
+        <option value="NSimSun, 新宋体">新宋体</option>
+        <option value="Sarasa Mono SC, 等距更纱黑体 SC">等距更纱黑体 SC</option>
+        <option value="LXGW WenKai Mono, 霞鹜文楷等宽, 霞鹜文楷">霞鹜文楷</option>
+      </select>
+    </label>
+
+    <button id="run">重新生成</button>
+  </div>
+
+  <div id="render">running...</div>
+  <div id="meta"></div>
+
+  <script type="module">
+    import {
+      textToArt,
+      OutputFormat,
+      PresetCharset,
+      getBrowserAdapterCacheStats,
+      getBrowserRuntimeCapabilities,
+      clearBrowserAdapterCache
+    } from '../dist/browser.esm.js';
+
+    const render = document.querySelector('#render');
+    const meta = document.querySelector('#meta');
+    const fontSelect = document.querySelector('#font');
+    const runButton = document.querySelector('#run');
+
+    async function run() {
+      const selectedFont = fontSelect.value;
+      const displayFont = selectedFont
+        .split(',')
+        .map(name => `"${name.trim()}"`)
+        .join(', ') + ', monospace';
+
+      render.style.fontFamily = displayFont;
+      render.textContent = 'running...';
+      meta.textContent = '';
+
+      clearBrowserAdapterCache();
+
+      const logs = [];
+
+      const result = await textToArt('中文测试', {
+        height: 20,
+        matrixSize: 6,
+        font: selectedFont.split(',')[0].trim(),
+        //font: 'NSimSun',
+        fontStyle: 'normal',
+        outputFormat: OutputFormat.PLAIN_TEXT,
+        charset: {
+          type: PresetCharset.CUSTOM,
+          customChars: ' .:-=+*#%@!@#$%^&*()'
+        }
+      }, {
+        maxInputPixels: 16_000_000,
+        maxOutputCells: 300_000,
+        progress: event => {
+          logs.push(`${event.stage}: ${event.progress}`);
+        }
+      });
+
+      render.textContent = result.content;
+
+      meta.textContent =
+        'rows: ' + result.rows +
+        '\ncols: ' + result.cols +
+        '\n\nprogress:\n' + logs.join('\n') +
+        '\n\ncapabilities:\n' + JSON.stringify(getBrowserRuntimeCapabilities(), null, 2) +
+        '\n\ncache:\n' + JSON.stringify(getBrowserAdapterCacheStats(), null, 2);
+    }
+
+    runButton.addEventListener('click', run);
+    fontSelect.addEventListener('change', run);
+
+    run().catch(error => {
+      render.textContent = String(error?.stack || error);
+    });
+  </script>
+</body>
+</html>
