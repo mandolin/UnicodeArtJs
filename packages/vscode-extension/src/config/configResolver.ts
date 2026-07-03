@@ -2,10 +2,18 @@ import * as vscode from 'vscode';
 import type { BoxOptions } from 'unicode-art-js';
 import { mergeExtensionConfig } from './configMerge';
 import { DEFAULT_EXTENSION_CONFIG } from './defaults';
-import { loadRecentConfig } from './presetStore';
+import { loadDefaultTemplate, loadRecentConfig } from './presetStore';
 import type { ExtensionArtConfig } from './types';
 
-export function resolveArtConfig(context?: vscode.ExtensionContext): ExtensionArtConfig {
+export interface ResolveArtConfigOptions {
+  includeRecent?: boolean;
+}
+
+export function resolveArtConfig(
+  context?: vscode.ExtensionContext,
+  options: ResolveArtConfigOptions = {}
+): ExtensionArtConfig {
+  const includeRecent = options.includeRecent ?? true;
   const config = vscode.workspace.getConfiguration('unicodeArtJs');
   const boxEnabled = config.get<boolean>('box.enabled', false);
   const boxTitle = config.get<string>('box.title', '');
@@ -43,12 +51,14 @@ export function resolveArtConfig(context?: vscode.ExtensionContext): ExtensionAr
     outputTarget: 'vscode',
   };
 
-  const recent = context ? loadRecentConfig(context) : undefined;
+  const defaultTemplate = context ? loadDefaultTemplate(context) : undefined;
+  const baseWithTemplate = mergeExtensionConfig(fromSettings, defaultTemplate);
+  const recent = context && includeRecent ? loadRecentConfig(context) : undefined;
   if (!recent) {
-    return fromSettings;
+    return baseWithTemplate;
   }
 
-  return mergeExtensionConfig(fromSettings, recent);
+  return mergeExtensionConfig(baseWithTemplate, recent);
 }
 
 function normalizeOptionalNumber(value: number | null | undefined): number | undefined {

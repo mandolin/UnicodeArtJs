@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { resolveArtConfig } from '../config/configResolver';
-import { saveRecentConfig } from '../config/presetStore';
+import { loadTemplateSlot, saveRecentConfig } from '../config/presetStore';
+import type { ExtensionArtConfig } from '../config/types';
 import { createCoreAdapter } from '../core/coreAdapter';
 import { InsertMode, writeResult } from '../output/resultWriter';
 import type { ExtensionLogger } from '../utils/logger';
@@ -9,6 +10,44 @@ export async function convertSelection(
   context: vscode.ExtensionContext,
   logger: ExtensionLogger
 ): Promise<void> {
+  await convertSelectedText(context, logger, resolveArtConfig(context), 'selection');
+}
+
+export async function generateWithDefaultTemplate(
+  context: vscode.ExtensionContext,
+  logger: ExtensionLogger
+): Promise<void> {
+  const config = resolveArtConfig(context, { includeRecent: false });
+  await convertSelectedText(context, logger, config, 'default template', false);
+}
+
+export async function generateWithTemplateSlot(
+  context: vscode.ExtensionContext,
+  logger: ExtensionLogger,
+  slot: number
+): Promise<void> {
+  const config = loadTemplateSlot(context, slot);
+  if (!config) {
+    const action = await vscode.window.showInformationMessage(
+      `UnicodeArtJs Template ${slot} is not configured yet.`,
+      'Open Converter'
+    );
+    if (action === 'Open Converter') {
+      await vscode.commands.executeCommand('unicodeArtJs.openConverter');
+    }
+    return;
+  }
+
+  await convertSelectedText(context, logger, config, `template ${slot}`);
+}
+
+async function convertSelectedText(
+  context: vscode.ExtensionContext,
+  logger: ExtensionLogger,
+  config: ExtensionArtConfig,
+  flowLabel: string,
+  saveRecent = true
+): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.selection.isEmpty) {
     await vscode.window.showInformationMessage('Please select text before generating Unicode art.');
@@ -16,8 +55,9 @@ export async function convertSelection(
   }
 
   const selectedText = editor.document.getText(editor.selection);
-  const config = resolveArtConfig(context);
-  logger.info(`Selection conversion requested. chars=${selectedText.length}, preset=${config.preset}`);
+  logger.info(
+    `Selection conversion requested. flow=${flowLabel}, chars=${selectedText.length}, preset=${config.preset}`
+  );
 
   try {
     await vscode.window.withProgress(
@@ -29,7 +69,9 @@ export async function convertSelection(
       async () => {
         const result = await createCoreAdapter().convertText(selectedText, config);
         await writeResult(editor, result.content, config.insertMode);
-        await saveRecentConfig(context, config);
+        if (saveRecent) {
+          await saveRecentConfig(context, config);
+        }
         logger.info(`Selection conversion completed. rows=${result.rows}, cols=${result.cols}, duration=${result.duration}ms`);
       }
     );

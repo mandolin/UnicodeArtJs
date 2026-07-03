@@ -1,23 +1,29 @@
 import * as vscode from 'vscode';
 import { mergeExtensionConfig } from '../config/configMerge';
 import { resolveArtConfig } from '../config/configResolver';
-import { saveRecentConfig } from '../config/presetStore';
+import {
+  getTemplateSlotSummaries,
+  loadDefaultTemplate,
+  saveDefaultTemplate,
+  saveRecentConfig,
+  saveTemplateSlot,
+} from '../config/presetStore';
+import { GLYPH_FONT_OPTIONS, VISUAL_FONT_OPTIONS } from '../config/fontOptions';
 import type { ExtensionArtConfig } from '../config/types';
 import { createCoreAdapter } from '../core/coreAdapter';
 import { writeResult } from '../output/resultWriter';
 import type { ExtensionLogger } from '../utils/logger';
-import { isWebviewMessage, type ExtensionMessage, type SaveFormat } from './protocol';
+import {
+  isWebviewMessage,
+  type ExtensionMessage,
+  type InitialWebviewState,
+  type SaveFormat,
+  type WebviewMessage,
+} from './protocol';
 
 const CHARSETS = ['ASCII', 'EXTENDED', 'CHINESE_SIMPLE', 'CUSTOM'];
 const BOX_STYLES = ['single', 'double', 'round', 'bold', 'classic', 'ascii', 'singleDouble', 'doubleSingle', 'arrow', 'block', 'thick', 'none'];
 const INSERT_MODES = ['replaceSelection', 'beforeSelection', 'afterSelection', 'previousLine', 'nextLine', 'newDocument', 'clipboardOnly'] as const;
-const GLYPH_FONTS = [
-  "Consolas, 'Courier New', monospace",
-  'NSimSun, 新宋体, monospace',
-  "'Sarasa Mono SC', 等距更纱黑体 SC, monospace",
-  "'LXGW WenKai Mono', 霞鹜文楷等宽, monospace",
-  "Menlo, Monaco, 'Courier New', monospace"
-];
 const canceledRequests = new WeakMap<vscode.WebviewPanel, Set<string>>();
 
 export async function handleWebviewMessage(
@@ -38,11 +44,13 @@ export async function handleWebviewMessage(
         type: 'readyAck',
         payload: {
           config: resolveArtConfig(context),
+          templates: getTemplateState(context),
           options: {
             charsets: CHARSETS,
             boxStyles: BOX_STYLES,
             insertModes: [...INSERT_MODES],
-            glyphFonts: GLYPH_FONTS,
+            visualFonts: VISUAL_FONT_OPTIONS,
+            glyphFonts: GLYPH_FONT_OPTIONS,
           },
         },
       });
@@ -132,9 +140,12 @@ export async function handleWebviewMessage(
       await post(panel, { type: 'notice', payload: { message: 'Canceling conversion...' } });
       break;
     case 'savePreset':
-      await saveRecentConfig(context, message.payload.config);
-      logger.info(`WebView preset saved. preset=${message.payload.config.preset}`);
-      await post(panel, { type: 'notice', payload: { message: `Saved preset: ${message.payload.config.preset}` } });
+      await savePresetTarget(context, message.payload);
+      logger.info(
+        `WebView preset saved. target=${message.payload.target ?? 'recent'}, preset=${message.payload.config.preset}`
+      );
+      await post(panel, { type: 'templateState', payload: getTemplateState(context) });
+      await post(panel, { type: 'notice', payload: { message: getPresetSavedMessage(message.payload) } });
       break;
     case 'copy':
       await vscode.env.clipboard.writeText(message.payload.content);
@@ -157,6 +168,38 @@ export async function handleWebviewMessage(
     default:
       await postError(panel, 'Unsupported WebView message.', 'unsupportedMessage');
   }
+}
+
+function getTemplateState(context: vscode.ExtensionContext): InitialWebviewState['templates'] {
+  return {
+    defaultConfigured: Boolean(loadDefaultTemplate(context)),
+    slots: getTemplateSlotSummaries(context),
+  };
+}
+
+async function savePresetTarget(
+  context: vscode.ExtensionContext,
+  payload: Extract<WebviewMessage, { type: 'savePreset' }>['payload']
+): Promise<void> {
+  if (payload.target === 'default') {
+    await saveDefaultTemplate(context, payload.config);
+    return;
+  }
+
+  if (payload.target === 'slot') {
+    await saveTemplateSlot(context, payload.slot ?? 1, payload.config);
+    return;
+  }
+
+  await saveRecentConfig(context, payload.config);
+}
+
+function getPresetSavedMessage(
+  payload: Extract<WebviewMessage, { type: 'savePreset' }>['payload']
+): string {
+  if (payload.target === 'default') return 'Saved default template.';
+  if (payload.target === 'slot') return `Saved Template ${payload.slot ?? 1}.`;
+  return `Saved recent preset: ${payload.config.preset}`;
 }
 
 async function post(panel: vscode.WebviewPanel, message: ExtensionMessage): Promise<void> {

@@ -27,7 +27,9 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
         <button id="cancelConvert" type="button" disabled>Cancel</button>
         <button id="copyResult" type="button">Copy</button>
         <button id="insertResult" type="button">Insert</button>
-        <button id="savePreset" type="button">Save Preset</button>
+        <button id="saveDefaultTemplate" type="button">Save Default Template</button>
+        <select id="templateSlot" title="Template slot"></select>
+        <button id="saveTemplateSlot" type="button">Save Template</button>
       </div>
     </header>
 
@@ -75,7 +77,8 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
 
         <div class="field">
           <label for="font">Visual Font</label>
-          <input id="font" type="text">
+          <input id="font" type="text" list="visualFontOptions">
+          <datalist id="visualFontOptions"></datalist>
         </div>
 
         <div class="field">
@@ -151,6 +154,7 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
           <div>
             <span id="statusText">Initializing...</span>
             <span id="resultMeta" class="meta"></span>
+            <span id="templateStatus" class="meta"></span>
           </div>
           <progress id="progress" max="1" value="0"></progress>
         </div>

@@ -26,6 +26,8 @@ test('isWebviewMessage accepts image, cancel, save, and insert messages', () => 
   assert.equal(isWebviewMessage({ type: 'save', payload: { content: 'abc', format: 'txt' } }), true);
   assert.equal(isWebviewMessage({ type: 'save', payload: { content: 'abc', format: 'html', glyphFont: 'NSimSun' } }), true);
   assert.equal(isWebviewMessage({ type: 'insert', payload: { content: 'abc', mode: 'newDocument' } }), true);
+  assert.equal(isWebviewMessage({ type: 'savePreset', payload: { config: {}, target: 'default' } }), true);
+  assert.equal(isWebviewMessage({ type: 'savePreset', payload: { config: {}, target: 'slot', slot: 2 } }), true);
 });
 
 test('isWebviewMessage rejects malformed messages', () => {

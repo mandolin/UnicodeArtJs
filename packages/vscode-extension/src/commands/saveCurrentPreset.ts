@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { resolveArtConfig } from '../config/configResolver';
-import { saveRecentConfig } from '../config/presetStore';
+import { saveDefaultTemplate, saveTemplateSlot, TEMPLATE_SLOT_COUNT } from '../config/presetStore';
 import type { ExtensionLogger } from '../utils/logger';
 
 export async function saveCurrentPreset(
@@ -8,16 +8,34 @@ export async function saveCurrentPreset(
   logger: ExtensionLogger
 ): Promise<void> {
   const config = resolveArtConfig(context);
-  const preset = await vscode.window.showInputBox({
-    title: 'UnicodeArtJs Preset Name',
-    prompt: 'Name this preset for the current session.',
-    value: config.preset || 'default',
-    validateInput: (value) => value.trim().length === 0 ? 'Preset name cannot be empty.' : undefined,
+  const target = await vscode.window.showQuickPick([
+    {
+      label: 'Default Template',
+      description: 'Used by the editor context menu default template command.',
+      slot: 0,
+    },
+    ...Array.from({ length: TEMPLATE_SLOT_COUNT }, (_, index) => {
+      const slot = index + 1;
+      return {
+        label: `Template ${slot}`,
+        description: `Used by the editor context menu Template ${slot} command.`,
+        slot,
+      };
+    }),
+  ], {
+    title: 'UnicodeArtJs Save Template',
+    placeHolder: 'Choose where to save the current configuration.',
   });
-  if (!preset) return;
+  if (!target) return;
 
-  const presetName = preset.trim();
-  await saveRecentConfig(context, { ...config, preset: presetName });
-  logger.info(`Saved current preset. preset=${presetName}`);
-  await vscode.window.showInformationMessage(`UnicodeArtJs preset saved: ${presetName}`);
+  if (target.slot === 0) {
+    await saveDefaultTemplate(context, config);
+    logger.info('Saved current default template.');
+    await vscode.window.showInformationMessage('UnicodeArtJs default template saved.');
+    return;
+  }
+
+  await saveTemplateSlot(context, target.slot, { ...config, preset: `template-${target.slot}` });
+  logger.info(`Saved current template slot. slot=${target.slot}`);
+  await vscode.window.showInformationMessage(`UnicodeArtJs Template ${target.slot} saved.`);
 }

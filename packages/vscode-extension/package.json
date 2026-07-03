@@ -35,6 +35,10 @@
     "onCommand:unicodeArtJs.openConverter",
     "onCommand:unicodeArtJs.convertSelection",
     "onCommand:unicodeArtJs.convertSelectionWithOptions",
+    "onCommand:unicodeArtJs.generateWithDefaultTemplate",
+    "onCommand:unicodeArtJs.generateWithTemplate1",
+    "onCommand:unicodeArtJs.generateWithTemplate2",
+    "onCommand:unicodeArtJs.generateWithTemplate3",
     "onCommand:unicodeArtJs.convertImageFile",
     "onCommand:unicodeArtJs.openSettings",
     "onCommand:unicodeArtJs.saveCurrentPreset"
@@ -55,6 +59,26 @@
       {
         "command": "unicodeArtJs.convertSelectionWithOptions",
         "title": "UnicodeArtJs: Generate Unicode Art With Options",
+        "category": "UnicodeArtJs"
+      },
+      {
+        "command": "unicodeArtJs.generateWithDefaultTemplate",
+        "title": "UnicodeArtJs: Generate Unicode Art: Default Template",
+        "category": "UnicodeArtJs"
+      },
+      {
+        "command": "unicodeArtJs.generateWithTemplate1",
+        "title": "Template 1",
+        "category": "UnicodeArtJs"
+      },
+      {
+        "command": "unicodeArtJs.generateWithTemplate2",
+        "title": "Template 2",
+        "category": "UnicodeArtJs"
+      },
+      {
+        "command": "unicodeArtJs.generateWithTemplate3",
+        "title": "Template 3",
         "category": "UnicodeArtJs"
       },
       {
@@ -234,17 +258,45 @@
         }
       }
     },
+    "submenus": [
+      {
+        "id": "unicodeArtJs.customTemplates",
+        "label": "UnicodeArtJs: Generate Unicode Art: Custom Template"
+      }
+    ],
     "menus": {
       "editor/context": [
         {
-          "command": "unicodeArtJs.convertSelection",
+          "command": "unicodeArtJs.generateWithDefaultTemplate",
           "when": "editorHasSelection",
-          "group": "navigation@50"
+          "group": "unicodeArtJs@1"
         },
         {
-          "command": "unicodeArtJs.convertSelectionWithOptions",
+          "submenu": "unicodeArtJs.customTemplates",
           "when": "editorHasSelection",
-          "group": "navigation@51"
+          "group": "unicodeArtJs@2"
+        },
+        {
+          "command": "unicodeArtJs.openConverter",
+          "when": "editorHasSelection",
+          "group": "unicodeArtJs@3"
+        }
+      ],
+      "unicodeArtJs.customTemplates": [
+        {
+          "command": "unicodeArtJs.generateWithTemplate1",
+          "when": "editorHasSelection",
+          "group": "1_templateSlots@1"
+        },
+        {
+          "command": "unicodeArtJs.generateWithTemplate2",
+          "when": "editorHasSelection",
+          "group": "1_templateSlots@2"
+        },
+        {
+          "command": "unicodeArtJs.generateWithTemplate3",
+          "when": "editorHasSelection",
+          "group": "1_templateSlots@3"
         }
       ],
       "explorer/context": [
@@ -259,7 +311,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "node --test tests/unit/config-merge.test.cjs tests/unit/manifest.test.cjs tests/unit/protocol.test.cjs",
+    "test": "node --test tests/unit/config-merge.test.cjs tests/unit/font-options.test.cjs tests/unit/manifest.test.cjs tests/unit/protocol.test.cjs",
     "check:webview": "node --check media/main.js",
     "package": "vsce package --pre-release",
     "package:release": "vsce package",

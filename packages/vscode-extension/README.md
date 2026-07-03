@@ -15,6 +15,7 @@ This extension is built on the MIT-licensed `unicode-art-js` core package. Unico
 - Insert output into the active editor, open a new document, or copy to clipboard.
 - Save generated output as `.txt` or `.html`.
 - Remember the most recent configuration.
+- Save a default template and three custom template slots for editor context menu generation.
 - Open the converter from the VSCode status bar.
 - Pass VSCode language into Core locale for localized Core errors.
 - Choose a separate glyph font in the Converter preview and HTML export.
@@ -32,7 +33,10 @@ Use the Command Palette:
 
 Context menus:
 
-- Select text in an editor, then right-click to generate Unicode art.
+- Select text in an editor, then right-click to use:
+  - `UnicodeArtJs: Generate Unicode Art: Default Template`
+  - `UnicodeArtJs: Generate Unicode Art: Custom Template > Template 1 / 2 / 3`
+  - `UnicodeArtJs: Open Converter`
 - Right-click a `png`, `jpg`, `jpeg`, `webp`, `gif`, or `bmp` file in Explorer to convert it.
 
 ## Settings
@@ -57,6 +61,12 @@ Common settings:
 - `unicodeArtJs.trimTrailingSpaces`
 - `unicodeArtJs.insertMode`
 
+Visual font notes:
+
+- `Visual Font` controls how input text is rasterized before conversion.
+- Localized Chinese names such as `黑体`, `宋体`, `新宋体`, and `微软雅黑` are normalized to Node canvas friendly names such as `SimHei`, `SimSun`, `NSimSun`, and `Microsoft YaHei`.
+- `Glyph Font` only controls how the generated art is displayed in preview/export. It does not change the source text rasterization.
+
 Box settings:
 
 - `unicodeArtJs.box.enabled`
@@ -76,7 +86,7 @@ The panel supports:
 - Image mode.
 - Separate visual font and glyph font options.
 - Preview, copy, insert, save TXT, save HTML.
-- Save current options as the recent preset.
+- Save current options as the default template or Template 1 / 2 / 3.
 - Basic progress and cancellation UI.
 
 Cancellation currently prevents canceled requests from updating the preview. Core-level hard cancellation will require future `AbortSignal` support in `unicode-art-js`.

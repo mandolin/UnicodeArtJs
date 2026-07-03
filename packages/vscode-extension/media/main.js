@@ -8,6 +8,7 @@
     imageSize: 0,
     activeRequestId: '',
     isBusy: false,
+    templates: { defaultConfigured: false, slots: [] },
   };
 
   const elements = {
@@ -22,6 +23,7 @@
     customCharsWrap: document.getElementById('customCharsWrap'),
     customChars: document.getElementById('customChars'),
     font: document.getElementById('font'),
+    visualFontOptions: document.getElementById('visualFontOptions'),
     glyphFont: document.getElementById('glyphFont'),
     glyphFontOptions: document.getElementById('glyphFontOptions'),
     matrixSize: document.getElementById('matrixSize'),
@@ -40,12 +42,15 @@
     cancelConvert: document.getElementById('cancelConvert'),
     copyResult: document.getElementById('copyResult'),
     insertResult: document.getElementById('insertResult'),
-    savePreset: document.getElementById('savePreset'),
+    saveDefaultTemplate: document.getElementById('saveDefaultTemplate'),
+    templateSlot: document.getElementById('templateSlot'),
+    saveTemplateSlot: document.getElementById('saveTemplateSlot'),
     saveTxt: document.getElementById('saveTxt'),
     saveHtml: document.getElementById('saveHtml'),
     output: document.getElementById('output'),
     statusText: document.getElementById('statusText'),
     resultMeta: document.getElementById('resultMeta'),
+    templateStatus: document.getElementById('templateStatus'),
     progress: document.getElementById('progress'),
   };
 
@@ -66,7 +71,9 @@
     elements.insertResult.disabled = isBusy || state.currentResult.length === 0;
     elements.saveTxt.disabled = isBusy || state.currentResult.length === 0;
     elements.saveHtml.disabled = isBusy || state.currentResult.length === 0;
-    elements.savePreset.disabled = isBusy;
+    elements.saveDefaultTemplate.disabled = isBusy;
+    elements.saveTemplateSlot.disabled = isBusy;
+    elements.templateSlot.disabled = isBusy;
   }
 
   function fillSelect(select, values, current) {
@@ -96,7 +103,9 @@
     fillSelect(elements.charset, payload.options.charsets, config.charset);
     fillSelect(elements.boxStyle, payload.options.boxStyles, config.box && config.box.style ? config.box.style : 'round');
     fillSelect(elements.insertMode, payload.options.insertModes, config.insertMode);
+    fillDatalist(elements.visualFontOptions, payload.options.visualFonts || []);
     fillDatalist(elements.glyphFontOptions, payload.options.glyphFonts || []);
+    applyTemplateState(payload.templates);
 
     elements.height.value = String(config.height);
     elements.width.value = config.width === undefined ? '' : String(config.width);
@@ -154,6 +163,26 @@
       locale: state.config ? state.config.locale : 'zh-CN',
       outputTarget: 'vscode',
     };
+  }
+
+  function applyTemplateState(templates) {
+    state.templates = templates || { defaultConfigured: false, slots: [] };
+    elements.templateSlot.textContent = '';
+    state.templates.slots.forEach((item) => {
+      const option = document.createElement('option');
+      option.value = String(item.slot);
+      option.textContent = item.configured ? `${item.label} (${item.preset || 'saved'})` : `${item.label} (empty)`;
+      elements.templateSlot.appendChild(option);
+    });
+
+    const defaultText = state.templates.defaultConfigured ? 'Default saved' : 'Default uses settings';
+    const savedSlots = state.templates.slots
+      .filter((item) => item.configured)
+      .map((item) => item.label)
+      .join(', ');
+    elements.templateStatus.textContent = savedSlots
+      ? `${defaultText} | Saved: ${savedSlots}`
+      : `${defaultText} | No custom templates saved`;
   }
 
   function numberOr(value, fallback) {
@@ -290,9 +319,24 @@
     content: state.currentResult,
     mode: elements.insertMode.value,
   }));
-  elements.savePreset.addEventListener('click', () => {
+  elements.saveDefaultTemplate.addEventListener('click', () => {
+    const config = {
+      ...collectConfig(),
+      preset: 'default',
+    };
+    post('savePreset', { config, target: 'default' });
+  });
+  elements.saveTemplateSlot.addEventListener('click', () => {
+    const slot = numberOr(elements.templateSlot.value, 1);
     const config = collectConfig();
-    post('savePreset', { config });
+    post('savePreset', {
+      config: {
+        ...config,
+        preset: `template-${slot}`,
+      },
+      target: 'slot',
+      slot,
+    });
   });
   elements.saveTxt.addEventListener('click', () => post('save', { content: state.currentResult, format: 'txt' }));
   elements.saveHtml.addEventListener('click', () => post('save', {
@@ -318,6 +362,9 @@
         state.activeRequestId = '';
         setBusy(false);
         setStatus(`Done (${message.payload.cols}x${message.payload.rows})`, 1);
+        break;
+      case 'templateState':
+        applyTemplateState(message.payload);
         break;
       case 'error':
         state.activeRequestId = '';

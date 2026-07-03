@@ -8,6 +8,7 @@ import {
   type CharsetConfig,
 } from 'unicode-art-js';
 import type { ExtensionArtConfig } from '../config/types';
+import { normalizeVisualFontFamily } from '../config/fontOptions';
 
 export interface CoreAdapter {
   convertText(text: string, config: ExtensionArtConfig): Promise<ArtResult>;
@@ -43,12 +44,13 @@ export function createCoreAdapter(): CoreAdapter {
 }
 
 function toCoreConfig(config: ExtensionArtConfig): Partial<ArtConfig> {
+  const visualFontFamily = normalizeVisualFontFamily(config.visualFont || config.font);
   const coreConfig: CoreUnifiedConfig = {
     height: config.height,
     width: config.width,
     charset: toCoreCharset(config),
     visualFont: {
-      family: config.visualFont || config.font,
+      family: visualFontFamily,
       reduce: config.fontReduce,
     },
     glyphFont: {
@@ -56,7 +58,7 @@ function toCoreConfig(config: ExtensionArtConfig): Partial<ArtConfig> {
       widthProfile: config.glyphWidthProfile,
       wideCharRegex: config.wideCharRegex || undefined,
     },
-    font: config.visualFont || config.font,
+    font: visualFontFamily,
     glyphFontFamily: config.glyphFont,
     glyphWidthProfile: config.glyphWidthProfile,
     wideCharRegex: config.wideCharRegex || undefined,
