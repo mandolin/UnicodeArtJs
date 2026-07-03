@@ -35,6 +35,7 @@ export function resolveArtConfig(context?: vscode.ExtensionContext): ExtensionAr
       : false,
     insertMode: config.get<ExtensionArtConfig['insertMode']>('insertMode', DEFAULT_EXTENSION_CONFIG.insertMode),
     preset: config.get<string>('preset', DEFAULT_EXTENSION_CONFIG.preset),
+    locale: resolveLocale(),
   };
 
   const recent = context ? loadRecentConfig(context) : undefined;
@@ -47,4 +48,8 @@ export function resolveArtConfig(context?: vscode.ExtensionContext): ExtensionAr
 
 function normalizeOptionalNumber(value: number | null | undefined): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function resolveLocale(): ExtensionArtConfig['locale'] {
+  return vscode.env.language.toLowerCase().startsWith('en') ? 'en-US' : 'zh-CN';
 }

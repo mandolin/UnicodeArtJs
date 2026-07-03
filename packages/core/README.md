@@ -1,6 +1,8 @@
 # unicode-art-js
 
-TypeScript core library for converting text or images into Unicode character art.
+MIT-licensed TypeScript core library for converting text or images into Unicode character art.
+
+UnicodeArtJs is an independent TypeScript / JavaScript implementation. Its feature goals reference the public behavior and user experience of UnicodeArt, while the codebase is maintained under the MIT License and avoids copying GPL source code, comments, or line-by-line implementation structure.
 
 ## Install
 
@@ -95,6 +97,8 @@ The browser entry targets Chrome 120+ and does not import `sharp`, `canvas`, or 
 - `validateConfig(config)` validates and fills defaults.
 - `isWideChar(char)` detects East Asian wide characters.
 - `getPresetChars(type)` returns preset character sets.
+- `t(key, params, locale)` renders built-in Core messages for `zh-CN` / `en-US`.
+- `normalizeLocale(locale)` normalizes host locale values before passing them into Core config.
 
 ## Configuration
 
@@ -107,6 +111,18 @@ Important options:
 - `outputFormat`: `OutputFormat.PLAIN_TEXT`, `HTML`, or `ANSI`.
 - `invert`: invert grayscale values before matching.
 - `wideCharRatio`: controls when wide characters win over normal characters.
+- `locale`: Core message locale, currently `zh-CN` or `en-US`. This affects errors and hints only; conversion output is unchanged.
+
+## Core i18n
+
+Core errors include machine-readable `code`, optional `messageKey`, optional `messageParams`, and optional `locale`. Hosts such as CLI, Web, VSCode, and Electron can pass `locale` in `ArtConfig` and reuse exported message helpers:
+
+```typescript
+import { t, normalizeLocale } from 'unicode-art-js';
+
+const locale = normalizeLocale('en-US');
+console.log(t('config.height.positive', {}, locale));
+```
 
 ## License
 

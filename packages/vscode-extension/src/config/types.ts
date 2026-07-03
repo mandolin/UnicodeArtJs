@@ -1,6 +1,8 @@
 import type { BoxOptions } from 'unicode-art-js';
 import type { InsertMode } from '../output/resultWriter';
 
+export type ExtensionLocale = 'zh-CN' | 'en-US';
+
 export interface ExtensionArtConfig {
   height: number;
   width: number | undefined;
@@ -15,4 +17,5 @@ export interface ExtensionArtConfig {
   box: false | BoxOptions;
   insertMode: InsertMode;
   preset: string;
+  locale: ExtensionLocale;
 }

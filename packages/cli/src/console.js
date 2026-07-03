@@ -315,6 +315,7 @@ async function handleImageCommand(input, options) {
   
   // 合并配置（命令行 > 配置文件 > 默认值）
   const fullConfig = mergeConfig(config, options);
+  fullConfig.locale = lang;
   
   // 验证配置
   const validatedConfig = validateConfig(fullConfig);
@@ -353,6 +354,7 @@ async function handleTextCommand(text, options) {
   
   // 合并配置
   const fullConfig = mergeConfig(config, options);
+  fullConfig.locale = lang;
   
   // 验证配置
   const validatedConfig = validateConfig(fullConfig);

@@ -1,6 +1,8 @@
 # unicode-art-cli
 
-Unicode Art CLI - 将文本和图片转换为Unicode字符画的命令行工具。
+Unicode Art CLI - 将文本和图片转换为 Unicode 字符画的命令行工具。
+
+本工具基于 MIT 许可的 `unicode-art-js` Core 独立实现构建。项目功能目标参考 UnicodeArt 的公开行为和使用体验，并通过兼容性测试尽量对齐常用参数下的输出效果；公开文档不将本项目描述为 GPL 源码的直接移植或逐行翻译。
 
 ## 📦 安装
 
@@ -163,6 +165,8 @@ text:
 i18n:
   lang: zh-CN
 ```
+
+`--lang` / `i18n.lang` 会同步传递给 Core 的 `locale` 配置，因此 Core 层配置错误也会尽量使用对应语言输出。
 
 ## 🎨 字符集说明
 

@@ -36,6 +36,7 @@ import type { CharsetConfig } from './charset';
 import { PresetCharset } from './charset';
 import { OutputFormat } from './output';
 import type { BoxOptions } from '../box/types';
+import type { SupportedLocale } from '../i18n';
 
 /**
  * 🟢 插值算法枚举
@@ -487,6 +488,21 @@ export interface ArtConfig {
   maxParallelTasks?: number;
   
   //#endregion
+
+  //#region 🔶 本地化配置
+
+  /**
+   * Core 消息语言
+   * - 默认值: zh-CN
+   * - 当前支持: zh-CN, en-US
+   *
+   * @remarks
+   * - 该字段只影响 Core 层错误和提示消息，不改变转换算法结果。
+   * - CLI / Web / VSCode / Electron 应把各自的语言设置同步到此字段。
+   */
+  locale?: SupportedLocale;
+
+  //#endregion
 }
 
 //#endregion
@@ -548,7 +564,10 @@ export const DEFAULT_CONFIG: Partial<ArtConfig> = {
   // 性能配置
   wideCharRatio: 2.0,
   enableEarlyTermination: true,
-  maxParallelTasks: 0
+  maxParallelTasks: 0,
+
+  // 本地化配置
+  locale: 'zh-CN'
 };
 
 //#endregion

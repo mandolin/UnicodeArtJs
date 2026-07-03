@@ -26,7 +26,7 @@ export function createCoreAdapter(): CoreAdapter {
 }
 
 function toCoreConfig(config: ExtensionArtConfig): Partial<ArtConfig> {
-  return {
+  const coreConfig: Partial<ArtConfig> & { locale?: string } = {
     height: config.height,
     width: config.width,
     charset: toCoreCharset(config),
@@ -39,7 +39,9 @@ function toCoreConfig(config: ExtensionArtConfig): Partial<ArtConfig> {
     box: config.box,
     outputFormat: OutputFormat.PLAIN_TEXT,
     enableEarlyTermination: true,
+    locale: config.locale,
   };
+  return coreConfig as Partial<ArtConfig>;
 }
 
 function toCoreCharset(config: ExtensionArtConfig): CharsetConfig {

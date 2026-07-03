@@ -139,6 +139,21 @@ export {
   UnicodeArtError
 } from './types/output';
 
+export {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  formatMessage,
+  isSupportedLocale,
+  normalizeLocale,
+  t
+} from './i18n';
+
+export type {
+  MessageKey,
+  MessageParams,
+  SupportedLocale
+} from './i18n';
+
 //#endregion
 
 //#region 🟦 常量导出
@@ -200,6 +215,7 @@ import { isWideChar as detectWideChar, calculateDisplayWidth } from './utils/wid
 import { boxText, normalizeBoxOptions as normalizeBoxConfig } from './box/box';
 import { getGlyphWidth, padToWidth, repeatToWidth } from './box/width';
 import { nodePlatformAdapter } from './platform/node/nodePlatformAdapter';
+import { normalizeLocale, t as translateCoreMessage } from './i18n';
 
 export {
   loadImage,
@@ -857,6 +873,8 @@ export async function imageToArt(
 export function validateConfig(
   config: Partial<ArtConfig>
 ): ArtConfig {
+  const locale = normalizeLocale(config.locale);
+
   // 🔹 从DEFAULT_CONFIG开始
   const fullConfig: ArtConfig = {
     matrixSize: config.matrixSize || 6,
@@ -876,16 +894,21 @@ export function validateConfig(
     box: config.box !== undefined ? config.box : false,
     wideCharRatio: config.wideCharRatio !== undefined ? config.wideCharRatio : 2.0,
     enableEarlyTermination: config.enableEarlyTermination !== undefined ? config.enableEarlyTermination : true,
-    maxParallelTasks: config.maxParallelTasks !== undefined ? config.maxParallelTasks : 0
+    maxParallelTasks: config.maxParallelTasks !== undefined ? config.maxParallelTasks : 0,
+    locale
   };
   
   // 🔹 处理height和width
   if (config.height) {
     if (config.height <= 0) {
       throw new UnicodeArtError(
-        'height必须大于0',
+        translateCoreMessage('config.height.positive', {}, locale),
         ErrorCode.INVALID_CONFIG,
-        { height: config.height }
+        {
+          details: { height: config.height },
+          messageKey: 'config.height.positive',
+          locale
+        }
       );
     }
     fullConfig.height = config.height;
@@ -894,9 +917,13 @@ export function validateConfig(
   if (config.width) {
     if (config.width <= 0) {
       throw new UnicodeArtError(
-        'width必须大于0',
+        translateCoreMessage('config.width.positive', {}, locale),
         ErrorCode.INVALID_CONFIG,
-        { width: config.width }
+        {
+          details: { width: config.width },
+          messageKey: 'config.width.positive',
+          locale
+        }
       );
     }
     fullConfig.width = config.width;
@@ -905,27 +932,39 @@ export function validateConfig(
   // 🔹 至少指定一个维度
   if (!fullConfig.height && !fullConfig.width) {
     throw new UnicodeArtError(
-      '必须指定height或width至少一个',
+      translateCoreMessage('config.dimension.required', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { config }
+      {
+        details: { config },
+        messageKey: 'config.dimension.required',
+        locale
+      }
     );
   }
   
   // 🔹 验证matrixSize
   if (fullConfig.matrixSize < 2 || fullConfig.matrixSize > 20) {
     throw new UnicodeArtError(
-      'matrixSize必须在2-20之间',
+      translateCoreMessage('config.matrixSize.range', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { matrixSize: fullConfig.matrixSize }
+      {
+        details: { matrixSize: fullConfig.matrixSize },
+        messageKey: 'config.matrixSize.range',
+        locale
+      }
     );
   }
   
   // 🔹 验证ratio
   if (fullConfig.ratio < 1.0 || fullConfig.ratio > 3.0) {
     throw new UnicodeArtError(
-      'ratio必须在1.0-3.0之间',
+      translateCoreMessage('config.ratio.range', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { ratio: fullConfig.ratio }
+      {
+        details: { ratio: fullConfig.ratio },
+        messageKey: 'config.ratio.range',
+        locale
+      }
     );
   }
   
@@ -935,19 +974,29 @@ export function validateConfig(
     (fullConfig.wideCharRatio <= 0 || fullConfig.wideCharRatio > 10)
   ) {
     throw new UnicodeArtError(
-      'wideCharRatio必须在0-10之间',
+      translateCoreMessage('config.wideCharRatio.range', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { wideCharRatio: fullConfig.wideCharRatio }
+      {
+        details: { wideCharRatio: fullConfig.wideCharRatio },
+        messageKey: 'config.wideCharRatio.range',
+        locale
+      }
     );
   }
 
   try {
     normalizeBoxConfig(fullConfig.box);
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     throw new UnicodeArtError(
-      `box配置无效: ${error instanceof Error ? error.message : String(error)}`,
+      translateCoreMessage('config.box.invalid', { message }, locale),
       ErrorCode.INVALID_CONFIG,
-      { box: fullConfig.box }
+      {
+        details: { box: fullConfig.box },
+        messageKey: 'config.box.invalid',
+        messageParams: { message },
+        locale
+      }
     );
   }
   
@@ -991,7 +1040,7 @@ export function isWideChar(char: string): boolean {
  * console.log(chars); // ' .:-=+*#%@'
  * ```
  */
-export function getPresetChars(type: PresetCharset): string {
+export function getPresetChars(type: PresetCharset, locale?: string): string {
   switch (type) {
     case PresetCharset.ASCII:
       return DEFAULT_ASCII_CHARS;
@@ -1000,10 +1049,16 @@ export function getPresetChars(type: PresetCharset): string {
     case PresetCharset.CHINESE_SIMPLE:
       return CHINESE_SIMPLE_CHARS;
     default:
+      const safeLocale = normalizeLocale(locale);
       throw new UnicodeArtError(
-        `不支持的字符集类型: ${type}`,
+        translateCoreMessage('charset.unsupported', { type }, safeLocale),
         ErrorCode.UNSUPPORTED_FORMAT,
-        { type }
+        {
+          details: { type },
+          messageKey: 'charset.unsupported',
+          messageParams: { type },
+          locale: safeLocale
+        }
       );
   }
 }

@@ -1,6 +1,8 @@
 # @unicode-art/web
 
-> UnicodeArtJs Web Application - 浏览器端的Unicode字符画生成工具
+> UnicodeArtJs Web Application - 浏览器端的 Unicode 字符画生成工具
+
+本 Web 应用基于 MIT 许可的 `unicode-art-js/browser` 独立实现构建，用于在浏览器中完成图片和文字到 Unicode 字符画的转换。项目功能目标参考 UnicodeArt 的公开行为和使用体验，但不以复制 GPL 源码或逐行翻译为实现方式。
 
 ## 快速开始
 
@@ -25,6 +27,7 @@ npm run preview
 - 📦 **裱框功能** - 为字符画添加装饰边框（圆角/双线/ASCII等）
 - 🎨 **5套主题** - 支持亮色/暗黑/高对比度/Solarized/Nord
 - 📤 **导出** - TXT/HTML/PNG/复制到剪贴板
+- 🌐 **语言基础设施** - 会将浏览器语言映射为 Core `locale`，为后续完整 UI 多语言做准备
 
 ## 技术栈
 
@@ -40,7 +43,7 @@ npm run preview
 ```
 packages/web/
 ├── src/
-│   ├── main.js              # 应用主入口 (~680行)
+│   ├── main.js              # 应用主入口
 │   └── styles/
 │       └── main.css          # 主样式表 (含5套主题)
 ├── tests/

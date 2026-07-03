@@ -56,6 +56,21 @@ export {
   UnicodeArtError
 } from './types/output';
 
+export {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  formatMessage,
+  isSupportedLocale,
+  normalizeLocale,
+  t
+} from './i18n';
+
+export type {
+  MessageKey,
+  MessageParams,
+  SupportedLocale
+} from './i18n';
+
 export type {
   BoxAlign,
   BoxCellOptions,

@@ -2,6 +2,8 @@
 
 Convert selected text or image files to Unicode character art inside VSCode.
 
+This extension is built on the MIT-licensed `unicode-art-js` core package. UnicodeArtJs is an independent TypeScript / JavaScript implementation whose feature goals reference the public behavior and user experience of UnicodeArt without copying GPL source code or line-by-line implementation structure.
+
 ## Features
 
 - Convert selected editor text to Unicode art.
@@ -13,6 +15,7 @@ Convert selected text or image files to Unicode character art inside VSCode.
 - Save generated output as `.txt` or `.html`.
 - Remember the most recent configuration.
 - Open the converter from the VSCode status bar.
+- Pass VSCode language into Core locale for localized Core errors.
 
 ## Commands
 
@@ -106,5 +109,5 @@ Publishing requires a valid VSCode Marketplace publisher and PAT configured for 
 ```bash
 npm run check
 npm run package
-vsce publish
+vsce publish --pre-release --packagePath .\unicode-art-js-vscode-0.1.0.vsix
 ```

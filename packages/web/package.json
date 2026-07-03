@@ -1,7 +1,7 @@
 {
   "name": "@unicode-art/web",
   "version": "0.1.0-alpha",
-  "description": "UnicodeArtJs Web Application - Convert images and text to Unicode art in browser",
+  "description": "UnicodeArtJs browser application for converting images and text to Unicode art",
   "type": "module",
   "private": true,
   "files": [

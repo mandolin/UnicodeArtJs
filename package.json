@@ -1,7 +1,7 @@
 {
   "name": "UnicodeArtJs",
   "version": "1.0.0",
-  "description": "根据输入的文本或图片生成相应的字符画，js版本",
+  "description": "将文本或图片转换为 Unicode 字符画的 TypeScript / JavaScript 独立实现",
   "main": "index.js",
   "scripts": {
     "start": "node src/console.js -t 白 -e 5 -p spec",

@@ -26,6 +26,8 @@
  * ============================================================================
  */
 
+import type { MessageKey, MessageParams, SupportedLocale } from '../i18n';
+
 //#region 🟦 输出格式枚举
 
 /**
@@ -320,6 +322,15 @@ export class UnicodeArtError extends Error {
   
   /** 错误详细信息（可选） */
   public readonly details?: any;
+
+  /** 消息 key（可选，用于多语言重渲染） */
+  public readonly messageKey?: MessageKey;
+
+  /** 消息模板参数（可选） */
+  public readonly messageParams?: MessageParams;
+
+  /** 生成当前 message 时使用的语言（可选） */
+  public readonly locale?: SupportedLocale;
   
   /**
    * 🟢 构造函数
@@ -339,7 +350,7 @@ export class UnicodeArtError extends Error {
    * );
    * ```
    */
-  constructor(message: string, code: ErrorCode, details?: any) {
+  constructor(message: string, code: ErrorCode, details?: any | UnicodeArtErrorOptions) {
     super(message);
     
     // 维护正确的原型链
@@ -347,7 +358,11 @@ export class UnicodeArtError extends Error {
     
     this.name = 'UnicodeArtError';
     this.code = code;
-    this.details = details;
+    const options = normalizeUnicodeArtErrorOptions(details);
+    this.details = options.details;
+    this.messageKey = options.messageKey;
+    this.messageParams = options.messageParams;
+    this.locale = options.locale;
     
     // 捕获堆栈跟踪（V8引擎）
     if (Error.captureStackTrace) {
@@ -375,6 +390,9 @@ export class UnicodeArtError extends Error {
       message: this.message,
       code: this.code,
       details: this.details,
+      messageKey: this.messageKey,
+      messageParams: this.messageParams,
+      locale: this.locale,
       stack: this.stack
     });
   }
@@ -395,6 +413,32 @@ export class UnicodeArtError extends Error {
     
     return result;
   }
+}
+
+/** UnicodeArtError 扩展选项。 */
+export interface UnicodeArtErrorOptions {
+  details?: any;
+  messageKey?: MessageKey;
+  messageParams?: MessageParams;
+  locale?: SupportedLocale;
+}
+
+/** 兼容旧的 details 参数，同时支持新的 messageKey / locale 元数据。 */
+function normalizeUnicodeArtErrorOptions(details?: any | UnicodeArtErrorOptions): UnicodeArtErrorOptions {
+  if (
+    details &&
+    typeof details === 'object' &&
+    (
+      Object.prototype.hasOwnProperty.call(details, 'details') ||
+      Object.prototype.hasOwnProperty.call(details, 'messageKey') ||
+      Object.prototype.hasOwnProperty.call(details, 'messageParams') ||
+      Object.prototype.hasOwnProperty.call(details, 'locale')
+    )
+  ) {
+    return details as UnicodeArtErrorOptions;
+  }
+
+  return { details };
 }
 
 //#endregion

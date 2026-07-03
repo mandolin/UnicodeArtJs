@@ -14,4 +14,5 @@ export const DEFAULT_EXTENSION_CONFIG: ExtensionArtConfig = {
   box: false,
   insertMode: 'replaceSelection',
   preset: 'default',
+  locale: 'zh-CN',
 };

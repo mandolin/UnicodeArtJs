@@ -14,6 +14,11 @@
 
 let $ = window.jQuery || window.$;
 
+function detectCoreLocale() {
+  const language = navigator.language || navigator.userLanguage || 'zh-CN';
+  return language.toLowerCase().startsWith('en') ? 'en-US' : 'zh-CN';
+}
+
 async function ensureJQuery() {
   if (!$) {
     const jqueryModule = await import('jquery');
@@ -44,6 +49,7 @@ const AppState = {
     earlyTermination: true,
     fontReduce: 0,
     charSpace: 1,
+    locale: detectCoreLocale(),
     outputFormat: 'plain',
     boxEnabled: false,
     boxStyle: 'round',
@@ -273,6 +279,7 @@ class ArtGenerator {
       enableEarlyTermination: cfg.earlyTermination !== false,
       fontReduce: parseInt(cfg.fontReduce) || 0,
       charSpace: parseInt(cfg.charSpace) || 1,
+      locale: cfg.locale || detectCoreLocale(),
       outputFormat: 'plain', // 预览统一用plain，导出时再切换
       box: cfg.boxEnabled
         ? {
