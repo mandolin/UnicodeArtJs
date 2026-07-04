@@ -21,7 +21,14 @@ test('isWebviewMessage rejects text conversion without text', () => {
 });
 
 test('isWebviewMessage accepts image, cancel, save, and insert messages', () => {
-  assert.equal(isWebviewMessage({ type: 'convertImage', payload: { imageData: 'data:image/png;base64,AA==' } }), true);
+  assert.equal(isWebviewMessage({
+    type: 'convertImage',
+    payload: {
+      imageData: 'data:image/png;base64,AA==',
+      fileSize: 2,
+      mimeType: 'image/png',
+    },
+  }), true);
   assert.equal(isWebviewMessage({ type: 'cancel', payload: { requestId: 'req-1' } }), true);
   assert.equal(isWebviewMessage({ type: 'save', payload: { content: 'abc', format: 'txt' } }), true);
   assert.equal(isWebviewMessage({ type: 'save', payload: { content: 'abc', format: 'html', glyphFont: 'NSimSun' } }), true);
@@ -33,6 +40,10 @@ test('isWebviewMessage accepts image, cancel, save, and insert messages', () => 
 test('isWebviewMessage rejects malformed messages', () => {
   assert.equal(isWebviewMessage(null), false);
   assert.equal(isWebviewMessage({ type: 'unknown' }), false);
+  assert.equal(isWebviewMessage({ type: 'cancel', payload: { requestId: 1 } }), false);
   assert.equal(isWebviewMessage({ type: 'copy', payload: { value: 'abc' } }), false);
+  assert.equal(isWebviewMessage({ type: 'insert', payload: { content: 'abc' } }), false);
+  assert.equal(isWebviewMessage({ type: 'save', payload: { format: 'txt' } }), false);
   assert.equal(isWebviewMessage({ type: 'save', payload: { content: 'abc', format: 'png' } }), false);
+  assert.equal(isWebviewMessage({ type: 'savePreset', payload: { target: 'default' } }), false);
 });

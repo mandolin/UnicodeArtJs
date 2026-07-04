@@ -39,6 +39,16 @@ Context menus:
   - `UnicodeArtJs: Open Converter`
 - Right-click a `png`, `jpg`, `jpeg`, `webp`, `gif`, or `bmp` file in Explorer to convert it.
 
+## Quick Start
+
+1. Select text in an editor.
+2. Right-click and choose `UnicodeArtJs: Generate Unicode Art: Default Template`.
+3. Use `UnicodeArtJs: Open Converter` for full controls, image conversion, previews, exports, and template saving.
+4. Adjust `Visual Font` for how source text is rendered before conversion.
+5. Adjust `Glyph Font` for how generated art is previewed, exported to HTML, and displayed in VSCode.
+
+After installing or reinstalling a local VSIX, run `Developer: Reload Window` if commands or menus do not appear immediately.
+
 ## Settings
 
 The extension uses the `unicodeArtJs` setting namespace.
@@ -66,6 +76,9 @@ Visual font notes:
 - `Visual Font` controls how input text is rasterized before conversion.
 - Localized Chinese names such as `黑体`, `宋体`, `新宋体`, and `微软雅黑` are normalized to Node canvas friendly names such as `SimHei`, `SimSun`, `NSimSun`, and `Microsoft YaHei`.
 - `Glyph Font` only controls how the generated art is displayed in preview/export. It does not change the source text rasterization.
+- For best display, prefer a strict mixed-width monospace font, for example `新宋体`, `等距更纱黑体 SC`, or `霞鹜文楷等宽`.
+- In VSCode, some fonts such as `微软雅黑 Mono` may show unexpected spacing because of editor font metrics or fallback behavior. Try changing `editor.fontFamily`, trying another glyph font, or toggling `editor.disableMonospaceOptimizations`.
+- With `新宋体` and round boxes, upper rounded corners may not visually fit perfectly because of the font's own glyph design.
 
 Box settings:
 
@@ -88,8 +101,21 @@ The panel supports:
 - Preview, copy, insert, save TXT, save HTML.
 - Save current options as the default template or Template 1 / 2 / 3.
 - Basic progress and cancellation UI.
+- Advanced fields for reserved glyph width rules: `glyphWidthProfile`, `wideCharRegex`, `outputTarget`, and `locale`.
+- Image details, clear image action, and Output Channel diagnostics.
 
 Cancellation currently prevents canceled requests from updating the preview. Core-level hard cancellation will require future `AbortSignal` support in `unicode-art-js`.
+
+## Templates
+
+The extension supports one default template and three custom template slots.
+
+- `Save Default Template` stores the current Converter options for the default editor context-menu command.
+- `Save Template` stores the current Converter options into Template 1 / 2 / 3.
+- `UnicodeArtJs: Save Current Preset` can also save the current resolved settings into the default template or a template slot.
+- If a custom template slot has not been configured yet, the command prompts you to open the Converter.
+
+Templates store conversion options such as size, charset, visual font, glyph font, box options, insert mode, locale, and reserved glyph-width fields.
 
 ## Development
 
@@ -105,6 +131,8 @@ npm run package
 - Node unit tests.
 - WebView JavaScript syntax check.
 
+Manual verification before publishing is tracked in [`docs/manual-test-checklist.md`](docs/manual-test-checklist.md).
+
 ## Notes
 
 - The WebView uses local bundled assets only. It does not load CDN scripts.
@@ -118,6 +146,14 @@ After packaging, install the VSIX locally:
 ```bash
 code --install-extension .\unicode-art-js-vscode-0.1.0.vsix --force
 ```
+
+For profile-specific testing:
+
+```bash
+code --profile WebDev --install-extension .\unicode-art-js-vscode-0.1.0.vsix --force
+```
+
+Then run `Developer: Reload Window` in that VSCode window.
 
 ## Marketplace Publish
 

@@ -311,7 +311,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "node --test tests/unit/config-merge.test.cjs tests/unit/font-options.test.cjs tests/unit/manifest.test.cjs tests/unit/protocol.test.cjs",
+    "test": "node --test tests/unit/config-merge.test.cjs tests/unit/font-options.test.cjs tests/unit/manifest.test.cjs tests/unit/preset-store.test.cjs tests/unit/protocol.test.cjs",
     "check:webview": "node --check media/main.js",
     "package": "vsce package --pre-release",
     "package:release": "vsce package",

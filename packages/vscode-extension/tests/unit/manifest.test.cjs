@@ -7,6 +7,7 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../packa
 const packageNls = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.nls.json'), 'utf8'));
 const packageNlsZhCn = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.nls.zh-cn.json'), 'utf8'));
 const commandSource = fs.readFileSync(path.join(__dirname, '../../src/commands/index.ts'), 'utf8');
+const configResolverSource = fs.readFileSync(path.join(__dirname, '../../src/config/configResolver.ts'), 'utf8');
 
 test('all contributed commands have activation events', () => {
   const commands = packageJson.contributes.commands.map((item) => item.command);
@@ -70,6 +71,19 @@ test('manifest localization keys are present in default and zh-CN nls files', ()
   for (const key of keys) {
     assert.equal(Object.hasOwn(packageNls, key), true, `${key} is missing from package.nls.json`);
     assert.equal(Object.hasOwn(packageNlsZhCn, key), true, `${key} is missing from package.nls.zh-cn.json`);
+  }
+});
+
+test('configuration keys are consumed by config resolver', () => {
+  const properties = packageJson.contributes.configuration.properties;
+
+  for (const key of Object.keys(properties)) {
+    const settingName = key.replace(/^unicodeArtJs\./, '');
+    assert.equal(
+      configResolverSource.includes(`'${settingName}'`),
+      true,
+      `${key} is contributed but not read by configResolver.ts`
+    );
   }
 });
 
