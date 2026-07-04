@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.2.0
+
+VSCode extension pre-release refresh for the T-tea milestone.
+
+### Added
+
+- Editor context menu structure for default template, custom template slots, and Converter entry.
+- Default template and Template 1 / 2 / 3 storage.
+- Separate visual font and glyph font controls in the Converter.
+- Chinese / English localization for commands, menus, settings, Converter labels, status, and errors.
+- Advanced reserved glyph-width fields in the Converter.
+- Converter image metadata, clear image action, and richer result metadata.
+- Output Channel diagnostics for Converter, conversion, template, copy, insert, and save flows.
+- Manual and automated release verification checklists.
+
+### Changed
+
+- Improved HTML export styling and glyph font handling.
+- Improved save cancellation feedback.
+- Improved WebView accessibility labels and status region semantics.
+- Expanded unit tests for manifest, templates, protocol, and configuration alignment.
+
+### Known Limitations
+
+- Core-level hard cancellation still requires future `AbortSignal` support in `unicode-art-js`.
+- VSIX packaging still includes native image/font dependencies; bundle and package-size optimization remain a follow-up task.
+
 ## 0.1.0
 
 Initial VSCode extension release candidate.
