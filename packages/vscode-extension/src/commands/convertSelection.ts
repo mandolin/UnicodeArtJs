@@ -3,6 +3,7 @@ import { resolveArtConfig } from '../config/configResolver';
 import { loadTemplateSlot, saveRecentConfig } from '../config/presetStore';
 import type { ExtensionArtConfig } from '../config/types';
 import { createCoreAdapter } from '../core/coreAdapter';
+import { t } from '../i18n';
 import { InsertMode, writeResult } from '../output/resultWriter';
 import type { ExtensionLogger } from '../utils/logger';
 
@@ -29,10 +30,10 @@ export async function generateWithTemplateSlot(
   const config = loadTemplateSlot(context, slot);
   if (!config) {
     const action = await vscode.window.showInformationMessage(
-      `UnicodeArtJs Template ${slot} is not configured yet.`,
-      'Open Converter'
+      t('message.templateNotConfigured', { slot }),
+      t('message.openConverter')
     );
-    if (action === 'Open Converter') {
+    if (action === t('message.openConverter')) {
       await vscode.commands.executeCommand('unicodeArtJs.openConverter');
     }
     return;
@@ -50,7 +51,7 @@ async function convertSelectedText(
 ): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.selection.isEmpty) {
-    await vscode.window.showInformationMessage('Please select text before generating Unicode art.');
+    await vscode.window.showInformationMessage(t('message.selectText'));
     return;
   }
 
@@ -63,7 +64,7 @@ async function convertSelectedText(
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: 'UnicodeArtJs: generating text art',
+        title: t('message.generatingTextArt'),
         cancellable: false,
       },
       async () => {
@@ -77,7 +78,7 @@ async function convertSelectedText(
     );
   } catch (error) {
     logger.error('Selection conversion failed.', error);
-    await vscode.window.showErrorMessage(`UnicodeArtJs conversion failed: ${getErrorMessage(error)}`);
+    await vscode.window.showErrorMessage(t('message.conversionFailed', { message: getErrorMessage(error) }));
   }
 }
 
@@ -87,7 +88,7 @@ export async function convertSelectionWithOptions(
 ): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.selection.isEmpty) {
-    await vscode.window.showInformationMessage('Please select text before generating Unicode art.');
+    await vscode.window.showInformationMessage(t('message.selectText'));
     return;
   }
 
@@ -100,7 +101,7 @@ export async function convertSelectionWithOptions(
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: 'UnicodeArtJs: generating text art',
+        title: t('message.generatingTextArt'),
         cancellable: false,
       },
       async () => {
@@ -112,28 +113,28 @@ export async function convertSelectionWithOptions(
     );
   } catch (error) {
     logger.error('Selection conversion with options failed.', error);
-    await vscode.window.showErrorMessage(`UnicodeArtJs conversion failed: ${getErrorMessage(error)}`);
+    await vscode.window.showErrorMessage(t('message.conversionFailed', { message: getErrorMessage(error) }));
   }
 }
 
 async function pickInsertMode(current: InsertMode): Promise<InsertMode | undefined> {
   const modes: Array<{ label: string; mode: InsertMode; description: string }> = [
-    { label: 'Replace Selection', mode: 'replaceSelection', description: 'Replace the selected text.' },
-    { label: 'Before Selection', mode: 'beforeSelection', description: 'Insert before the selected text.' },
-    { label: 'After Selection', mode: 'afterSelection', description: 'Insert after the selected text.' },
-    { label: 'Previous Line', mode: 'previousLine', description: 'Insert above the selected line.' },
-    { label: 'Next Line', mode: 'nextLine', description: 'Insert below the selected line.' },
-    { label: 'New Document', mode: 'newDocument', description: 'Open the result in a new document.' },
-    { label: 'Clipboard Only', mode: 'clipboardOnly', description: 'Copy the result to clipboard.' },
+    { label: t('insert.replaceSelection'), mode: 'replaceSelection', description: t('insert.replaceSelectionDesc') },
+    { label: t('insert.beforeSelection'), mode: 'beforeSelection', description: t('insert.beforeSelectionDesc') },
+    { label: t('insert.afterSelection'), mode: 'afterSelection', description: t('insert.afterSelectionDesc') },
+    { label: t('insert.previousLine'), mode: 'previousLine', description: t('insert.previousLineDesc') },
+    { label: t('insert.nextLine'), mode: 'nextLine', description: t('insert.nextLineDesc') },
+    { label: t('insert.newDocument'), mode: 'newDocument', description: t('insert.newDocumentDesc') },
+    { label: t('insert.clipboardOnly'), mode: 'clipboardOnly', description: t('insert.clipboardOnlyDesc') },
   ];
 
   const picked = await vscode.window.showQuickPick(
     modes.map((item) => ({
       label: item.label,
-      description: item.mode === current ? `${item.description} Current` : item.description,
+      description: item.mode === current ? `${item.description} ${t('insert.current')}` : item.description,
       mode: item.mode,
     })),
-    { title: 'UnicodeArtJs Insert Mode' }
+    { title: t('insert.title') }
   );
 
   return picked?.mode;

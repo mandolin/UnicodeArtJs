@@ -9,6 +9,7 @@
     activeRequestId: '',
     isBusy: false,
     templates: { defaultConfigured: false, slots: [] },
+    i18n: {},
   };
 
   const elements = {
@@ -63,6 +64,21 @@
     elements.progress.value = progress;
   }
 
+  function localize(key, params) {
+    const template = state.i18n[key] || key;
+    return template.replace(/\{(\w+)\}/g, (_, name) => String(params && params[name] !== undefined ? params[name] : `{${name}}`));
+  }
+
+  function applyLocalization(messages) {
+    state.i18n = messages || {};
+    document.querySelectorAll('[data-i18n]').forEach((element) => {
+      element.textContent = localize(element.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+      element.setAttribute('placeholder', localize(element.dataset.i18nPlaceholder));
+    });
+  }
+
   function setBusy(isBusy) {
     state.isBusy = isBusy;
     elements.convertText.disabled = isBusy;
@@ -98,6 +114,7 @@
 
   function applyInitialState(payload) {
     state.config = payload.config;
+    applyLocalization(payload.i18n);
     const config = payload.config;
 
     fillSelect(elements.charset, payload.options.charsets, config.charset);
@@ -125,7 +142,7 @@
     updateCustomCharsVisibility();
     updateModeVisibility();
     applyGlyphFont();
-    setStatus('Ready', 0);
+    setStatus(localize('web.ready'), 0);
     setBusy(false);
   }
 
@@ -171,18 +188,22 @@
     state.templates.slots.forEach((item) => {
       const option = document.createElement('option');
       option.value = String(item.slot);
-      option.textContent = item.configured ? `${item.label} (${item.preset || 'saved'})` : `${item.label} (empty)`;
+      option.textContent = item.configured
+        ? `${item.label} (${item.preset || localize('web.savedFallback')})`
+        : `${item.label} (${localize('web.empty')})`;
       elements.templateSlot.appendChild(option);
     });
 
-    const defaultText = state.templates.defaultConfigured ? 'Default saved' : 'Default uses settings';
+    const defaultText = state.templates.defaultConfigured
+      ? localize('web.defaultSaved')
+      : localize('web.defaultUsesSettings');
     const savedSlots = state.templates.slots
       .filter((item) => item.configured)
       .map((item) => item.label)
       .join(', ');
     elements.templateStatus.textContent = savedSlots
-      ? `${defaultText} | Saved: ${savedSlots}`
-      : `${defaultText} | No custom templates saved`;
+      ? `${defaultText} | ${localize('web.saved')}: ${savedSlots}`
+      : `${defaultText} | ${localize('web.noCustomTemplates')}`;
   }
 
   function numberOr(value, fallback) {
@@ -198,19 +219,19 @@
 
   function validateConfig(config) {
     if (!Number.isInteger(config.height) || config.height < 1 || config.height > 300) {
-      return 'Height must be an integer between 1 and 300.';
+      return localize('web.heightValidation');
     }
     if (config.width !== undefined && (!Number.isInteger(config.width) || config.width < 1 || config.width > 1000)) {
-      return 'Width must be empty or an integer between 1 and 1000.';
+      return localize('web.widthValidation');
     }
     if (!Number.isFinite(config.matrixSize) || config.matrixSize < 2 || config.matrixSize > 32) {
-      return 'Matrix must be between 2 and 32.';
+      return localize('web.matrixValidation');
     }
     if (!Number.isFinite(config.ratio) || config.ratio < 0.1 || config.ratio > 10) {
-      return 'Ratio must be between 0.1 and 10.';
+      return localize('web.ratioValidation');
     }
     if (config.charset === 'CUSTOM' && config.customChars.trim().length === 0) {
-      return 'Custom Chars is required when charset is CUSTOM.';
+      return localize('web.customCharsRequired');
     }
     return '';
   }
@@ -243,14 +264,14 @@
 
     if (elements.mode.value === 'image') {
       if (!state.imageData) {
-        setStatus('Please choose an image file.', 0);
+        setStatus(localize('web.chooseImage'), 0);
         setBusy(false);
         return;
       }
       if (state.imageSize > 10 * 1024 * 1024) {
-        setStatus('Large image selected; conversion may take a while.', 0.05);
+        setStatus(localize('web.largeImage'), 0.05);
       }
-      setStatus('Sending image...', 0.1);
+      setStatus(localize('web.sendingImage'), 0.1);
       post('convertImage', {
         imageData: state.imageData,
         fileName: state.imageFileName,
@@ -260,11 +281,11 @@
       return;
     }
     if (elements.input.value.length === 0) {
-      setStatus('Input Text cannot be empty.', 0);
+      setStatus(localize('web.inputRequired'), 0);
       setBusy(false);
       return;
     }
-    setStatus('Sending request...', 0.1);
+    setStatus(localize('web.sendingRequest'), 0.1);
     post('convertText', {
       text: elements.input.value,
       config,
@@ -280,7 +301,7 @@
   elements.cancelConvert.addEventListener('click', () => {
     if (!state.activeRequestId) return;
     post('cancel', { requestId: state.activeRequestId });
-    setStatus('Canceling conversion...', elements.progress.value);
+    setStatus(localize('web.canceling'), elements.progress.value);
     setBusy(false);
     state.activeRequestId = '';
   });
@@ -293,7 +314,7 @@
       state.imageData = '';
       state.imageFileName = '';
       state.imageSize = 0;
-      elements.imageName.textContent = 'No image selected';
+      elements.imageName.textContent = localize('web.noImageSelected');
       return;
     }
 
@@ -303,14 +324,14 @@
       state.imageFileName = file.name;
       state.imageSize = file.size;
       elements.imageName.textContent = `${file.name} (${formatBytes(file.size)})`;
-      setStatus('Image ready', 0);
+      setStatus(localize('web.imageReady'), 0);
     });
     reader.addEventListener('error', () => {
       state.imageData = '';
       state.imageFileName = '';
       state.imageSize = 0;
-      elements.imageName.textContent = 'Failed to load image';
-      setStatus('Failed to load image.', 0);
+      elements.imageName.textContent = localize('web.failedToLoadImage');
+      setStatus(localize('web.failedToLoadImage'), 0);
     });
     reader.readAsDataURL(file);
   });
@@ -361,7 +382,7 @@
         elements.resultMeta.textContent = `${message.payload.source} | ${message.payload.cols} cols x ${message.payload.rows} rows | ${formatBytes(message.payload.content.length)}`;
         state.activeRequestId = '';
         setBusy(false);
-        setStatus(`Done (${message.payload.cols}x${message.payload.rows})`, 1);
+        setStatus(localize('web.done', { cols: message.payload.cols, rows: message.payload.rows }), 1);
         break;
       case 'templateState':
         applyTemplateState(message.payload);
@@ -369,7 +390,7 @@
       case 'error':
         state.activeRequestId = '';
         setBusy(false);
-        setStatus(`Error: ${message.payload.message}`, 0);
+        setStatus(localize('web.error', { message: message.payload.message }), 0);
         break;
       case 'notice':
         if (message.payload.message.includes('canceled')) {
@@ -379,7 +400,7 @@
         setStatus(message.payload.message, elements.progress.value);
         break;
       default:
-        setStatus('Unknown host message', 0);
+        setStatus(localize('web.unknownHostMessage'), 0);
     }
   });
 

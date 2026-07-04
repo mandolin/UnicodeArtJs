@@ -1,7 +1,7 @@
 {
   "name": "unicode-art-js-vscode",
   "displayName": "UnicodeArtJs",
-  "description": "Convert images and text to Unicode art inside VSCode.",
+  "description": "%extension.description%",
   "version": "0.1.0",
   "publisher": "mandolin",
   "license": "MIT",
@@ -48,52 +48,52 @@
     "commands": [
       {
         "command": "unicodeArtJs.openConverter",
-        "title": "UnicodeArtJs: Open Converter",
+        "title": "%command.openConverter%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.convertSelection",
-        "title": "UnicodeArtJs: Generate Unicode Art",
+        "title": "%command.convertSelection%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.convertSelectionWithOptions",
-        "title": "UnicodeArtJs: Generate Unicode Art With Options",
+        "title": "%command.convertSelectionWithOptions%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.generateWithDefaultTemplate",
-        "title": "UnicodeArtJs: Generate Unicode Art: Default Template",
+        "title": "%command.generateWithDefaultTemplate%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.generateWithTemplate1",
-        "title": "Template 1",
+        "title": "%command.template1%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.generateWithTemplate2",
-        "title": "Template 2",
+        "title": "%command.template2%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.generateWithTemplate3",
-        "title": "Template 3",
+        "title": "%command.template3%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.convertImageFile",
-        "title": "UnicodeArtJs: Convert Image File",
+        "title": "%command.convertImageFile%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.openSettings",
-        "title": "UnicodeArtJs: Open Settings",
+        "title": "%command.openSettings%",
         "category": "UnicodeArtJs"
       },
       {
         "command": "unicodeArtJs.saveCurrentPreset",
-        "title": "UnicodeArtJs: Save Current Preset",
+        "title": "%command.saveCurrentPreset%",
         "category": "UnicodeArtJs"
       }
     ],
@@ -105,7 +105,7 @@
           "default": 20,
           "minimum": 1,
           "maximum": 300,
-          "description": "Output height in rows."
+          "description": "%config.height%"
         },
         "unicodeArtJs.width": {
           "type": [
@@ -115,7 +115,7 @@
           "default": null,
           "minimum": 1,
           "maximum": 1000,
-          "description": "Output width in columns. Use null for automatic width."
+          "description": "%config.width%"
         },
         "unicodeArtJs.charset": {
           "type": "string",
@@ -126,73 +126,73 @@
             "CHINESE_SIMPLE",
             "CUSTOM"
           ],
-          "description": "Character set used for matching."
+          "description": "%config.charset%"
         },
         "unicodeArtJs.customChars": {
           "type": "string",
           "default": "",
-          "description": "Custom characters ordered from dark to light when charset is CUSTOM."
+          "description": "%config.customChars%"
         },
         "unicodeArtJs.font": {
           "type": "string",
           "default": "Arial",
-          "description": "Legacy alias for unicodeArtJs.visualFont."
+          "description": "%config.font%"
         },
         "unicodeArtJs.visualFont": {
           "type": "string",
           "default": "Arial",
-          "description": "Visual font used when rendering input text before conversion."
+          "description": "%config.visualFont%"
         },
         "unicodeArtJs.glyphFont": {
           "type": "string",
           "default": "Consolas, 'Courier New', monospace",
-          "description": "Glyph display font used for preview and downstream rendering."
+          "description": "%config.glyphFont%"
         },
         "unicodeArtJs.glyphWidthProfile": {
           "type": "string",
           "default": "default",
-          "description": "Glyph width profile name. Reserved for future wide glyph rules."
+          "description": "%config.glyphWidthProfile%"
         },
         "unicodeArtJs.wideCharRegex": {
           "type": "string",
           "default": "",
-          "description": "Custom wide glyph regular expression. Reserved for future wide glyph rules."
+          "description": "%config.wideCharRegex%"
         },
         "unicodeArtJs.matrixSize": {
           "type": "number",
           "default": 6,
           "minimum": 2,
           "maximum": 32,
-          "description": "Glyph sampling matrix size."
+          "description": "%config.matrixSize%"
         },
         "unicodeArtJs.ratio": {
           "type": "number",
           "default": 2,
           "minimum": 0.1,
           "maximum": 10,
-          "description": "Character cell width-to-height ratio."
+          "description": "%config.ratio%"
         },
         "unicodeArtJs.invert": {
           "type": "boolean",
           "default": false,
-          "description": "Invert brightness before matching."
+          "description": "%config.invert%"
         },
         "unicodeArtJs.fontReduce": {
           "type": "number",
           "default": 0,
           "minimum": 0,
           "maximum": 20,
-          "description": "Visual font rendering inset / shrink value."
+          "description": "%config.fontReduce%"
         },
         "unicodeArtJs.trimTrailingSpaces": {
           "type": "boolean",
           "default": false,
-          "description": "Trim trailing spaces from generated lines."
+          "description": "%config.trimTrailingSpaces%"
         },
         "unicodeArtJs.box.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Enable box rendering around generated art."
+          "description": "%config.box.enabled%"
         },
         "unicodeArtJs.box.style": {
           "type": "string",
@@ -211,31 +211,31 @@
             "thick",
             "none"
           ],
-          "description": "Box style name."
+          "description": "%config.box.style%"
         },
         "unicodeArtJs.box.padding": {
           "type": "number",
           "default": 1,
           "minimum": 0,
           "maximum": 20,
-          "description": "Box inner padding."
+          "description": "%config.box.padding%"
         },
         "unicodeArtJs.box.margin": {
           "type": "number",
           "default": 0,
           "minimum": 0,
           "maximum": 20,
-          "description": "Box outer margin."
+          "description": "%config.box.margin%"
         },
         "unicodeArtJs.box.title": {
           "type": "string",
           "default": "",
-          "description": "Optional title rendered in the box border."
+          "description": "%config.box.title%"
         },
         "unicodeArtJs.box.shadow": {
           "type": "boolean",
           "default": false,
-          "description": "Render a simple box shadow when box rendering is enabled."
+          "description": "%config.box.shadow%"
         },
         "unicodeArtJs.insertMode": {
           "type": "string",
@@ -249,19 +249,19 @@
             "newDocument",
             "clipboardOnly"
           ],
-          "description": "How generated art should be inserted after converting a selection."
+          "description": "%config.insertMode%"
         },
         "unicodeArtJs.preset": {
           "type": "string",
           "default": "default",
-          "description": "Current preset name."
+          "description": "%config.preset%"
         }
       }
     },
     "submenus": [
       {
         "id": "unicodeArtJs.customTemplates",
-        "label": "UnicodeArtJs: Generate Unicode Art: Custom Template"
+        "label": "%submenu.customTemplates%"
       }
     ],
     "menus": {

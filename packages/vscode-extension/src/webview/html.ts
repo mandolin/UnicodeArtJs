@@ -20,80 +20,80 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
     <header class="header">
       <div>
         <h1>UnicodeArtJs</h1>
-        <p class="subtitle">VSCode converter preview</p>
+        <p class="subtitle" data-i18n="web.subtitle">VSCode converter preview</p>
       </div>
       <div class="header-actions">
-        <button id="convertText" type="button">Convert</button>
-        <button id="cancelConvert" type="button" disabled>Cancel</button>
-        <button id="copyResult" type="button">Copy</button>
-        <button id="insertResult" type="button">Insert</button>
-        <button id="saveDefaultTemplate" type="button">Save Default Template</button>
+        <button id="convertText" type="button" data-i18n="web.convert">Convert</button>
+        <button id="cancelConvert" type="button" disabled data-i18n="web.cancel">Cancel</button>
+        <button id="copyResult" type="button" data-i18n="web.copy">Copy</button>
+        <button id="insertResult" type="button" data-i18n="web.insert">Insert</button>
+        <button id="saveDefaultTemplate" type="button" data-i18n="web.saveDefaultTemplate">Save Default Template</button>
         <select id="templateSlot" title="Template slot"></select>
-        <button id="saveTemplateSlot" type="button">Save Template</button>
+        <button id="saveTemplateSlot" type="button" data-i18n="web.saveTemplate">Save Template</button>
       </div>
     </header>
 
     <section class="layout">
       <aside class="panel controls-panel">
         <div class="field">
-          <label for="mode">Mode</label>
+          <label for="mode" data-i18n="web.mode">Mode</label>
           <select id="mode">
-            <option value="text">Text Banner</option>
-            <option value="image">Image</option>
+            <option value="text" data-i18n="web.textBanner">Text Banner</option>
+            <option value="image" data-i18n="web.image">Image</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="input">Input Text</label>
+          <label for="input" data-i18n="web.inputText">Input Text</label>
           <textarea id="input" rows="5">UnicodeArtJs</textarea>
         </div>
 
         <div class="field" id="imageInputWrap" hidden>
-          <label for="imageInput">Image File</label>
+          <label for="imageInput" data-i18n="web.imageFile">Image File</label>
           <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
-          <span id="imageName" class="hint">No image selected</span>
+          <span id="imageName" class="hint" data-i18n="web.noImageSelected">No image selected</span>
         </div>
 
         <div class="grid two">
           <div class="field">
-            <label for="height">Height</label>
+            <label for="height" data-i18n="web.height">Height</label>
             <input id="height" type="number" min="1" max="300">
           </div>
           <div class="field">
-            <label for="width">Width</label>
-            <input id="width" type="number" min="1" max="1000" placeholder="Auto">
+            <label for="width" data-i18n="web.width">Width</label>
+            <input id="width" type="number" min="1" max="1000" placeholder="Auto" data-i18n-placeholder="web.auto">
           </div>
         </div>
 
         <div class="field">
-          <label for="charset">Charset</label>
+          <label for="charset" data-i18n="web.charset">Charset</label>
           <select id="charset"></select>
         </div>
 
         <div class="field" id="customCharsWrap">
-          <label for="customChars">Custom Chars</label>
+          <label for="customChars" data-i18n="web.customChars">Custom Chars</label>
           <input id="customChars" type="text" placeholder=" .:-=+*#%@">
         </div>
 
         <div class="field">
-          <label for="font">Visual Font</label>
+          <label for="font" data-i18n="web.visualFont">Visual Font</label>
           <input id="font" type="text" list="visualFontOptions">
           <datalist id="visualFontOptions"></datalist>
         </div>
 
         <div class="field">
-          <label for="glyphFont">Glyph Font</label>
+          <label for="glyphFont" data-i18n="web.glyphFont">Glyph Font</label>
           <input id="glyphFont" type="text" list="glyphFontOptions" placeholder="Consolas, 'Courier New', monospace">
           <datalist id="glyphFontOptions"></datalist>
         </div>
 
         <div class="grid two">
           <div class="field">
-            <label for="matrixSize">Matrix</label>
+            <label for="matrixSize" data-i18n="web.matrix">Matrix</label>
             <input id="matrixSize" type="number" min="2" max="32">
           </div>
           <div class="field">
-            <label for="ratio">Ratio</label>
+            <label for="ratio" data-i18n="web.ratio">Ratio</label>
             <input id="ratio" type="number" min="0.1" max="10" step="0.1">
           </div>
         </div>
@@ -101,50 +101,50 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
         <div class="grid two">
           <label class="checkbox">
             <input id="invert" type="checkbox">
-            <span>Invert</span>
+            <span data-i18n="web.invert">Invert</span>
           </label>
           <label class="checkbox">
             <input id="trimTrailingSpaces" type="checkbox">
-            <span>Trim Spaces</span>
+            <span data-i18n="web.trimSpaces">Trim Spaces</span>
           </label>
         </div>
 
         <div class="field">
-          <label for="fontReduce">Font Reduce</label>
+          <label for="fontReduce" data-i18n="web.fontReduce">Font Reduce</label>
           <input id="fontReduce" type="number" min="0" max="20">
         </div>
 
         <section class="subpanel">
           <label class="checkbox">
             <input id="boxEnabled" type="checkbox">
-            <span>Enable Box</span>
+            <span data-i18n="web.enableBox">Enable Box</span>
           </label>
           <div class="field">
-            <label for="boxStyle">Box Style</label>
+            <label for="boxStyle" data-i18n="web.boxStyle">Box Style</label>
             <select id="boxStyle"></select>
           </div>
           <div class="field">
-            <label for="boxTitle">Box Title</label>
-            <input id="boxTitle" type="text" placeholder="Optional">
+            <label for="boxTitle" data-i18n="web.boxTitle">Box Title</label>
+            <input id="boxTitle" type="text" placeholder="Optional" data-i18n-placeholder="web.optional">
           </div>
           <label class="checkbox">
             <input id="boxShadow" type="checkbox">
-            <span>Box Shadow</span>
+            <span data-i18n="web.boxShadow">Box Shadow</span>
           </label>
           <div class="grid two">
             <div class="field">
-              <label for="boxPadding">Padding</label>
+              <label for="boxPadding" data-i18n="web.padding">Padding</label>
               <input id="boxPadding" type="number" min="0" max="20">
             </div>
             <div class="field">
-              <label for="boxMargin">Margin</label>
+              <label for="boxMargin" data-i18n="web.margin">Margin</label>
               <input id="boxMargin" type="number" min="0" max="20">
             </div>
           </div>
         </section>
 
         <div class="field">
-          <label for="insertMode">Insert Mode</label>
+          <label for="insertMode" data-i18n="web.insertMode">Insert Mode</label>
           <select id="insertMode"></select>
         </div>
       </aside>
@@ -152,7 +152,7 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
       <section class="panel preview-panel">
         <div class="preview-toolbar">
           <div>
-            <span id="statusText">Initializing...</span>
+            <span id="statusText" data-i18n="web.initializing">Initializing...</span>
             <span id="resultMeta" class="meta"></span>
             <span id="templateStatus" class="meta"></span>
           </div>
@@ -160,8 +160,8 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
         </div>
         <pre id="output" aria-live="polite"></pre>
         <div class="footer-actions">
-          <button id="saveTxt" type="button">Save TXT</button>
-          <button id="saveHtml" type="button">Save HTML</button>
+          <button id="saveTxt" type="button" data-i18n="web.saveTxt">Save TXT</button>
+          <button id="saveHtml" type="button" data-i18n="web.saveHtml">Save HTML</button>
         </div>
       </section>
     </section>

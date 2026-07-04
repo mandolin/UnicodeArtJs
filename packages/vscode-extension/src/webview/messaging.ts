@@ -11,6 +11,7 @@ import {
 import { GLYPH_FONT_OPTIONS, VISUAL_FONT_OPTIONS } from '../config/fontOptions';
 import type { ExtensionArtConfig } from '../config/types';
 import { createCoreAdapter } from '../core/coreAdapter';
+import { getWebviewMessages, t } from '../i18n';
 import { writeResult } from '../output/resultWriter';
 import type { ExtensionLogger } from '../utils/logger';
 import {
@@ -34,7 +35,7 @@ export async function handleWebviewMessage(
 ): Promise<void> {
   if (!isWebviewMessage(message)) {
     logger.warn('Rejected unknown WebView message.');
-    await postError(panel, 'Unsupported WebView message.', 'unknownMessage');
+    await postError(panel, t('message.unsupportedMessage'), 'unknownMessage');
     return;
   }
 
@@ -45,6 +46,7 @@ export async function handleWebviewMessage(
         payload: {
           config: resolveArtConfig(context),
           templates: getTemplateState(context),
+          i18n: getWebviewMessages(),
           options: {
             charsets: CHARSETS,
             boxStyles: BOX_STYLES,
@@ -65,7 +67,7 @@ export async function handleWebviewMessage(
         const result = await createCoreAdapter().convertText(message.payload.text, config);
         if (consumeCanceledRequest(panel, requestId)) {
           logger.info(`WebView text conversion canceled. requestId=${requestId}`);
-          await post(panel, { type: 'notice', payload: { message: 'Conversion canceled.' } });
+          await post(panel, { type: 'notice', payload: { message: t('message.conversionCanceled') } });
           return;
         }
 
@@ -84,13 +86,13 @@ export async function handleWebviewMessage(
         logger.info(`WebView text conversion completed. rows=${result.rows}, cols=${result.cols}, duration=${result.duration}ms`);
       } catch (error) {
         logger.error('WebView text conversion failed.', error);
-        await postError(panel, `Text conversion failed: ${getErrorMessage(error)}`, 'convertTextFailed');
+        await postError(panel, t('message.textConversionFailed', { message: getErrorMessage(error) }), 'convertTextFailed');
       }
       break;
     }
     case 'convertImage': {
       if (!message.payload.imageData) {
-        await postError(panel, 'Please choose an image file before converting.', 'missingImage');
+        await postError(panel, t('message.missingImage'), 'missingImage');
         return;
       }
 
@@ -107,7 +109,7 @@ export async function handleWebviewMessage(
         const result = await createCoreAdapter().convertImage(tempUri.fsPath, config);
         if (consumeCanceledRequest(panel, requestId)) {
           logger.info(`WebView image conversion canceled. requestId=${requestId}`);
-          await post(panel, { type: 'notice', payload: { message: 'Conversion canceled.' } });
+          await post(panel, { type: 'notice', payload: { message: t('message.conversionCanceled') } });
           return;
         }
 
@@ -126,7 +128,7 @@ export async function handleWebviewMessage(
         logger.info(`WebView image conversion completed. rows=${result.rows}, cols=${result.cols}, duration=${result.duration}ms`);
       } catch (error) {
         logger.error('WebView image conversion failed.', error);
-        await postError(panel, `Image conversion failed: ${getErrorMessage(error)}`, 'convertImageFailed');
+        await postError(panel, t('message.imageConversionFailed', { message: getErrorMessage(error) }), 'convertImageFailed');
       } finally {
         if (tempUri) {
           await vscode.workspace.fs.delete(tempUri, { useTrash: false }).then(undefined, () => undefined);
@@ -137,7 +139,7 @@ export async function handleWebviewMessage(
     case 'cancel':
       markRequestCanceled(panel, message.payload.requestId);
       logger.info(`WebView conversion cancel requested. requestId=${message.payload.requestId}`);
-      await post(panel, { type: 'notice', payload: { message: 'Canceling conversion...' } });
+      await post(panel, { type: 'notice', payload: { message: t('message.cancelingConversion') } });
       break;
     case 'savePreset':
       await savePresetTarget(context, message.payload);
@@ -149,31 +151,34 @@ export async function handleWebviewMessage(
       break;
     case 'copy':
       await vscode.env.clipboard.writeText(message.payload.content);
-      await post(panel, { type: 'notice', payload: { message: 'Copied to clipboard.' } });
+      await post(panel, { type: 'notice', payload: { message: t('message.copied') } });
       break;
     case 'insert': {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
-        await postError(panel, 'No active editor is available.', 'noActiveEditor');
+        await postError(panel, t('message.noActiveEditor'), 'noActiveEditor');
         return;
       }
       await writeResult(editor, message.payload.content, message.payload.mode);
-      await post(panel, { type: 'notice', payload: { message: 'Inserted into editor.' } });
+      await post(panel, { type: 'notice', payload: { message: t('message.inserted') } });
       break;
     }
     case 'save':
       await saveContent(message.payload.content, message.payload.format, message.payload.glyphFont);
-      await post(panel, { type: 'notice', payload: { message: 'Saved file.' } });
+      await post(panel, { type: 'notice', payload: { message: t('message.savedFile') } });
       break;
     default:
-      await postError(panel, 'Unsupported WebView message.', 'unsupportedMessage');
+      await postError(panel, t('message.unsupportedMessage'), 'unsupportedMessage');
   }
 }
 
 function getTemplateState(context: vscode.ExtensionContext): InitialWebviewState['templates'] {
   return {
     defaultConfigured: Boolean(loadDefaultTemplate(context)),
-    slots: getTemplateSlotSummaries(context),
+    slots: getTemplateSlotSummaries(context).map((item) => ({
+      ...item,
+      label: t('quickPick.templateSlot', { slot: item.slot }),
+    })),
   };
 }
 
@@ -197,9 +202,9 @@ async function savePresetTarget(
 function getPresetSavedMessage(
   payload: Extract<WebviewMessage, { type: 'savePreset' }>['payload']
 ): string {
-  if (payload.target === 'default') return 'Saved default template.';
-  if (payload.target === 'slot') return `Saved Template ${payload.slot ?? 1}.`;
-  return `Saved recent preset: ${payload.config.preset}`;
+  if (payload.target === 'default') return t('message.savedDefaultTemplate');
+  if (payload.target === 'slot') return t('message.savedTemplateSlot', { slot: payload.slot ?? 1 });
+  return t('message.savedRecentPreset', { preset: payload.config.preset });
 }
 
 async function post(panel: vscode.WebviewPanel, message: ExtensionMessage): Promise<void> {

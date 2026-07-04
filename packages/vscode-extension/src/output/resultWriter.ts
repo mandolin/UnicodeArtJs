@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { t } from '../i18n';
 
 export type InsertMode =
   | 'replaceSelection'
@@ -35,7 +36,7 @@ export async function writeResult(
       break;
     case 'clipboardOnly':
       await vscode.env.clipboard.writeText(content);
-      await vscode.window.showInformationMessage('UnicodeArtJs result copied to clipboard.');
+      await vscode.window.showInformationMessage(t('message.copied'));
       break;
     default:
       await assertNever(mode);

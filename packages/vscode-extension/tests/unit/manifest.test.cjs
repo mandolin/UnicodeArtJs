@@ -4,6 +4,8 @@ const path = require('node:path');
 const test = require('node:test');
 
 const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8'));
+const packageNls = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.nls.json'), 'utf8'));
+const packageNlsZhCn = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.nls.zh-cn.json'), 'utf8'));
 const commandSource = fs.readFileSync(path.join(__dirname, '../../src/commands/index.ts'), 'utf8');
 
 test('all contributed commands have activation events', () => {
@@ -59,3 +61,33 @@ test('editor context exposes the UnicodeArtJs template menu group', () => {
   );
   assert.equal(customTemplatesMenu.length >= 3, true, 'custom template submenu should expose template slots');
 });
+
+test('manifest localization keys are present in default and zh-CN nls files', () => {
+  const keys = collectNlsKeys(packageJson);
+
+  assert.equal(keys.size > 0, true, 'manifest should use nls placeholders');
+
+  for (const key of keys) {
+    assert.equal(Object.hasOwn(packageNls, key), true, `${key} is missing from package.nls.json`);
+    assert.equal(Object.hasOwn(packageNlsZhCn, key), true, `${key} is missing from package.nls.zh-cn.json`);
+  }
+});
+
+function collectNlsKeys(value, keys = new Set()) {
+  if (typeof value === 'string') {
+    const match = /^%(.+)%$/.exec(value);
+    if (match) keys.add(match[1]);
+    return keys;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectNlsKeys(item, keys));
+    return keys;
+  }
+
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach((item) => collectNlsKeys(item, keys));
+  }
+
+  return keys;
+}

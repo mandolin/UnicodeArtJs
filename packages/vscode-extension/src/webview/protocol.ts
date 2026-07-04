@@ -14,6 +14,7 @@ export interface InitialWebviewState {
     defaultConfigured: boolean;
     slots: TemplateSlotView[];
   };
+  i18n: Record<string, string>;
   options: {
     charsets: string[];
     boxStyles: string[];
