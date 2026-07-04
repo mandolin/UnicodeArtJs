@@ -110,6 +110,13 @@ progress {
   padding-top: 10px;
 }
 
+.advanced-panel summary {
+  color: var(--vscode-foreground);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 label {
   color: var(--vscode-descriptionForeground);
   font-size: 12px;
@@ -119,6 +126,10 @@ label {
   color: var(--vscode-descriptionForeground);
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+.warning {
+  color: var(--vscode-editorWarning-foreground);
 }
 
 .meta {

@@ -25,6 +25,8 @@ import {
 const CHARSETS = ['ASCII', 'EXTENDED', 'CHINESE_SIMPLE', 'CUSTOM'];
 const BOX_STYLES = ['single', 'double', 'round', 'bold', 'classic', 'ascii', 'singleDouble', 'doubleSingle', 'arrow', 'block', 'thick', 'none'];
 const INSERT_MODES = ['replaceSelection', 'beforeSelection', 'afterSelection', 'previousLine', 'nextLine', 'newDocument', 'clipboardOnly'] as const;
+const OUTPUT_TARGETS: ExtensionArtConfig['outputTarget'][] = ['vscode'];
+const LOCALES: ExtensionArtConfig['locale'][] = ['zh-CN', 'en-US'];
 const canceledRequests = new WeakMap<vscode.WebviewPanel, Set<string>>();
 
 export async function handleWebviewMessage(
@@ -53,6 +55,8 @@ export async function handleWebviewMessage(
             insertModes: [...INSERT_MODES],
             visualFonts: VISUAL_FONT_OPTIONS,
             glyphFonts: GLYPH_FONT_OPTIONS,
+            outputTargets: OUTPUT_TARGETS,
+            locales: LOCALES,
           },
         },
       });
@@ -164,8 +168,11 @@ export async function handleWebviewMessage(
       break;
     }
     case 'save':
-      await saveContent(message.payload.content, message.payload.format, message.payload.glyphFont);
-      await post(panel, { type: 'notice', payload: { message: t('message.savedFile') } });
+      if (await saveContent(message.payload.content, message.payload.format, message.payload.glyphFont)) {
+        await post(panel, { type: 'notice', payload: { message: t('message.savedFile') } });
+      } else {
+        await post(panel, { type: 'notice', payload: { message: t('message.saveCanceled') } });
+      }
       break;
     default:
       await postError(panel, t('message.unsupportedMessage'), 'unsupportedMessage');
@@ -215,7 +222,7 @@ async function postError(panel: vscode.WebviewPanel, message: string, code?: str
   await post(panel, { type: 'error', payload: { message, code } });
 }
 
-async function saveContent(content: string, format: SaveFormat, glyphFont?: string): Promise<void> {
+async function saveContent(content: string, format: SaveFormat, glyphFont?: string): Promise<boolean> {
   const defaultName = format === 'html' ? 'unicode-art.html' : 'unicode-art.txt';
   const uri = await vscode.window.showSaveDialog({
     defaultUri: vscode.Uri.file(defaultName),
@@ -223,12 +230,13 @@ async function saveContent(content: string, format: SaveFormat, glyphFont?: stri
       ? { HTML: ['html'] }
       : { Text: ['txt'] },
   });
-  if (!uri) return;
+  if (!uri) return false;
 
   const body = format === 'html'
     ? toHtmlDocument(content, glyphFont)
     : content;
   await vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(body));
+  return true;
 }
 
 function toHtmlDocument(content: string, glyphFont?: string): string {
@@ -237,8 +245,25 @@ function toHtmlDocument(content: string, glyphFont?: string): string {
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UnicodeArtJs Output</title>
-  <style>pre { white-space: pre; font-family: ${safeGlyphFont}; }</style>
+  <style>
+    body {
+      margin: 16px;
+      background: #ffffff;
+      color: #111111;
+    }
+
+    pre {
+      margin: 0;
+      overflow: auto;
+      font-family: ${safeGlyphFont};
+      font-size: 14px;
+      line-height: 1;
+      tab-size: 2;
+      white-space: pre;
+    }
+  </style>
 </head>
 <body>
   <pre>${escapeHtml(content)}</pre>

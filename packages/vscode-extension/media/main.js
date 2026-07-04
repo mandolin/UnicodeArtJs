@@ -27,6 +27,7 @@
     visualFontOptions: document.getElementById('visualFontOptions'),
     glyphFont: document.getElementById('glyphFont'),
     glyphFontOptions: document.getElementById('glyphFontOptions'),
+    fontWarning: document.getElementById('fontWarning'),
     matrixSize: document.getElementById('matrixSize'),
     ratio: document.getElementById('ratio'),
     invert: document.getElementById('invert'),
@@ -39,6 +40,10 @@
     boxPadding: document.getElementById('boxPadding'),
     boxMargin: document.getElementById('boxMargin'),
     insertMode: document.getElementById('insertMode'),
+    glyphWidthProfile: document.getElementById('glyphWidthProfile'),
+    wideCharRegex: document.getElementById('wideCharRegex'),
+    outputTarget: document.getElementById('outputTarget'),
+    locale: document.getElementById('locale'),
     convertText: document.getElementById('convertText'),
     cancelConvert: document.getElementById('cancelConvert'),
     copyResult: document.getElementById('copyResult'),
@@ -120,6 +125,8 @@
     fillSelect(elements.charset, payload.options.charsets, config.charset);
     fillSelect(elements.boxStyle, payload.options.boxStyles, config.box && config.box.style ? config.box.style : 'round');
     fillSelect(elements.insertMode, payload.options.insertModes, config.insertMode);
+    fillSelect(elements.outputTarget, payload.options.outputTargets, config.outputTarget);
+    fillSelect(elements.locale, payload.options.locales, config.locale);
     fillDatalist(elements.visualFontOptions, payload.options.visualFonts || []);
     fillDatalist(elements.glyphFontOptions, payload.options.glyphFonts || []);
     applyTemplateState(payload.templates);
@@ -129,6 +136,8 @@
     elements.customChars.value = config.customChars || '';
     elements.font.value = config.visualFont || config.font;
     elements.glyphFont.value = config.glyphFont || "Consolas, 'Courier New', monospace";
+    elements.glyphWidthProfile.value = config.glyphWidthProfile || 'default';
+    elements.wideCharRegex.value = config.wideCharRegex || '';
     elements.matrixSize.value = String(config.matrixSize);
     elements.ratio.value = String(config.ratio);
     elements.invert.checked = Boolean(config.invert);
@@ -142,6 +151,7 @@
     updateCustomCharsVisibility();
     updateModeVisibility();
     applyGlyphFont();
+    updateFontWarning();
     setStatus(localize('web.ready'), 0);
     setBusy(false);
   }
@@ -158,8 +168,8 @@
       font: elements.font.value,
       // 字素字体用于 Converter 预览和后续 HTML 导出显示。
       glyphFont: elements.glyphFont.value,
-      glyphWidthProfile: state.config ? state.config.glyphWidthProfile : 'default',
-      wideCharRegex: state.config ? state.config.wideCharRegex : '',
+      glyphWidthProfile: elements.glyphWidthProfile.value.trim() || 'default',
+      wideCharRegex: elements.wideCharRegex.value.trim(),
       matrixSize: numberOr(elements.matrixSize.value, 6),
       ratio: numberOr(elements.ratio.value, 2),
       invert: elements.invert.checked,
@@ -177,8 +187,8 @@
         : false,
       insertMode: elements.insertMode.value,
       preset: state.config ? state.config.preset : 'default',
-      locale: state.config ? state.config.locale : 'zh-CN',
-      outputTarget: 'vscode',
+      locale: elements.locale.value || (state.config ? state.config.locale : 'zh-CN'),
+      outputTarget: elements.outputTarget.value || 'vscode',
     };
   }
 
@@ -250,6 +260,23 @@
     elements.output.style.fontFamily = elements.glyphFont.value || "Consolas, 'Courier New', monospace";
   }
 
+  function updateFontWarning() {
+    const glyphFont = elements.glyphFont.value.toLowerCase();
+    const visualFont = elements.font.value.toLowerCase();
+    const boxStyle = elements.boxStyle.value;
+    const boxEnabled = elements.boxEnabled.checked;
+    let message = '';
+
+    if (boxEnabled && boxStyle === 'round' && (glyphFont.includes('nsimsun') || glyphFont.includes('新宋体'))) {
+      message = localize('web.fontWarningRoundNSimSun');
+    } else if (glyphFont.includes('微软雅黑 mono') || glyphFont.includes('microsoft yahei mono') || visualFont.includes('微软雅黑 mono') || visualFont.includes('microsoft yahei mono')) {
+      message = localize('web.fontWarningYaHeiMono');
+    }
+
+    elements.fontWarning.textContent = message;
+    elements.fontWarning.hidden = message.length === 0;
+  }
+
   function convert() {
     const config = collectConfig();
     const validationError = validateConfig(config);
@@ -307,7 +334,13 @@
   });
   elements.mode.addEventListener('change', updateModeVisibility);
   elements.charset.addEventListener('change', updateCustomCharsVisibility);
-  elements.glyphFont.addEventListener('input', applyGlyphFont);
+  elements.font.addEventListener('input', updateFontWarning);
+  elements.glyphFont.addEventListener('input', () => {
+    applyGlyphFont();
+    updateFontWarning();
+  });
+  elements.boxEnabled.addEventListener('change', updateFontWarning);
+  elements.boxStyle.addEventListener('change', updateFontWarning);
   elements.imageInput.addEventListener('change', () => {
     const file = elements.imageInput.files && elements.imageInput.files[0];
     if (!file) {
@@ -379,7 +412,13 @@
         state.currentResult = message.payload.content;
         applyGlyphFont();
         elements.output.textContent = message.payload.content;
-        elements.resultMeta.textContent = `${message.payload.source} | ${message.payload.cols} cols x ${message.payload.rows} rows | ${formatBytes(message.payload.content.length)}`;
+        elements.resultMeta.textContent = localize('web.meta', {
+          source: message.payload.source,
+          cols: message.payload.cols,
+          rows: message.payload.rows,
+          chars: message.payload.content.length,
+          preset: collectConfig().preset,
+        });
         state.activeRequestId = '';
         setBusy(false);
         setStatus(localize('web.done', { cols: message.payload.cols, rows: message.payload.rows }), 1);

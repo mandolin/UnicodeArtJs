@@ -85,6 +85,8 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
           <label for="glyphFont" data-i18n="web.glyphFont">Glyph Font</label>
           <input id="glyphFont" type="text" list="glyphFontOptions" placeholder="Consolas, 'Courier New', monospace">
           <datalist id="glyphFontOptions"></datalist>
+          <span class="hint" data-i18n="web.fontHint">Visual font affects text rendering before conversion; glyph font affects preview, HTML export, and editor display.</span>
+          <span id="fontWarning" class="hint warning" hidden></span>
         </div>
 
         <div class="grid two">
@@ -147,6 +149,29 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
           <label for="insertMode" data-i18n="web.insertMode">Insert Mode</label>
           <select id="insertMode"></select>
         </div>
+
+        <details class="subpanel advanced-panel">
+          <summary data-i18n="web.advanced">Advanced</summary>
+          <p class="hint" data-i18n="web.reservedWidthRules">Reserved width-rule fields. They are exposed for later mixed-width font tuning and do not fully solve all font metric differences yet.</p>
+          <div class="field">
+            <label for="glyphWidthProfile" data-i18n="web.glyphWidthProfile">Glyph Width Profile</label>
+            <input id="glyphWidthProfile" type="text" placeholder="default">
+          </div>
+          <div class="field">
+            <label for="wideCharRegex" data-i18n="web.wideCharRegex">Wide Glyph Regex</label>
+            <input id="wideCharRegex" type="text">
+          </div>
+          <div class="grid two">
+            <div class="field">
+              <label for="outputTarget" data-i18n="web.outputTarget">Output Target</label>
+              <select id="outputTarget"></select>
+            </div>
+            <div class="field">
+              <label for="locale" data-i18n="web.locale">Language</label>
+              <select id="locale"></select>
+            </div>
+          </div>
+        </details>
       </aside>
 
       <section class="panel preview-panel">

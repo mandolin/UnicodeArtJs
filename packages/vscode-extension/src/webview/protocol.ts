@@ -21,6 +21,8 @@ export interface InitialWebviewState {
     insertModes: InsertMode[];
     visualFonts: string[];
     glyphFonts: string[];
+    outputTargets: ExtensionArtConfig['outputTarget'][];
+    locales: ExtensionArtConfig['locale'][];
   };
 }
 
