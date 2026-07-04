@@ -21,6 +21,8 @@ class MockCanvas {
   }
 }
 
+const mockFillTextBaselines: string[] = [];
+
 class MockContext {
   fillStyle = '#000000';
   font = '10px Arial';
@@ -41,6 +43,7 @@ class MockContext {
 
   fillText(text: string, x: number, y: number): void {
     this.ensurePixels();
+    mockFillTextBaselines.push(this.textBaseline);
     const startX = Math.max(0, Math.floor(x));
     const startY = Math.max(0, Math.floor(y));
     const width = Math.max(1, Math.min(this.canvas.width - startX, text.length || 1));
@@ -53,8 +56,17 @@ class MockContext {
     }
   }
 
-  measureText(text: string): { width: number } {
-    return { width: text.length * 3 };
+  measureText(text: string): {
+    width: number;
+    actualBoundingBoxAscent?: number;
+    actualBoundingBoxDescent?: number;
+  } {
+    // 中文注释：模拟浏览器现代 Canvas 度量字段，便于验证字体垂直纠偏分支。
+    return {
+      width: text.length * 3,
+      actualBoundingBoxAscent: 4,
+      actualBoundingBoxDescent: 2
+    };
   }
 
   drawImage(source: any): void {
@@ -102,6 +114,7 @@ describe('browserPlatformAdapter', () => {
 
   beforeEach(() => {
     clearBrowserAdapterCache();
+    mockFillTextBaselines.length = 0;
     (globalThis as any).OffscreenCanvas = undefined;
     (globalThis as any).document = {
       createElement: (tag: string) => {
@@ -156,6 +169,26 @@ describe('browserPlatformAdapter', () => {
     expect(image.width).toBe(4);
     expect(image.height).toBe(4);
     expect(image.data.some((value) => value < 255)).toBe(true);
+  });
+
+  test('keeps top baseline except YaHei-like visual fonts', async () => {
+    await browserPlatformAdapter.renderTextToImage('A', {
+      font: 'Arial',
+      fontSize: 4,
+      width: 8,
+      height: 8
+    });
+    expect(mockFillTextBaselines).toContain('top');
+    expect(mockFillTextBaselines).not.toContain('alphabetic');
+
+    mockFillTextBaselines.length = 0;
+    await browserPlatformAdapter.renderTextToImage('A', {
+      font: 'Microsoft YaHei',
+      fontSize: 8,
+      width: 12,
+      height: 12
+    });
+    expect(mockFillTextBaselines).toContain('alphabetic');
   });
 
   test('renders character matrices through browser canvas APIs', async () => {

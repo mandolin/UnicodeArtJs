@@ -264,13 +264,15 @@ export async function renderTextToImage(
     // 🔹 处理多行文本
     const lines = text.split('\n');
     
-    // 🔹 计算实际字体大小
-    const actualFontSize = Math.max(1, fontSize);
+    // 🔹 计算实际字体大小，并根据真实字形高度自动收缩，避免微软雅黑等字体下沿被裁切。
+    const requestedFontSize = Math.max(1, fontSize);
+    const useVerticalFit = needsVisualFontVerticalFit(font);
+    const fittedFontSize = useVerticalFit ? resolveFittedTextFontSize(ctx, font, requestedFontSize) : requestedFontSize;
     
     // 🔹 设置字体和颜色
     ctx.fillStyle = '#000000';
-    ctx.font = `${actualFontSize}px ${formatCanvasFontFamily(font)}`;
-    ctx.textBaseline = 'top';
+    ctx.font = `${fittedFontSize}px ${formatCanvasFontFamily(font)}`;
+    ctx.textBaseline = useVerticalFit ? 'alphabetic' : 'top';
     
     // 🔹 计算每行的rectunit（与Python一致）
     const effectiveLineSpacing = lineSpacingPixelsOverride ?? lineSpacing;
@@ -286,7 +288,15 @@ export async function renderTextToImage(
     }
     
     // 🔹 逐行绘制文本（参考Python实现）
-    let currentY = fontReduce; // ← 关键：从fontReduce开始，形成视觉字体渲染上内边距
+    // 🔹 只有 YaHei 系列使用 alphabetic baseline + 实际字形度量，避免破坏参考项目 parity。
+    const verticalMetrics = useVerticalFit ? measureTextVerticalMetrics(ctx, lines) : undefined;
+    const drawableLineHeight = Math.max(1, rectunit - fontReduce * 2);
+    const verticalCenterOffset = verticalMetrics
+      ? Math.max(0, Math.floor((drawableLineHeight - verticalMetrics.height) / 2))
+      : 0;
+    let currentY = verticalMetrics
+      ? fontReduce + verticalCenterOffset + verticalMetrics.ascent
+      : fontReduce;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -297,7 +307,7 @@ export async function renderTextToImage(
       
       for (const char of line) {
         const metrics = ctx.measureText(char);
-        const charWidth = fontSize < 8 ? Math.round(metrics.width) : Math.ceil(metrics.width);
+        const charWidth = fittedFontSize < 8 ? Math.round(metrics.width) : Math.ceil(metrics.width);
         charWidths.push(charWidth);
         lineWidth += charWidth + fontReduce * 2;
       }
@@ -325,11 +335,8 @@ export async function renderTextToImage(
       }
       
       // 🔹 更新Y坐标到下一行
-      if (i < lines.length - 1) {
-        currentY += rectunit + effectiveLineSpacing;
-      } else {
-        currentY += rectunit;
-      }
+      currentY += rectunit;
+      if (i < lines.length - 1) currentY += effectiveLineSpacing;
     }
     
     // 🔹 获取像素数据
@@ -423,6 +430,66 @@ function darkenTextBand(
 function formatCanvasFontFamily(font: string): string {
   const escapedFont = font.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return `"${escapedFont}"`;
+}
+
+interface TextVerticalMetrics {
+  ascent: number;
+  descent: number;
+  height: number;
+}
+
+function resolveFittedTextFontSize(ctx: any, font: string, requestedFontSize: number): number {
+  if (!needsVisualFontVerticalFit(font)) {
+    return requestedFontSize;
+  }
+
+  const family = formatCanvasFontFamily(font);
+  ctx.font = `${requestedFontSize}px ${family}`;
+  const metrics = measureTextVerticalMetrics(ctx, ['Mg|中文测试jyqpQÅÄÉ国']);
+  if (metrics.height <= requestedFontSize || metrics.height <= 0) {
+    return requestedFontSize;
+  }
+
+  // 中文注释：部分视觉字体的实际墨迹高度会超过字号，这里按比例收缩以避免下沿裁切。
+  const fittedSize = Math.max(1, Math.floor(requestedFontSize * requestedFontSize / metrics.height));
+  ctx.font = `${fittedSize}px ${family}`;
+  return fittedSize;
+}
+
+function measureTextVerticalMetrics(ctx: any, lines: string[]): TextVerticalMetrics {
+  let ascent = 0;
+  let descent = 0;
+  const samples = lines.some((line) => line.length > 0) ? lines : ['Mg|中文测试jyqpQÅÄÉ国'];
+
+  for (const line of samples) {
+    const metrics = ctx.measureText(line.length > 0 ? line : ' ');
+    ascent = Math.max(ascent, Math.ceil(metrics.actualBoundingBoxAscent || 0));
+    descent = Math.max(descent, Math.ceil(metrics.actualBoundingBoxDescent || 0));
+  }
+
+  if (ascent + descent <= 0) {
+    const fallbackSize = parseCanvasFontSize(ctx.font);
+    ascent = Math.ceil(fallbackSize * 0.8);
+    descent = Math.ceil(fallbackSize * 0.2);
+  }
+
+  return {
+    ascent,
+    descent,
+    height: ascent + descent
+  };
+}
+
+function parseCanvasFontSize(font: string): number {
+  const match = /(\d+(?:\.\d+)?)px/u.exec(font);
+  return match ? Number(match[1]) : 1;
+}
+
+function needsVisualFontVerticalFit(font: string): boolean {
+  const normalized = font.toLowerCase();
+  return normalized.includes('microsoft yahei') ||
+    normalized.includes('微软雅黑') ||
+    normalized.includes('yahei');
 }
 
 //#endregion

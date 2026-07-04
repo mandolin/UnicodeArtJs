@@ -108,11 +108,12 @@ function measureTextWidthWithCanvas(
     const { createCanvas } = require('canvas');
     const tempCanvas = createCanvas(1, 1);
     const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.font = `${fontSize}px ${formatCanvasFontFamily(font)}`;
+    const fittedFontSize = resolveFittedTextFontSize(tempCtx, font, fontSize);
+    tempCtx.font = `${fittedFontSize}px ${formatCanvasFontFamily(font)}`;
 
     return Array.from(text).reduce((sum, char) => {
       const measuredWidth = tempCtx.measureText(char).width;
-      const charWidth = fontSize < 8 ? Math.round(measuredWidth) : Math.ceil(measuredWidth);
+      const charWidth = fittedFontSize < 8 ? Math.round(measuredWidth) : Math.ceil(measuredWidth);
       return sum + charWidth + fontReduce * 2;
     }, 0);
   } catch (error: any) {
@@ -135,6 +136,41 @@ function measureTextWidthWithCanvas(
 function formatCanvasFontFamily(font: string): string {
   const escapedFont = font.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   return `"${escapedFont}"`;
+}
+
+function resolveFittedTextFontSize(ctx: any, font: string, requestedFontSize: number): number {
+  if (!needsVisualFontVerticalFit(font)) {
+    return requestedFontSize;
+  }
+
+  const family = formatCanvasFontFamily(font);
+  ctx.font = `${requestedFontSize}px ${family}`;
+  const metrics = measureTextVerticalMetrics(ctx, 'Mg|中文测试jyqpQÅÄÉ国');
+  if (metrics <= requestedFontSize || metrics <= 0) {
+    return requestedFontSize;
+  }
+
+  // 中文注释：与文本渲染路径保持一致，宽度测量也使用自动收缩后的视觉字体字号。
+  return Math.max(1, Math.floor(requestedFontSize * requestedFontSize / metrics));
+}
+
+function measureTextVerticalMetrics(ctx: any, sample: string): number {
+  const metrics = ctx.measureText(sample);
+  const height = Math.ceil(metrics.actualBoundingBoxAscent || 0) + Math.ceil(metrics.actualBoundingBoxDescent || 0);
+  if (height > 0) return height;
+  return parseCanvasFontSize(ctx.font);
+}
+
+function parseCanvasFontSize(font: string): number {
+  const match = /(\d+(?:\.\d+)?)px/u.exec(font);
+  return match ? Number(match[1]) : 1;
+}
+
+function needsVisualFontVerticalFit(font: string): boolean {
+  const normalized = font.toLowerCase();
+  return normalized.includes('microsoft yahei') ||
+    normalized.includes('微软雅黑') ||
+    normalized.includes('yahei');
 }
 
 //#endregion

@@ -44,7 +44,11 @@ type CanvasRenderingContextLike = {
   textBaseline: string;
   fillRect(x: number, y: number, width: number, height: number): void;
   fillText(text: string, x: number, y: number): void;
-  measureText(text: string): { width: number };
+  measureText(text: string): {
+    width: number;
+    actualBoundingBoxAscent?: number;
+    actualBoundingBoxDescent?: number;
+  };
   drawImage(source: unknown, dx: number, dy: number, width?: number, height?: number): void;
   getImageData(x: number, y: number, width: number, height: number): { data: Uint8ClampedArray | Uint8Array };
 };
@@ -432,13 +436,18 @@ function renderTextToCoreImage(text: string, options: TextRenderOptions): CoreIm
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, options.width, options.height);
 
-    const fontSize = Math.max(1, options.fontSize);
+    const requestedFontSize = Math.max(1, options.fontSize);
     const fontReduce = options.fontReduce ?? 0;
     const lines = text.split('\n');
+    const useVerticalFit = needsVisualFontVerticalFit(options.font);
+    const fontSize = useVerticalFit
+      ? resolveFittedTextFontSize(ctx, options.font, requestedFontSize)
+      : requestedFontSize;
 
     ctx.fillStyle = '#000000';
     ctx.font = `${fontSize}px ${formatCanvasFontFamily(options.font)}`;
-    ctx.textBaseline = 'top';
+    // 中文注释：默认仍沿用参考项目的 top baseline；仅对微软雅黑类字体启用垂直度量纠偏。
+    ctx.textBaseline = useVerticalFit ? 'alphabetic' : 'top';
 
     const effectiveLineSpacing = options.lineSpacingPixels ?? options.lineSpacing ?? 0;
     let rectunit: number;
@@ -452,7 +461,14 @@ function renderTextToCoreImage(text: string, options: TextRenderOptions): CoreIm
       rectunit = Math.floor(drawingHeight / lines.length);
     }
 
-    let currentY = fontReduce;
+    const verticalMetrics = useVerticalFit ? measureTextVerticalMetrics(ctx, lines) : undefined;
+    const drawableLineHeight = Math.max(1, rectunit - fontReduce * 2);
+    const verticalCenterOffset = verticalMetrics
+      ? Math.max(0, Math.floor((drawableLineHeight - verticalMetrics.height) / 2))
+      : 0;
+    let currentY = verticalMetrics
+      ? fontReduce + verticalCenterOffset + verticalMetrics.ascent
+      : fontReduce;
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
       const charWidths: number[] = [];
@@ -511,10 +527,11 @@ function measureTextWidthWithCanvas(text: string, options: TextMeasureOptions): 
   const canvas = createCanvas(1, 1);
   const ctx = get2dContext(canvas);
   const fontReduce = options.fontReduce ?? 0;
-  ctx.font = `${options.fontSize}px ${formatCanvasFontFamily(options.font)}`;
+  const fontSize = resolveFittedTextFontSize(ctx, options.font, options.fontSize);
+  ctx.font = `${fontSize}px ${formatCanvasFontFamily(options.font)}`;
 
   return Array.from(text).reduce((sum, char) => {
-    return sum + measureSingleCharWidth(ctx, char, options.fontSize) + fontReduce * 2;
+    return sum + measureSingleCharWidth(ctx, char, fontSize) + fontReduce * 2;
   }, 0);
 }
 
@@ -597,6 +614,71 @@ function get2dContext(canvas: CanvasLike): CanvasRenderingContextLike {
 function measureSingleCharWidth(ctx: CanvasRenderingContextLike, char: string, fontSize: number): number {
   const measuredWidth = ctx.measureText(char).width;
   return fontSize < 8 ? Math.round(measuredWidth) : Math.ceil(measuredWidth);
+}
+
+interface TextVerticalMetrics {
+  ascent: number;
+  descent: number;
+  height: number;
+}
+
+function resolveFittedTextFontSize(
+  ctx: CanvasRenderingContextLike,
+  font: string,
+  requestedFontSize: number
+): number {
+  if (!needsVisualFontVerticalFit(font)) {
+    return requestedFontSize;
+  }
+
+  const family = formatCanvasFontFamily(font);
+  ctx.font = `${requestedFontSize}px ${family}`;
+  const metrics = measureTextVerticalMetrics(ctx, ['Mg|中文测试jyqpQÅÄÉ国']);
+  if (metrics.height <= requestedFontSize || metrics.height <= 0) {
+    return requestedFontSize;
+  }
+
+  // 中文注释：浏览器 Canvas 也按真实墨迹高度自动收缩视觉字体，避免底部裁切。
+  return Math.max(1, Math.floor(requestedFontSize * requestedFontSize / metrics.height));
+}
+
+function measureTextVerticalMetrics(
+  ctx: CanvasRenderingContextLike,
+  lines: string[]
+): TextVerticalMetrics {
+  let ascent = 0;
+  let descent = 0;
+  const samples = lines.some((line) => line.length > 0) ? lines : ['Mg|中文测试jyqpQÅÄÉ国'];
+
+  for (const line of samples) {
+    const metrics = ctx.measureText(line.length > 0 ? line : ' ');
+    ascent = Math.max(ascent, Math.ceil(metrics.actualBoundingBoxAscent || 0));
+    descent = Math.max(descent, Math.ceil(metrics.actualBoundingBoxDescent || 0));
+  }
+
+  if (ascent + descent <= 0) {
+    const fallbackSize = parseCanvasFontSize(ctx.font);
+    ascent = Math.ceil(fallbackSize * 0.8);
+    descent = Math.ceil(fallbackSize * 0.2);
+  }
+
+  return {
+    ascent,
+    descent,
+    height: ascent + descent
+  };
+}
+
+function parseCanvasFontSize(font: string): number {
+  const match = /(\d+(?:\.\d+)?)px/u.exec(font);
+  return match ? Number(match[1]) : 1;
+}
+
+function needsVisualFontVerticalFit(font: string): boolean {
+  const normalized = font.toLowerCase();
+  return normalized.includes('microsoft yahei') ||
+    normalized.includes('微软雅黑') ||
+    normalized.includes('yahei');
 }
 
 function resolveTextX(
