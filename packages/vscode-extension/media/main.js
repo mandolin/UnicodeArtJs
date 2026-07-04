@@ -14,10 +14,13 @@
 
   const elements = {
     mode: document.getElementById('mode'),
+    controlsPanel: document.getElementById('controlsPanel'),
     input: document.getElementById('input'),
     imageInputWrap: document.getElementById('imageInputWrap'),
     imageInput: document.getElementById('imageInput'),
     imageName: document.getElementById('imageName'),
+    imageMeta: document.getElementById('imageMeta'),
+    clearImage: document.getElementById('clearImage'),
     height: document.getElementById('height'),
     width: document.getElementById('width'),
     charset: document.getElementById('charset'),
@@ -82,6 +85,12 @@
     document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
       element.setAttribute('placeholder', localize(element.dataset.i18nPlaceholder));
     });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
+      element.setAttribute('aria-label', localize(element.dataset.i18nAriaLabel));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach((element) => {
+      element.setAttribute('title', localize(element.dataset.i18nTitle));
+    });
   }
 
   function setBusy(isBusy) {
@@ -95,6 +104,9 @@
     elements.saveDefaultTemplate.disabled = isBusy;
     elements.saveTemplateSlot.disabled = isBusy;
     elements.templateSlot.disabled = isBusy;
+    elements.controlsPanel.querySelectorAll('input, select, textarea').forEach((control) => {
+      control.disabled = isBusy;
+    });
   }
 
   function fillSelect(select, values, current) {
@@ -302,6 +314,8 @@
       post('convertImage', {
         imageData: state.imageData,
         fileName: state.imageFileName,
+        fileSize: state.imageSize,
+        mimeType: getImageMimeType(),
         config,
         requestId,
       });
@@ -348,6 +362,8 @@
       state.imageFileName = '';
       state.imageSize = 0;
       elements.imageName.textContent = localize('web.noImageSelected');
+      elements.imageMeta.textContent = '';
+      elements.clearImage.disabled = true;
       return;
     }
 
@@ -356,7 +372,13 @@
       state.imageData = typeof reader.result === 'string' ? reader.result : '';
       state.imageFileName = file.name;
       state.imageSize = file.size;
-      elements.imageName.textContent = `${file.name} (${formatBytes(file.size)})`;
+      elements.imageName.textContent = file.name;
+      elements.imageMeta.textContent = localize('web.imageDetails', {
+        name: file.name,
+        type: file.type || 'unknown',
+        size: formatBytes(file.size),
+      });
+      elements.clearImage.disabled = false;
       setStatus(localize('web.imageReady'), 0);
     });
     reader.addEventListener('error', () => {
@@ -364,10 +386,13 @@
       state.imageFileName = '';
       state.imageSize = 0;
       elements.imageName.textContent = localize('web.failedToLoadImage');
+      elements.imageMeta.textContent = '';
+      elements.clearImage.disabled = true;
       setStatus(localize('web.failedToLoadImage'), 0);
     });
     reader.readAsDataURL(file);
   });
+  elements.clearImage.addEventListener('click', clearImage);
   elements.copyResult.addEventListener('click', () => post('copy', { content: state.currentResult }));
   elements.insertResult.addEventListener('click', () => post('insert', {
     content: state.currentResult,
@@ -429,7 +454,9 @@
       case 'error':
         state.activeRequestId = '';
         setBusy(false);
-        setStatus(localize('web.error', { message: message.payload.message }), 0);
+        setStatus(message.payload.code
+          ? localize('web.errorWithCode', { message: message.payload.message, code: message.payload.code })
+          : localize('web.error', { message: message.payload.message }), 0);
         break;
       case 'notice':
         if (message.payload.message.includes('canceled')) {
@@ -450,5 +477,21 @@
     const kb = bytes / 1024;
     if (kb < 1024) return `${kb.toFixed(1)} KB`;
     return `${(kb / 1024).toFixed(1)} MB`;
+  }
+
+  function clearImage() {
+    state.imageData = '';
+    state.imageFileName = '';
+    state.imageSize = 0;
+    elements.imageInput.value = '';
+    elements.imageName.textContent = localize('web.noImageSelected');
+    elements.imageMeta.textContent = '';
+    elements.clearImage.disabled = true;
+    setStatus(localize('web.noImageSelected'), 0);
+  }
+
+  function getImageMimeType() {
+    const match = /^data:([^;,]+);/u.exec(state.imageData);
+    return match ? match[1] : '';
   }
 }());

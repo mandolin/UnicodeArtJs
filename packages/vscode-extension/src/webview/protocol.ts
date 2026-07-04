@@ -35,6 +35,8 @@ export interface ConvertTextPayload {
 export interface ConvertImagePayload {
   imageData?: string;
   fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
   config?: Partial<ExtensionArtConfig>;
   requestId?: string;
 }

@@ -96,6 +96,7 @@ export async function handleWebviewMessage(
     }
     case 'convertImage': {
       if (!message.payload.imageData) {
+        logger.warn('WebView image conversion rejected: missing image data.');
         await postError(panel, t('message.missingImage'), 'missingImage');
         return;
       }
@@ -104,7 +105,10 @@ export async function handleWebviewMessage(
       try {
         const requestId = message.payload.requestId;
         const config = mergeExtensionConfig(resolveArtConfig(context), message.payload.config);
-        logger.info(`WebView image conversion requested. file=${message.payload.fileName ?? 'unnamed'}, preset=${config.preset}`);
+        logger.info(
+          `WebView image conversion requested. file=${message.payload.fileName ?? 'unnamed'}, ` +
+          `type=${message.payload.mimeType ?? 'unknown'}, size=${message.payload.fileSize ?? 0}, preset=${config.preset}`
+        );
         await post(panel, { type: 'progress', payload: { stage: 'loadImage', progress: 0.15 } });
 
         tempUri = await writeTempImage(context, message.payload.imageData, message.payload.fileName);
@@ -154,23 +158,29 @@ export async function handleWebviewMessage(
       await post(panel, { type: 'notice', payload: { message: getPresetSavedMessage(message.payload) } });
       break;
     case 'copy':
+      logger.info(`WebView copy requested. chars=${message.payload.content.length}`);
       await vscode.env.clipboard.writeText(message.payload.content);
       await post(panel, { type: 'notice', payload: { message: t('message.copied') } });
       break;
     case 'insert': {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
+        logger.warn('WebView insert rejected: no active editor.');
         await postError(panel, t('message.noActiveEditor'), 'noActiveEditor');
         return;
       }
+      logger.info(`WebView insert requested. mode=${message.payload.mode}, chars=${message.payload.content.length}`);
       await writeResult(editor, message.payload.content, message.payload.mode);
       await post(panel, { type: 'notice', payload: { message: t('message.inserted') } });
       break;
     }
     case 'save':
+      logger.info(`WebView save requested. format=${message.payload.format}, chars=${message.payload.content.length}`);
       if (await saveContent(message.payload.content, message.payload.format, message.payload.glyphFont)) {
+        logger.info(`WebView save completed. format=${message.payload.format}`);
         await post(panel, { type: 'notice', payload: { message: t('message.savedFile') } });
       } else {
+        logger.info(`WebView save canceled. format=${message.payload.format}`);
         await post(panel, { type: 'notice', payload: { message: t('message.saveCanceled') } });
       }
       break;

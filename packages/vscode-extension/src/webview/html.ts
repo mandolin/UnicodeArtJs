@@ -22,19 +22,19 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
         <h1>UnicodeArtJs</h1>
         <p class="subtitle" data-i18n="web.subtitle">VSCode converter preview</p>
       </div>
-      <div class="header-actions">
+      <div class="header-actions" aria-label="Converter actions" data-i18n-aria-label="web.actions">
         <button id="convertText" type="button" data-i18n="web.convert">Convert</button>
         <button id="cancelConvert" type="button" disabled data-i18n="web.cancel">Cancel</button>
         <button id="copyResult" type="button" data-i18n="web.copy">Copy</button>
         <button id="insertResult" type="button" data-i18n="web.insert">Insert</button>
         <button id="saveDefaultTemplate" type="button" data-i18n="web.saveDefaultTemplate">Save Default Template</button>
-        <select id="templateSlot" title="Template slot"></select>
+        <select id="templateSlot" title="Template slot" aria-label="Template slot" data-i18n-title="web.templateSlot" data-i18n-aria-label="web.templateSlot"></select>
         <button id="saveTemplateSlot" type="button" data-i18n="web.saveTemplate">Save Template</button>
       </div>
     </header>
 
     <section class="layout">
-      <aside class="panel controls-panel">
+      <aside id="controlsPanel" class="panel controls-panel">
         <div class="field">
           <label for="mode" data-i18n="web.mode">Mode</label>
           <select id="mode">
@@ -52,6 +52,8 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
           <label for="imageInput" data-i18n="web.imageFile">Image File</label>
           <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
           <span id="imageName" class="hint" data-i18n="web.noImageSelected">No image selected</span>
+          <span id="imageMeta" class="hint"></span>
+          <button id="clearImage" type="button" data-i18n="web.clearImage" disabled>Clear Image</button>
         </div>
 
         <div class="grid two">
@@ -176,14 +178,14 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
 
       <section class="panel preview-panel">
         <div class="preview-toolbar">
-          <div>
+          <div id="statusRegion" role="status" aria-live="polite" aria-atomic="true">
             <span id="statusText" data-i18n="web.initializing">Initializing...</span>
             <span id="resultMeta" class="meta"></span>
             <span id="templateStatus" class="meta"></span>
           </div>
-          <progress id="progress" max="1" value="0"></progress>
+          <progress id="progress" max="1" value="0" aria-label="Conversion progress" data-i18n-aria-label="web.progress"></progress>
         </div>
-        <pre id="output" aria-live="polite"></pre>
+        <pre id="output" role="region" aria-label="UnicodeArtJs output" data-i18n-aria-label="web.output" aria-live="polite"></pre>
         <div class="footer-actions">
           <button id="saveTxt" type="button" data-i18n="web.saveTxt">Save TXT</button>
           <button id="saveHtml" type="button" data-i18n="web.saveHtml">Save HTML</button>
