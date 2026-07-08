@@ -1,6 +1,6 @@
 {
   "name": "unicode-art-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MIT-licensed Unicode Art CLI for converting text and images to character art",
   "main": "src/console.js",
   "bin": {
