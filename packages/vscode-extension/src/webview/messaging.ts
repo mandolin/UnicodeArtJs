@@ -250,7 +250,7 @@ async function saveContent(content: string, format: SaveFormat, glyphFont?: stri
 }
 
 function toHtmlDocument(content: string, glyphFont?: string): string {
-  const safeGlyphFont = sanitizeCssFontFamily(glyphFont || "Consolas, 'Courier New', monospace");
+  const safeGlyphFont = sanitizeCssFontFamily(glyphFont || "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace");
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -284,7 +284,7 @@ function toHtmlDocument(content: string, glyphFont?: string): string {
 function sanitizeCssFontFamily(value: string): string {
   // 只保留字体族列表常见字符，避免把 WebView 输入直接写成任意 CSS。
   const cleaned = value.replace(/[^a-zA-Z0-9\u4e00-\u9fff\s'",._#-]/g, '').trim();
-  return cleaned.length > 0 ? cleaned : "Consolas, 'Courier New', monospace";
+  return cleaned.length > 0 ? cleaned : "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace";
 }
 
 function escapeHtml(value: string): string {

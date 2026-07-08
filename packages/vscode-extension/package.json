@@ -135,17 +135,17 @@
         },
         "unicodeArtJs.font": {
           "type": "string",
-          "default": "Arial",
+          "default": "Noto Sans SC",
           "description": "%config.font%"
         },
         "unicodeArtJs.visualFont": {
           "type": "string",
-          "default": "Arial",
+          "default": "Noto Sans SC",
           "description": "%config.visualFont%"
         },
         "unicodeArtJs.glyphFont": {
           "type": "string",
-          "default": "Consolas, 'Courier New', monospace",
+          "default": "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace",
           "description": "%config.glyphFont%"
         },
         "unicodeArtJs.glyphWidthProfile": {

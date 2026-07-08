@@ -144,7 +144,7 @@ export function trimTrailingSpaces(line: string): string {
  * 
  * @remarks
  * - 使用<pre>标签保持等宽字体和对齐
- * - 默认使用Courier New字体
+ * - 默认使用开源等宽字体优先的 fallback 字体栈
  * - 支持深色模式（invert配置）
  * - 可添加元数据和版权信息
  * 
@@ -179,7 +179,7 @@ export function assembleHTML(
       padding: 20px;
       background-color: ${bgColor};
       color: ${fgColor};
-      font-family: 'Courier New', Courier, monospace;
+      font-family: 'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace;
       display: flex;
       justify-content: center;
       align-items: center;

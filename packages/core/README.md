@@ -66,7 +66,7 @@ const capabilities = getBrowserRuntimeCapabilities();
 const result = await imageToArt(file, {
   width: 80,
   matrixSize: 6,
-  font: 'Consolas',
+  font: 'Noto Sans SC',
   outputFormat: OutputFormat.PLAIN_TEXT,
   charset: {
     type: PresetCharset.CUSTOM,
@@ -122,11 +122,11 @@ Important options:
 await textToArt('UnicodeArtJs', {
   height: 20,
   visualFont: {
-    family: 'SimSun',
+    family: 'Noto Sans SC',
     reduce: 0
   },
   glyphFont: {
-    family: 'NSimSun',
+    family: 'Sarasa Mono SC, LXGW WenKai Mono, Source Code Pro, Liberation Mono, monospace',
     widthProfile: 'default',
     wideCharRegex: undefined
   },

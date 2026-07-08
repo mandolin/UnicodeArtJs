@@ -74,11 +74,11 @@ Common settings:
 Visual font notes:
 
 - `Visual Font` controls how input text is rasterized before conversion.
-- Localized Chinese names such as `黑体`, `宋体`, `新宋体`, and `微软雅黑` are normalized to Node canvas friendly names such as `SimHei`, `SimSun`, `NSimSun`, and `Microsoft YaHei`.
+- Built-in defaults and suggestions prefer open fonts such as `Noto Sans SC`, `Sarasa Mono SC`, `LXGW WenKai Mono`, `Source Code Pro`, and `Liberation Mono`.
+- Localized Chinese system-font names such as `黑体`, `宋体`, `新宋体`, and `微软雅黑` are still normalized for old user presets, but they are compatibility inputs only. UnicodeArtJs does not redistribute these fonts.
 - `Glyph Font` only controls how the generated art is displayed in preview/export. It does not change the source text rasterization.
-- For best display, prefer a strict mixed-width monospace font, for example `新宋体`, `等距更纱黑体 SC`, or `霞鹜文楷等宽`.
-- In VSCode, some fonts such as `微软雅黑 Mono` may show unexpected spacing because of editor font metrics or fallback behavior. Try changing `editor.fontFamily`, trying another glyph font, or toggling `editor.disableMonospaceOptimizations`.
-- With `新宋体` and round boxes, upper rounded corners may not visually fit perfectly because of the font's own glyph design.
+- For best display, prefer a strict mixed-width monospace font, for example `Sarasa Mono SC` / `等距更纱黑体 SC` or `LXGW WenKai Mono` / `霞鹜文楷等宽`.
+- In VSCode, some locally installed system fonts may show unexpected spacing because of editor font metrics or fallback behavior. Try changing `editor.fontFamily`, trying another glyph font, or toggling `editor.disableMonospaceOptimizations`.
 
 Box settings:
 

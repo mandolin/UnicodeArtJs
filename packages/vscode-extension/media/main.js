@@ -147,7 +147,7 @@
     elements.width.value = config.width === undefined ? '' : String(config.width);
     elements.customChars.value = config.customChars || '';
     elements.font.value = config.visualFont || config.font;
-    elements.glyphFont.value = config.glyphFont || "Consolas, 'Courier New', monospace";
+    elements.glyphFont.value = config.glyphFont || "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace";
     elements.glyphWidthProfile.value = config.glyphWidthProfile || 'default';
     elements.wideCharRegex.value = config.wideCharRegex || '';
     elements.matrixSize.value = String(config.matrixSize);
@@ -269,7 +269,7 @@
   }
 
   function applyGlyphFont() {
-    elements.output.style.fontFamily = elements.glyphFont.value || "Consolas, 'Courier New', monospace";
+    elements.output.style.fontFamily = elements.glyphFont.value || "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace";
   }
 
   function updateFontWarning() {

@@ -364,7 +364,7 @@ export async function textToArt(
     // 🔹 处理多行文本
     const lines = text.split('\n');
     const lineCount = lines.length;
-    const resolvedFont = await nodePlatformAdapter.loadFont(fullConfig.font || 'Arial', fullConfig.fontStyle);
+    const resolvedFont = await nodePlatformAdapter.loadFont(fullConfig.font || 'Noto Sans SC', fullConfig.fontStyle);
     
     //  渲染文本为图像
     // Python的字体大小计算: afont = ImageFont.truetype(font, rectunit - fontreduce*2)
@@ -812,7 +812,7 @@ export async function imageToArt(
     const charDataMap = await nodePlatformAdapter.precomputeCharData({
       charset: fullConfig.charset,
       matrixSize: fullConfig.matrixSize,
-      font: fullConfig.font || 'Arial',
+      font: fullConfig.font || 'Noto Sans SC',
       fontSize: fullConfig.matrixSize,
       fontReduce: 0, // Python get_char_data does not apply fontreduce to character templates
       interpolation: fullConfig.interpolation,

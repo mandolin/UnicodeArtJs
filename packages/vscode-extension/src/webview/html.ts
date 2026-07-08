@@ -85,7 +85,7 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
 
         <div class="field">
           <label for="glyphFont" data-i18n="web.glyphFont">Glyph Font</label>
-          <input id="glyphFont" type="text" list="glyphFontOptions" placeholder="Consolas, 'Courier New', monospace">
+          <input id="glyphFont" type="text" list="glyphFontOptions" placeholder="'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', monospace">
           <datalist id="glyphFontOptions"></datalist>
           <span class="hint" data-i18n="web.fontHint">Visual font affects text rendering before conversion; glyph font affects preview, HTML export, and editor display.</span>
           <span id="fontWarning" class="hint warning" hidden></span>

@@ -79,14 +79,14 @@ function validateTemplateSlot(slot: number): void {
 }
 
 function sanitizeConfig(config: ExtensionArtConfig): ExtensionArtConfig {
-  const visualFont = config.visualFont || config.font || 'Arial';
+  const visualFont = config.visualFont || config.font || 'Noto Sans SC';
   return {
     ...config,
     width: typeof config.width === 'number' ? config.width : undefined,
     customChars: config.customChars ?? '',
     visualFont,
     font: visualFont,
-    glyphFont: config.glyphFont || "Consolas, 'Courier New', monospace",
+    glyphFont: config.glyphFont || "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace",
     glyphWidthProfile: config.glyphWidthProfile || 'default',
     wideCharRegex: config.wideCharRegex || '',
     outputTarget: 'vscode',

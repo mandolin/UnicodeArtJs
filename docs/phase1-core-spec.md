@@ -460,7 +460,7 @@ export async function renderTextToImage(
   const ctx = canvas.getContext('2d');
 
   // 设置字体
-  ctx.font = `${fontSize}px ${config.font || 'Arial'}`;
+  ctx.font = `${fontSize}px ${config.font || 'Noto Sans SC'}`;
   ctx.fillStyle = '#000000';
   ctx.textBaseline = 'top';
 
@@ -879,7 +879,7 @@ describe('Comparison with Python version', () => {
   it('should match Python output for simple text', () => {
     const pythonOutput = readFileSync('tests/fixtures/python_output.txt', 'utf-8');
     const jsOutput = textToArt('Hello', {
-      font: 'Arial',
+      font: 'Noto Sans SC',
       height: 10,
       matrixSize: 6
     });

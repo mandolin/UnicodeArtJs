@@ -45,8 +45,8 @@ unicode-art image photo.jpg -v
 # 基本用法
 unicode-art text "Hello World"
 
-# 指定字体和大小
-unicode-art text "你好世界" -f "Microsoft YaHei" -e 10
+# 指定开源视觉字体和大小
+unicode-art text "你好世界" --visual-font "Noto Sans SC" -e 10
 
 # 居中对齐
 unicode-art text "Center" --text-align center
@@ -145,17 +145,17 @@ charset:
 
 # 字体配置
 font:
-  name: Arial
+  name: "Noto Sans SC"
   style: regular
   reduce: 0.8
 
 # 统一配置模型（推荐新写法）
 visualFont:
-  family: Arial
+  family: "Noto Sans SC"
   style: regular
   reduce: 0
 glyphFont:
-  family: "Consolas, Courier New, monospace"
+  family: "Sarasa Mono SC, LXGW WenKai Mono, Source Code Pro, Liberation Mono, monospace"
   widthProfile: default
   wideCharRegex: ""
 

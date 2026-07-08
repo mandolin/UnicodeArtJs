@@ -25,7 +25,7 @@ const mockFillTextBaselines: string[] = [];
 
 class MockContext {
   fillStyle = '#000000';
-  font = '10px Arial';
+  font = '10px Noto Sans SC';
   textBaseline = 'top';
   private pixels: Uint8ClampedArray | null = null;
 
@@ -160,7 +160,7 @@ describe('browserPlatformAdapter', () => {
 
   test('renders text through browser canvas APIs', async () => {
     const image = await browserPlatformAdapter.renderTextToImage('A', {
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4,
       width: 4,
       height: 4
@@ -173,7 +173,7 @@ describe('browserPlatformAdapter', () => {
 
   test('keeps top baseline except YaHei-like visual fonts', async () => {
     await browserPlatformAdapter.renderTextToImage('A', {
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4,
       width: 8,
       height: 8
@@ -194,7 +194,7 @@ describe('browserPlatformAdapter', () => {
   test('renders character matrices through browser canvas APIs', async () => {
     const matrix = await browserPlatformAdapter.renderCharToMatrix('A', {
       matrixSize: 4,
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4
     });
 
@@ -205,12 +205,12 @@ describe('browserPlatformAdapter', () => {
   test('caches browser glyph matrices by rendering options', async () => {
     const first = await browserPlatformAdapter.renderCharToMatrix('A', {
       matrixSize: 4,
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4
     });
     const second = await browserPlatformAdapter.renderCharToMatrix('A', {
       matrixSize: 4,
-      font: 'Arial',
+        font: 'Noto Sans SC',
       fontSize: 4
     });
 
@@ -225,7 +225,7 @@ describe('browserPlatformAdapter', () => {
         customChars: 'A'
       },
       matrixSize: 4,
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4
     });
 
@@ -244,7 +244,7 @@ describe('browserPlatformAdapter', () => {
         customChars: 'A'
       },
       matrixSize: 4,
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4
     };
 

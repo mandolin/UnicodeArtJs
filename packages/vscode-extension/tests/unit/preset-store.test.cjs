@@ -26,9 +26,9 @@ const baseConfig = {
   width: undefined,
   charset: 'ASCII',
   customChars: '',
-  visualFont: 'Arial',
-  font: 'Arial',
-  glyphFont: "Consolas, 'Courier New', monospace",
+  visualFont: 'Noto Sans SC',
+  font: 'Noto Sans SC',
+  glyphFont: "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace",
   glyphWidthProfile: 'default',
   wideCharRegex: '',
   matrixSize: 6,
@@ -50,7 +50,7 @@ test('saveRecentConfig sanitizes font aliases and optional fields', async () => 
     ...baseConfig,
     width: null,
     visualFont: '',
-    font: '黑体',
+    font: 'Noto Sans SC',
     glyphFont: '',
     glyphWidthProfile: '',
     outputTarget: 'browser',
@@ -58,9 +58,9 @@ test('saveRecentConfig sanitizes font aliases and optional fields', async () => 
 
   const saved = loadRecentConfig(context);
   assert.equal(saved.width, undefined);
-  assert.equal(saved.visualFont, '黑体');
-  assert.equal(saved.font, '黑体');
-  assert.equal(saved.glyphFont, "Consolas, 'Courier New', monospace");
+  assert.equal(saved.visualFont, 'Noto Sans SC');
+  assert.equal(saved.font, 'Noto Sans SC');
+  assert.equal(saved.glyphFont, "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace");
   assert.equal(saved.glyphWidthProfile, 'default');
   assert.equal(saved.outputTarget, 'vscode');
 });

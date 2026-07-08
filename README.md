@@ -120,7 +120,7 @@ const { textToArt, imageToArt } = require('unicode-art-js');
 
 // 文本转字符画
 const art = textToArt('Hello', {
-  font: 'Arial',
+  font: 'Noto Sans SC',
   height: 10,
   charset: 'ASCII'
 });

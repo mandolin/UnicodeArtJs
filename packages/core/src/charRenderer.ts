@@ -58,7 +58,7 @@ import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants
  * 
  * @example
  * ```typescript
- * const matrix = await renderCharToMatrix('A', 6, 'Arial', 48, 0);
+ * const matrix = await renderCharToMatrix('A', 6, 'Noto Sans SC', 48, 0);
  * console.log(matrix.length); // 36 (6×6)
  * console.log(matrix[0]); // 0.0-1.0之间的值
  * ```
@@ -193,7 +193,7 @@ function resizeGrayscaleToNormalized(
  * const charData = await precomputeCharData(
  *   { type: PresetCharset.ASCII },
  *   6,
- *   'Arial',
+ *   'Noto Sans SC',
  *   48,
  *   0
  * );

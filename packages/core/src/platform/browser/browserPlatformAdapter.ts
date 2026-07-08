@@ -446,7 +446,7 @@ function renderTextToCoreImage(text: string, options: TextRenderOptions): CoreIm
 
     ctx.fillStyle = '#000000';
     ctx.font = `${fontSize}px ${formatCanvasFontFamily(options.font)}`;
-    // 中文注释：默认仍沿用参考项目的 top baseline；仅对微软雅黑类字体启用垂直度量纠偏。
+    // 中文注释：默认仍沿用参考项目的 top baseline；仅对已知易裁切的本机系统字体启用垂直度量纠偏。
     ctx.textBaseline = useVerticalFit ? 'alphabetic' : 'top';
 
     const effectiveLineSpacing = options.lineSpacingPixels ?? options.lineSpacing ?? 0;

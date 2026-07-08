@@ -6,7 +6,7 @@ import { CharType, PresetCharset } from '../src/types/charset';
 describe('nodePlatformAdapter', () => {
   test('measures text width through the Node adapter', async () => {
     const width = await nodePlatformAdapter.measureTextWidth('AB', {
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 10,
       fontReduce: 1
     });
@@ -17,7 +17,7 @@ describe('nodePlatformAdapter', () => {
   test('renders character matrices through the Node adapter', async () => {
     const matrix = await nodePlatformAdapter.renderCharToMatrix('A', {
       matrixSize: 4,
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4
     });
 
@@ -32,7 +32,7 @@ describe('nodePlatformAdapter', () => {
         customChars: 'A'
       },
       matrixSize: 4,
-      font: 'Arial',
+      font: 'Noto Sans SC',
       fontSize: 4
     });
 

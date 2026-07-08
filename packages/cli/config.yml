@@ -40,7 +40,7 @@ charset:
 
 # 字体配置
 font:
-  name: Arial            # 字体名称或路径
+  name: Noto Sans SC     # 字体名称或路径
   style: regular         # regular | bold | italic | bold-italic
   reduce: 0.8            # 字体缩放比例
 

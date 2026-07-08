@@ -264,7 +264,7 @@ export async function renderTextToImage(
     // 🔹 处理多行文本
     const lines = text.split('\n');
     
-    // 🔹 计算实际字体大小，并根据真实字形高度自动收缩，避免微软雅黑等字体下沿被裁切。
+    // 🔹 计算实际字体大小，并根据真实字形高度自动收缩，避免部分本机系统字体下沿被裁切。
     const requestedFontSize = Math.max(1, fontSize);
     const useVerticalFit = needsVisualFontVerticalFit(font);
     const fittedFontSize = useVerticalFit ? resolveFittedTextFontSize(ctx, font, requestedFontSize) : requestedFontSize;

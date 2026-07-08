@@ -19,7 +19,7 @@ const charDataMap = await browserPlatformAdapter.precomputeCharData({
     customChars: ' .:-=+*#%@'
   },
   matrixSize: 6,
-  font: 'Consolas',
+  font: 'Noto Sans SC',
   fontSize: 6
 });
 

@@ -160,15 +160,15 @@ describe('public configuration helpers', () => {
 
   test('normalizeArtConfigAliases keeps legacy fields as aliases', () => {
     const config = normalizeArtConfigAliases({
-      font: 'SimSun',
+      font: 'Noto Sans SC',
       fontReduce: 1,
-      glyphFontFamily: 'NSimSun',
+      glyphFontFamily: 'Sarasa Mono SC',
       glyphWidthProfile: 'default'
     });
 
-    expect(config.visualFont?.family).toBe('SimSun');
+    expect(config.visualFont?.family).toBe('Noto Sans SC');
     expect(config.visualFont?.reduce).toBe(1);
-    expect(config.glyphFont?.family).toBe('NSimSun');
+    expect(config.glyphFont?.family).toBe('Sarasa Mono SC');
     expect(config.glyphFont?.widthProfile).toBe('default');
   });
 

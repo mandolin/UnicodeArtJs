@@ -13,6 +13,8 @@ test('normalizeVisualFontFamily maps localized Chinese font names for node-canva
 });
 
 test('visual font options keep localized and canonical names discoverable', () => {
-  assert.equal(VISUAL_FONT_OPTIONS.includes('黑体'), true);
-  assert.equal(VISUAL_FONT_OPTIONS.includes('SimHei'), true);
+  assert.equal(VISUAL_FONT_OPTIONS.includes('Noto Sans SC'), true);
+  assert.equal(VISUAL_FONT_OPTIONS.includes('Source Han Sans SC'), true);
+  assert.equal(VISUAL_FONT_OPTIONS.includes('黑体'), false);
+  assert.equal(VISUAL_FONT_OPTIONS.includes('SimHei'), false);
 });

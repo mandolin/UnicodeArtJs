@@ -7,7 +7,7 @@ import { CharType, PresetCharset } from '../src/types/charset';
 
 describe('charRenderer', () => {
   test('renders a normal character to a square matrix', async () => {
-    const matrix = await renderCharToMatrix('A', 4, 'Arial', 16, 0);
+    const matrix = await renderCharToMatrix('A', 4, 'Noto Sans SC', 16, 0);
 
     expect(matrix).toBeInstanceOf(Float32Array);
     expect(matrix).toHaveLength(16);
@@ -16,7 +16,7 @@ describe('charRenderer', () => {
   });
 
   test('renders a wide character to a double-width matrix', async () => {
-    const matrix = await renderCharToMatrix('中', 4, 'Arial', 16, 0);
+    const matrix = await renderCharToMatrix('中', 4, 'Noto Sans SC', 16, 0);
 
     expect(matrix).toHaveLength(32);
   });
@@ -25,7 +25,7 @@ describe('charRenderer', () => {
     const data = await precomputeCharData(
       { type: PresetCharset.CUSTOM, customChars: 'A中' },
       4,
-      'Arial',
+      'Noto Sans SC',
       16,
       0
     );
@@ -37,6 +37,6 @@ describe('charRenderer', () => {
   });
 
   test('loadFont returns system font names without registration', async () => {
-    await expect(loadFont('Arial')).resolves.toBe('Arial');
+    await expect(loadFont('Noto Sans SC')).resolves.toBe('Noto Sans SC');
   });
 });

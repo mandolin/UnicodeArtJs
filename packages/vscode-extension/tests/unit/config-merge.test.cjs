@@ -7,9 +7,9 @@ const baseConfig = {
   width: undefined,
   charset: 'ASCII',
   customChars: '',
-  visualFont: 'Arial',
-  font: 'Arial',
-  glyphFont: "Consolas, 'Courier New', monospace",
+  visualFont: 'Noto Sans SC',
+  font: 'Noto Sans SC',
+  glyphFont: "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace",
   glyphWidthProfile: 'default',
   wideCharRegex: '',
   matrixSize: 6,
@@ -33,14 +33,14 @@ test('mergeExtensionConfig overlays scalar fields', () => {
     height: 32,
     charset: 'CUSTOM',
     customChars: '@# ',
-    glyphFont: 'NSimSun, 新宋体, monospace',
+    glyphFont: "'LXGW WenKai Mono', 'Source Code Pro', monospace",
     insertMode: 'newDocument',
   });
 
   assert.equal(merged.height, 32);
   assert.equal(merged.charset, 'CUSTOM');
   assert.equal(merged.customChars, '@# ');
-  assert.equal(merged.glyphFont, 'NSimSun, 新宋体, monospace');
+  assert.equal(merged.glyphFont, "'LXGW WenKai Mono', 'Source Code Pro', monospace");
   assert.equal(merged.insertMode, 'newDocument');
   assert.deepEqual(merged.box, baseConfig.box);
 });

@@ -114,7 +114,7 @@ describe('配置持久化', () => {
     const original = {
       height: 20,
       charset: 'EXTENDED',
-      font: 'Consolas',
+      font: 'Noto Sans SC',
       matrixSize: 8,
       invert: true,
       boxEnabled: true,
@@ -126,7 +126,7 @@ describe('配置持久化', () => {
 
     assertEqual(restored.height, 20);
     assertEqual(restored.charset, 'EXTENDED');
-    assertEqual(restored.font, 'Consolas');
+    assertEqual(restored.font, 'Noto Sans SC');
     assertEqual(restored.matrixSize, 8);
     assertEqual(restored.invert, true);
   });
@@ -135,7 +135,7 @@ describe('配置持久化', () => {
     const partial = JSON.parse('{"height":30}');
     // 模拟 Object.assign 补默认
     const defaults = {
-      height: 20, width: '', charset: 'ASCII', font: 'Arial',
+      height: 20, width: '', charset: 'ASCII', font: 'Noto Sans SC',
       matrixSize: 6, ratio: 2.0, invert: false, boxEnabled: false,
     };
     const merged = Object.assign({}, defaults, partial);

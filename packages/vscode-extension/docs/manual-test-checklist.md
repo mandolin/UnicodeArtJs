@@ -63,6 +63,6 @@ Use this checklist before publishing a new VSIX or Marketplace version.
 
 ## Font Notes
 
-- [ ] With `新宋体` + round box, confirm the light warning appears.
-- [ ] With `微软雅黑 Mono`, confirm the VSCode font metric warning appears.
+- [ ] With a locally installed legacy CJK system font + round box, confirm the light warning appears when the warning condition is configured manually.
+- [ ] With a locally installed non-recommended system mono font, confirm the VSCode font metric warning appears when the warning condition is configured manually.
 - [ ] Confirm strict mixed-width monospace fonts such as `等距更纱黑体 SC` or `霞鹜文楷等宽` display more predictably.

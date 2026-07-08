@@ -259,8 +259,7 @@ export function getPresetChars(type: PresetCharset): string {
  * 
  * @remarks
  * - 不同操作系统的命名约定可能不同
- * - Windows: Arial-Bold.ttf
- * - macOS: Arial Bold.ttf
+ * - Windows/macOS/Linux: 建议优先使用开源字体文件，例如 Noto Sans SC 或 Source Han Sans SC
  * - Linux: 取决于发行版
  */
 export const FONT_STYLE_SUFFIX: Record<string, string> = {

@@ -25,7 +25,7 @@
     }
 
     #render {
-      font-family: "NSimSun", "新宋体", monospace;
+      font-family: "Sarasa Mono SC", "LXGW WenKai Mono", "Source Code Pro", monospace;
       font-size: 14px;
       line-height: 1;
       letter-spacing: 0;
@@ -42,7 +42,7 @@
 
     #meta {
       margin-top: 12px;
-      font-family: Consolas, monospace;
+      font-family: "Source Code Pro", "Liberation Mono", monospace;
       font-size: 12px;
       white-space: pre-wrap;
     }
@@ -55,7 +55,6 @@
     <label>
       字素字体:
       <select id="font">
-        <option value="NSimSun, 新宋体">新宋体</option>
         <option value="Sarasa Mono SC, 等距更纱黑体 SC">等距更纱黑体 SC</option>
         <option value="LXGW WenKai Mono, 霞鹜文楷等宽, 霞鹜文楷">霞鹜文楷</option>
       </select>
@@ -101,7 +100,7 @@
         height: 20,
         matrixSize: 6,
         font: selectedFont.split(',')[0].trim(),
-        //font: 'NSimSun',
+        // font: 'Sarasa Mono SC',
         fontStyle: 'normal',
         outputFormat: OutputFormat.PLAIN_TEXT,
         charset: {

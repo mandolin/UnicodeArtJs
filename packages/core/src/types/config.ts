@@ -88,7 +88,7 @@ export enum Interpolation {
  * @example
  * ```typescript
  * const config: ArtConfig = {
- *   font: 'Arial',
+ *   font: 'Noto Sans SC',
  *   fontStyle: FontStyle.BOLD
  * };
  * ```
@@ -160,7 +160,7 @@ export interface VisualFontConfig {
  * 🔹 `widthProfile` / `wideCharRegex` 是后续字素宽度字典的入口，本阶段先冻结契约。
  */
 export interface GlyphFontConfig {
-  /** 输出字素展示字体，例如新宋体、等距更纱黑体 SC、Consolas 等。 */
+  /** 输出字素展示字体，例如 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro 等开源等宽字体。 */
   family?: string;
   /** 字素宽度 profile 名称，后续用于按字体选择宽字素规则。 */
   widthProfile?: string;
@@ -246,7 +246,7 @@ export enum HeightMode {
  *   charset: {
  *     type: PresetCharset.ASCII
  *   },
- *   font: 'Arial',
+ *   font: 'Noto Sans SC',
  *   invert: false,
  *   enableEarlyTermination: true
  * };
@@ -257,7 +257,7 @@ export enum HeightMode {
  * // 文本转字符画
  * const textArt = await textToArt('Hello', {
  *   ...fullConfig,
- *   font: 'SimSun',
+ *   font: 'Noto Sans SC',
  *   height: 15
  * });
  * ```
@@ -374,7 +374,7 @@ export interface ArtConfig {
    *
    * @example
    * visualFont: {
-   *   family: 'SimSun',
+   *   family: 'Noto Sans SC',
    *   style: FontStyle.REGULAR,
    *   reduce: 0
    * }
@@ -383,12 +383,12 @@ export interface ArtConfig {
   
   /** 
    * 字体名称或路径（兼容旧字段，语义等同于 visualFont.family）
-   * - 系统字体: 直接使用字体名称（如'Arial'）
+   * - 系统字体: 直接使用字体名称（建议优先使用开源字体，如 'Noto Sans SC'）
    * - 自定义字体: 提供字体文件路径（如'/path/to/font.ttf'）
-   * - 默认值: 'Arial'（系统默认）
+   * - 默认值: 'Noto Sans SC'（开源字体优先）
    * 
    * @example
-   * font: 'SimSun' // 使用中文字体
+   * font: 'Noto Sans SC' // 使用开源中文字体
    * font: './fonts/custom.ttf' // 使用自定义字体文件
    */
   font?: string;
@@ -660,7 +660,7 @@ export const DEFAULT_CONFIG: Partial<ArtConfig> = {
   
   // 字体配置
   visualFont: {
-    family: 'Arial',
+    family: 'Noto Sans SC',
     style: FontStyle.REGULAR,
     reduce: 0
   },
@@ -669,7 +669,7 @@ export const DEFAULT_CONFIG: Partial<ArtConfig> = {
     widthProfile: 'default',
     wideCharRegex: undefined
   },
-  font: 'Arial',
+  font: 'Noto Sans SC',
   fontStyle: FontStyle.REGULAR,
   fontReduce: 0,
   charSpace: 1,

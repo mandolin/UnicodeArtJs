@@ -38,8 +38,8 @@ const AppState = {
     width: '',
     charset: 'ASCII',
     customChars: '',
-    font: 'Arial',
-    glyphFont: "Consolas, 'Courier New', monospace",
+    font: 'Noto Sans SC',
+    glyphFont: "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace",
     glyphWidthProfile: 'default',
     wideCharRegex: '',
     matrixSize: 6,
@@ -721,7 +721,7 @@ class AppController {
       + '    padding: 20px;\n'
       + '    background: #fafbfc;\n'
       + '    color: #1a1a2e;\n'
-      + '    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;\n'
+      + '    font-family: "Noto Sans SC", "Noto Sans", Roboto, "Liberation Sans", sans-serif;\n'
       + '  }\n'
       + '  .art-container {\n'
       + '    max-width: 100%;\n'
