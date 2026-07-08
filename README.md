@@ -1,183 +1,117 @@
 # UnicodeArtJs
 
-> 将文本或图片转换为字符画（Unicode Art）的 TypeScript / JavaScript 独立实现
+把文字和图片转换成字符画的 TypeScript / JavaScript 工具集。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/unicode-art-js.svg)](https://www.npmjs.com/package/unicode-art-js)
+[![CLI](https://img.shields.io/npm/v/unicode-art-cli.svg?label=unicode-art-cli)](https://www.npmjs.com/package/unicode-art-cli)
 
-## 📖 项目简介
+UnicodeArtJs 面向几种常见使用场景：在网页里生成字符画、在命令行里处理图片或文本、在 VS Code 编辑器中把选中文本转换成 Banner。核心库以 MIT 协议发布，可作为普通 npm 包集成到自己的项目中。
 
-UnicodeArtJs 是一个功能强大的字符画生成工具，支持将**文本**或**图片**转换为精美的 **Unicode 字符艺术**。本项目采用 **TypeScript + JavaScript** 混合开发，以 MIT 协议发布；功能目标参考 [UnicodeArt](https://github.com/mandolin/UnicodeArt) 的公开行为和使用体验，并通过兼容性测试尽量对齐常用参数下的输出效果。
+在线体验：<https://mandolin.github.io/UnicodeArtJs/>
 
-### ✨ 核心特性
+## 能做什么
 
-- 🎨 **图片转字符画**：支持多种图像格式，智能匹配字符
-- 📝 **文本转字符画**：自定义字体、样式、对齐方式
-- 🌏 **宽字符支持**：完美处理中文、日文等双宽度字符
-- ⚡ **高性能**：优化的SAD匹配算法，支持早期终止
-- 🔧 **高度可配置**：丰富的参数控制输出效果
-- 📦 **多平台支持**：npm库、CLI、Web、VSCode插件；Electron应用后续规划
+- 将图片转换成 ASCII / Unicode 字符画。
+- 将文本渲染成字符 Banner。
+- 支持中文、日文等双宽字符场景。
+- 支持自定义字符集、矩阵大小、宽高比例、反色、字体收缩等参数。
+- 支持给字符画添加边框、标题、留白和阴影。
+- 提供 Node、浏览器、CLI、Web 页面和 VS Code 插件等入口。
 
----
+## 安装
 
-## 🎯 项目目标
-
-本项目旨在构建一个**完整的字符画生态系统**，包含以下五个子项目：
-
-### 1️⃣ **Core Library** (`packages/core/`)
-- **定位**：核心算法库，发布到 npm
-- **技术栈**：TypeScript + ndarray + sharp
-- **功能**：提供纯函数式API，无副作用
-- **状态**：✅ `unicode-art-js@1.1.2` 已发布
-
-### 2️⃣ **CLI Tool** (`packages/cli/`)
-- **定位**：命令行工具，提供与 Core 一致的转换能力
-- **技术栈**：Node.js + commander + cosmiconfig
-- **功能**：终端交互、配置文件、国际化
-- **状态**：✅ `unicode-art-cli@1.0.1` 已发布
-
-### 3️⃣ **Web Application** (`packages/web/`)
-- **定位**：浏览器端网页应用
-- **技术栈**：Vanilla JS + Canvas API
-- **功能**：可视化界面、实时预览、导出功能
-- **兼容性**：当前以 Chrome 120+ 等现代浏览器为基准，后续再评估更早浏览器兼容
-- **部署**：GitHub Pages
-- **状态**：✅ 当前阶段功能闭环已完成，后续继续体验与发布完善
-
-### 4️⃣ **VSCode Extension** (`packages/vscode-extension/`)
-- **定位**：Visual Studio Code 插件
-- **技术栈**：VSCode Extension API
-- **功能**：编辑器内实时生成、配置面板
-- **发布**：VSCode Marketplace
-- **状态**：✅ `mandolin.unicode-art-js-vscode@0.2.2` pre-release 已发布
-
-### 5️⃣ **Electron App** (`packages/electron-app/`)
-- **定位**：跨平台桌面应用
-- **技术栈**：Electron + React/Vue
-- **功能**：完整GUI、系统托盘、自动更新
-- **发布**：Microsoft Store、GitHub Releases
-- **状态**：⏸️ 暂缓，待 Core / Web / VSCode 基础设施进一步稳定后启动
-
----
-
-## 📂 项目结构
-
-```
-UnicodeArtJs/
-├── packages/                    # Monorepo 多包结构
-│   ├── core/                    # 核心算法库（npm包）
-│   │   ├── src/                 # TypeScript源码
-│   │   ├── tests/               # 单元测试
-│   │   ├── dist/                # 编译输出
-│   │   └── package.json
-│   ├── cli/                     # CLI命令行工具
-│   │   ├── src/
-│   │   └── package.json
-│   ├── web/                     # Web应用
-│   │   ├── src/
-│   │   ├── public/
-│   │   └── package.json
-│   ├── vscode-extension/        # VSCode插件
-│   │   ├── src/
-│   │   └── package.json
-│   └── electron-app/            # Electron桌面应用
-│       ├── src/
-│       └── package.json
-├── docs/                        # 公开项目文档
-│   ├── README.md                # 文档边界说明
-│   ├── license-audit.md         # 许可证边界与依赖审计
-│   └── roadmap.md               # 公开路线图
-├── tests/                       # 集成测试
-├── tools/                       # 工具脚本
-├── package.json                 # 根配置
-└── README.md
-```
-
----
-
-## 🚀 快速开始
-
-### 安装依赖
-
-```bash
-npm install
-```
-
-### 使用 Core 库
+### Core
 
 ```bash
 npm install unicode-art-js
 ```
 
-### 使用示例
+### CLI
 
-```javascript
+```bash
+npm install -g unicode-art-cli
+```
+
+### VS Code
+
+在 VS Code Marketplace 搜索 `UnicodeArtJs`，或打开：
+
+<https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode>
+
+## 快速示例
+
+### 在 Node.js 中使用
+
+```js
 const { textToArt, imageToArt } = require('unicode-art-js');
 
-// 文本转字符画
-const art = textToArt('Hello', {
+const textArt = textToArt('Hello', {
   font: 'Noto Sans SC',
   height: 10,
   charset: 'ASCII'
 });
-console.log(art);
 
-// 图片转字符画
-const artFromImage = await imageToArt('photo.jpg', {
+console.log(textArt);
+
+const imageArt = await imageToArt('photo.jpg', {
   width: 80,
   matrixSize: 6
 });
-console.log(artFromImage);
+
+console.log(imageArt);
 ```
 
-### 使用 CLI
+### 在浏览器中使用
+
+```js
+import { textToArt } from 'unicode-art-js/browser';
+
+const result = await textToArt('中文测试', {
+  height: 20,
+  charset: 'EXTENDED',
+  font: 'Noto Sans SC'
+});
+
+document.querySelector('pre').textContent = result.content;
+```
+
+### 使用命令行
 
 ```bash
-npm install -g unicode-art-cli
 unicode-art text "Hello" --height 10
 unicode-art image photo.jpg --width 80
+unicode-art text "UnicodeArtJs" --box "{\"enabled\":true,\"style\":\"round\",\"padding\":1}"
 ```
 
----
+## 包和应用
 
-## 📋 开发路线图
+| 位置 | 说明 |
+| --- | --- |
+| `packages/core` | 核心库，npm 包名为 `unicode-art-js`。 |
+| `packages/cli` | 命令行工具，npm 包名为 `unicode-art-cli`。 |
+| `packages/web` | 在线工具站，部署到 GitHub Pages。 |
+| `packages/vscode-extension` | VS Code 插件。 |
+| `packages/electron-app` | 桌面端预留目录。 |
 
-详见 [docs/roadmap.md](docs/roadmap.md)
+## 字体说明
 
-### 阶段概览
+字符画的最终效果与显示字体有关。为了获得稳定的对齐效果，建议在终端、网页或编辑器中使用混合等宽字体，例如 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro、Liberation Mono 等。
 
-| 阶段 | 目标 | 预计时间 | 状态 |
-|------|------|---------|------|
-| Phase 0 | 项目初始化与架构设计 | 1天 | ✅ 完成 |
-| Phase 1 | Core库核心算法实现 | 5天 | ✅ `unicode-art-js@1.1.2` 已发布 |
-| Phase 2 | CLI程序开发 | 3天 | ✅ `unicode-art-cli@1.0.1` 已发布 |
-| Phase 3 | Web应用开发 | 7天 | ✅ 当前阶段功能闭环完成 |
-| Phase 4 | VSCode插件开发 | 5天 | ✅ Marketplace pre-release 已发布 |
-| Phase 5 | Electron应用开发 | 10天 | ⏸️ 暂缓 |
+生成文字 Banner 时，`font` / `visualFont` 影响输入文字被渲染成图像的形状；`glyphFont` 影响字符画结果在页面或编辑器中的显示方式。二者不是同一个概念。
 
----
+## 许可证与来源说明
 
-## 🤝 贡献指南
+本项目采用 [MIT License](LICENSE)。
 
-欢迎贡献代码、报告问题或提出建议！
+UnicodeArtJs 是 TypeScript / JavaScript 的独立实现。它的功能目标参考了 [UnicodeArt](https://github.com/mandolin/UnicodeArt) 的公开行为和使用体验，并通过测试尽量保持常用参数下的结果接近；实现上不复制 GPL 源码、注释或逐行结构。
 
-## 📄 许可证
+项目依赖优先选择 MIT、Apache-2.0、BSD、ISC 等宽松许可证。更多说明见 [docs/license-audit.md](docs/license-audit.md)。
 
-本项目采用 **MIT License** - 详见 [LICENSE](LICENSE) 文件
+## 相关链接
 
-**重要**：所有第三方依赖必须使用 MIT、Apache、BSD 等宽松协议。
-
-### 许可证边界说明
-
-UnicodeArtJs 是 MIT 许可的 TypeScript / JavaScript 独立实现。项目的功能目标参考 UnicodeArt 的公开行为和使用体验，但不以复制 GPL 源码、注释或逐行翻译为实现方式。后续公开文档均以“独立实现 + 行为兼容测试”为表述准则。
-
----
-
-## 🔗 相关链接
-
-- **功能参考（Python）**: [UnicodeArt](https://github.com/mandolin/UnicodeArt)
-- **Issue追踪**: [GitHub Issues](https://github.com/mandolin/UnicodeArtJs/issues)
-
----
-
-*最后更新：2026-07-08*
+- 在线工具站：<https://mandolin.github.io/UnicodeArtJs/>
+- Core npm 包：<https://www.npmjs.com/package/unicode-art-js>
+- CLI npm 包：<https://www.npmjs.com/package/unicode-art-cli>
+- VS Code 插件：<https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode>
+- 问题反馈：<https://github.com/mandolin/UnicodeArtJs/issues>
