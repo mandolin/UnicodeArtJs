@@ -3,9 +3,10 @@
  * 🟦 UnicodeArtJs browser entry
  * ============================================================================
  *
- * 🔶 Module responsibility
- * Source-level browser entry prepared for `browser-adapt-phase-4` packaging.
- * It combines pure algorithms with the Chrome 120+ browser platform adapter.
+ * 🔶 模块职责 / Module responsibility
+ * 浏览器入口组合纯算法与 Chrome 120+ 平台适配器，并导出浏览器高层 API。
+ * Combines the pure algorithms with the Chrome 120+ platform adapter and
+ * exports the browser-oriented high-level APIs.
  * ============================================================================
  */
 

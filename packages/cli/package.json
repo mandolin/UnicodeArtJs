@@ -18,7 +18,7 @@
     "cli",
     "character-art"
   ],
-  "author": "Qoder",
+  "author": "mandolin",
   "license": "MIT",
   "dependencies": {
     "unicode-art-js": "file:../core",

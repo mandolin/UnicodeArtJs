@@ -1,6 +1,6 @@
 # Browser Adapter Minimal Example
 
-> Status: available via the `unicode-art-js/browser` entry after `browser-adapt-phase-4`.
+This API is available from the `unicode-art-js/browser` entry.
 
 ```ts
 import {

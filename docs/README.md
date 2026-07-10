@@ -1,13 +1,15 @@
-# UnicodeArtJs Public Docs
+# UnicodeArtJs 文档
 
-本目录只放面向使用者、二次开发者或发布流程的公开文档。
+这里存放面向使用者、二次开发者和发布维护者的公开文档。
 
-内部阶段规划、AI 协作记录、过程性审查报告、临时备忘和未整理草案已经迁移到：
+- [公开路线](roadmap.md)
+- [依赖与许可证政策](license-audit.md)
+- [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)
+- [VS Code Extension 发布检查](vscode-extension-release-checklist.md)
 
-```text
-work-zone/docs/
-work-zone/ai/
-```
+各子项目还有独立文档：
 
-后续如果需要把内部材料转成公开文档，应先重新整理为正式文档口径，避免直接复制开发过程记录。
-
+- [Core](../packages/core/README.md)
+- [CLI](../packages/cli/README.md)
+- [Web](../packages/web/README.md)
+- [VS Code Extension](../packages/vscode-extension/README.md)

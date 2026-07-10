@@ -17,7 +17,6 @@
  * - 缓存检测结果
  * 
  * @module utils/wideCharDetector
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://www.unicode.org/reports/tr11/}
  * ============================================================================

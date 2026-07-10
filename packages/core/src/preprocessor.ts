@@ -26,7 +26,6 @@
  * - 浏览器环境应使用Canvas API替代sharp
  * 
  * @module preprocessor
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://sharp.pixelplumbing.com/}
  * @see {@link https://github.com/Automattic/node-canvas}

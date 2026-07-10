@@ -24,7 +24,6 @@
  * - enableEarlyTermination: 早期终止优化，大幅提升SAD匹配速度
  * 
  * @module types/config
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://github.com/mandolin/UnicodeArt/doc/algorithms/performance-notes.md}
  * ============================================================================

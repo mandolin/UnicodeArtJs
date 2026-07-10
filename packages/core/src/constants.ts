@@ -21,7 +21,6 @@
  * - 记录变更历史
  * 
  * @module constants
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://github.com/mandolin/UnicodeArt/src/unicodeart/config/constants.py}
  * ============================================================================

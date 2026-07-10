@@ -56,7 +56,6 @@
  * - 所有枚举类型
  * 
  * @module unicode-art-js
- * @author Qoder
  * @since 1.0.0
  * @license MIT
  * @see {@link https://github.com/mandolin/UnicodeArtJs}

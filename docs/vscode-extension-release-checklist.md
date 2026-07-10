@@ -21,11 +21,12 @@ Set `VSCE_PAT` or login with `vsce login mandolin`.
 
 For the current pre-release package:
 
-```bash
+```powershell
 cd K:\Project\Github_mandolin\UnicodeArtJs\packages\vscode-extension
 mise exec -- npm run check
 mise exec -- npm run package
-vsce publish --pre-release --packagePath .\unicode-art-js-vscode-0.1.0.vsix
+$version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+vsce publish --pre-release --packagePath ".\unicode-art-js-vscode-$version.vsix"
 ```
 
 For a normal release, run `mise exec -- npm run package:release`, then publish without `--pre-release`.

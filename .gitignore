@@ -128,8 +128,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-/ai/*
-!/ai/README.md
+/ai/
 /work-zone
 
 # Local package artifacts

@@ -21,7 +21,6 @@
  * - 高度统一 = matrixSize
  * 
  * @module types/charset
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://github.com/mandolin/UnicodeArt/doc/algorithms/wide-character-handling.md}
  * ============================================================================

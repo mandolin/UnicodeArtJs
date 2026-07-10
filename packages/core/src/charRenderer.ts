@@ -24,7 +24,6 @@
  * - 支持宽字符检测（中文、日文等）
  * 
  * @module charRenderer
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://github.com/Automattic/node-canvas}
  * ============================================================================

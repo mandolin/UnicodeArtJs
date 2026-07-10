@@ -26,7 +26,6 @@
  * - ANSI: 使用转义码实现颜色和高亮，仅适用于终端
  * 
  * @module assembler
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://en.wikipedia.org/wiki/ANSI_escape_code}
  * ============================================================================

@@ -222,7 +222,7 @@ print(json.dumps({'shape': arr.shape, 'values': arr.flatten().tolist()}))
     }
   });
 
-  test('sampling array matches Python for Qoder zhong image case', async () => {
+  test('sampling array matches Python for the Chinese text image case', async () => {
     const imagePath = join(__dirname, 'test-image-zhong.png');
     const { loadImage } = await import('../src/preprocessor');
     const imageData = await loadImage(imagePath);
@@ -253,7 +253,7 @@ print(json.dumps({'shape': arr.shape, 'values': arr.flatten().tolist()}))
   test.each([
     ['ASCII95', { type: PresetCharset.ASCII }, ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'],
     ['small custom charset', { type: PresetCharset.CUSTOM, customChars: ' .#@' }, ' .#@']
-  ])('imageToArt matches Python for Qoder zhong image with %s', async (_name, jsCharset, pythonChars) => {
+  ])('imageToArt matches Python for the Chinese text image with %s', async (_name, jsCharset, pythonChars) => {
     const imagePath = join(__dirname, 'test-image-zhong.png');
     const jsResult = await imageToArt(imagePath, {
       height: 5,

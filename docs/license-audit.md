@@ -1,171 +1,51 @@
-# 依赖许可证审查清单
+# 依赖与许可证政策
 
-> **创建日期**: 2026-06-17
-> **最后更新**: 2026-07-03
-> **要求**: 所有依赖必须使用 MIT、Apache 2.0、BSD、ISC 等宽松协议
-> **禁止**: GPL、AGPL、LGPL 等强传染性协议
+UnicodeArtJs 本身采用 [MIT License](../LICENSE)。项目优先选择 MIT、Apache-2.0、BSD、ISC、0BSD、BlueOak 等宽松许可证的第三方软件。
 
----
+## 审查范围
 
-## 📦 当前依赖清单
+引入或升级依赖时，需要分别检查：
 
-### 生产依赖 (dependencies)
+- 直接生产依赖和可选依赖。
+- 随平台安装的原生二进制及其底层库。
+- 会进入 npm、VSIX、Web 或桌面安装包的传递依赖。
+- 仅用于构建、测试、签名或发布的开发工具。
+- 字体、图片、示例、测试 fixture 和生成资产的内容许可。
 
-| 包名 | 版本 | 许可证 | 状态 | 备注 |
-|------|------|--------|------|------|
-| canvas | ^2.11.2 | MIT | ✅ 通过 | Node.js Canvas实现 |
-| commander | ^12.0.0 | MIT | ✅ 通过 | 命令行参数解析 |
-| cosmiconfig | ^9.0.0 | MIT | ✅ 通过 | 配置文件加载 |
-| fontkit | ^2.0.2 | MIT | ✅ 通过 | 字体处理 |
-| jsfeat | ^0.0.8 | BSD-3 | ✅ 通过 | 图像处理算法 |
-| ndarray | ^1.0.19 | MIT | ✅ 通过 | 多维数组 |
-| ndarray-fill | ^1.0.2 | MIT | ✅ 通过 | 数组填充 |
-| ndarray-ops | ^1.2.2 | MIT | ✅ 通过 | 数组运算 |
-| sd | ^0.0.3 | MIT | ✅ 通过 | ?需确认用途 |
-| sharp | ^0.33.2 | Apache-2.0 | ✅ 通过 | 高性能图像处理 |
-| text-to-svg | ^3.1.5 | MIT | ✅ 通过 | 文本转SVG |
+包顶层的 `license` 字段不能代替完整审查。原生包、预构建二进制和开发工具可能包含单独的许可证文件或附加使用条件。
 
-### 开发依赖（待Phase 1添加）
+## 当前需要持续复核的依赖
 
-| 包名 | 版本 | 许可证 | 状态 | 用途 |
-|------|------|--------|------|------|
-| typescript | ^5.3.0 | Apache-2.0 | ⏳ 待添加 | TypeScript编译器 |
-| rollup | ^4.0.0 | MIT | ⏳ 待添加 | 模块打包工具 |
-| @rollup/plugin-typescript | ^11.0.0 | MIT | ⏳ 待添加 | Rollup TS插件 |
-| @rollup/plugin-node-resolve | ^15.0.0 | MIT | ⏳ 待添加 | Node模块解析 |
-| @rollup/plugin-commonjs | ^25.0.0 | MIT | ⏳ 待添加 | CommonJS转换 |
-| jest | ^29.0.0 | MIT | ⏳ 待添加 | 单元测试框架 |
-| @types/jest | ^29.0.0 | MIT | ⏳ 待添加 | Jest类型定义 |
-| @types/ndarray | ^1.0.14 | MIT | ⏳ 待添加 | ndarray类型定义 |
-| eslint | ^8.0.0 | MIT | ⏳ 待添加 | 代码检查 |
-| @typescript-eslint/eslint-plugin | ^6.0.0 | MIT | ⏳ 待添加 | TS ESLint插件 |
+### sharp 与 libvips
 
----
+`sharp` 源码采用 Apache-2.0，但 npm 在常见平台上会安装预构建的 sharp/libvips 二进制。例如 Windows x64 包 `@img/sharp-win32-x64` 当前声明为 `Apache-2.0 AND LGPL-3.0-or-later`。
 
-## 🔍 审查方法
+这不等同于认定 UnicodeArtJs 不能使用或分发 sharp，也不应简单描述为许可证“传染”。但它超出了本项目“只采用宽松许可证依赖”的严格目标，需要单独评估：
 
-### 自动化工具
+- Core 是否继续直接依赖 sharp。
+- 是否将 Node 图像加载调整为可选 adapter 或 peer dependency。
+- 使用预构建 libvips 时需要保留哪些许可证、通知和可替换性条件。
+- 是否存在许可更简单且能满足格式、性能和平台需求的替代实现。
 
-```bash
-# 安装license-checker
-npm install -g license-checker
+在完成决定前，不把 sharp 平台二进制标记为“宽松许可证审查已通过”。
 
-# 检查所有依赖的许可证
-license-checker --summary
+### 发布工具
 
-# 生成详细报告
-license-checker --json > license-report.json
+VS Code 官方发布工具 `@vscode/vsce` 本身采用 MIT，但其可选签名组件可能使用 Microsoft 的专用工具许可。此类组件只作为开发/发布工具使用，不应进入扩展运行时或作为项目组件再分发；发布流程仍需记录实际安装和打包边界。
 
-# 只列出非宽松协议的包
-license-checker --onlyAllow="MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC" --failOnViolation
-```
+## 参考实现边界
 
-### 手动验证步骤
+UnicodeArtJs 是 MIT 许可的独立 TypeScript/JavaScript 实现。兼容性工作可以使用公开行为、输入输出和黑盒测试作为依据，但不应复制 GPL 项目的源码、注释或具有表达性的内部实现结构。
 
-1. **查看package.json**：
-   ```bash
-   npm view <package-name> license
-   ```
+对外文档使用“独立实现”“行为兼容测试”等准确表述。涉及参考项目的测试、源码链接和实现注释会持续审查，并逐步改为可独立复现的规范、公式和项目自有测试资产。
 
-2. **检查GitHub仓库**：
-   - 访问包的GitHub页面
-   - 查看LICENSE文件
-   - 确认无附加条件
+## 新依赖检查清单
 
-3. **查阅npm页面**：
-   - https://www.npmjs.com/package/<package-name>
-   - 查看"License"字段
+1. 核对 package metadata、仓库 LICENSE、NOTICE 和第三方通知。
+2. 检查生产、可选、平台和传递依赖，不只检查直接依赖。
+3. 确认依赖是否会被打包、再分发，或只在本地开发时运行。
+4. 记录引入理由、替代方案和许可证结论。
+5. 执行 clean install、pack/VSIX 内容检查和许可证扫描。
+6. 无法明确判断的依赖先标记为待审查，不以猜测代替结论。
 
----
-
-## ⚠️ 已知问题
-
-### 参考项目许可证边界
-
-Python 版 UnicodeArt 当前使用 GPL-3.0-only。UnicodeArtJs 采用 MIT License，因此公开文档和源码实现必须保持清晰边界：
-
-- 可以参考公开行为、命令体验、参数含义和输出效果。
-- 可以使用 black-box / oracle 兼容性测试验证常用参数下的行为。
-- 不应复制 GPL 源码、注释、私有函数拆分或逐行实现结构。
-- 公开文案应使用“独立实现”“功能目标参考”“行为兼容测试”等表述。
-- 公开文案应避免“GPL 源码移植”“逐行翻译”“完全复刻”等表述。
-
-该项是项目级许可证风险控制要求，后续发布 npm、Marketplace、GitHub Pages 或商业化推广前都需要复核。
-
-### sd 包用途不明
-
-- **包名**: `sd`
-- **版本**: ^0.0.3
-- **许可证**: MIT（需确认）
-- **问题**: 不清楚在项目中的具体用途
-- **行动**:
-  - [ ] 搜索代码库中`sd`的使用位置
-  - [ ] 如无必要，考虑移除
-  - [ ] 如必需，添加注释说明用途
-
----
-
-## 📋 审查计划
-
-### Phase 1前（立即执行）
-
-- [ ] 运行`license-checker`自动生成报告
-- [ ] 确认`sd`包的用途和必要性
-- [ ] 记录所有依赖的许可证到本文档
-- [ ] 如有不合规依赖，寻找替代方案
-
-### 每次添加新依赖时
-
-- [ ] 在PR/MR中注明新依赖的许可证
-- [ ] 更新本文档
-- [ ] 团队审核通过后方可合并
-
-### 定期审查（每月）
-
-- [ ] 检查依赖更新是否有许可证变更
-- [ ] 移除未使用的依赖
-- [ ] 评估依赖的健康度（维护活跃度、安全问题）
-
----
-
-## 🚫 禁止的许可证类型
-
-以下许可证**严禁使用**：
-
-- ❌ GPL-2.0 / GPL-3.0（GNU通用公共许可证）
-- ❌ AGPL-3.0（ Affero GPL）
-- ❌ LGPL-2.1 / LGPL-3.0（GNU宽通用公共许可证）
-- ❌ SSPL（Server Side Public License）
-- ❌ BSL（Business Source License）
-- ❌ 任何带有"Copyleft"字样的许可证
-
-**原因**：这些许可证具有强传染性，会要求整个项目开源，与MIT协议冲突。
-
----
-
-## ✅ 允许的许可证类型
-
-以下许可证**可以安全使用**：
-
-- ✅ MIT
-- ✅ Apache-2.0
-- ✅ BSD-2-Clause / BSD-3-Clause
-- ✅ ISC
-- ✅ Unlicense / CC0（公共领域）
-- ✅ WTFPL（Do What The F*ck You Want To Public License）
-
-**原因**：这些是宽松许可证，允许商业使用、修改、分发，无传染性。
-
----
-
-## 🔗 参考资源
-
-- [OSI批准的许可证列表](https://opensource.org/licenses/)
-- [Choose a License](https://choosealicense.com/)
-- [npm许可证最佳实践](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#license)
-- [GitHub许可证检测](https://github.com/licensee/licensee)
-
----
-
-*最后更新*: 2026-07-03
-*下次审查*: 2026-07-17（或添加新依赖时）
+许可证审查是工程风险控制，不构成法律意见。对 LGPL、专用工具许可、字体再分发或商业发行有疑问时，应结合实际分发方式进一步确认。

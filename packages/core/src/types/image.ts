@@ -20,7 +20,6 @@
  * - 避免嵌套对象，扁平化存储
  * 
  * @module types/image
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://github.com/mandolin/UnicodeArt} Python参考实现
  * ============================================================================

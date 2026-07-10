@@ -25,7 +25,6 @@
  * - 归一化公式: normalizedValue = pixelValue / 255.0
  * 
  * @module sampler
- * @author Qoder
  * @since 0.1.0
  * @see {@link https://github.com/mandolin/UnicodeArt/src/unicodeart/core/sampler.py}
  * ============================================================================
