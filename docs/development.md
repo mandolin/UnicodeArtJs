@@ -15,7 +15,7 @@ mise exec -- npm --version
 
 ## 安装依赖
 
-当前仍保留各包自己的 `package-lock.json`。单根 lockfile 试迁完成前，依赖按包安装：
+当前使用 npm workspaces 和根目录单一 `package-lock.json`。依赖从仓库根目录安装：
 
 ```bash
 npm run install:packages
@@ -47,9 +47,9 @@ npm run check:vscode
 
 ## Lockfile 策略
 
-现阶段由各包维护自己的 `package-lock.json`。旧根 lockfile 属于已归档的历史原型，不进入公开仓库状态。
+现阶段由根目录维护唯一 `package-lock.json`。旧根原型 lockfile 已归档到 WorkZone，不进入公开仓库状态。
 
-后续会单独试迁单根 lockfile。该试迁需要验证原生 optional dependency、各包发布、Web 部署和 CI 行为，再决定是否保留。
+如果后续发现原生 optional dependency、发布打包或跨平台 CI 有不可接受问题，可回退到“私有根编排 + 各包 lockfile”的保守模式。
 
 ## 生成文件
 

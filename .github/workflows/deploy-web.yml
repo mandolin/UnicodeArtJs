@@ -43,38 +43,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
 
-      - name: Install Core dependencies
-        working-directory: ./packages/core
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build Core library
-        working-directory: ./packages/core
-        run: npm run build
-
-      - name: Install Web dependencies
-        working-directory: ./packages/web
-        run: npm install
+        run: npm run build:core
 
       - name: Install Playwright browser
-        working-directory: ./packages/web
         run: npx playwright install --with-deps chromium
 
       - name: Lint Web
-        working-directory: ./packages/web
-        run: npm run lint
+        run: npm run lint:web
 
       - name: Test Web
-        working-directory: ./packages/web
-        run: npm test
+        run: npm run test:web
 
       - name: Build Web application
-        working-directory: ./packages/web
-        run: npm run build
+        run: npm run build:web
 
       - name: Smoke Test Web
-        working-directory: ./packages/web
-        run: npm run test:e2e
+        run: npm run test:web:e2e
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

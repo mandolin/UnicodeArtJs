@@ -28,8 +28,8 @@ permissions:
   contents: read
 
 jobs:
-  core:
-    name: Core
+  check:
+    name: Full Check
     runs-on: ubuntu-latest
 
     steps:
@@ -41,89 +41,30 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/core/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install Core dependencies
-        working-directory: packages/core
-        run: npm ci
-
-      - name: Check Core
-        working-directory: packages/core
-        run: npm run typecheck && npm run build && npm test && npm run test:browser
-
-  cli:
-    name: CLI
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            packages/core/package-lock.json
-            packages/cli/package-lock.json
-
-      - name: Install Core dependencies
-        working-directory: packages/core
-        run: npm ci
-
-      - name: Build Core for local CLI dependency
-        working-directory: packages/core
-        run: npm run build
-
-      - name: Install CLI dependencies
-        working-directory: packages/cli
-        run: npm ci
-
-      - name: Test CLI
-        working-directory: packages/cli
-        run: npm test
-
-  web:
-    name: Web
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            packages/core/package-lock.json
-            packages/web/package-lock.json
-
-      - name: Install Core dependencies
-        working-directory: packages/core
-        run: npm ci
-
-      - name: Build Core for local Web dependency
-        working-directory: packages/core
-        run: npm run build
-
-      - name: Install Web dependencies
-        working-directory: packages/web
+      - name: Install dependencies
         run: npm ci
 
       - name: Install Playwright browser
-        working-directory: packages/web
         run: npx playwright install --with-deps chromium
 
-      - name: Check Web
-        working-directory: packages/web
+      - name: Run repository check
         run: npm run check
 
-  vscode-extension:
-    name: VSCode Extension
-    runs-on: ubuntu-latest
+      - name: Run package dry-run
+        run: npm run pack:core && npm run pack:cli
+
+  native-install:
+    name: Native Install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
 
     steps:
       - name: Checkout
@@ -134,12 +75,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/vscode-extension/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install VSCode Extension dependencies
-        working-directory: packages/vscode-extension
+      - name: Install dependencies
         run: npm ci
 
-      - name: Check VSCode Extension
-        working-directory: packages/vscode-extension
-        run: npm run check
+      - name: Build Core
+        run: npm run build:core
+
+      - name: Test Node consumers
+        run: npm run test:core && npm run test:cli
