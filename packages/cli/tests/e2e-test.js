@@ -20,7 +20,7 @@
  * ============================================================================
  */
 
-const { textToArt, validateConfig, PresetCharset, OutputFormat } = require('unicode-art-js');
+const { imageToArt, textToArt, validateConfig, PresetCharset, OutputFormat } = require('unicode-art-js');
 const { spawnSync } = require('child_process');
 const chalk = require('chalk');
 const fs = require('fs');
@@ -32,10 +32,7 @@ console.log(chalk.blue('🧪 Starting E2E Tests...\n'));
 let passed = 0;
 let failed = 0;
 const cliPath = path.resolve(__dirname, '..', 'src', 'console.js');
-const pythonProjectRoot = 'K:/Project/Github_mandolin/UnicodeArt';
-const pythonHelperPath = path.join(pythonProjectRoot, 'test_golden_helper.py');
-const pythonSourceRoot = path.join(pythonProjectRoot, 'src');
-const referenceFont = 'C:/Windows/Fonts/arial.ttf';
+const fixtureImagePath = path.resolve(__dirname, '..', '..', 'core', 'tests', 'test-image-zhong.png');
 
 /**
  * 🟢 运行单个测试
@@ -63,110 +60,6 @@ function runCli(args, options = {}) {
 }
 
 /**
- * 🔹 运行Python参考项目代码
- */
-function runPython(code, args = []) {
-  const result = spawnSync('python', ['-c', code, ...args], {
-    encoding: 'utf-8',
-    maxBuffer: 20 * 1024 * 1024,
-    env: {
-      ...process.env,
-      PYTHONPATH: pythonSourceRoot
-    }
-  });
-
-  if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout);
-  }
-
-  return result.stdout.trim();
-}
-
-/**
- * 🔹 使用Python参考项目生成文本字符画
- */
-function runPythonTextReference(text, options) {
-  const code = `
-import json
-import sys
-from unicodeart import unicodeart_util as u
-
-text = json.loads(sys.argv[1])
-font = sys.argv[2]
-chars = sys.argv[3]
-height = int(sys.argv[4])
-matrix = int(sys.argv[5])
-ratio = float(sys.argv[6])
-interpolation = sys.argv[7]
-align = sys.argv[8]
-line_spacing = int(sys.argv[9])
-height_mode = sys.argv[10]
-font_reduce = int(sys.argv[11])
-wide_char_ratio = float(sys.argv[12])
-
-base = u.get_baseimg(text, font, height, matrix, align, line_spacing, height_mode, font_reduce)
-if height_mode == 'total':
-    sampling_height = height
-else:
-    lines_count = len(u.preprocess_text_input(text))
-    sampling_height = height * lines_count + line_spacing * max(0, lines_count - 1)
-sampling = u.get_sampling_array(base, sampling_height, None, ratio, matrix, interpolation)
-char_data, wide_char_data = u.get_char_data(chars, font, matrix, ratio, interpolation)
-print(json.dumps(u.get_final_output(sampling, char_data, wide_char_data, None, wide_char_ratio), ensure_ascii=False))
-`;
-
-  const output = runPython(code, [
-    JSON.stringify(text),
-    options.font,
-    options.chars,
-    String(options.height),
-    String(options.matrix),
-    String(options.ratio),
-    options.interpolation,
-    options.align,
-    String(options.lineSpacing),
-    options.heightMode,
-    String(options.fontReduce),
-    String(options.wideCharRatio)
-  ]);
-
-  return JSON.parse(output);
-}
-
-/**
- * 🔹 使用Python参考项目生成图片字符画
- */
-function runPythonImageReference(imagePath, options) {
-  const result = spawnSync('python', [
-    pythonHelperPath,
-    imagePath,
-    options.height == null ? 'None' : String(options.height),
-    options.width == null ? 'None' : String(options.width),
-    String(options.ratio),
-    String(options.matrix),
-    options.interpolation,
-    options.font,
-    options.chars,
-    options.fontReduce == null ? 'None' : String(options.fontReduce),
-    String(options.wideCharRatio)
-  ], {
-    encoding: 'utf-8',
-    maxBuffer: 20 * 1024 * 1024
-  });
-
-  if (result.status !== 0) {
-    throw new Error(result.stderr || result.stdout);
-  }
-
-  const lastLine = result.stdout.trim().split(/\r?\n/).pop();
-  if (!lastLine) {
-    throw new Error('Python reference helper returned empty output');
-  }
-
-  return JSON.parse(lastLine);
-}
-
-/**
  * 🟢 创建临时目录
  */
 function createTempDir() {
@@ -174,25 +67,10 @@ function createTempDir() {
 }
 
 /**
- * 🔹 创建Python/OpenCV也能稳定读取的PNG测试图
+ * 🔹 复制仓库内自有PNG测试图
  */
-function createReferenceImage(imagePath) {
-  const code = `
-import cv2
-import numpy as np
-import sys
-
-img = np.array([
-    [0, 255, 64, 192],
-    [255, 0, 192, 64],
-    [64, 192, 0, 255],
-    [192, 64, 255, 0],
-], dtype=np.uint8)
-if not cv2.imwrite(sys.argv[1], img):
-    raise RuntimeError('failed to write png')
-`;
-
-  runPython(code, [imagePath]);
+function createFixtureImage(imagePath) {
+  fs.copyFileSync(fixtureImagePath, imagePath);
 }
 
 //#region 🟩 测试用例
@@ -410,7 +288,7 @@ async function testImageCommand() {
   
   try {
     const imagePath = path.join(tempDir, 'sample.png');
-    createReferenceImage(imagePath);
+    createFixtureImage(imagePath);
     
     const result = runCli(['--image', imagePath, '--height', '2', '--lang', 'en-US']);
     
@@ -427,17 +305,17 @@ async function testImageCommand() {
 }
 
 /**
- * 🔹 Test 12: text子命令输出与Python参考项目逐字一致
+ * 🔹 Test 12: text子命令输出与Core API同参数一致
  */
-async function testTextCommandReferenceParity() {
+async function testTextCommandCoreParity() {
   const tempDir = createTempDir();
-  const outputPath = path.join(tempDir, 'text-reference.txt');
+  const outputPath = path.join(tempDir, 'text-core-parity.txt');
   const options = {
     height: 2,
     matrix: 3,
     ratio: 2,
     interpolation: 'bilinear',
-    font: referenceFont,
+    font: 'serif',
     chars: ' @',
     align: 'left',
     lineSpacing: 0,
@@ -473,10 +351,23 @@ async function testTextCommandReferenceParity() {
     }
     
     const actual = fs.readFileSync(outputPath, 'utf-8');
-    const expected = runPythonTextReference('Hi', options);
+    const expected = await textToArt('Hi', {
+      height: options.height,
+      matrixSize: options.matrix,
+      ratio: options.ratio,
+      interpolation: options.interpolation,
+      font: options.font,
+      charset: { type: PresetCharset.CUSTOM, customChars: options.chars },
+      textAlign: options.align,
+      lineSpacing: options.lineSpacing,
+      heightMode: options.heightMode,
+      fontReduce: options.fontReduce,
+      wideCharRatio: options.wideCharRatio,
+      outputFormat: OutputFormat.PLAIN_TEXT
+    });
     
-    if (actual !== expected) {
-      throw new Error(`Text output differs from Python reference\nExpected:\n${expected}\nActual:\n${actual}`);
+    if (actual !== expected.content) {
+      throw new Error(`Text output differs from Core API\nExpected:\n${expected.content}\nActual:\n${actual}`);
     }
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -484,26 +375,26 @@ async function testTextCommandReferenceParity() {
 }
 
 /**
- * 🔹 Test 13: image子命令输出与Python参考项目逐字一致
+ * 🔹 Test 13: image子命令输出与Core API同参数一致
  */
-async function testImageCommandReferenceParity() {
+async function testImageCommandCoreParity() {
   const tempDir = createTempDir();
   const imagePath = path.join(tempDir, 'sample.png');
-  const outputPath = path.join(tempDir, 'image-reference.txt');
+  const outputPath = path.join(tempDir, 'image-core-parity.txt');
   const options = {
     height: 2,
     width: null,
     matrix: 3,
     ratio: 2,
     interpolation: 'bilinear',
-    font: referenceFont,
+    font: 'serif',
     chars: ' @',
     fontReduce: null,
     wideCharRatio: 2
   };
   
   try {
-    createReferenceImage(imagePath);
+    createFixtureImage(imagePath);
     
     const result = runCli([
       'image', imagePath,
@@ -527,10 +418,19 @@ async function testImageCommandReferenceParity() {
     }
     
     const actual = fs.readFileSync(outputPath, 'utf-8');
-    const expected = runPythonImageReference(imagePath, options);
+    const expected = await imageToArt(imagePath, {
+      height: options.height,
+      matrixSize: options.matrix,
+      ratio: options.ratio,
+      interpolation: options.interpolation,
+      font: options.font,
+      charset: { type: PresetCharset.CUSTOM, customChars: options.chars },
+      wideCharRatio: options.wideCharRatio,
+      outputFormat: OutputFormat.PLAIN_TEXT
+    });
     
-    if (actual !== expected) {
-      throw new Error(`Image output differs from Python reference\nExpected:\n${expected}\nActual:\n${actual}`);
+    if (actual !== expected.content) {
+      throw new Error(`Image output differs from Core API\nExpected:\n${expected.content}\nActual:\n${actual}`);
     }
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -714,7 +614,7 @@ async function testImageCommandBoxOption() {
   const outputPath = path.join(tempDir, 'image-box.txt');
 
   try {
-    createReferenceImage(imagePath);
+    createFixtureImage(imagePath);
 
     const result = runCli([
       'image', imagePath,
@@ -814,8 +714,8 @@ async function testCliBoxPhase5LayoutOptions() {
   await runTest('Test 9: CLI output file mode', testOutputFileMode);
   await runTest('Test 10: CLI missing image error', testMissingImageError);
   await runTest('Test 11: CLI image command', testImageCommand);
-  await runTest('Test 12: CLI text reference parity', testTextCommandReferenceParity);
-  await runTest('Test 13: CLI image reference parity', testImageCommandReferenceParity);
+  await runTest('Test 12: CLI text Core parity', testTextCommandCoreParity);
+  await runTest('Test 13: CLI image Core parity', testImageCommandCoreParity);
   await runTest('Test 14: CLI box style shortcut', testTextCommandBoxStyleShortcut);
   await runTest('Test 15: CLI box JSON options', testTextCommandBoxJson);
   await runTest('Test 16: CLI config file box and override', testConfigFileBoxAndCliOverride);

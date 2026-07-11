@@ -52,7 +52,7 @@ function samplingArray(rows = 2, cols = 4): SamplingArray {
   );
 }
 
-describe('Python reference parity cases', () => {
+describe('matcher regression cases', () => {
   test('does not output placeholders when only wide charset is available', async () => {
     const chars = new Map<string, CharMatrix>([
       ['士', charMatrix('士', 0.5, CharType.WIDE, 4, 2)]

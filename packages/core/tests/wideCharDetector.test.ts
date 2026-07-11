@@ -20,7 +20,7 @@ describe('wideCharDetector', () => {
       expect(isWideChar('ウ')).toBe(true);
     });
 
-    test('matches Python reference behavior for Korean characters', () => {
+    test('keeps current Korean width compatibility behavior', () => {
       expect(isWideChar('한')).toBe(false);
       expect(isWideChar('글')).toBe(false);
     });
