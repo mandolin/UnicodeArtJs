@@ -253,6 +253,10 @@ export {
   sharpImageBackend
 } from './platform/node/sharpImageBackend';
 
+export {
+  napiRsImageBackend
+} from './platform/node/napiRsImageBackend';
+
 export type {
   NodeImageBackend,
   NodeImageBackendName

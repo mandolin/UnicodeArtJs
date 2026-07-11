@@ -45,12 +45,13 @@ export default [
         sourcemap: true,
         globals: {
           sharp: 'sharp',
+          '@napi-rs/image': 'napiRsImage',
           ndarray: 'ndarray',
           'ndarray-ops': 'ndarrayOps'
         }
       }
     ],
-    external: ['sharp', 'ndarray', 'ndarray-ops'],
+    external: ['sharp', '@napi-rs/image', 'ndarray', 'ndarray-ops'],
     plugins: createPlugins()
   },
   {

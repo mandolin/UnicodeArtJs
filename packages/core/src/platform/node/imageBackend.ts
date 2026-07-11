@@ -10,12 +10,13 @@
  */
 
 import type { CoreImageData } from '../../types/image';
+import { napiRsImageBackend } from './napiRsImageBackend';
 import { sharpImageBackend } from './sharpImageBackend';
 
 //#region 🟦 类型定义
 
 /** 当前内置的 Node 图像后端名称。 */
-export type NodeImageBackendName = 'sharp';
+export type NodeImageBackendName = 'sharp' | 'napi-rs';
 
 /** Node 图像后端能力接口。 */
 export interface NodeImageBackend {
@@ -39,6 +40,7 @@ export interface NodeImageBackend {
 //#region 🟦 后端注册表
 
 const BUILTIN_NODE_IMAGE_BACKENDS: Record<NodeImageBackendName, NodeImageBackend> = {
+  'napi-rs': napiRsImageBackend,
   sharp: sharpImageBackend
 };
 
@@ -71,4 +73,3 @@ export function resetNodeImageBackend(): void {
 }
 
 //#endregion
-

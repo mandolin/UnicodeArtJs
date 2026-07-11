@@ -50,6 +50,7 @@
     "sharp": "^0.33.2"
   },
   "optionalDependencies": {
+    "@napi-rs/image": "^1.14.0",
     "canvas": "^3.2.3"
   },
   "peerDependencies": {

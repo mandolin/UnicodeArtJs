@@ -93,7 +93,7 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 ## Main APIs
 
 - `textToArt(text, config)` converts text into Unicode art. Requires `canvas` in Node.js.
-- `imageToArt(imagePath, config)` converts an image file into Unicode art. Uses `sharp`.
+- `imageToArt(imagePath, config)` converts an image file into Unicode art. The default Node backend still uses `sharp`.
 - `unicode-art-js/browser` exports browser `imageToArt()`, browser `textToArt()`, `browserPlatformAdapter`, `loadBrowserFont`, cache controls, runtime capability checks, and pure conversion APIs for browser projects.
 - `unicode-art-js/pure` exports platform-independent sampling, matching, assembly, box, and `imageDataToArt()` APIs.
 - `validateConfig(config)` validates and fills defaults.
@@ -101,7 +101,7 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - `getPresetChars(type)` returns preset character sets.
 - `t(key, params, locale)` renders built-in Core messages for `zh-CN` / `en-US`.
 - `normalizeLocale(locale)` normalizes host locale values before passing them into Core config.
-- `getNodeImageBackend()`, `setNodeImageBackend()`, and `resetNodeImageBackend()` expose the Node image backend boundary. The default backend is currently `sharp`.
+- `getNodeImageBackend()`, `setNodeImageBackend()`, and `resetNodeImageBackend()` expose the Node image backend boundary. The default backend is currently `sharp`; `napi-rs` is available as an experimental optional backend.
 
 ## Stability Notes
 
@@ -109,7 +109,7 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, and layout-stage `box` modes such as `lines` / `grid`.
 - Reserved: `charSpace`, `maxParallelTasks`, `visualFont.reduceTop/right/bottom/left`, `glyphFont.widthProfile`, and `glyphFont.wideCharRegex`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
 
-Node image backend note: Core still defaults to `sharp` for compatibility. The backend is now explicit so future permissive-license adapters can be tested without changing the high-level API.
+Node image backend note: Core still defaults to `sharp` for compatibility. The experimental `napi-rs` backend can be enabled with `setNodeImageBackend('napi-rs')`; its first-batch format target is PNG / JPEG / WebP / BMP. GIF first-frame support and SVG / TIFF paths remain outside the stable default backend contract for now.
 
 ## Configuration
 
