@@ -45,6 +45,8 @@ npm run check:web
 npm run check:vscode
 ```
 
+`release:gate` 是当前推荐的发布前总入口，会额外执行 Core/CLI pack dry-run、VSIX 隔离打包、VSIX 内容扫描、版本/依赖图检查和共享 fixture 校验。更多说明见 [发布门禁与版本图](release-gate.md)。
+
 ## Lockfile 策略
 
 现阶段由根目录维护唯一 `package-lock.json`。旧根原型 lockfile 已归档到 WorkZone，不进入公开仓库状态。

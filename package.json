@@ -39,9 +39,12 @@
     "check:cli": "npm run test:cli",
     "check:web": "npm --workspace packages/web run check",
     "check:vscode": "npm --workspace packages/vscode-extension run check",
+    "package:vscode": "npm --workspace packages/vscode-extension run package && npm --workspace packages/vscode-extension run inspect:vsix",
     "pack:core": "npm --workspace packages/core pack --dry-run",
     "pack:cli": "npm --workspace packages/cli pack --dry-run",
-    "release:gate": "npm run check && npm run pack:core && npm run pack:cli"
+    "release:verify": "node scripts/release-gate.cjs",
+    "release:verify:publish": "node scripts/release-gate.cjs --strict-publish",
+    "release:gate": "npm run check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
   },
   "repository": {
     "type": "git",

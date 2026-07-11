@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "text": [
+    {
+      "id": "ascii-basic",
+      "input": "Hi",
+      "height": 3,
+      "charset": "ASCII",
+      "locale": "en-US"
+    },
+    {
+      "id": "wide-text-box",
+      "input": "中文",
+      "height": 4,
+      "chars": " .#@",
+      "locale": "zh-CN",
+      "box": {
+        "style": "ascii",
+        "padding": {
+          "left": 1,
+          "right": 1
+        },
+        "margin": 0
+      }
+    }
+  ],
+  "image": [
+    {
+      "id": "image-basic",
+      "path": "packages/core/tests/test-image-zhong.png",
+      "height": 2,
+      "chars": " @",
+      "locale": "en-US"
+    }
+  ]
+}

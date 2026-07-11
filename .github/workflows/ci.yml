@@ -49,11 +49,8 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Run repository check
-        run: npm run check
-
-      - name: Run package dry-run
-        run: npm run pack:core && npm run pack:cli
+      - name: Run repository release gate
+        run: npm run release:gate
 
   native-install:
     name: Native Install (${{ matrix.os }})

@@ -6,8 +6,8 @@
 - Confirm extension version.
 - Confirm `unicode-art-js` dependency version.
 - Confirm Node 22 is active through `mise exec -- node -v`.
-- Run `mise exec -- npm run check`.
-- Run `mise exec -- npm run package` for the current pre-release version.
+- Run `mise exec -- npm run release:gate` from the repository root.
+- Confirm `mise exec -- npm --workspace packages/vscode-extension run inspect:vsix` passes for the generated VSIX.
 - Install the VSIX locally with `code --install-extension`.
 - Open the converter from the command palette.
 - Convert selected text.
@@ -23,8 +23,9 @@ For the current pre-release package:
 
 ```powershell
 cd K:\Project\Github_mandolin\UnicodeArtJs\packages\vscode-extension
-mise exec -- npm run check
-mise exec -- npm run package
+cd K:\Project\Github_mandolin\UnicodeArtJs
+mise exec -- npm run release:gate
+cd K:\Project\Github_mandolin\UnicodeArtJs\packages\vscode-extension
 $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
 vsce publish --pre-release --packagePath ".\unicode-art-js-vscode-$version.vsix"
 ```
