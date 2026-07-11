@@ -26,6 +26,14 @@ export type MessageParams = Record<string, string | number | boolean | null | un
  * - `error.*` 作为通用包装消息，供 CLI / Web / VSCode 复用。
  */
 export type MessageKey =
+  | 'input.text.required'
+  | 'input.imagePath.required'
+  | 'input.imageData.object'
+  | 'input.imageData.widthPositive'
+  | 'input.imageData.heightPositive'
+  | 'input.imageData.uint8Array'
+  | 'input.imageData.lengthMismatch'
+  | 'input.charDataMap.nonEmpty'
   | 'config.height.positive'
   | 'config.width.positive'
   | 'config.dimension.required'
@@ -34,8 +42,12 @@ export type MessageKey =
   | 'config.wideCharRatio.range'
   | 'config.box.invalid'
   | 'charset.unsupported'
+  | 'browser.conversionAborted'
+  | 'browser.inputPixels.limit'
+  | 'browser.outputCells.limit'
   | 'error.processingFailed'
   | 'error.textToArtFailed'
-  | 'error.imageToArtFailed';
+  | 'error.imageToArtFailed'
+  | 'error.coreImageDataFailed';
 
 //#endregion

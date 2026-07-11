@@ -83,7 +83,30 @@ describe('pure core entry', () => {
         }
       )
     ).rejects.toMatchObject({
-      code: ErrorCode.INVALID_INPUT
+      code: ErrorCode.INVALID_INPUT,
+      messageKey: 'input.imageData.lengthMismatch',
+      locale: 'zh-CN'
+    });
+  });
+
+  test('localizes pure validation errors', async () => {
+    await expect(
+      imageDataToArt(
+        {
+          width: 0,
+          height: 1,
+          data: new Uint8Array()
+        },
+        { height: 1, matrixSize: 2, locale: 'en-US' },
+        {
+          charDataMap: new Map<string, CharMatrix>([['.', makeCharMatrix('.', 1)]])
+        }
+      )
+    ).rejects.toMatchObject({
+      code: ErrorCode.INVALID_INPUT,
+      message: 'imageData.width must be a positive integer',
+      messageKey: 'input.imageData.widthPositive',
+      locale: 'en-US'
     });
   });
 

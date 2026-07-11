@@ -267,6 +267,9 @@ export enum ErrorCode {
   
   /** 图像处理失败 */
   IMAGE_PROCESSING_FAILED = 'IMAGE_PROCESSING_FAILED',
+
+  /** 用户或宿主环境主动取消操作 */
+  OPERATION_ABORTED = 'OPERATION_ABORTED',
   
   /** 字符匹配失败 */
   MATCHING_FAILED = 'MATCHING_FAILED',

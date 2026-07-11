@@ -342,14 +342,19 @@ export async function textToArt(
   config: Partial<ArtConfig>
 ): Promise<ArtResult> {
   const startTime = Date.now();
+  const locale = normalizeLocale(config.locale);
   
   try {
     // 🔹 验证输入
     if (!text || text.length === 0) {
       throw new UnicodeArtError(
-        '文本不能为空',
+        translateCoreMessage('input.text.required', {}, locale),
         ErrorCode.INVALID_INPUT,
-        { text }
+        {
+          details: { text },
+          messageKey: 'input.text.required',
+          locale
+        }
       );
     }
     
@@ -488,10 +493,16 @@ export async function textToArt(
       throw error;
     }
     
+    const message = error instanceof Error ? error.message : String(error);
     throw new UnicodeArtError(
-      `文本转字符画失败: ${error instanceof Error ? error.message : String(error)}`,
+      translateCoreMessage('error.textToArtFailed', { message }, locale),
       ErrorCode.INTERNAL_ERROR,
-      { originalError: error }
+      {
+        details: { originalError: error },
+        messageKey: 'error.textToArtFailed',
+        messageParams: { message },
+        locale
+      }
     );
   }
 }
@@ -781,14 +792,19 @@ export async function imageToArt(
   config: Partial<ArtConfig>
 ): Promise<ArtResult> {
   const startTime = Date.now();
+  const locale = normalizeLocale(config.locale);
   
   try {
     // 🔹 验证输入
     if (!imagePath || imagePath.length === 0) {
       throw new UnicodeArtError(
-        '图像路径不能为空',
+        translateCoreMessage('input.imagePath.required', {}, locale),
         ErrorCode.INVALID_INPUT,
-        { imagePath }
+        {
+          details: { imagePath },
+          messageKey: 'input.imagePath.required',
+          locale
+        }
       );
     }
     
@@ -845,10 +861,16 @@ export async function imageToArt(
       throw error;
     }
     
+    const message = error instanceof Error ? error.message : String(error);
     throw new UnicodeArtError(
-      `图片转字符画失败: ${error instanceof Error ? error.message : String(error)}`,
+      translateCoreMessage('error.imageToArtFailed', { message }, locale),
       ErrorCode.INTERNAL_ERROR,
-      { originalError: error }
+      {
+        details: { originalError: error },
+        messageKey: 'error.imageToArtFailed',
+        messageParams: { message },
+        locale
+      }
     );
   }
 }
@@ -1100,6 +1122,6 @@ export function calcDisplayWidth(text: string): number {
  * 
  * @constant {string} VERSION
  */
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.2';
 
 //#endregion

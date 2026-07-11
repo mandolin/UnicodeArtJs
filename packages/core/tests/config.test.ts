@@ -5,6 +5,8 @@ import {
   validateConfig,
   VERSION
 } from '../src';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { DEFAULT_ASCII_CHARS, EXTENDED_CHARS } from '../src/constants';
 import { PresetCharset } from '../src/types/charset';
 import { OutputFormat } from '../src/types/output';
@@ -179,8 +181,10 @@ describe('public configuration helpers', () => {
   });
 
   test('public utility exports are available', () => {
+    const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
+
     expect(isWideChar('中')).toBe(true);
     expect(calcDisplayWidth('A中')).toBe(3);
-    expect(VERSION).toBe('1.0.0');
+    expect(VERSION).toBe(pkg.version);
   });
 });

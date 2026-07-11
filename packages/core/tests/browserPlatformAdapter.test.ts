@@ -380,7 +380,8 @@ describe('browserPlatformAdapter', () => {
     }))
       .rejects
       .toMatchObject({
-        code: ErrorCode.INVALID_INPUT
+        code: ErrorCode.OPERATION_ABORTED,
+        messageKey: 'browser.conversionAborted'
       });
   });
 

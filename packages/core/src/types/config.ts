@@ -416,14 +416,13 @@ export interface ArtConfig {
   fontReduce?: number;
   
   /** 
-   * 字符间距（像素）
-   * - 字符之间的额外空白
-   * - 范围: [0, 5]
-   * - 推荐: 1
-   * - 默认值: 1
+   * 字符间距（像素，保留字段）
+   * - 当前 Core 主路径暂不按此字段改变文本渲染或采样结果
+   * - 后续视觉字体排版增强时会作为字符间距入口
+   * - 默认值: 1（仅用于配置兼容）
    * 
-   * @example
-   * charSpace: 2 // 增加字符间距
+   * @remarks
+   * - 调用方 UI 可展示为实验性/预留选项，不应承诺当前输出会变化。
    */
   charSpace?: number;
 
@@ -542,9 +541,11 @@ export interface ArtConfig {
   /**
    * 裱框配置
    * - false: 关闭（默认）
-   * - object: 对最终字符画文本执行外框后处理
+   * - object: 对最终字符画文本执行外框后处理，或在文本模式中启用 layout-stage 行/格布局
    *
-   * box-phase-2 仅支持 mode='outer' 与 renderStage='post'。
+   * @remarks
+   * - post/outer 裱框已作为稳定后处理能力使用。
+   * - layout/lines、layout/grid 仍属于实验性布局能力，调用方应在 UI 中标注或隐藏高级选项。
    */
   box?: false | BoxOptions;
   
@@ -582,19 +583,13 @@ export interface ArtConfig {
   enableEarlyTermination?: boolean;
   
   /** 
-   * 最大并行任务数
-   * - 0表示自动检测CPU核心数
-   * - 仅在Node.js环境有效
-   * - 默认值: 0
+   * 最大并行任务数（保留字段）
+   * - 当前 Core 匹配路径仍为单进程/单线程实现
+   * - 后续引入 worker_threads / Web Worker 时再接入该字段
+   * - 默认值: 0（仅用于配置兼容）
    * 
    * @remarks
-   * - 浏览器环境使用Web Workers
-   * - Node.js环境使用worker_threads
-   * - 设置为1可禁用并行
-   * 
-   * @performance
-   * - 理想值: CPU核心数
-   * - 过高会导致线程切换开销
+   * - 调用方 UI 可展示为实验性/预留选项，不应承诺当前输出或速度会变化。
    */
   maxParallelTasks?: number;
   

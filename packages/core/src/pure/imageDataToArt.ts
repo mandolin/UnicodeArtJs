@@ -24,6 +24,7 @@ import { batchMatch } from '../matcher';
 import { generateSamplingArray } from '../sampler';
 import { assembleOutput } from '../assembler';
 import { normalizeBoxOptions } from '../box/box';
+import { normalizeLocale, t as translateCoreMessage } from '../i18n';
 
 //#region 🟦 Public Types
 
@@ -63,10 +64,11 @@ export async function imageDataToArt(
 ): Promise<ArtResult> {
   const now = options.now ?? Date.now;
   const startTime = now();
+  const locale = normalizeLocale(config.locale);
 
   try {
-    validateCoreImageData(imageData);
-    validateCharDataMap(options.charDataMap);
+    validateCoreImageData(imageData, locale);
+    validateCharDataMap(options.charDataMap, locale);
 
     const fullConfig = validatePureConfig(config);
     const processedImage = fullConfig.invert ? invertCorePixels(imageData) : imageData;
@@ -93,10 +95,16 @@ export async function imageDataToArt(
       throw error;
     }
 
+    const message = error instanceof Error ? error.message : String(error);
     throw new UnicodeArtError(
-      `Core image data conversion failed: ${error instanceof Error ? error.message : String(error)}`,
+      translateCoreMessage('error.coreImageDataFailed', { message }, locale),
       ErrorCode.INTERNAL_ERROR,
-      { originalError: error }
+      {
+        details: { originalError: error },
+        messageKey: 'error.coreImageDataFailed',
+        messageParams: { message },
+        locale
+      }
     );
   }
 }
@@ -105,65 +113,92 @@ export async function imageDataToArt(
 
 //#region 🟦 Validation
 
-function validateCoreImageData(imageData: CoreImageData): void {
+function validateCoreImageData(imageData: CoreImageData, locale: string | undefined | null): void {
   if (!imageData || typeof imageData !== 'object') {
     throw new UnicodeArtError(
-      'imageData must be an object',
+      translateCoreMessage('input.imageData.object', {}, locale),
       ErrorCode.INVALID_INPUT,
-      { imageData }
+      {
+        details: { imageData },
+        messageKey: 'input.imageData.object',
+        locale: normalizeLocale(locale)
+      }
     );
   }
 
   if (!Number.isInteger(imageData.width) || imageData.width <= 0) {
     throw new UnicodeArtError(
-      'imageData.width must be a positive integer',
+      translateCoreMessage('input.imageData.widthPositive', {}, locale),
       ErrorCode.INVALID_INPUT,
-      { width: imageData.width }
+      {
+        details: { width: imageData.width },
+        messageKey: 'input.imageData.widthPositive',
+        locale: normalizeLocale(locale)
+      }
     );
   }
 
   if (!Number.isInteger(imageData.height) || imageData.height <= 0) {
     throw new UnicodeArtError(
-      'imageData.height must be a positive integer',
+      translateCoreMessage('input.imageData.heightPositive', {}, locale),
       ErrorCode.INVALID_INPUT,
-      { height: imageData.height }
+      {
+        details: { height: imageData.height },
+        messageKey: 'input.imageData.heightPositive',
+        locale: normalizeLocale(locale)
+      }
     );
   }
 
   if (!(imageData.data instanceof Uint8Array)) {
     throw new UnicodeArtError(
-      'imageData.data must be a Uint8Array',
+      translateCoreMessage('input.imageData.uint8Array', {}, locale),
       ErrorCode.INVALID_INPUT,
-      { data: imageData.data }
+      {
+        details: { data: imageData.data },
+        messageKey: 'input.imageData.uint8Array',
+        locale: normalizeLocale(locale)
+      }
     );
   }
 
   const expectedLength = imageData.width * imageData.height;
   if (imageData.data.length !== expectedLength) {
+    const messageParams = { expected: expectedLength, actual: imageData.data.length };
     throw new UnicodeArtError(
-      `imageData.data length mismatch: expected ${expectedLength}, got ${imageData.data.length}`,
+      translateCoreMessage('input.imageData.lengthMismatch', messageParams, locale),
       ErrorCode.INVALID_INPUT,
       {
-        width: imageData.width,
-        height: imageData.height,
-        dataLength: imageData.data.length
+        details: {
+          width: imageData.width,
+          height: imageData.height,
+          dataLength: imageData.data.length
+        },
+        messageKey: 'input.imageData.lengthMismatch',
+        messageParams,
+        locale: normalizeLocale(locale)
       }
     );
   }
 }
 
-function validateCharDataMap(charDataMap: Map<string, CharMatrix>): void {
+function validateCharDataMap(charDataMap: Map<string, CharMatrix>, locale: string | undefined | null): void {
   if (!(charDataMap instanceof Map) || charDataMap.size === 0) {
     throw new UnicodeArtError(
-      'options.charDataMap must be a non-empty Map',
+      translateCoreMessage('input.charDataMap.nonEmpty', {}, locale),
       ErrorCode.INVALID_INPUT,
-      { charDataMap }
+      {
+        details: { charDataMap },
+        messageKey: 'input.charDataMap.nonEmpty',
+        locale: normalizeLocale(locale)
+      }
     );
   }
 }
 
 function validatePureConfig(config: Partial<ArtConfig>): ArtConfig {
   const normalizedConfig = normalizeArtConfigAliases(config);
+  const locale = normalizeLocale(normalizedConfig.locale);
   const fullConfig: ArtConfig = {
     matrixSize: normalizedConfig.matrixSize || 6,
     ratio: normalizedConfig.ratio || 2.0,
@@ -189,15 +224,19 @@ function validatePureConfig(config: Partial<ArtConfig>): ArtConfig {
     wideCharRatio: normalizedConfig.wideCharRatio !== undefined ? normalizedConfig.wideCharRatio : 2.0,
     enableEarlyTermination: normalizedConfig.enableEarlyTermination !== undefined ? normalizedConfig.enableEarlyTermination : true,
     maxParallelTasks: normalizedConfig.maxParallelTasks !== undefined ? normalizedConfig.maxParallelTasks : 0,
-    locale: normalizedConfig.locale
+    locale
   };
 
   if (normalizedConfig.height !== undefined) {
     if (!Number.isFinite(normalizedConfig.height) || normalizedConfig.height <= 0) {
       throw new UnicodeArtError(
-        'height must be greater than 0',
+        translateCoreMessage('config.height.positive', {}, locale),
         ErrorCode.INVALID_CONFIG,
-        { height: normalizedConfig.height }
+        {
+          details: { height: normalizedConfig.height },
+          messageKey: 'config.height.positive',
+          locale
+        }
       );
     }
     fullConfig.height = normalizedConfig.height;
@@ -206,9 +245,13 @@ function validatePureConfig(config: Partial<ArtConfig>): ArtConfig {
   if (normalizedConfig.width !== undefined) {
     if (!Number.isFinite(normalizedConfig.width) || normalizedConfig.width <= 0) {
       throw new UnicodeArtError(
-        'width must be greater than 0',
+        translateCoreMessage('config.width.positive', {}, locale),
         ErrorCode.INVALID_CONFIG,
-        { width: normalizedConfig.width }
+        {
+          details: { width: normalizedConfig.width },
+          messageKey: 'config.width.positive',
+          locale
+        }
       );
     }
     fullConfig.width = normalizedConfig.width;
@@ -216,25 +259,37 @@ function validatePureConfig(config: Partial<ArtConfig>): ArtConfig {
 
   if (!fullConfig.height && !fullConfig.width) {
     throw new UnicodeArtError(
-      'height or width must be specified',
+      translateCoreMessage('config.dimension.required', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { config }
+      {
+        details: { config },
+        messageKey: 'config.dimension.required',
+        locale
+      }
     );
   }
 
   if (fullConfig.matrixSize < 2 || fullConfig.matrixSize > 20) {
     throw new UnicodeArtError(
-      'matrixSize must be between 2 and 20',
+      translateCoreMessage('config.matrixSize.range', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { matrixSize: fullConfig.matrixSize }
+      {
+        details: { matrixSize: fullConfig.matrixSize },
+        messageKey: 'config.matrixSize.range',
+        locale
+      }
     );
   }
 
   if (fullConfig.ratio < 1.0 || fullConfig.ratio > 3.0) {
     throw new UnicodeArtError(
-      'ratio must be between 1.0 and 3.0',
+      translateCoreMessage('config.ratio.range', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { ratio: fullConfig.ratio }
+      {
+        details: { ratio: fullConfig.ratio },
+        messageKey: 'config.ratio.range',
+        locale
+      }
     );
   }
 
@@ -243,19 +298,29 @@ function validatePureConfig(config: Partial<ArtConfig>): ArtConfig {
     (fullConfig.wideCharRatio <= 0 || fullConfig.wideCharRatio > 10)
   ) {
     throw new UnicodeArtError(
-      'wideCharRatio must be between 0 and 10',
+      translateCoreMessage('config.wideCharRatio.range', {}, locale),
       ErrorCode.INVALID_CONFIG,
-      { wideCharRatio: fullConfig.wideCharRatio }
+      {
+        details: { wideCharRatio: fullConfig.wideCharRatio },
+        messageKey: 'config.wideCharRatio.range',
+        locale
+      }
     );
   }
 
   try {
     normalizeBoxOptions(fullConfig.box);
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     throw new UnicodeArtError(
-      `box config is invalid: ${error instanceof Error ? error.message : String(error)}`,
+      translateCoreMessage('config.box.invalid', { message }, locale),
       ErrorCode.INVALID_CONFIG,
-      { box: fullConfig.box }
+      {
+        details: { box: fullConfig.box },
+        messageKey: 'config.box.invalid',
+        messageParams: { message },
+        locale
+      }
     );
   }
 
