@@ -88,6 +88,8 @@ clearBrowserAdapterCache({ glyphs: true, charData: true });
 
 The browser entry targets Chrome 120+ and does not import `sharp`, `canvas`, or Node filesystem APIs. URL image loading is subject to normal browser CORS rules. Browser APIs include glyph/font caches, cache statistics, runtime capability checks, progress callbacks, cancellation, and large-image limits.
 
+The browser entry is usable today, but cross-browser pixel-level parity is still treated as experimental. If exact output matching matters, pin the browser/runtime/font combination in your own tests.
+
 ## Main APIs
 
 - `textToArt(text, config)` converts text into Unicode art. Requires `canvas` in Node.js.
@@ -100,6 +102,12 @@ The browser entry targets Chrome 120+ and does not import `sharp`, `canvas`, or 
 - `t(key, params, locale)` renders built-in Core messages for `zh-CN` / `en-US`.
 - `normalizeLocale(locale)` normalizes host locale values before passing them into Core config.
 
+## Stability Notes
+
+- Stable: Node `textToArt()`, Node `imageToArt()`, pure `imageDataToArt()`, config validation, preset charsets, output assembly, and post/outer `box` rendering.
+- Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, and layout-stage `box` modes such as `lines` / `grid`.
+- Reserved: `charSpace`, `maxParallelTasks`, `visualFont.reduceTop/right/bottom/left`, `glyphFont.widthProfile`, and `glyphFont.wideCharRegex`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
+
 ## Configuration
 
 Important options:
@@ -109,9 +117,9 @@ Important options:
 - `ratio`: vertical/horizontal ratio, default `2.0`.
 - `charset`: `PresetCharset.ASCII`, `EXTENDED`, `CHINESE_SIMPLE`, or `CUSTOM`.
 - `visualFont`: input text rendering font, replacing the old `font` / `fontStyle` / `fontReduce` naming in new integrations.
-- `glyphFont`: output glyph display font contract, including `family`, `widthProfile`, and `wideCharRegex`.
+- `glyphFont`: output glyph display font contract. `family` is descriptive for hosts; `widthProfile` and `wideCharRegex` are reserved for the later glyph-width dictionary.
 - `outputFormat`: `OutputFormat.PLAIN_TEXT`, `HTML`, or `ANSI`.
-- `outputTarget`: host target such as `plain`, `terminal`, `web`, `vscode`, `electron`, `html`, or `ansi`.
+- `outputTarget`: host target such as `plain`, `terminal`, `web`, `vscode`, `electron`, `html`, or `ansi`. It is metadata for host coordination and does not change sampling today.
 - `invert`: invert grayscale values before matching.
 - `wideCharRatio`: controls when wide characters win over normal characters.
 - `locale`: Core message locale, currently `zh-CN` or `en-US`. This affects errors and hints only; conversion output is unchanged.

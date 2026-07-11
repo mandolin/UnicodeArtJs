@@ -378,7 +378,7 @@ export async function renderTextToImage(
 }
 
 /**
- * 🔹 node-canvas在小字号多行文本的行首抗锯齿比Pillow略浅。
+ * 🔹 node-canvas在小字号多行文本的行首抗锯齿和其他渲染器可能存在轻微差异。
  * 🔹 仅在total模式的后续行做局部灰度校正，避免影响普通图片管线和line模式。
  */
 function applyTotalModeTextParityCorrection(

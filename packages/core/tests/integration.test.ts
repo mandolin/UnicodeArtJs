@@ -132,7 +132,7 @@ describe('integration smoke tests', () => {
         height: 2
       });
 
-      // 🔹 参考项目line模式下，height表示单行文本的字符画高度
+      // 🔹 line模式下，height表示单行文本的字符画高度。
       expect(result.rows).toBe(2);
       expect(result.content.length).toBeGreaterThan(0);
     });
@@ -143,7 +143,7 @@ describe('integration smoke tests', () => {
         matrixSize: 4
       });
 
-      // 🔹 参考项目line模式下，height表示单行文本的字符画高度
+      // 🔹 line模式下，height表示单行文本的字符画高度。
       expect(result.rows).toBe(2);
       expect(result.metadata.matrixSize).toBe(4);
       expect(result.content.length).toBeGreaterThan(0);

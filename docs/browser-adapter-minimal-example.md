@@ -47,5 +47,5 @@ document.querySelector<HTMLPreElement>('#preview')!.textContent = result.content
 - The browser adapter targets Chrome 120+.
 - URL image loading uses `fetch()` and is subject to CORS.
 - Remote font loading uses `FontFace` and `document.fonts.add()`.
-- Text and glyph rasterization may differ slightly from Node `canvas` and Python/Pillow.
+- Text and glyph rasterization may differ slightly across rendering engines such as browser Canvas and Node `canvas`.
 - The browser entry is intended for modern bundlers such as Vite, Webpack, and Rollup.

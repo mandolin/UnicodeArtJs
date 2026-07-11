@@ -272,7 +272,7 @@ export enum HeightMode {
  * - matrixSize: 范围 [2, 20]，推荐 [4, 8]
  * - ratio: 范围 [1.0, 3.0]，推荐 2.0
  * - fontReduce: 范围 [0, 10]，推荐 0
- * - charSpace: 范围 [0, 5]，推荐 1
+ * - charSpace: 当前为保留字段，暂不改变主路径输出
  */
 export interface ArtConfig {
   //#region 🔶 尺寸配置
