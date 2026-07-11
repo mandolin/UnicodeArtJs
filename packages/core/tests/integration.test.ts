@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import sharp from 'sharp';
 import { imageToArt, textToArt } from '../src/index';
 import { PresetCharset } from '../src/types/charset';
 import { OutputFormat } from '../src/types/output';
@@ -153,14 +153,7 @@ describe('integration smoke tests', () => {
   describe('imageToArt', () => {
     test('converts a generated PNG image to art', async () => {
       const imagePath = join(tempDir, 'fixture.png');
-      await sharp({
-        create: {
-          width: 4,
-          height: 4,
-          channels: 3,
-          background: { r: 128, g: 128, b: 128 }
-        }
-      }).png().toFile(imagePath);
+      await writeFile(imagePath, await createGrayPngFixture(4, 4, 128));
 
       const result = await imageToArt(imagePath, {
         height: 2,
@@ -175,3 +168,17 @@ describe('integration smoke tests', () => {
     });
   });
 });
+
+async function createGrayPngFixture(width: number, height: number, gray: number): Promise<Buffer> {
+  const { Transformer } = await import('@napi-rs/image');
+  const rgba = new Uint8Array(width * height * 4);
+
+  for (let index = 0; index < rgba.length; index += 4) {
+    rgba[index] = gray;
+    rgba[index + 1] = gray;
+    rgba[index + 2] = gray;
+    rgba[index + 3] = 255;
+  }
+
+  return Transformer.fromRgbaPixels(rgba, width, height).png();
+}

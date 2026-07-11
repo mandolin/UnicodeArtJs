@@ -9,9 +9,9 @@ output:
 
 # 图片输入配置
 image:
-  # Node 图片后端: sharp | napi-rs
-  # napi-rs 是宽松许可证实验后端，首批目标格式为 PNG / JPEG / WebP / BMP。
-  backend: sharp
+  # Node 图片后端: napi-rs | sharp
+  # 默认 napi-rs；sharp 是 legacy opt-in 后端，需要用户自行安装 sharp。
+  backend: napi-rs
 
 # 裱框配置，可设为 false、true、样式名或对象
 # box:

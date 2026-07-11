@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import sharp from 'sharp';
 import {
   invertPixels,
   loadImage,
@@ -97,14 +97,7 @@ describe('preprocessor', () => {
   describe('loadImage', () => {
     test('loads a generated image as grayscale data', async () => {
       const imagePath = join(tempDir, 'load-image.png');
-      await sharp({
-        create: {
-          width: 2,
-          height: 2,
-          channels: 3,
-          background: { r: 255, g: 0, b: 0 }
-        }
-      }).png().toFile(imagePath);
+      await writeFile(imagePath, await createTinyPngFixture());
 
       const image = await loadImage(imagePath);
 
@@ -119,7 +112,7 @@ describe('preprocessor', () => {
   });
 
   describe('resizeImage', () => {
-    test('resizes grayscale image data with sharp', async () => {
+    test('resizes grayscale image data with the default Node backend', async () => {
       const resized = await resizeImage(
         { width: 2, height: 2, data: new Uint8Array([0, 64, 128, 255]) },
         1,
@@ -133,3 +126,15 @@ describe('preprocessor', () => {
     });
   });
 });
+
+async function createTinyPngFixture(): Promise<Buffer> {
+  const { Transformer } = await import('@napi-rs/image');
+  const rgba = new Uint8Array([
+    255, 0, 0, 255,
+    255, 0, 0, 255,
+    255, 0, 0, 255,
+    255, 0, 0, 255
+  ]);
+
+  return Transformer.fromRgbaPixels(rgba, 2, 2).png();
+}

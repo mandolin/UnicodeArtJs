@@ -5,8 +5,8 @@
  *
  * 🔶 Module responsibility
  * Centralizes Node-only image, font, and text rendering capabilities used by
- * the default Node entry. This keeps the pure core free from `sharp`,
- * `node-canvas`, filesystem, and process assumptions.
+ * the default Node entry. This keeps the pure core free from concrete Node image
+ * backends, `node-canvas`, filesystem, and process assumptions.
  * ============================================================================
  */
 

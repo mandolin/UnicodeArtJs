@@ -311,14 +311,19 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "node --test tests/unit/config-merge.test.cjs tests/unit/font-options.test.cjs tests/unit/manifest.test.cjs tests/unit/preset-store.test.cjs tests/unit/protocol.test.cjs",
+    "test": "node --test tests/unit/config-merge.test.cjs tests/unit/font-options.test.cjs tests/unit/manifest.test.cjs tests/unit/preset-store.test.cjs tests/unit/protocol.test.cjs tests/unit/release-tools.test.cjs",
     "check:webview": "node --check media/main.js",
-    "package": "vsce package --pre-release",
-    "package:release": "vsce package",
+    "core:dep:status": "node scripts/core-dependency.cjs status",
+    "core:dep:npm": "node scripts/core-dependency.cjs use-npm",
+    "core:dep:local": "node scripts/core-dependency.cjs use-local",
+    "release:verify": "node scripts/core-dependency.cjs verify-release",
+    "inspect:vsix": "node scripts/inspect-vsix.cjs",
+    "package": "npm run compile && node scripts/package-vsix.cjs --pre-release",
+    "package:release": "npm run compile && node scripts/package-vsix.cjs",
     "check": "npm run compile && npm test && npm run check:webview"
   },
   "dependencies": {
-    "unicode-art-js": "1.1.2"
+    "unicode-art-js": "^1.2.0"
   },
   "devDependencies": {
     "@types/node": "^26.0.0",

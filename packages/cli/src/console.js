@@ -183,7 +183,7 @@ program
   .option('--height-mode <mode>', 'Height mode (line|total)')
   .option('--trim-trailing-spaces', 'Trim trailing spaces')
   .option('--format <format>', 'Output format (plain|html|ansi)')
-  .option('--image-backend <backend>', 'Node image backend for image input (sharp|napi-rs)')
+  .option('--image-backend <backend>', 'Node image backend for image input (napi-rs|sharp)')
   .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
@@ -240,7 +240,7 @@ program
   .option('--wide-char-ratio <number>', 'Wide character matching ratio', parseFloat)
   .option('--trim-trailing-spaces', 'Trim trailing spaces')
   .option('--format <format>', 'Output format (plain|html|ansi)')
-  .option('--image-backend <backend>', 'Node image backend for image input (sharp|napi-rs)')
+  .option('--image-backend <backend>', 'Node image backend for image input (napi-rs|sharp)')
   .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
@@ -652,7 +652,7 @@ function extractRuntimeConfig(fullConfig) {
 /**
  * 🟢 应用图片后端选择
  *
- * 🔹 默认仍由 Core 决定；显式传入 `napi-rs` 可提前验证宽松许可证后端路径。
+ * 🔹 默认仍由 Core 决定；当前 Core 默认是 `napi-rs`，`sharp` 仅为 legacy opt-in。
  *
  * @param {string|undefined} backend - Node 图片后端名称
  */

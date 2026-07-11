@@ -4,9 +4,9 @@
  * ============================================================================
  *
  * 🔶 模块职责
- * 使用 MIT 许可的 `@napi-rs/image` 提供可选实验图像后端，作为替换
- * sharp/libvips 默认路径的前置验证。该后端默认不启用，只在调用方显式
- * `setNodeImageBackend('napi-rs')` 或传入对象时参与运行。
+ * 使用 MIT 许可的 `@napi-rs/image` 提供默认 Node 图像后端，替代
+ * sharp/libvips 默认路径。调用方仍可通过 `setNodeImageBackend()` 传入
+ * 自定义后端，或在自行安装 sharp 后显式选择 legacy sharp adapter。
  *
  * 🔶 稳定性边界
  * - 首批只开放 PNG / JPEG / WebP / BMP。
@@ -50,7 +50,7 @@ let nodeFsPromisesModulePromise: Promise<NodeFsPromisesModule> | undefined;
 
 //#region 🟦 后端实现
 
-/** MIT 许可的实验图像后端。 */
+/** MIT 许可的默认 Node 图像后端。 */
 export const napiRsImageBackend: NodeImageBackend = {
   name: 'napi-rs',
 
@@ -141,7 +141,7 @@ async function loadNapiImageModule(): Promise<NapiImageModule> {
     napiImageModulePromise = import('@napi-rs/image').catch((error) => {
       napiImageModulePromise = undefined;
       throw new UnicodeArtError(
-        '实验图像后端需要可选依赖 @napi-rs/image，请先安装该依赖',
+        '默认 Node 图像后端需要 @napi-rs/image，请确认该依赖已正确安装',
         ErrorCode.DEPENDENCY_MISSING,
         { dependency: '@napi-rs/image', backend: 'napi-rs', originalError: error }
       );

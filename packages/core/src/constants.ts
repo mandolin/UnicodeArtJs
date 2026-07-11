@@ -99,20 +99,20 @@ export const DEFAULT_WIDE_CHAR_RATIO = 2.0;
 //#region 🔶 插值算法映射
 
 /**
- * 🟢 插值算法名称到OpenCV常量的映射
+ * 🟢 插值算法名称到 Node 图像后端插值名称的映射
  * 
- * 🔹 用于sharp库的interpolation选项。
+ * 🔹 用于 legacy sharp 后端的 interpolation 选项；默认 napi-rs 后端会自行映射。
  * 
  * @constant {Object} INTERPOLATION_MAP
  * 
  * @example
  * ```typescript
- * const sharpInterpolation = INTERPOLATION_MAP[Interpolation.BICUBIC];
- * // sharpInterpolation === 'cubic'
+ * const backendInterpolation = INTERPOLATION_MAP[Interpolation.BICUBIC];
+ * // backendInterpolation === 'cubic'
  * ```
  * 
  * @remarks
- * - sharp支持的插值: nearest, bilinear, cubic, lanczos3
+ * - legacy sharp支持的插值: nearest, bilinear, cubic, lanczos3
  * - 与OpenCV的对应关系可能不完全一致
  */
 export const INTERPOLATION_MAP: Record<string, string> = {

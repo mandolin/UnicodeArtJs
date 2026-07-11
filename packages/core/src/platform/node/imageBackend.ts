@@ -4,8 +4,11 @@
  * ============================================================================
  *
  * 🔶 模块职责
- * 为 Node 环境图片加载/缩放提供可替换后端边界。当前默认后端仍为 sharp，
- * 后续 permissive experimental adapter 会接入同一接口。
+ * 为 Node 环境图片加载/缩放提供可替换后端边界。
+ *
+ * 🔶 默认策略
+ * Core 默认使用宽松许可证口径下的 `napi-rs` 后端；`sharp` 仅作为 legacy
+ * adapter 名称保留，调用方需要自行安装 sharp 并显式选择后才会加载。
  * ============================================================================
  */
 
@@ -44,7 +47,9 @@ const BUILTIN_NODE_IMAGE_BACKENDS: Record<NodeImageBackendName, NodeImageBackend
   sharp: sharpImageBackend
 };
 
-let activeNodeImageBackend: NodeImageBackend = sharpImageBackend;
+const DEFAULT_NODE_IMAGE_BACKEND: NodeImageBackend = napiRsImageBackend;
+
+let activeNodeImageBackend: NodeImageBackend = DEFAULT_NODE_IMAGE_BACKEND;
 
 /** 获取当前 Node 图像后端。 */
 export function getNodeImageBackend(): NodeImageBackend {
@@ -67,9 +72,9 @@ export function setNodeImageBackend(backend: NodeImageBackend | NodeImageBackend
     : backend;
 }
 
-/** 重置为默认 sharp 后端。 */
+/** 重置为默认 napi-rs 后端。 */
 export function resetNodeImageBackend(): void {
-  activeNodeImageBackend = sharpImageBackend;
+  activeNodeImageBackend = DEFAULT_NODE_IMAGE_BACKEND;
 }
 
 //#endregion

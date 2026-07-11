@@ -17,6 +17,6 @@
  *
  * 🔹 该值需要与 `packages/core/package.json` 中的 version 保持一致。
  */
-export const VERSION = '1.1.2';
+export const VERSION = '1.2.0';
 
 //#endregion

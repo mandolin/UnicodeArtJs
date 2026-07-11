@@ -194,9 +194,10 @@ describe('public configuration helpers', () => {
 
     expect(capabilities.version).toBe(VERSION);
     expect(capabilities.stableFeatures.map((feature) => feature.id)).toContain('node.textToArt');
-    expect(capabilities.experimentalFeatures.map((feature) => feature.id)).toContain('node.imageBackend.napi-rs');
+    expect(capabilities.stableFeatures.map((feature) => feature.id)).toContain('node.imageBackend.napi-rs');
     expect(capabilities.reservedConfig.map((feature) => feature.id)).toContain('config.glyphWidthProfile');
-    expect(capabilities.nodeImageBackends.defaultBackend).toBe('sharp');
+    expect(capabilities.nodeImageBackends.defaultBackend).toBe('napi-rs');
+    expect(capabilities.nodeImageBackends.legacyBackends).toContain('sharp');
     expect(capabilities.nodeImageBackends.napiRsFirstBatchFormats).toEqual([
       'png',
       'jpeg',

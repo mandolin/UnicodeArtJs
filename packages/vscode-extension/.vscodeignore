@@ -1,7 +1,11 @@
 node_modules/**
 !node_modules/
-!node_modules/@img/
-!node_modules/@img/**
+!node_modules/@emnapi/
+!node_modules/@emnapi/**
+!node_modules/@napi-rs/
+!node_modules/@napi-rs/**
+!node_modules/@tybys/
+!node_modules/@tybys/**
 !node_modules/base64-js/**
 !node_modules/bl/**
 !node_modules/buffer/**
@@ -43,7 +47,6 @@ node_modules/**
 !node_modules/readable-stream/**
 !node_modules/safe-buffer/**
 !node_modules/semver/**
-!node_modules/sharp/**
 !node_modules/simple-concat/**
 !node_modules/simple-get/**
 !node_modules/simple-swizzle/**

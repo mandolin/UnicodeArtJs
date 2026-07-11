@@ -16,18 +16,17 @@
  * 3. renderTextToImage() - 使用canvas将文本渲染为图像（可选功能）
  * 
  * 🔶 性能考虑
- * - 默认Node图像后端为sharp，后续可切换为宽松许可证实验后端
+ * - 默认Node图像后端为宽松许可证口径的 napi-rs
  * - 灰度转换使用整数运算避免浮点误差
  * - 批量处理减少函数调用开销
  * 
  * 🔶 依赖说明
- * - Node图像后端: 默认sharp，后续可替换
+ * - Node图像后端: 默认 napi-rs；sharp 仅为显式 opt-in legacy adapter
  * - canvas: 可选依赖，仅用于文本渲染
  * - 浏览器环境应使用Canvas API替代sharp
  * 
  * @module preprocessor
  * @since 0.1.0
- * @see {@link https://sharp.pixelplumbing.com/}
  * @see {@link https://github.com/Automattic/node-canvas}
  * ============================================================================
  */
@@ -41,7 +40,7 @@ import { getNodeImageBackend } from './platform/node/imageBackend';
 /**
  * 🟢 从文件加载图像并转换为灰度数据
  * 
- * 🔹 使用当前Node图像后端加载图像，默认后端为sharp。
+ * 🔹 使用当前Node图像后端加载图像，默认后端为 napi-rs。
  * 🔹 直接输出灰度值数组，避免中间格式转换。
  * 
  * @param imagePath - 图像文件路径
@@ -57,8 +56,8 @@ import { getNodeImageBackend } from './platform/node/imageBackend';
  * @throws {UnicodeArtError} 当文件不存在或格式不支持时抛出
  * 
  * @remarks
- * - 当前默认后端会自动检测图像格式
- * - 默认后端支持的格式由sharp决定；未来后端会收敛到项目自有格式承诺
+ * - 当前默认后端支持 PNG / JPEG / WebP / BMP
+ * - sharp 后端仅在用户自行安装并显式选择时可用
  * - 输出为Uint8Array，范围[0, 255]
  * - 行优先存储：data[y * width + x]
  * 

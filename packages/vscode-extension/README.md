@@ -123,6 +123,7 @@ Templates store conversion options such as size, charset, visual font, glyph fon
 npm install
 npm run check
 npm run package
+npm run inspect:vsix
 ```
 
 `npm run check` runs:
@@ -130,6 +131,8 @@ npm run package
 - TypeScript compilation.
 - Node unit tests.
 - WebView JavaScript syntax check.
+
+`npm run package` builds the extension through an isolated staging directory, so the VSIX uses packaged Core files instead of monorepo workspace links.
 
 Manual verification before publishing is tracked in [`docs/manual-test-checklist.md`](docs/manual-test-checklist.md).
 
@@ -144,13 +147,13 @@ Manual verification before publishing is tracked in [`docs/manual-test-checklist
 After packaging, install the VSIX locally:
 
 ```bash
-code --install-extension .\unicode-art-js-vscode-0.2.0.vsix --force
+code --install-extension .\unicode-art-js-vscode-0.2.2.vsix --force
 ```
 
 For profile-specific testing:
 
 ```bash
-code --profile WebDev --install-extension .\unicode-art-js-vscode-0.2.0.vsix --force
+code --profile WebDev --install-extension .\unicode-art-js-vscode-0.2.2.vsix --force
 ```
 
 Then run `Developer: Reload Window` in that VSCode window.
@@ -162,5 +165,6 @@ Publishing requires a valid VSCode Marketplace publisher and PAT configured for 
 ```bash
 npm run check
 npm run package
-vsce publish --pre-release --packagePath .\unicode-art-js-vscode-0.2.0.vsix
+npm run inspect:vsix
+vsce publish --pre-release --packagePath .\unicode-art-js-vscode-0.2.2.vsix
 ```

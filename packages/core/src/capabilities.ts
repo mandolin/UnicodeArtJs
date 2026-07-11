@@ -37,11 +37,11 @@ export interface CoreCapabilityDescriptor {
 /** Node 图像后端能力边界。 */
 export interface NodeImageBackendCapabilities {
   /** 当前默认后端。 */
-  defaultBackend: 'sharp';
+  defaultBackend: 'napi-rs';
   /** Core 内置可解析的后端名称。 */
-  availableBackends: readonly ('sharp' | 'napi-rs')[];
-  /** 仍处于实验状态的后端。 */
-  experimentalBackends: readonly 'napi-rs'[];
+  availableBackends: readonly ('napi-rs' | 'sharp')[];
+  /** legacy 后端需要用户自行安装依赖并显式启用。 */
+  legacyBackends: readonly 'sharp'[];
   /** `napi-rs` 后端首批承诺格式。 */
   napiRsFirstBatchFormats: readonly ('png' | 'jpeg' | 'jpg' | 'webp' | 'bmp')[];
 }
@@ -103,7 +103,7 @@ const STABLE_FEATURES: CoreCapabilityDescriptor[] = [
   {
     id: 'node.imageToArt',
     stability: 'stable',
-    description: 'Node 图片文件转字符画主入口；默认后端仍为 sharp。'
+    description: 'Node 图片文件转字符画主入口；默认后端为 napi-rs。'
   },
   {
     id: 'pure.imageDataToArt',
@@ -129,6 +129,11 @@ const STABLE_FEATURES: CoreCapabilityDescriptor[] = [
     id: 'i18n.coreMessages',
     stability: 'stable',
     description: 'Core 错误消息 key 与 zh-CN / en-US fallback。'
+  },
+  {
+    id: 'node.imageBackend.napi-rs',
+    stability: 'stable',
+    description: '@napi-rs/image 默认 Node 图像后端，首批格式为 PNG / JPEG / WebP / BMP。'
   }
 ];
 
@@ -142,11 +147,6 @@ const EXPERIMENTAL_FEATURES: CoreCapabilityDescriptor[] = [
     id: 'browser.abortSignal',
     stability: 'experimental',
     description: '浏览器入口的协作式取消。'
-  },
-  {
-    id: 'node.imageBackend.napi-rs',
-    stability: 'experimental',
-    description: '@napi-rs/image 可选 Node 图像后端，首批格式为 PNG / JPEG / WebP / BMP。'
   },
   {
     id: 'box.layoutStage',
@@ -190,6 +190,11 @@ const RESERVED_CONFIG: CoreCapabilityDescriptor[] = [
 
 const LEGACY_ALIASES: CoreCapabilityDescriptor[] = [
   {
+    id: 'node.imageBackend.sharp',
+    stability: 'legacy',
+    description: 'legacy sharp 后端；默认不安装，用户需自行安装 sharp 并显式启用。'
+  },
+  {
     id: 'config.font',
     stability: 'legacy',
     description: '旧视觉字体字段，继续归一到 visualFont.family。'
@@ -230,9 +235,9 @@ export function getCoreCapabilities(): CoreCapabilities {
     reservedConfig: RESERVED_CONFIG.map((feature) => ({ ...feature })),
     legacyAliases: LEGACY_ALIASES.map((feature) => ({ ...feature })),
     nodeImageBackends: {
-      defaultBackend: 'sharp',
-      availableBackends: ['sharp', 'napi-rs'],
-      experimentalBackends: ['napi-rs'],
+      defaultBackend: 'napi-rs',
+      availableBackends: ['napi-rs', 'sharp'],
+      legacyBackends: ['sharp'],
       napiRsFirstBatchFormats: ['png', 'jpeg', 'jpg', 'webp', 'bmp']
     },
     browserEntry: {

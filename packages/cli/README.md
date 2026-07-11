@@ -102,7 +102,7 @@ unicode-art image <input> [options]
 - `--trim-trailing-spaces` - 去除行尾空格
 - `--format <format>` - 输出格式 (plain\|html\|ansi)
 - `--output-target <target>` - 输出目标环境 (plain\|terminal\|web\|vscode\|electron\|html\|ansi)
-- `--image-backend <backend>` - Node 图片后端 (sharp\|napi-rs)。`napi-rs` 是宽松许可证实验后端，首批目标格式为 PNG / JPEG / WebP / BMP
+- `--image-backend <backend>` - Node 图片后端 (`napi-rs`|`sharp`)。默认 `napi-rs`；`sharp` 是 legacy opt-in 后端，需要用户自行安装 `sharp`
 - `-b, --box <json-or-style>` - 裱框配置，支持 `true`、`false`、内置样式名或 JSON 对象
 - `-d, --debug <tags>` - 调试标签，逗号分隔
 - `--no-config` - 禁用配置文件自动发现
@@ -147,7 +147,7 @@ output:
 
 # 图片输入配置
 image:
-  backend: sharp # sharp | napi-rs
+  backend: napi-rs # napi-rs | sharp
 
 # 尺寸配置
 size:

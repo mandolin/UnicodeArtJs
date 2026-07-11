@@ -4,24 +4,46 @@
  * ============================================================================
  *
  * 🔶 模块职责
- * 将现有 sharp/libvips 图像加载与缩放能力收敛为显式 adapter，便于后续
- * permissive experimental adapter 并行对照和逐步替换。
+ * 保留 legacy sharp/libvips 图像加载与缩放 adapter。
+ *
+ * 🔶 依赖边界
+ * Core 不再把 sharp 作为默认依赖发布。本文件只能通过动态导入加载用户
+ * 自行安装的 `sharp`，默认 npm / VSIX 产物不得携带 sharp/libvips。
  * ============================================================================
  */
 
-import sharp from 'sharp';
 import type { CoreImageData } from '../../types/image';
 import { ErrorCode, UnicodeArtError } from '../../types/output';
 import type { NodeImageBackend } from './imageBackend';
 
 //#region 🟦 sharp adapter
 
-/** 当前默认的 sharp 图像后端。 */
+type SharpMetadata = {
+  width?: number;
+  height?: number;
+};
+
+interface SharpInstance {
+  metadata(): Promise<SharpMetadata>;
+  grayscale(): SharpInstance;
+  raw(): SharpInstance;
+  resize(width: number, height: number, options?: { kernel?: string }): SharpInstance;
+  toBuffer(): Promise<Buffer>;
+}
+
+type SharpFactory = (input: string | Buffer, options?: unknown) => SharpInstance;
+
+const SHARP_MODULE_NAME = 'sharp';
+
+let sharpFactoryPromise: Promise<SharpFactory> | undefined;
+
+/** legacy sharp 图像后端；仅在用户显式安装 sharp 后可用。 */
 export const sharpImageBackend: NodeImageBackend = {
   name: 'sharp',
 
   async loadImage(imagePath: string): Promise<CoreImageData> {
     try {
+      const sharp = await loadSharpFactory();
       const sharpInstance = sharp(imagePath);
       const metadata = await sharpInstance.metadata();
 
@@ -72,6 +94,7 @@ export const sharpImageBackend: NodeImageBackend = {
     interpolation: string = 'bicubic'
   ): Promise<CoreImageData> {
     try {
+      const sharp = await loadSharpFactory();
       const buffer = Buffer.from(image.data);
 
       const resizedBuffer = await sharp(buffer, {
@@ -105,3 +128,29 @@ export const sharpImageBackend: NodeImageBackend = {
 
 //#endregion
 
+//#region 🟦 lazy dependency loading
+
+async function loadSharpFactory(): Promise<SharpFactory> {
+  if (!sharpFactoryPromise) {
+    // 中文注释：用变量动态导入，避免打包器把 sharp 视为默认运行时依赖。
+    // English: keep sharp out of the default dependency graph; users opt in explicitly.
+    sharpFactoryPromise = import(SHARP_MODULE_NAME).then((module) => {
+      const factory = (module as { default?: SharpFactory }).default ?? (module as unknown as SharpFactory);
+      if (typeof factory !== 'function') {
+        throw new Error('sharp module does not expose a callable default export');
+      }
+      return factory;
+    }).catch((error) => {
+      sharpFactoryPromise = undefined;
+      throw new UnicodeArtError(
+        'legacy sharp 后端需要用户自行安装 sharp 依赖；默认后端已切换为 napi-rs',
+        ErrorCode.DEPENDENCY_MISSING,
+        { dependency: 'sharp', backend: 'sharp', originalError: error }
+      );
+    });
+  }
+
+  return sharpFactoryPromise;
+}
+
+//#endregion

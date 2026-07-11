@@ -19,10 +19,10 @@ describe('Node image backend registry', () => {
     resetNodeImageBackend();
   });
 
-  test('uses sharp as the default Node image backend', () => {
-    expect(getNodeImageBackend().name).toBe('sharp');
-    expect(resolveNodeImageBackend('sharp').name).toBe('sharp');
+  test('uses napi-rs as the default Node image backend', () => {
+    expect(getNodeImageBackend().name).toBe('napi-rs');
     expect(resolveNodeImageBackend('napi-rs').name).toBe('napi-rs');
+    expect(resolveNodeImageBackend('sharp').name).toBe('sharp');
   });
 
   test('allows a custom backend for loadImage and resizeImage', async () => {
@@ -64,7 +64,7 @@ describe('Node image backend registry', () => {
     });
   });
 
-  test('can reset a custom backend to sharp', () => {
+  test('can reset a custom backend to napi-rs', () => {
     setNodeImageBackend({
       name: 'temporary',
       async loadImage() {
@@ -74,19 +74,19 @@ describe('Node image backend registry', () => {
 
     expect(getNodeImageBackend().name).toBe('temporary');
     resetNodeImageBackend();
-    expect(getNodeImageBackend().name).toBe('sharp');
+    expect(getNodeImageBackend().name).toBe('napi-rs');
   });
 
-  test('loads a PNG through the experimental napi-rs backend', async () => {
+  test('loads a PNG through the default napi-rs backend', async () => {
     const imagePath = path.join(__dirname, 'test-image-zhong.png');
 
-    const sharpImage = await resolveNodeImageBackend('sharp').loadImage(imagePath);
+    const defaultImage = await loadImage(imagePath);
     const napiImage = await napiRsImageBackend.loadImage(imagePath);
 
-    expect(napiImage.width).toBe(sharpImage.width);
-    expect(napiImage.height).toBe(sharpImage.height);
-    expect(napiImage.data).toHaveLength(sharpImage.width * sharpImage.height);
-    expect(averageAbsoluteDiff(napiImage.data, sharpImage.data)).toBeLessThanOrEqual(2);
+    expect(defaultImage.width).toBe(napiImage.width);
+    expect(defaultImage.height).toBe(napiImage.height);
+    expect(defaultImage.data).toHaveLength(defaultImage.width * defaultImage.height);
+    expect(averageAbsoluteDiff(napiImage.data, defaultImage.data)).toBe(0);
   });
 
   test('resizes grayscale data through the experimental napi-rs backend', async () => {
@@ -95,8 +95,6 @@ describe('Node image backend registry', () => {
       height: 2,
       data: new Uint8Array([0, 85, 170, 255])
     };
-
-    setNodeImageBackend('napi-rs');
 
     const resized = await resizeImage(image, 4, 3, 'bilinear');
 
