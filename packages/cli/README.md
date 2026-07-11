@@ -65,6 +65,7 @@ unicode-art text "中文测试" --charset CHINESE_SIMPLE
 | `--lang <locale>` | 语言 (zh-CN\|en-US) | zh-CN |
 | `-i, --image <path>` | 图片输入模式 | - |
 | `-t, --text <text>` | 文本输入模式 | - |
+| `--no-config` | 禁用配置文件自动发现 | false |
 | `--help` | 显示帮助信息 | - |
 | `--version` | 显示版本号 | - |
 
@@ -101,8 +102,10 @@ unicode-art image <input> [options]
 - `--trim-trailing-spaces` - 去除行尾空格
 - `--format <format>` - 输出格式 (plain\|html\|ansi)
 - `--output-target <target>` - 输出目标环境 (plain\|terminal\|web\|vscode\|electron\|html\|ansi)
+- `--image-backend <backend>` - Node 图片后端 (sharp\|napi-rs)。`napi-rs` 是宽松许可证实验后端，首批目标格式为 PNG / JPEG / WebP / BMP
 - `-b, --box <json-or-style>` - 裱框配置，支持 `true`、`false`、内置样式名或 JSON 对象
 - `-d, --debug <tags>` - 调试标签，逗号分隔
+- `--no-config` - 禁用配置文件自动发现
 
 #### `text` 命令
 
@@ -119,6 +122,12 @@ unicode-art text <text> [options]
 - `--line-spacing <number>` - 行间距（默认1.0）
 - `--height-mode <mode>` - 高度模式 (line\|total)
 
+`text -` 可以从 stdin 读取文本：
+
+```bash
+echo "Hello" | unicode-art text - --height 8
+```
+
 ## 📝 配置文件
 
 支持以下格式的配置文件：
@@ -133,7 +142,12 @@ unicode-art text <text> [options]
 # 输出配置
 output:
   format: plain
+  target: terminal
   trimTrailingSpaces: false
+
+# 图片输入配置
+image:
+  backend: sharp # sharp | napi-rs
 
 # 尺寸配置
 size:
@@ -182,6 +196,28 @@ i18n:
 ```
 
 `--lang` / `i18n.lang` 会同步传递给 Core 的 `locale` 配置，因此 Core 层配置错误也会尽量使用对应语言输出。
+
+## 发布准备
+
+仓库开发态默认使用本地 Core：
+
+```bash
+npm --workspace packages/cli run core:dep:status
+```
+
+发布 CLI 前切换到 npm Core 依赖：
+
+```bash
+npm --workspace packages/cli run core:dep:npm
+npm --workspace packages/cli run release:verify
+npm --workspace packages/cli run smoke:pack-install
+```
+
+发布完成后切回本地 Core，便于后续联动开发：
+
+```bash
+npm --workspace packages/cli run core:dep:local
+```
 
 ## 🎨 字符集说明
 

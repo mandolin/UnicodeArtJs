@@ -75,6 +75,7 @@ const { cosmiconfig } = require('cosmiconfig');
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
+const cliPackage = require('../package.json');
 
 // 导入core库
 const {
@@ -87,8 +88,10 @@ const {
   FontStyle,
   TextAlign,
   HeightMode,
+  getCoreCapabilities,
   isBoxStyleName,
-  normalizeBoxOptions
+  normalizeBoxOptions,
+  setNodeImageBackend
 } = require('unicode-art-js');
 
 //#region 🟩 国际化管理
@@ -153,7 +156,7 @@ const program = new Command();
 program
   .name('unicode-art')
   .description('Convert text and images to Unicode character art')
-  .version('1.0.0')
+  .version(cliPackage.version)
   .option('-i, --image <path>', 'Convert image file to character art')
   .option('-t, --text <text>', 'Convert text to character art')
   .option('-o, --output <path>', 'Output file path')
@@ -180,9 +183,11 @@ program
   .option('--height-mode <mode>', 'Height mode (line|total)')
   .option('--trim-trailing-spaces', 'Trim trailing spaces')
   .option('--format <format>', 'Output format (plain|html|ansi)')
+  .option('--image-backend <backend>', 'Node image backend for image input (sharp|napi-rs)')
   .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
+  .option('--no-config', 'Disable config file discovery')
   .option('--lang <locale>', 'Language (zh-CN|en-US)')
   .action(async (...args) => {
     try {
@@ -235,9 +240,11 @@ program
   .option('--wide-char-ratio <number>', 'Wide character matching ratio', parseFloat)
   .option('--trim-trailing-spaces', 'Trim trailing spaces')
   .option('--format <format>', 'Output format (plain|html|ansi)')
+  .option('--image-backend <backend>', 'Node image backend for image input (sharp|napi-rs)')
   .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
+  .option('--no-config', 'Disable config file discovery')
   .option('--lang <locale>', 'Language (zh-CN|en-US)')
   .action(async (...args) => {
     try {
@@ -284,6 +291,7 @@ program
   .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
   .option('-d, --debug <tags>', 'Debug tags, comma separated')
   .option('-c, --config <path>', 'Config file path')
+  .option('--no-config', 'Disable config file discovery')
   .option('--lang <locale>', 'Language (zh-CN|en-US)')
   .action(async (...args) => {
     try {
@@ -329,6 +337,7 @@ async function handleImageCommand(input, options) {
   
   // 合并配置（命令行 > 配置文件 > 默认值）
   const fullConfig = mergeConfig(config, options);
+  const runtimeConfig = extractRuntimeConfig(fullConfig);
   fullConfig.locale = lang;
   
   // 验证配置
@@ -338,6 +347,8 @@ async function handleImageCommand(input, options) {
   const startTime = Date.now();
   
   try {
+    applyImageBackend(runtimeConfig.imageBackend);
+
     // 调用core库
     const result = await imageToArt(input, validatedConfig);
     
@@ -361,6 +372,7 @@ async function handleImageCommand(input, options) {
 async function handleTextCommand(text, options) {
   // 加载配置文件
   const config = await loadConfig(options.config);
+  const inputText = readTextInput(text);
   
   // 加载语言（命令行 > 配置文件 > 默认）
   const lang = options.lang || config.i18n?.lang || config.lang || 'zh-CN';
@@ -378,7 +390,7 @@ async function handleTextCommand(text, options) {
   
   try {
     // 调用core库
-    const result = await textToArt(text, validatedConfig);
+    const result = await textToArt(inputText, validatedConfig);
     
     const duration = Date.now() - startTime;
     console.log(chalk.green(t(i18n, 'commands.text.completed', { duration })));
@@ -403,6 +415,10 @@ async function handleTextCommand(text, options) {
  */
 async function loadConfig(configPath) {
   try {
+    if (configPath === false) {
+      return {};
+    }
+
     const explorer = cosmiconfig('unicode-art');
     let result;
     
@@ -485,6 +501,7 @@ function mergeConfig(fileConfig, cliOptions) {
   if (hasOption(cliOptions, 'trimTrailingSpaces')) merged.trimTrailingSpaces = cliOptions.trimTrailingSpaces;
   if (hasOption(cliOptions, 'format')) merged.outputFormat = cliOptions.format;
   if (hasOption(cliOptions, 'outputTarget')) merged.outputTarget = cliOptions.outputTarget;
+  if (hasOption(cliOptions, 'imageBackend')) merged.imageBackend = cliOptions.imageBackend;
   if (hasOption(cliOptions, 'textAlign')) merged.textAlign = cliOptions.textAlign;
   if (hasOption(cliOptions, 'lineSpacing')) {
     merged.lineSpacing = requireFiniteNumber(cliOptions.lineSpacing, 'line-spacing');
@@ -492,6 +509,9 @@ function mergeConfig(fileConfig, cliOptions) {
   if (hasOption(cliOptions, 'heightMode')) merged.heightMode = normalizeHeightMode(cliOptions.heightMode);
   if (hasOption(cliOptions, 'box')) merged.box = parseBoxOption(cliOptions.box);
   if (hasOption(cliOptions, 'lang')) merged.lang = cliOptions.lang;
+  if (!hasOption(cliOptions, 'outputTarget')) {
+    merged.outputTarget = inferOutputTarget(merged.outputFormat);
+  }
   
   return merged;
 }
@@ -542,6 +562,8 @@ function normalizeConfig(fileConfig = {}) {
   if (hasOption(fileConfig, 'heightMode')) normalized.heightMode = normalizeHeightMode(fileConfig.heightMode);
   if (hasOption(fileConfig, 'outputFormat')) normalized.outputFormat = fileConfig.outputFormat;
   if (hasOption(fileConfig, 'outputTarget')) normalized.outputTarget = fileConfig.outputTarget;
+  if (hasOption(fileConfig, 'imageBackend')) normalized.imageBackend = fileConfig.imageBackend;
+  if (hasOption(fileConfig, 'nodeImageBackend')) normalized.imageBackend = fileConfig.nodeImageBackend;
   if (hasOption(fileConfig, 'invert')) normalized.invert = fileConfig.invert;
   if (hasOption(fileConfig, 'trimTrailingSpaces')) normalized.trimTrailingSpaces = fileConfig.trimTrailingSpaces;
   if (hasOption(fileConfig, 'box')) normalized.box = normalizeBoxConfig(fileConfig.box);
@@ -563,6 +585,9 @@ function normalizeConfig(fileConfig = {}) {
     }
     if (hasOption(fileConfig.output, 'box')) normalized.box = normalizeBoxConfig(fileConfig.output.box);
   }
+  if (fileConfig.image && hasOption(fileConfig.image, 'backend')) {
+    normalized.imageBackend = fileConfig.image.backend;
+  }
   if (fileConfig.algorithm) {
     if (hasOption(fileConfig.algorithm, 'matrixSize')) normalized.matrixSize = fileConfig.algorithm.matrixSize;
     if (hasOption(fileConfig.algorithm, 'ratio')) normalized.ratio = fileConfig.algorithm.ratio;
@@ -582,8 +607,67 @@ function normalizeConfig(fileConfig = {}) {
     normalized.maxParallelTasks = fileConfig.performance.maxParallelTasks;
   }
   if (fileConfig.i18n && hasOption(fileConfig.i18n, 'lang')) normalized.lang = fileConfig.i18n.lang;
+  if (!normalized.outputTarget) {
+    normalized.outputTarget = inferOutputTarget(normalized.outputFormat);
+  }
   
   return normalized;
+}
+
+/**
+ * 🟢 读取文本输入
+ *
+ * 🔹 当文本参数为 `-` 时，从 stdin 读取内容，便于管道组合。
+ *
+ * @param {string} text - 命令行文本参数
+ * @returns {string} 实际输入文本
+ */
+function readTextInput(text) {
+  if (text !== '-') {
+    return text;
+  }
+
+  return fs.readFileSync(0, 'utf-8').replace(/\r?\n$/, '');
+}
+
+/**
+ * 🟢 提取 CLI 运行时配置
+ *
+ * 🔹 imageBackend 是宿主运行时选择，不属于 Core ArtConfig，验证前需要移出。
+ *
+ * @param {Object} fullConfig - 合并后的配置对象
+ * @returns {{ imageBackend?: string }} 运行时配置
+ */
+function extractRuntimeConfig(fullConfig) {
+  const runtimeConfig = {
+    imageBackend: fullConfig.imageBackend
+  };
+
+  delete fullConfig.imageBackend;
+  delete fullConfig.nodeImageBackend;
+
+  return runtimeConfig;
+}
+
+/**
+ * 🟢 应用图片后端选择
+ *
+ * 🔹 默认仍由 Core 决定；显式传入 `napi-rs` 可提前验证宽松许可证后端路径。
+ *
+ * @param {string|undefined} backend - Node 图片后端名称
+ */
+function applyImageBackend(backend) {
+  if (!backend) {
+    return;
+  }
+
+  const capabilities = getCoreCapabilities();
+  const availableBackends = capabilities.nodeImageBackends.availableBackends;
+  if (!availableBackends.includes(backend)) {
+    throw new Error(`Invalid image backend: ${backend}. Expected ${availableBackends.join('|')}`);
+  }
+
+  setNodeImageBackend(backend);
 }
 
 /**
@@ -711,6 +795,15 @@ function normalizeHeightMode(value) {
   if (value === 'auto') return HeightMode.LINE;
   if (value === 'fixed') return HeightMode.TOTAL;
   return value;
+}
+
+/**
+ * 🟢 根据输出格式推断宿主输出目标
+ */
+function inferOutputTarget(format) {
+  if (format === OutputFormat.HTML || format === 'html') return 'html';
+  if (format === OutputFormat.ANSI || format === 'ansi') return 'ansi';
+  return 'terminal';
 }
 
 //#endregion

@@ -5,6 +5,13 @@
 output:
   format: plain          # plain | html | ansi
   trimTrailingSpaces: false
+  target: terminal       # plain | terminal | web | vscode | electron | html | ansi
+
+# 图片输入配置
+image:
+  # Node 图片后端: sharp | napi-rs
+  # napi-rs 是宽松许可证实验后端，首批目标格式为 PNG / JPEG / WebP / BMP。
+  backend: sharp
 
 # 裱框配置，可设为 false、true、样式名或对象
 # box:
@@ -43,6 +50,15 @@ font:
   name: Noto Sans SC     # 字体名称或路径
   style: regular         # regular | bold | italic | bold-italic
   reduce: 0.8            # 字体缩放比例
+
+# 新配置模型中的视觉字体 / 字素字体
+visualFont:
+  family: Noto Sans SC
+  reduce: 0
+glyphFont:
+  family: Sarasa Mono SC, LXGW WenKai Mono, Source Code Pro, Liberation Mono, monospace
+  widthProfile: default  # 当前为预留配置
+  # wideCharRegex: "[\\u4E00-\\u9FFF]"
 
 # 算法配置
 algorithm:

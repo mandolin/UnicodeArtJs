@@ -20,7 +20,15 @@
  * ============================================================================
  */
 
-const { imageToArt, textToArt, validateConfig, PresetCharset, OutputFormat } = require('unicode-art-js');
+const {
+  imageToArt,
+  resetNodeImageBackend,
+  setNodeImageBackend,
+  textToArt,
+  validateConfig,
+  PresetCharset,
+  OutputFormat
+} = require('unicode-art-js');
 const { spawnSync } = require('child_process');
 const chalk = require('chalk');
 const fs = require('fs');
@@ -33,6 +41,7 @@ let passed = 0;
 let failed = 0;
 const cliPath = path.resolve(__dirname, '..', 'src', 'console.js');
 const fixtureImagePath = path.resolve(__dirname, '..', '..', 'core', 'tests', 'test-image-zhong.png');
+const cliPackage = require('../package.json');
 
 /**
  * 🟢 运行单个测试
@@ -698,6 +707,171 @@ async function testCliBoxPhase5LayoutOptions() {
   }
 }
 
+/**
+ * 🔶 Test 22: CLI --version 使用 package.json 版本
+ */
+async function testCliVersionMatchesPackage() {
+  const result = runCli(['--version']);
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr || result.stdout);
+  }
+
+  if (result.stdout.trim() !== cliPackage.version) {
+    throw new Error(`Expected version ${cliPackage.version}, got ${result.stdout.trim()}`);
+  }
+}
+
+/**
+ * 🔶 Test 23: help 展示 P1.4 新增稳定选项
+ */
+async function testHelpIncludesP14Options() {
+  const result = runCli(['--help']);
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr || result.stdout);
+  }
+
+  for (const option of ['--image-backend', '--no-config', '--glyph-font']) {
+    if (!result.stdout.includes(option)) {
+      throw new Error(`Help output missing ${option}`);
+    }
+  }
+}
+
+/**
+ * 🔶 Test 24: text - 从 stdin 读取文本
+ */
+async function testTextCommandReadsStdin() {
+  const result = runCli(['text', '-', '--height', '2', '--chars', ' @', '--lang', 'en-US'], {
+    input: 'Pipe\n'
+  });
+
+  if (result.status !== 0) {
+    throw new Error(result.stderr || result.stdout);
+  }
+
+  if (!result.stdout.includes('Processing text') || !result.stdout.trim()) {
+    throw new Error('stdin text mode did not produce output');
+  }
+}
+
+/**
+ * 🔶 Test 25: --no-config 禁用自动配置发现
+ */
+async function testNoConfigDisablesDiscovery() {
+  const tempDir = createTempDir();
+
+  try {
+    fs.writeFileSync(
+      path.join(tempDir, '.unicode-artrc.yml'),
+      [
+        'size:',
+        '  height: 2',
+        'i18n:',
+        '  lang: en-US',
+        ''
+      ].join('\n'),
+      'utf-8'
+    );
+
+    const result = runCli(['text', 'Hi', '--no-config', '--chars', ' @', '--lang', 'en-US'], {
+      cwd: tempDir
+    });
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    if (!result.stdout.includes('Size: 10 rows')) {
+      throw new Error(`--no-config did not use CLI default height:\n${result.stdout}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 26: Unicode 输出路径
+ */
+async function testUnicodeOutputPath() {
+  const tempDir = createTempDir();
+  const outputPath = path.join(tempDir, '输出-字符画.txt');
+
+  try {
+    const result = runCli(['text', 'Hi', '--height', '2', '--chars', ' @', '--output', outputPath, '--lang', 'en-US']);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    if (!fs.existsSync(outputPath)) {
+      throw new Error('Unicode output path was not created');
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 27: image --image-backend napi-rs 显式使用宽松许可证实验后端
+ */
+async function testImageCommandNapiBackendParity() {
+  const tempDir = createTempDir();
+  const imagePath = path.join(tempDir, 'sample.png');
+  const outputPath = path.join(tempDir, 'image-napi-parity.txt');
+
+  try {
+    createFixtureImage(imagePath);
+
+    const result = runCli([
+      'image', imagePath,
+      '--height', '2',
+      '--matrix', '3',
+      '--chars', ' @',
+      '--image-backend', 'napi-rs',
+      '--output', outputPath,
+      '--lang', 'en-US'
+    ]);
+
+    if (result.status !== 0) {
+      throw new Error(result.stderr || result.stdout);
+    }
+
+    setNodeImageBackend('napi-rs');
+    const expected = await imageToArt(imagePath, {
+      height: 2,
+      matrixSize: 3,
+      charset: { type: PresetCharset.CUSTOM, customChars: ' @' },
+      outputFormat: OutputFormat.PLAIN_TEXT
+    });
+    resetNodeImageBackend();
+
+    const actual = fs.readFileSync(outputPath, 'utf-8');
+    if (actual !== expected.content) {
+      throw new Error(`napi-rs backend output differs from Core API\nExpected:\n${expected.content}\nActual:\n${actual}`);
+    }
+  } finally {
+    resetNodeImageBackend();
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * 🔶 Test 28: 同时指定 image 和 text 返回非 0
+ */
+async function testImageTextConflict() {
+  const result = runCli(['--image', 'a.png', '--text', 'Hi', '--lang', 'en-US']);
+
+  if (result.status === 0) {
+    throw new Error('image/text conflict should fail');
+  }
+
+  if (!result.stderr.includes('either --image or --text')) {
+    throw new Error(`Conflict error was not clear:\n${result.stderr || result.stdout}`);
+  }
+}
+
 //#endregion
 
 //#region 🟩 执行测试
@@ -724,6 +898,13 @@ async function testCliBoxPhase5LayoutOptions() {
   await runTest('Test 19: CLI image box option', testImageCommandBoxOption);
   await runTest('Test 20: CLI box phase-4 options', testCliBoxPhase4Options);
   await runTest('Test 21: CLI box phase-5 layout options', testCliBoxPhase5LayoutOptions);
+  await runTest('Test 22: CLI version matches package', testCliVersionMatchesPackage);
+  await runTest('Test 23: CLI help includes P1.4 options', testHelpIncludesP14Options);
+  await runTest('Test 24: CLI text reads stdin', testTextCommandReadsStdin);
+  await runTest('Test 25: CLI --no-config disables discovery', testNoConfigDisablesDiscovery);
+  await runTest('Test 26: CLI unicode output path', testUnicodeOutputPath);
+  await runTest('Test 27: CLI napi-rs image backend parity', testImageCommandNapiBackendParity);
+  await runTest('Test 28: CLI image/text conflict', testImageTextConflict);
   
   console.log('\n' + '='.repeat(50));
   console.log(chalk.green(`✅ Passed: ${passed}`));

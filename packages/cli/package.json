@@ -8,7 +8,12 @@
   },
   "scripts": {
     "start": "node src/console.js",
-    "test": "node tests/e2e-test.js",
+    "test": "node tests/e2e-test.js && node tests/release-tools.test.js",
+    "core:dep:status": "node scripts/core-dependency.js status",
+    "core:dep:npm": "node scripts/core-dependency.js use-npm",
+    "core:dep:local": "node scripts/core-dependency.js use-local",
+    "release:verify": "node scripts/core-dependency.js verify-release",
+    "smoke:pack-install": "node tests/pack-install-smoke.js",
     "prepublishOnly": "npm test"
   },
   "keywords": [
