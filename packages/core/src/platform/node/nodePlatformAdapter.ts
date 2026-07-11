@@ -12,9 +12,9 @@
 
 import type { UnicodeArtPlatformAdapter } from '../types';
 import {
-  loadImage as loadImageWithSharp,
+  loadImage as loadImageWithNodeBackend,
   renderTextToImage as renderTextToImageWithCanvas,
-  resizeImage as resizeImageWithSharp
+  resizeImage as resizeImageWithNodeBackend
 } from '../../preprocessor';
 import {
   loadFont as loadFontWithCanvas,
@@ -36,11 +36,11 @@ export const nodePlatformAdapter: UnicodeArtPlatformAdapter = {
       );
     }
 
-    return loadImageWithSharp(input);
+    return loadImageWithNodeBackend(input);
   },
 
   async resizeImage(image, targetWidth, targetHeight, interpolation = 'bicubic') {
-    return resizeImageWithSharp(image, targetWidth, targetHeight, interpolation);
+    return resizeImageWithNodeBackend(image, targetWidth, targetHeight, interpolation);
   },
 
   async renderTextToImage(text, options) {

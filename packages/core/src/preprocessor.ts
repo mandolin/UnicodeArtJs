@@ -11,17 +11,17 @@
  * - 图像尺寸调整和归一化
  * 
  * 🔶 核心流程
- * 1. loadImage() - 使用sharp库加载图像文件
+ * 1. loadImage() - 使用当前Node图像后端加载图像文件
  * 2. grayscale() - 将RGB像素转换为灰度值（ITU-R BT.601标准）
  * 3. renderTextToImage() - 使用canvas将文本渲染为图像（可选功能）
  * 
  * 🔶 性能考虑
- * - sharp是高性能图像处理库，比canvas快3-5倍
+ * - 默认Node图像后端为sharp，后续可切换为宽松许可证实验后端
  * - 灰度转换使用整数运算避免浮点误差
  * - 批量处理减少函数调用开销
  * 
  * 🔶 依赖说明
- * - sharp: Node.js环境必需（高性能图像处理）
+ * - Node图像后端: 默认sharp，后续可替换
  * - canvas: 可选依赖，仅用于文本渲染
  * - 浏览器环境应使用Canvas API替代sharp
  * 
@@ -32,16 +32,16 @@
  * ============================================================================
  */
 
-import sharp from 'sharp';
 import type { ImageData } from './types/image';
 import { UnicodeArtError, ErrorCode } from './types/output';
+import { getNodeImageBackend } from './platform/node/imageBackend';
 
 //#region 🟩 图像加载
 
 /**
  * 🟢 从文件加载图像并转换为灰度数据
  * 
- * 🔹 使用sharp库高效加载图像，自动处理多种格式（PNG/JPG/GIF/WebP等）。
+ * 🔹 使用当前Node图像后端加载图像，默认后端为sharp。
  * 🔹 直接输出灰度值数组，避免中间格式转换。
  * 
  * @param imagePath - 图像文件路径
@@ -57,8 +57,8 @@ import { UnicodeArtError, ErrorCode } from './types/output';
  * @throws {UnicodeArtError} 当文件不存在或格式不支持时抛出
  * 
  * @remarks
- * - sharp会自动检测图像格式
- * - 支持的格式: JPEG, PNG, WebP, GIF, SVG, TIFF
+ * - 当前默认后端会自动检测图像格式
+ * - 默认后端支持的格式由sharp决定；未来后端会收敛到项目自有格式承诺
  * - 输出为Uint8Array，范围[0, 255]
  * - 行优先存储：data[y * width + x]
  * 
@@ -70,53 +70,7 @@ import { UnicodeArtError, ErrorCode } from './types/output';
  * @see {@link grayscale} RGB转灰度的具体实现
  */
 export async function loadImage(imagePath: string): Promise<ImageData> {
-  try {
-    // 🔹 使用sharp加载图像并转换为灰度
-    const sharpInstance = sharp(imagePath);
-    
-    // 🔹 获取图像元数据
-    const metadata = await sharpInstance.metadata();
-    
-    if (!metadata.width || !metadata.height) {
-      throw new UnicodeArtError(
-        `无法读取图像尺寸: ${imagePath}`,
-        ErrorCode.IMAGE_LOAD_FAILED,
-        { imagePath, metadata }
-      );
-    }
-    
-    // 🔹 转换为灰度并获取原始像素数据
-    const buffer = await sharpInstance
-      .grayscale()           // 转换为灰度
-      .raw()                 // 输出原始像素数据
-      .toBuffer();           // 转换为Buffer
-    
-    // 🔹 验证数据完整性
-    const expectedSize = metadata.width * metadata.height;
-    if (buffer.length !== expectedSize) {
-      throw new UnicodeArtError(
-        `图像数据大小不匹配: 期望${expectedSize}字节，实际${buffer.length}字节`,
-        ErrorCode.IMAGE_LOAD_FAILED,
-        { imagePath, expectedSize, actualSize: buffer.length }
-      );
-    }
-    
-    return {
-      width: metadata.width,
-      height: metadata.height,
-      data: new Uint8Array(buffer)
-    };
-  } catch (error) {
-    if (error instanceof UnicodeArtError) {
-      throw error;
-    }
-    
-    throw new UnicodeArtError(
-      `加载图像失败: ${imagePath}`,
-      ErrorCode.IMAGE_LOAD_FAILED,
-      { originalError: error }
-    );
-  }
+  return getNodeImageBackend().loadImage(imagePath);
 }
 
 //#endregion
@@ -498,7 +452,7 @@ function needsVisualFontVerticalFit(font: string): boolean {
 /**
  * 🟢 调整图像尺寸
  * 
- * 🔹 使用sharp库高效调整图像尺寸，支持多种插值算法。
+ * 🔹 使用当前Node图像后端调整图像尺寸。
  * 🔹 自动保持宽高比（如果只指定一个维度）。
  * 
  * @param image - 源图像数据
@@ -521,7 +475,7 @@ function needsVisualFontVerticalFit(font: string): boolean {
  * @performance
  * - 时间复杂度: O(W × H)
  * - 典型耗时: 5-50ms
- * - sharp使用SIMD指令加速
+ * - 性能取决于当前Node图像后端
  */
 export async function resizeImage(
   image: ImageData,
@@ -529,37 +483,16 @@ export async function resizeImage(
   targetHeight: number,
   interpolation: string = 'bicubic'
 ): Promise<ImageData> {
-  try {
-    // 🔹 将Uint8Array转换为Buffer
-    const buffer = Buffer.from(image.data);
-    
-    // 🔹 使用sharp调整尺寸
-    const resizedBuffer = await sharp(buffer, {
-      raw: {
-        width: image.width,
-        height: image.height,
-        channels: 1
-      }
-    })
-      .resize(targetWidth, targetHeight, {
-        kernel: interpolation as any
-      })
-      .grayscale()
-      .raw()
-      .toBuffer();
-    
-    return {
-      width: targetWidth,
-      height: targetHeight,
-      data: new Uint8Array(resizedBuffer)
-    };
-  } catch (error) {
+  const backend = getNodeImageBackend();
+  if (!backend.resizeImage) {
     throw new UnicodeArtError(
-      `调整图像尺寸失败: ${error instanceof Error ? error.message : String(error)}`,
+      `当前Node图像后端不支持resizeImage: ${backend.name}`,
       ErrorCode.IMAGE_PROCESSING_FAILED,
-      { originalError: error }
+      { backend: backend.name }
     );
   }
+
+  return backend.resizeImage(image, targetWidth, targetHeight, interpolation);
 }
 
 /**

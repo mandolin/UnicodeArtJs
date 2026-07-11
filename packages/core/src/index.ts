@@ -242,6 +242,22 @@ export {
   nodePlatformAdapter
 } from './platform/node/nodePlatformAdapter';
 
+export {
+  getNodeImageBackend,
+  resetNodeImageBackend,
+  resolveNodeImageBackend,
+  setNodeImageBackend
+} from './platform/node/imageBackend';
+
+export {
+  sharpImageBackend
+} from './platform/node/sharpImageBackend';
+
+export type {
+  NodeImageBackend,
+  NodeImageBackendName
+} from './platform/node/imageBackend';
+
 export type {
   ImageDataToArtOptions
 } from './pure/imageDataToArt';

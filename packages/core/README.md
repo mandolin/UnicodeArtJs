@@ -101,12 +101,15 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - `getPresetChars(type)` returns preset character sets.
 - `t(key, params, locale)` renders built-in Core messages for `zh-CN` / `en-US`.
 - `normalizeLocale(locale)` normalizes host locale values before passing them into Core config.
+- `getNodeImageBackend()`, `setNodeImageBackend()`, and `resetNodeImageBackend()` expose the Node image backend boundary. The default backend is currently `sharp`.
 
 ## Stability Notes
 
 - Stable: Node `textToArt()`, Node `imageToArt()`, pure `imageDataToArt()`, config validation, preset charsets, output assembly, and post/outer `box` rendering.
 - Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, and layout-stage `box` modes such as `lines` / `grid`.
 - Reserved: `charSpace`, `maxParallelTasks`, `visualFont.reduceTop/right/bottom/left`, `glyphFont.widthProfile`, and `glyphFont.wideCharRegex`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
+
+Node image backend note: Core still defaults to `sharp` for compatibility. The backend is now explicit so future permissive-license adapters can be tested without changing the high-level API.
 
 ## Configuration
 
