@@ -52,7 +52,7 @@ import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants
  * @param matrixSize - 目标矩阵尺寸（如6×6）
  * @param font - 字体名称或路径
  * @param fontSize - 字体大小（像素）
- * @param fontReduce - 渲染内边距/字号收缩量（像素）；高层字符模板预计算通常保持0以对齐参考项目
+ * @param fontReduce - 渲染内边距/字号收缩量（像素）；高层字符模板预计算通常保持0以稳定匹配基准
  * @returns Float32Array 归一化的灰度矩阵（一维数组）
  * 
  * @example
@@ -94,8 +94,7 @@ export async function renderCharToMatrix(
     // 🔹 判断是否为宽字符
     const wideChar = detectWideChar(char);
     
-    // 🔹 计算画布尺寸（参考Python实现）
-    // Python: width = round(matrix_size / vertical_horizontal_ratio)
+    // 🔹 计算画布尺寸：普通字素按 ratio 压缩宽度，宽字素占双倍宽度。
     // 默认ratio为2.0，所以width = matrix_size / 2
     const canvasWidth = wideChar ? 
       Math.round(matrixSize * 2 / ratio) : 
@@ -115,7 +114,7 @@ export async function renderCharToMatrix(
     ctx.font = `${actualFontSize}px ${formatCanvasFontFamily(font)}`;
     ctx.textBaseline = 'top';
     
-    // 🔹 Python参考: draw.text((0, 0), char, 0, font)
+    // 🔹 从左上角绘制，保证字素模板坐标稳定。
     ctx.fillText(char, 0, 0);
     
     // 🔹 获取源画布像素数据
@@ -147,7 +146,7 @@ export async function renderCharToMatrix(
 /**
  * 🟢 将灰度字符画布缩放为归一化矩阵
  * 
- * 🔹 对齐Python参考实现中的 cv2.resize(...)/255。
+ * 🔹 将灰度数据缩放到目标矩阵尺寸，并统一归一化到0-1范围。
  */
 function resizeGrayscaleToNormalized(
   data: Uint8Array,
@@ -184,7 +183,7 @@ function resizeGrayscaleToNormalized(
  * @param matrixSize - 目标矩阵尺寸
  * @param font - 字体名称或路径
  * @param fontSize - 字体大小（像素）
- * @param fontReduce - 渲染内边距/字号收缩量（像素）；高层字符模板预计算通常保持0以对齐参考项目
+ * @param fontReduce - 渲染内边距/字号收缩量（像素）；高层字符模板预计算通常保持0以稳定匹配基准
  * @returns Promise<Map<string, CharMatrix>> 字符到矩阵的映射
  * 
  * @example
@@ -253,8 +252,7 @@ export async function precomputeCharData(
   const resolvedFont = await loadFont(font, fontStyle);
   
   // 🔹 计算合适的字体大小
-  // Python参考: font = ImageFont.truetype(char_font_file, matrix_size)
-  // 字符渲染时使用matrixSize作为字体大小
+  // 字符模板默认使用matrixSize作为字体大小，保持模板矩阵和采样块尺度一致。
   const actualFontSize = fontSize ?? matrixSize; // ← 修正：默认值为matrixSize
   
   // 🔹 批量渲染所有字符

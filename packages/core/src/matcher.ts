@@ -31,7 +31,6 @@
  * 
  * @module matcher
  * @since 0.1.0
- * @see {@link https://github.com/mandolin/UnicodeArt/doc/algorithms/sad-matching.md}
  * ============================================================================
  */
 
@@ -426,7 +425,7 @@ export async function batchMatch(
         
         // 🔹 步骤3: 比较普通字符和宽字符的SAD
         // 公式: 如果 wideSAD < normalSAD × wideCharRatio，则使用宽字符
-        // 参考实现中仅有宽字符集时直接使用宽字符，行尾用空白块补齐右半边。
+        // 兼容行为：仅有宽字符集时直接使用宽字符，行尾用空白块补齐右半边。
         if (
           bestWideChar &&
           (normalChars.length === 0 || (col + 1 < outputWidth && bestWideSAD < bestNormalSAD * wideCharRatio))
@@ -450,7 +449,7 @@ export async function batchMatch(
         charMatrix[row][col] = bestNormalChar.char;
         col += 1;
       } else {
-        // 🔹 fallback: 与Python参考实现一致，字符集为空时使用占位符
+        // 🔹 fallback: 字符集为空时使用占位符，避免生成空单元。
         charMatrix[row][col] = '?';
         col += 1;
       }

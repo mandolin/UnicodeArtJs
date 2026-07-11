@@ -21,7 +21,6 @@
  * 
  * @module types/image
  * @since 0.1.0
- * @see {@link https://github.com/mandolin/UnicodeArt} Python参考实现
  * ============================================================================
  */
 

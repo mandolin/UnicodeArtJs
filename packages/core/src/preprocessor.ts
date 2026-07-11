@@ -220,7 +220,7 @@ export function rgbaToGrayscale(
  * 🟢 将文本渲染为灰度图像（支持多行、对齐、行间距）
  * 
  * 🔹 使用canvas将文本绘制到位图，然后转换为灰度。
- * 🔹 **重要**: 参考Python实现，必须逐个字符绘制以获取准确的字符宽度。
+ * 🔹 **重要**: 必须逐个字符绘制以获取准确的字符宽度，避免混合宽度字体下对齐漂移。
  * 🔹 这是textToArt的核心步骤。
  * 
  * @param text - 要渲染的文本字符串（支持\n分隔的多行）
@@ -273,7 +273,7 @@ export async function renderTextToImage(
     ctx.font = `${fittedFontSize}px ${formatCanvasFontFamily(font)}`;
     ctx.textBaseline = useVerticalFit ? 'alphabetic' : 'top';
     
-    // 🔹 计算每行的rectunit（与Python一致）
+    // 🔹 计算每行的rectunit，保持line/total两种高度模式的历史兼容行为。
     const effectiveLineSpacing = lineSpacingPixelsOverride ?? lineSpacing;
     let rectunit: number;
     if (rectunitOverride !== undefined) {
@@ -286,8 +286,8 @@ export async function renderTextToImage(
       rectunit = Math.floor(drawingHeight / lines.length);
     }
     
-    // 🔹 逐行绘制文本（参考Python实现）
-    // 🔹 只有 YaHei 系列使用 alphabetic baseline + 实际字形度量，避免破坏参考项目 parity。
+    // 🔹 逐行绘制文本。
+    // 🔹 只有 YaHei 系列使用 alphabetic baseline + 实际字形度量，避免破坏默认字体路径的兼容输出。
     const verticalMetrics = useVerticalFit ? measureTextVerticalMetrics(ctx, lines) : undefined;
     const drawableLineHeight = Math.max(1, rectunit - fontReduce * 2);
     const verticalCenterOffset = verticalMetrics
@@ -323,7 +323,7 @@ export async function renderTextToImage(
         xOffset = fontReduce;
       }
       
-      // 🔹 逐个字符绘制（参考Python的draw_text）
+      // 🔹 逐个字符绘制，确保每个字符的测量宽度都被纳入布局。
       let currentX = xOffset;
       for (let j = 0; j < line.length; j++) {
         const char = line[j];

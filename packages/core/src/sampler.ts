@@ -26,7 +26,6 @@
  * 
  * @module sampler
  * @since 0.1.0
- * @see {@link https://github.com/mandolin/UnicodeArt/src/unicodeart/core/sampler.py}
  * ============================================================================
  */
 
@@ -39,7 +38,7 @@ import { UnicodeArtError, ErrorCode } from './types/output';
 /**
  * 🟢 计算输出尺寸（行数和列数）
  * 
- * 🔹 按Python参考实现，先计算采样块尺寸，再由块尺寸反推实际输出行列数。
+ * 🔹 先计算采样块尺寸，再由块尺寸反推实际输出行列数，保持历史兼容的边界填充行为。
  * 
  * @param image - 源图像数据
  * @param config - 艺术生成配置
@@ -52,7 +51,6 @@ import { UnicodeArtError, ErrorCode } from './types/output';
  * ```
  * 
  * @remarks
- * - 参考Python: _calculate_block_size + _calculate_output_dimensions
  * - 配置的height/width用于计算块尺寸，不强制等于最终输出尺寸
  * - 边界块通过白色填充补齐
  * 
@@ -299,7 +297,7 @@ export function resizeInterpolate(
 /**
  * 🟢 最近邻插值
  * 
- * 🔹 对应Python参考实现中的 cv2.INTER_NEAREST。
+ * 🔹 选择离目标采样点最近的源像素，适合需要硬边缘和最快速度的场景。
  */
 export function nearestInterpolate(
   data: Uint8Array,

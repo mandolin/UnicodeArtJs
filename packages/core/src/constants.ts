@@ -22,7 +22,6 @@
  * 
  * @module constants
  * @since 0.1.0
- * @see {@link https://github.com/mandolin/UnicodeArt/src/unicodeart/config/constants.py}
  * ============================================================================
  */
 
@@ -32,7 +31,7 @@
  * 🟢 默认采样矩阵大小
  * 
  * 🔹 平衡质量和速度的推荐值。
- * 🔹 参考Python版本的DEFAULT_MATRIX_SIZE = 6
+ * 🔹 当前默认值为6，用于兼容早期公开行为和常见字体效果。
  * 
  * @constant {number} DEFAULT_MATRIX_SIZE
  * 
@@ -304,7 +303,7 @@ export const LINUX_FONT_DIRS = [
 /**
  * 🟢 默认ASCII字符集（完整）
  * 
- * 🔹 包含完整的可打印ASCII字符（95个），与Python参考项目一致。
+ * 🔹 包含完整的可打印ASCII字符（95个）。
  * 🔹 按亮度从亮到暗排序：空格最亮，~最暗。
  * 
  * @constant {string} DEFAULT_ASCII_CHARS
@@ -318,7 +317,6 @@ export const LINUX_FONT_DIRS = [
  * 
  * @remarks
  * - 共95个字符（0x20-0x7E）
- * - 与Python项目的DEFAULT_CHARSET完全一致
  * - 可根据需要反转顺序或使用子集
  */
 export const DEFAULT_ASCII_CHARS = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';

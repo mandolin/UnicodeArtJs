@@ -319,11 +319,11 @@ export {
  * 🟦 文本转字符画
  * ============================================================================
  * 
- * 🔶 核心思路（参考Python实现）
+ * 🔶 核心思路
  * 文本转字符画的正确流程是：**先渲染为图像，再进行SAD匹配**，而非逐字符匹配。
  * 
  * ✅ 正确流程
- * 1. 使用canvas/Pillow将文本渲染为位图（支持多行、对齐、行间距）
+ * 1. 使用宿主平台字体渲染器将文本渲染为位图（支持多行、对齐、行间距）
  * 2. 对渲染后的图像进行采样（与imageToArt相同）
  * 3. 预计算字符集数据
  * 4. 批量SAD匹配
@@ -371,10 +371,8 @@ export async function textToArt(
     const resolvedFont = await nodePlatformAdapter.loadFont(fullConfig.font || 'Noto Sans SC', fullConfig.fontStyle);
     
     //  渲染文本为图像
-    // Python的字体大小计算: afont = ImageFont.truetype(font, rectunit - fontreduce*2)
-    // 其中rectunit在line模式下等于height（字符画行数）
-    // 实际像素高度 = rectunit * matrixSize
-    // 所以字体大小 = height * matrixSize - fontReduce * 2
+    // 字体大小基于每行像素高度计算，再扣除视觉字体收缩量。
+    // 其中rectunit在line模式下等于height（字符画行数）对应的像素高度。
     const heightInRows = fullConfig.height || lineCount;
     const fontReduce = fullConfig.fontReduce || 0;
     const lineSpacingPixels = (fullConfig.lineSpacing || 0) * fullConfig.matrixSize;
@@ -454,14 +452,13 @@ export async function textToArt(
     });
     
     // 🔹 预计算字符数据
-    // Python参考: font = ImageFont.truetype(char_font_file, matrix_size)
-    // 字符渲染时使用matrixSize作为字体大小，不是fontSize
+    // 字符模板渲染时使用matrixSize作为字体大小，不是输入文字的fontSize。
     const charDataMap = await nodePlatformAdapter.precomputeCharData({
       charset: fullConfig.charset,
       matrixSize: fullConfig.matrixSize,
       font: resolvedFont,
       fontSize: fullConfig.matrixSize, // ← 修正：使用matrixSize而不是fontSize
-      fontReduce: 0, // Python get_char_data does not apply fontreduce to character templates
+      fontReduce: 0, // 字符模板不应用视觉字体收缩量，避免影响匹配基准。
       interpolation: fullConfig.interpolation,
       ratio: fullConfig.ratio,
       fontStyle: fullConfig.fontStyle
@@ -829,7 +826,7 @@ export async function imageToArt(
       matrixSize: fullConfig.matrixSize,
       font: fullConfig.font || 'Noto Sans SC',
       fontSize: fullConfig.matrixSize,
-      fontReduce: 0, // Python get_char_data does not apply fontreduce to character templates
+      fontReduce: 0, // 字符模板不应用视觉字体收缩量，避免影响匹配基准。
       interpolation: fullConfig.interpolation,
       ratio: fullConfig.ratio,
       fontStyle: fullConfig.fontStyle
