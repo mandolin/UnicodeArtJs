@@ -130,6 +130,7 @@ dist
 .pnp.*
 /ai/
 /work-zone
+/.serena/
 
 # Local package artifacts
 *.vsix

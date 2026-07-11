@@ -94,6 +94,17 @@ unicode-art text "UnicodeArtJs" --box "{\"enabled\":true,\"style\":\"round\",\"p
 | `packages/vscode-extension` | VS Code 插件。 |
 | `packages/electron-app` | 桌面端预留目录。 |
 
+## 本地开发
+
+仓库根目录是私有编排包，不发布到 npm。开发环境建议使用 Node.js 22 和 npm 10：
+
+```bash
+npm run install:packages
+npm run check
+```
+
+更多命令和 lockfile 说明见 [docs/development.md](docs/development.md)。
+
 ## 字体说明
 
 字符画的最终效果与显示字体有关。为了获得稳定的对齐效果，建议在终端、网页或编辑器中使用混合等宽字体，例如 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro、Liberation Mono 等。

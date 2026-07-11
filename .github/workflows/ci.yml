@@ -1,0 +1,145 @@
+# GitHub Actions: 多端基础验证
+#
+# 覆盖 Core、CLI、Web 与 VSCode Extension 的基础检查。
+# Web 的 GitHub Pages 发布仍由 deploy-web.yml 独立负责。
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ci.yml"
+      - "package.json"
+      - "mise.toml"
+      - "packages/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ci.yml"
+      - "package.json"
+      - "mise.toml"
+      - "packages/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    name: Core
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/core/package-lock.json
+
+      - name: Install Core dependencies
+        working-directory: packages/core
+        run: npm ci
+
+      - name: Check Core
+        working-directory: packages/core
+        run: npm run typecheck && npm run build && npm test && npm run test:browser
+
+  cli:
+    name: CLI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            packages/core/package-lock.json
+            packages/cli/package-lock.json
+
+      - name: Install Core dependencies
+        working-directory: packages/core
+        run: npm ci
+
+      - name: Build Core for local CLI dependency
+        working-directory: packages/core
+        run: npm run build
+
+      - name: Install CLI dependencies
+        working-directory: packages/cli
+        run: npm ci
+
+      - name: Test CLI
+        working-directory: packages/cli
+        run: npm test
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            packages/core/package-lock.json
+            packages/web/package-lock.json
+
+      - name: Install Core dependencies
+        working-directory: packages/core
+        run: npm ci
+
+      - name: Build Core for local Web dependency
+        working-directory: packages/core
+        run: npm run build
+
+      - name: Install Web dependencies
+        working-directory: packages/web
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: packages/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Check Web
+        working-directory: packages/web
+        run: npm run check
+
+  vscode-extension:
+    name: VSCode Extension
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/vscode-extension/package-lock.json
+
+      - name: Install VSCode Extension dependencies
+        working-directory: packages/vscode-extension
+        run: npm ci
+
+      - name: Check VSCode Extension
+        working-directory: packages/vscode-extension
+        run: npm run check
