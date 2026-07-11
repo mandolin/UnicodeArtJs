@@ -27,13 +27,20 @@
       </div>
       <nav class="header-nav">
         <div class="theme-selector">
-          <label for="themeSelect" class="theme-label">主题</label>
+          <label for="themeSelect" class="theme-label" data-i18n="theme.label">主题</label>
           <select id="themeSelect" class="theme-dropdown">
-            <option value="default">🌙 默认（现代简约）</option>
-            <option value="dark">☀️ 暗黑</option>
-            <option value="high-contrast">🎨 高对比度</option>
-            <option value="solarized-light">🌅 Solarized 浅色</option>
-            <option value="nord">❄️ Nord 极冰</option>
+            <option value="default" data-i18n="theme.default">🌙 默认（现代简约）</option>
+            <option value="dark" data-i18n="theme.dark">☀️ 暗黑</option>
+            <option value="high-contrast" data-i18n="theme.highContrast">🎨 高对比度</option>
+            <option value="solarized-light" data-i18n="theme.solarizedLight">🌅 Solarized 浅色</option>
+            <option value="nord" data-i18n="theme.nord">❄️ Nord 极冰</option>
+          </select>
+        </div>
+        <div class="language-selector">
+          <label for="languageSelect" class="language-label" data-i18n="language.label">语言</label>
+          <select id="languageSelect" class="language-dropdown" aria-label="语言 / Language">
+            <option value="zh-CN">中文</option>
+            <option value="en-US">English</option>
           </select>
         </div>
         <a href="https://github.com/mandolin/UnicodeArtJs" target="_blank" rel="noopener noreferrer" class="nav-link" title="GitHub">
@@ -45,17 +52,17 @@
 
     <!--#region 🟩 模式切换 -->
     <nav class="mode-switcher">
-      <button class="mode-btn active" data-mode="image">
+      <button class="mode-btn active" data-mode="image" type="button">
         <span class="mode-icon">🖼️</span>
-        <span class="mode-text">图片转字符画</span>
+        <span class="mode-text" data-i18n="mode.image">图片转字符画</span>
       </button>
-      <button class="mode-btn" data-mode="text">
+      <button class="mode-btn" data-mode="text" type="button">
         <span class="mode-icon">📝</span>
-        <span class="mode-text">文字Banner</span>
+        <span class="mode-text" data-i18n="mode.text">文字Banner</span>
       </button>
-      <button class="mode-btn disabled" data-mode="editor" title="后期实现">
+      <button class="mode-btn disabled" data-mode="editor" type="button" aria-disabled="true" title="后期实现" data-i18n-title="mode.editorSoon">
         <span class="mode-icon">✏️</span>
-        <span class="mode-text">编辑器</span>
+        <span class="mode-text" data-i18n="mode.editor">编辑器</span>
       </button>
     </nav>
     <!--#endregion-->
@@ -68,61 +75,61 @@
         <section class="card">
           <!-- 图片输入 -->
           <div class="input-panel" id="imageInputPanel">
-            <h3 class="card-title">上传图片</h3>
-            <div class="upload-zone" id="uploadZone">
+            <h3 class="card-title" data-i18n="input.imageTitle">上传图片</h3>
+            <div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-controls="fileInput" data-i18n-aria-label="input.uploadAria">
               <div class="upload-content">
                 <span class="upload-icon">📁</span>
-                <p class="upload-text">拖拽图片到此处</p>
-                <p class="upload-hint">或点击选择文件</p>
+                <p class="upload-text" data-i18n="input.uploadText">拖拽图片到此处</p>
+                <p class="upload-hint" data-i18n="input.uploadHint">或点击选择文件</p>
               </div>
               <input type="file" id="fileInput" accept="image/*" hidden>
             </div>
             <div class="preview-thumb" id="imagePreview" style="display: none;">
-              <img id="previewImg" src="" alt="预览">
-              <button class="btn-clear" id="clearImage">✕</button>
+              <img id="previewImg" src="" alt="预览" data-i18n-alt="input.previewAlt">
+              <button class="btn-clear" id="clearImage" type="button" data-i18n-aria-label="input.clearImage">✕</button>
             </div>
           </div>
           <!-- 文字输入 -->
           <div class="input-panel" id="textInputPanel" style="display: none;">
-            <h3 class="card-title">输入文字</h3>
-            <textarea id="textInput" class="text-input" placeholder="输入要转换的文字..." rows="4"></textarea>
+            <h3 class="card-title" data-i18n="input.textTitle">输入文字</h3>
+            <textarea id="textInput" class="text-input" placeholder="输入要转换的文字..." data-i18n-placeholder="input.textPlaceholder" rows="4"></textarea>
           </div>
         </section>
 
         <!-- 参数设置 -->
         <section class="card">
-          <h3 class="card-title">参数设置</h3>
+          <h3 class="card-title" data-i18n="config.title">参数设置</h3>
           <div class="config-form">
             <!-- 尺寸 -->
             <div class="form-row">
               <div class="form-group">
-                <label for="height">高度（行数）</label>
+                <label for="height" data-i18n="config.height">高度（行数）</label>
                 <input type="number" id="height" value="20" min="1" max="200">
               </div>
               <div class="form-group">
-                <label for="width">宽度（列数）</label>
-                <input type="number" id="width" value="" min="1" max="500" placeholder="自动">
+                <label for="width" data-i18n="config.width">宽度（列数）</label>
+                <input type="number" id="width" value="" min="1" max="500" placeholder="自动" data-i18n-placeholder="config.auto">
               </div>
             </div>
 
             <!-- 字符集 -->
             <div class="form-group">
-              <label for="charset">字符集</label>
+              <label for="charset" data-i18n="config.charset">字符集</label>
               <select id="charset">
-                <option value="ASCII">ASCII（英文 + 符号）</option>
-                <option value="EXTENDED">扩展字符</option>
-                <option value="CHINESE_SIMPLE">简体中文常用</option>
-                <option value="__CUSTOM__">自定义 →</option>
+                <option value="ASCII" data-i18n="charset.ascii">ASCII（英文 + 符号）</option>
+                <option value="EXTENDED" data-i18n="charset.extended">扩展字符</option>
+                <option value="CHINESE_SIMPLE" data-i18n="charset.chineseSimple">简体中文常用</option>
+                <option value="__CUSTOM__" data-i18n="charset.custom">自定义 →</option>
               </select>
             </div>
             <div class="form-group" id="customCharsGroup" style="display: none;">
-              <label for="customChars">自定义字符（从暗到亮排列）</label>
-              <input type="text" id="customChars" class="text-input" placeholder="例如: .:-=+*#%@" style="font-family: monospace;">
+              <label for="customChars" data-i18n="config.customChars">自定义字符（从暗到亮排列）</label>
+              <input type="text" id="customChars" class="text-input" placeholder="例如: .:-=+*#%@" data-i18n-placeholder="config.customCharsPlaceholder" style="font-family: monospace;">
             </div>
 
             <!-- 视觉字体（渲染输入文本/采样用） -->
             <div class="form-group">
-              <label for="font">视觉字体（渲染用）</label>
+              <label for="font" data-i18n="config.visualFont">视觉字体（渲染用）</label>
               <select id="font">
                 <option value="Noto Sans SC">Noto Sans SC</option>
                 <option value="Source Han Sans SC">思源黑体 / Source Han Sans SC</option>
@@ -137,7 +144,7 @@
 
             <!-- 字素字体（预览区显示用） -->
             <div class="form-group">
-              <label for="glyphFont">字素字体（显示用）</label>
+              <label for="glyphFont" data-i18n="config.glyphFont">字素字体（显示用）</label>
               <select id="glyphFont">
                 <option value="'Sarasa Mono SC', 'Sarasa Term SC', monospace">等距更纱黑体</option>
                 <option value="'LXGW WenKai Mono', 'LXGW WenKai', monospace">霞鹜文楷等宽</option>
@@ -152,56 +159,76 @@
 
             <!-- 高级设置折叠 -->
             <details class="config-details">
-              <summary>高级设置</summary>
+              <summary data-i18n="config.advanced">高级设置</summary>
               <div class="config-details-body">
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="matrixSize">矩阵大小</label>
+                    <label for="matrixSize" data-i18n="config.matrixSize">矩阵大小</label>
                     <input type="number" id="matrixSize" value="6" min="2" max="20">
                   </div>
                   <div class="form-group">
-                    <label for="ratio">宽高比</label>
+                    <label for="ratio" data-i18n="config.ratio">宽高比</label>
                     <input type="number" id="ratio" value="2.0" min="1.0" max="3.0" step="0.1">
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="interpolation">插值算法</label>
+                  <label for="interpolation" data-i18n="config.interpolation">插值算法</label>
                   <select id="interpolation">
-                    <option value="nearest">最近邻 (nearest)</option>
-                    <option value="bilinear">双线性 (bilinear)</option>
-                    <option value="bicubic" selected>双三次 (bicubic)</option>
+                    <option value="nearest" data-i18n="interpolation.nearest">最近邻 (nearest)</option>
+                    <option value="bilinear" data-i18n="interpolation.bilinear">双线性 (bilinear)</option>
+                    <option value="bicubic" selected data-i18n="interpolation.bicubic">双三次 (bicubic)</option>
                   </select>
                 </div>
 
                 <div class="form-group">
-                  <label for="wideCharRatio">宽字符比例</label>
+                  <label for="wideCharRatio" data-i18n="config.wideCharRatio">宽字符比例</label>
                   <input type="number" id="wideCharRatio" value="2.0" min="0.1" max="10.0" step="0.1">
                 </div>
 
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="invert">
-                    <span>反转颜色</span>
+                    <span data-i18n="config.invert">反转颜色</span>
                   </label>
                 </div>
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="trimTrailing">
-                    <span>去除行尾空格</span>
+                    <span data-i18n="config.trimTrailing">去除行尾空格</span>
                   </label>
                 </div>
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="earlyTermination" checked>
-                    <span>启用早期终止优化</span>
+                    <span data-i18n="config.earlyTermination">启用早期终止优化</span>
                   </label>
                 </div>
 
                 <div class="form-group">
-                  <label for="fontReduce">视觉字体内边距/收缩</label>
+                  <label for="fontReduce" data-i18n="config.fontReduce">视觉字体内边距/收缩</label>
                   <input type="number" id="fontReduce" value="0" min="0" max="10">
+                </div>
+
+                <div class="form-group">
+                  <label for="charSpace" data-i18n="config.charSpace">字距</label>
+                  <input type="number" id="charSpace" value="1" min="0" max="8">
+                </div>
+
+                <div class="form-group experimental-field">
+                  <label for="glyphWidthProfile" data-i18n="config.glyphWidthProfile">字素宽度规则（实验）</label>
+                  <select id="glyphWidthProfile">
+                    <option value="default" data-i18n="glyphWidth.default">默认</option>
+                    <option value="mixed-cjk" data-i18n="glyphWidth.mixedCjk">混合等宽 CJK</option>
+                    <option value="custom" data-i18n="glyphWidth.custom">自定义正则</option>
+                  </select>
+                  <p class="field-help" data-i18n="config.glyphWidthHelp">该选项目前用于冻结配置契约，后续会进一步接入更精细的字素宽度计算。</p>
+                </div>
+
+                <div class="form-group experimental-field" id="wideCharRegexGroup" style="display: none;">
+                  <label for="wideCharRegex" data-i18n="config.wideCharRegex">自定义宽字素正则</label>
+                  <input type="text" id="wideCharRegex" class="text-input" placeholder="例如: [\u4e00-\u9fff]" data-i18n-placeholder="config.wideCharRegexPlaceholder">
                 </div>
 
               </div>
@@ -211,17 +238,17 @@
 
         <!-- 裱框设置 -->
         <section class="card">
-          <h3 class="card-title">裱框设置</h3>
+          <h3 class="card-title" data-i18n="box.title">裱框设置</h3>
           <div class="config-form">
             <div class="form-group">
               <label class="checkbox-label">
                 <input type="checkbox" id="boxEnabled">
-                <span>启用裱框</span>
+                <span data-i18n="box.enable">启用裱框</span>
               </label>
             </div>
             <div class="box-config-body" id="boxConfigBody" style="display: none;">
               <div class="form-group">
-                <label for="boxStyle">裱框样式</label>
+                <label for="boxStyle" data-i18n="box.style">裱框样式</label>
                 <select id="boxStyle">
                   <option value="single">单线 (single)</option>
                   <option value="double">双线 (double)</option>
@@ -236,22 +263,22 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="boxPadding">内边距</label>
+                  <label for="boxPadding" data-i18n="box.padding">内边距</label>
                   <input type="number" id="boxPadding" value="1" min="0" max="10">
                 </div>
                 <div class="form-group">
-                  <label for="boxMargin">外边距</label>
+                  <label for="boxMargin" data-i18n="box.margin">外边距</label>
                   <input type="number" id="boxMargin" value="0" min="0" max="10">
                 </div>
               </div>
               <div class="form-group">
-                <label for="boxTitle">标题（可选）</label>
-                <input type="text" id="boxTitle" class="text-input" placeholder="标题文字">
+                <label for="boxTitle" data-i18n="box.titleText">标题（可选）</label>
+                <input type="text" id="boxTitle" class="text-input" placeholder="标题文字" data-i18n-placeholder="box.titlePlaceholder">
               </div>
               <div class="form-group">
                 <label class="checkbox-label">
                   <input type="checkbox" id="boxShadow">
-                  <span>启用阴影</span>
+                  <span data-i18n="box.shadow">启用阴影</span>
                 </label>
               </div>
             </div>
@@ -262,22 +289,22 @@
       <!-- 右侧：预览区 + 导出 -->
       <section class="preview-section">
         <div class="preview-toolbar">
-          <span class="preview-info" id="previewInfo">就绪</span>
+          <span class="preview-info" id="previewInfo" aria-live="polite">就绪</span>
           <div class="preview-actions">
-            <button class="btn-icon" id="refreshBtn" title="刷新">↻</button>
+            <button class="btn-icon" id="refreshBtn" type="button" title="刷新" data-i18n-title="preview.refresh" data-i18n-aria-label="preview.refresh">↻</button>
           </div>
         </div>
-        <div class="preview-container">
-          <pre class="art-preview" id="artPreview"><code class="preview-placeholder">字符画预览区域</code></pre>
+        <div class="preview-container" role="region" aria-label="字符画预览" data-i18n-aria-label="preview.region">
+          <pre class="art-preview" id="artPreview" aria-live="polite"><code class="preview-placeholder" data-i18n="preview.placeholder">字符画预览区域</code></pre>
         </div>
         <div class="preview-meta">
           <span id="metaInfo">宽度: -- 高度: -- 耗时: --ms</span>
         </div>
         <div class="export-actions">
-          <button class="btn" id="exportTxt">📄 TXT</button>
-          <button class="btn" id="exportHtml">🌐 HTML</button>
-          <button class="btn" id="exportPng">🖼️ PNG</button>
-          <button class="btn primary" id="copyBtn">📋 复制</button>
+          <button class="btn" id="exportTxt" type="button">📄 TXT</button>
+          <button class="btn" id="exportHtml" type="button">🌐 HTML</button>
+          <button class="btn" id="exportPng" type="button">🖼️ PNG</button>
+          <button class="btn primary" id="copyBtn" type="button"><span data-i18n="export.copy">📋 复制</span></button>
         </div>
       </section>
     </main>
@@ -291,13 +318,13 @@
   </div>
 
   <!-- 加载遮罩 -->
-  <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+  <div class="loading-overlay" id="loadingOverlay" style="display: none;" role="status" aria-live="assertive">
     <div class="loading-spinner"></div>
-    <p class="loading-text">正在生成字符画...</p>
+    <p class="loading-text" data-i18n="status.generating">正在生成字符画...</p>
   </div>
 
   <!-- Toast -->
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
   <!-- jQuery: GitHub Pages优先使用CDN；二次开发/离线打包由main.js动态导入本地jquery兜底 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"

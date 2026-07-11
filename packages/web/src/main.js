@@ -13,9 +13,228 @@
 
 let $ = window.jQuery || window.$;
 
+const SUPPORTED_UI_LOCALES = ['zh-CN', 'en-US'];
+
+const UI_MESSAGES = {
+  'zh-CN': {
+    'meta.title': 'UnicodeArtJs - 免费在线Unicode字符画生成器',
+    'meta.description': 'UnicodeArtJs - 免费在线Unicode字符画生成器，将图片和文本转换为精美的Unicode字符画。支持多种字符集、字体、裱框样式和主题。',
+    'language.label': '语言',
+    'theme.label': '主题',
+    'theme.default': '🌙 默认（现代简约）',
+    'theme.dark': '☀️ 暗黑',
+    'theme.highContrast': '🎨 高对比度',
+    'theme.solarizedLight': '🌅 Solarized 浅色',
+    'theme.nord': '❄️ Nord 极冰',
+    'mode.image': '图片转字符画',
+    'mode.text': '文字Banner',
+    'mode.editor': '编辑器',
+    'mode.editorSoon': '后期实现',
+    'input.imageTitle': '上传图片',
+    'input.uploadText': '拖拽图片到此处',
+    'input.uploadHint': '或点击选择文件',
+    'input.uploadHintTouch': '移动端暂不支持拖拽',
+    'input.uploadAria': '选择或拖拽图片文件',
+    'input.previewAlt': '预览',
+    'input.clearImage': '清除图片',
+    'input.textTitle': '输入文字',
+    'input.textPlaceholder': '输入要转换的文字...',
+    'config.title': '参数设置',
+    'config.height': '高度（行数）',
+    'config.width': '宽度（列数）',
+    'config.auto': '自动',
+    'config.charset': '字符集',
+    'charset.ascii': 'ASCII（英文 + 符号）',
+    'charset.extended': '扩展字符',
+    'charset.chineseSimple': '简体中文常用',
+    'charset.custom': '自定义 →',
+    'config.customChars': '自定义字符（从暗到亮排列）',
+    'config.customCharsPlaceholder': '例如: .:-=+*#%@',
+    'config.visualFont': '视觉字体（渲染用）',
+    'config.glyphFont': '字素字体（显示用）',
+    'config.advanced': '高级设置',
+    'config.matrixSize': '矩阵大小',
+    'config.ratio': '宽高比',
+    'config.interpolation': '插值算法',
+    'interpolation.nearest': '最近邻 (nearest)',
+    'interpolation.bilinear': '双线性 (bilinear)',
+    'interpolation.bicubic': '双三次 (bicubic)',
+    'config.wideCharRatio': '宽字符比例',
+    'config.invert': '反转颜色',
+    'config.trimTrailing': '去除行尾空格',
+    'config.earlyTermination': '启用早期终止优化',
+    'config.fontReduce': '视觉字体内边距/收缩',
+    'config.charSpace': '字距',
+    'config.glyphWidthProfile': '字素宽度规则（实验）',
+    'config.glyphWidthHelp': '该选项目前用于冻结配置契约，后续会进一步接入更精细的字素宽度计算。',
+    'config.wideCharRegex': '自定义宽字素正则',
+    'config.wideCharRegexPlaceholder': '例如: [\\u4e00-\\u9fff]',
+    'glyphWidth.default': '默认',
+    'glyphWidth.mixedCjk': '混合等宽 CJK',
+    'glyphWidth.custom': '自定义正则',
+    'box.title': '裱框设置',
+    'box.enable': '启用裱框',
+    'box.style': '裱框样式',
+    'box.padding': '内边距',
+    'box.margin': '外边距',
+    'box.titleText': '标题（可选）',
+    'box.titlePlaceholder': '标题文字',
+    'box.shadow': '启用阴影',
+    'box.style.single': '单线 (single)',
+    'box.style.double': '双线 (double)',
+    'box.style.round': '圆角 (round)',
+    'box.style.bold': '粗线 (bold)',
+    'box.style.classic': '经典 (classic)',
+    'box.style.ascii': 'ASCII (ascii)',
+    'box.style.singleDouble': '外粗内细 (singleDouble)',
+    'box.style.doubleSingle': '外细内粗 (doubleSingle)',
+    'box.style.thick': '厚框 (thick)',
+    'preview.ready': '就绪',
+    'preview.waiting': '等待输入',
+    'preview.generating': '正在生成...',
+    'preview.placeholder': '字符画预览区域',
+    'preview.uploadImage': '请上传图片',
+    'preview.enterText': '请输入文字',
+    'preview.failed': '生成失败',
+    'preview.refresh': '刷新',
+    'preview.region': '字符画预览',
+    'preview.meta.empty': '宽度: -- 高度: -- 耗时: --ms',
+    'preview.meta.ready': '宽度: {cols} 高度: {rows} 耗时: {duration}ms',
+    'status.generating': '正在生成字符画...',
+    'toast.imageLoaded': '图片已加载',
+    'toast.imageOnly': '请上传图片文件',
+    'toast.imageTooLarge': '图片文件过大，请选择小于10MB的图片',
+    'toast.generateDone': '字符画生成完成',
+    'toast.generateFailed': '生成失败: {message}',
+    'toast.exportFirst': '请先生成字符画',
+    'toast.exportTxt': '已导出为TXT',
+    'toast.exportHtml': '已导出为HTML',
+    'toast.exportPng': '已导出为PNG',
+    'toast.exportPngFailed': 'PNG导出失败',
+    'toast.copyDone': '已复制到剪贴板',
+    'toast.copyFailed': '复制失败，请手动选择文本复制',
+    'export.copy': '📋 复制',
+    'validate.height': '高度必须大于0',
+    'validate.width': '宽度必须大于0',
+    'validate.matrixSize': '矩阵大小必须在2-20之间',
+    'validate.ratio': '宽高比必须在1.0-3.0之间',
+    'validate.wideCharRatio': '宽字符比例必须在0-10之间',
+  },
+  'en-US': {
+    'meta.title': 'UnicodeArtJs - Free Online Unicode Art Generator',
+    'meta.description': 'UnicodeArtJs is a free online Unicode art generator for converting images and text into Unicode art with charsets, fonts, boxes, and themes.',
+    'language.label': 'Language',
+    'theme.label': 'Theme',
+    'theme.default': '🌙 Default',
+    'theme.dark': '☀️ Dark',
+    'theme.highContrast': '🎨 High Contrast',
+    'theme.solarizedLight': '🌅 Solarized Light',
+    'theme.nord': '❄️ Nord',
+    'mode.image': 'Image to Art',
+    'mode.text': 'Text Banner',
+    'mode.editor': 'Editor',
+    'mode.editorSoon': 'Planned for a later version',
+    'input.imageTitle': 'Upload Image',
+    'input.uploadText': 'Drop an image here',
+    'input.uploadHint': 'or click to choose a file',
+    'input.uploadHintTouch': 'Drag and drop is not available on mobile',
+    'input.uploadAria': 'Choose or drop an image file',
+    'input.previewAlt': 'Preview',
+    'input.clearImage': 'Clear image',
+    'input.textTitle': 'Input Text',
+    'input.textPlaceholder': 'Enter text to convert...',
+    'config.title': 'Settings',
+    'config.height': 'Height (rows)',
+    'config.width': 'Width (columns)',
+    'config.auto': 'Auto',
+    'config.charset': 'Charset',
+    'charset.ascii': 'ASCII (letters + symbols)',
+    'charset.extended': 'Extended characters',
+    'charset.chineseSimple': 'Simplified Chinese common chars',
+    'charset.custom': 'Custom →',
+    'config.customChars': 'Custom chars (dark to light)',
+    'config.customCharsPlaceholder': 'Example: .:-=+*#%@',
+    'config.visualFont': 'Visual font (rendering)',
+    'config.glyphFont': 'Glyph font (display)',
+    'config.advanced': 'Advanced',
+    'config.matrixSize': 'Matrix size',
+    'config.ratio': 'Aspect ratio',
+    'config.interpolation': 'Interpolation',
+    'interpolation.nearest': 'Nearest',
+    'interpolation.bilinear': 'Bilinear',
+    'interpolation.bicubic': 'Bicubic',
+    'config.wideCharRatio': 'Wide char ratio',
+    'config.invert': 'Invert colors',
+    'config.trimTrailing': 'Trim trailing spaces',
+    'config.earlyTermination': 'Enable early termination',
+    'config.fontReduce': 'Visual font padding/reduce',
+    'config.charSpace': 'Character spacing',
+    'config.glyphWidthProfile': 'Glyph width rule (experimental)',
+    'config.glyphWidthHelp': 'This option freezes the config contract for now; finer glyph-width calculation will be integrated later.',
+    'config.wideCharRegex': 'Custom wide-glyph regex',
+    'config.wideCharRegexPlaceholder': 'Example: [\\u4e00-\\u9fff]',
+    'glyphWidth.default': 'Default',
+    'glyphWidth.mixedCjk': 'Mixed-width CJK',
+    'glyphWidth.custom': 'Custom regex',
+    'box.title': 'Box',
+    'box.enable': 'Enable box',
+    'box.style': 'Box style',
+    'box.padding': 'Padding',
+    'box.margin': 'Margin',
+    'box.titleText': 'Title (optional)',
+    'box.titlePlaceholder': 'Title text',
+    'box.shadow': 'Enable shadow',
+    'box.style.single': 'Single',
+    'box.style.double': 'Double',
+    'box.style.round': 'Round',
+    'box.style.bold': 'Bold',
+    'box.style.classic': 'Classic',
+    'box.style.ascii': 'ASCII',
+    'box.style.singleDouble': 'Single Double',
+    'box.style.doubleSingle': 'Double Single',
+    'box.style.thick': 'Thick',
+    'preview.ready': 'Ready',
+    'preview.waiting': 'Waiting',
+    'preview.generating': 'Generating...',
+    'preview.placeholder': 'Unicode art preview',
+    'preview.uploadImage': 'Please upload an image',
+    'preview.enterText': 'Please enter text',
+    'preview.failed': 'Generation failed',
+    'preview.refresh': 'Refresh',
+    'preview.region': 'Unicode art preview',
+    'preview.meta.empty': 'Width: -- Height: -- Time: --ms',
+    'preview.meta.ready': 'Width: {cols} Height: {rows} Time: {duration}ms',
+    'status.generating': 'Generating Unicode art...',
+    'toast.imageLoaded': 'Image loaded',
+    'toast.imageOnly': 'Please upload an image file',
+    'toast.imageTooLarge': 'The image is too large. Please choose a file under 10MB.',
+    'toast.generateDone': 'Unicode art generated',
+    'toast.generateFailed': 'Generation failed: {message}',
+    'toast.exportFirst': 'Generate Unicode art first',
+    'toast.exportTxt': 'Exported as TXT',
+    'toast.exportHtml': 'Exported as HTML',
+    'toast.exportPng': 'Exported as PNG',
+    'toast.exportPngFailed': 'PNG export failed',
+    'toast.copyDone': 'Copied to clipboard',
+    'toast.copyFailed': 'Copy failed. Please select and copy manually.',
+    'export.copy': '📋 Copy',
+    'validate.height': 'Height must be greater than 0',
+    'validate.width': 'Width must be greater than 0',
+    'validate.matrixSize': 'Matrix size must be between 2 and 20',
+    'validate.ratio': 'Aspect ratio must be between 1.0 and 3.0',
+    'validate.wideCharRatio': 'Wide char ratio must be between 0 and 10',
+  },
+};
+
+function normalizeUILocale(locale) {
+  if (SUPPORTED_UI_LOCALES.includes(locale)) return locale;
+  const raw = (locale || '').toLowerCase();
+  return raw.startsWith('en') ? 'en-US' : 'zh-CN';
+}
+
 function detectCoreLocale() {
   const language = navigator.language || navigator.userLanguage || 'zh-CN';
-  return language.toLowerCase().startsWith('en') ? 'en-US' : 'zh-CN';
+  return normalizeUILocale(language);
 }
 
 async function ensureJQuery() {
@@ -26,6 +245,19 @@ async function ensureJQuery() {
     window.$ = $;
   }
   return $;
+}
+
+function formatMessage(template, params = {}) {
+  return template.replace(/\{(\w+)\}/g, (_, key) => (
+    Object.prototype.hasOwnProperty.call(params, key) ? String(params[key]) : ''
+  ));
+}
+
+function translate(key, params = {}, locale = AppState.config.locale) {
+  const safeLocale = normalizeUILocale(locale);
+  const bundle = UI_MESSAGES[safeLocale] || UI_MESSAGES['zh-CN'];
+  const template = bundle[key] || UI_MESSAGES['zh-CN'][key] || key;
+  return formatMessage(template, params);
 }
 
 const AppState = {
@@ -97,6 +329,9 @@ const DOM = {
   earlyTermination: '#earlyTermination',
   fontReduce: '#fontReduce',
   charSpace: '#charSpace',
+  glyphWidthProfile: '#glyphWidthProfile',
+  wideCharRegexGroup: '#wideCharRegexGroup',
+  wideCharRegex: '#wideCharRegex',
   outputFormat: '#outputFormat',
 
   boxEnabled: '#boxEnabled',
@@ -119,6 +354,7 @@ const DOM = {
 
   themeToggle: '#themeToggle',
   themeSelect: '#themeSelect',
+  languageSelect: '#languageSelect',
   loadingOverlay: '#loadingOverlay',
   toastContainer: '#toastContainer',
 };
@@ -126,6 +362,46 @@ const DOM = {
 //#endregion
 
 //#region 🟩 主题管理
+
+class I18nManager {
+  constructor() {
+    this.currentLocale = normalizeUILocale(AppState.config.locale);
+  }
+
+  t(key, params) {
+    return translate(key, params, this.currentLocale);
+  }
+
+  apply(locale) {
+    this.currentLocale = normalizeUILocale(locale);
+    AppState.config.locale = this.currentLocale;
+    document.documentElement.lang = this.currentLocale;
+    document.title = this.t('meta.title');
+    $('meta[name="description"]').attr('content', this.t('meta.description'));
+    $(DOM.languageSelect).val(this.currentLocale);
+
+    $('[data-i18n]').each((_, el) => {
+      const key = $(el).attr('data-i18n');
+      $(el).text(this.t(key));
+    });
+    $('[data-i18n-placeholder]').each((_, el) => {
+      const key = $(el).attr('data-i18n-placeholder');
+      $(el).attr('placeholder', this.t(key));
+    });
+    $('[data-i18n-title]').each((_, el) => {
+      const key = $(el).attr('data-i18n-title');
+      $(el).attr('title', this.t(key));
+    });
+    $('[data-i18n-aria-label]').each((_, el) => {
+      const key = $(el).attr('data-i18n-aria-label');
+      $(el).attr('aria-label', this.t(key));
+    });
+    $('[data-i18n-alt]').each((_, el) => {
+      const key = $(el).attr('data-i18n-alt');
+      $(el).attr('alt', this.t(key));
+    });
+  }
+}
 
 /**
  * 主题系统
@@ -177,7 +453,7 @@ class ThemeManager {
   // 获取主题
   getTheme(key) { return this.themes.find(t => t.key === key); }
 
-  loadTheme() { return AppState.config.themeName || localStorage.getItem('unicode-art-theme'); }
+  loadTheme() { return localStorage.getItem('unicode-art-theme') || AppState.config.themeName; }
 
   saveTheme(t) {
     AppState.config.themeName = t;
@@ -335,6 +611,7 @@ class ArtGenerator {
 
 class AppController {
   constructor() {
+    this.i18nManager = new I18nManager();
     this.themeManager = new ThemeManager();
     this.toastManager = new ToastManager();
     this.artGenerator = new ArtGenerator();
@@ -362,9 +639,10 @@ class AppController {
   }
 
   init() {
-    this.detectTouchDevice();
     this.bindEvents();
     this.loadConfig();
+    this.i18nManager.apply(AppState.config.locale);
+    this.detectTouchDevice();
     this.initBoxStylePreview();
     this.handleResize();
     console.log('UnicodeArtJs Web 初始化完成');
@@ -376,8 +654,8 @@ class AppController {
     if (isTouch) {
       document.documentElement.classList.add('touch-device');
       if (window.innerWidth <= 768) {
-        $('.upload-text').text('点击选择图片');
-        $('.upload-hint').text('移动端暂不支持拖拽');
+        $('.upload-text').text(this.i18nManager.t('input.uploadHint'));
+        $('.upload-hint').text(this.i18nManager.t('input.uploadHintTouch'));
       }
     }
   }
@@ -402,8 +680,12 @@ class AppController {
     // 动态更新样式下拉选项
     $sel.empty();
     names.forEach(name => {
-      const label = name.charAt(0).toUpperCase() + name.slice(1);
-      $sel.append(`<option value="${name}" ${name === currentVal ? 'selected' : ''}>${label}</option>`);
+      const label = this.i18nManager.t(`box.style.${name}`);
+      $('<option>')
+        .val(name)
+        .prop('selected', name === currentVal)
+        .text(label === `box.style.${name}` ? name.charAt(0).toUpperCase() + name.slice(1) : label)
+        .appendTo($sel);
     });
   }
 
@@ -415,6 +697,12 @@ class AppController {
 
     // 上传
     $doc.on('click', DOM.uploadZone, () => $(DOM.fileInput).click());
+    $doc.on('keydown', DOM.uploadZone, (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        $(DOM.fileInput).click();
+      }
+    });
     $doc.on('change', DOM.fileInput, (e) => this.handleFileSelect(e));
     $doc.on('dragover', DOM.uploadZone, (e) => { e.preventDefault(); e.stopPropagation(); $(DOM.uploadZone).addClass('dragover'); });
     $doc.on('dragleave', DOM.uploadZone, (e) => { e.preventDefault(); e.stopPropagation(); $(DOM.uploadZone).removeClass('dragover'); });
@@ -437,6 +725,8 @@ class AppController {
     $doc.on('input', DOM.wideCharRatio, (e) => { this.setConfigQuiet('wideCharRatio', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('input', DOM.fontReduce, (e) => { this.setNumConfigQuiet('fontReduce', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('input', DOM.charSpace, (e) => { this.setNumConfigQuiet('charSpace', $(e.target).val()); this.debouncedRefresh(); });
+    $doc.on('change', DOM.glyphWidthProfile, (e) => { this.handleGlyphWidthProfileChange(e); });
+    $doc.on('input', DOM.wideCharRegex, (e) => { this.setConfigQuiet('wideCharRegex', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('change', DOM.invertCheckbox, (e) => { this.setConfigQuiet('invert', $(e.target).prop('checked')); this.debouncedRefresh(); });
     $doc.on('change', DOM.trimTrailing, (e) => { this.setConfigQuiet('trimTrailing', $(e.target).prop('checked')); this.debouncedRefresh(); });
     $doc.on('change', DOM.earlyTermination, (e) => { this.setConfigQuiet('earlyTermination', $(e.target).prop('checked')); this.debouncedRefresh(); });
@@ -464,6 +754,7 @@ class AppController {
 
     // 主题
     $doc.on('change', DOM.themeSelect, (e) => { this.themeManager.switchTheme($(e.target).val()); });
+    $doc.on('change', DOM.languageSelect, (e) => { this.handleLanguageChange(e); });
   }
 
   handleModeSwitch(e) {
@@ -493,6 +784,24 @@ class AppController {
     this.saveConfig();
   }
 
+  handleGlyphWidthProfileChange(e) {
+    const profile = $(e.target).val();
+    this.setConfigQuiet('glyphWidthProfile', profile);
+    $(DOM.wideCharRegexGroup).toggle(profile === 'custom');
+    this.debouncedRefresh();
+  }
+
+  handleLanguageChange(e) {
+    this.i18nManager.apply($(e.target).val());
+    this.initBoxStylePreview();
+    this.saveConfig();
+    if (!AppState.result) {
+      this.setPlaceholder(this.getIdlePlaceholder());
+    } else {
+      this.displayResult(AppState.result, false);
+    }
+  }
+
   applyGlyphFont() {
     const $preview = $(DOM.artPreview);
     $preview.css('font-family', AppState.config.glyphFont);
@@ -520,13 +829,17 @@ class AppController {
     if (files.length > 0) {
       const file = files[0];
       if (file.type.startsWith('image/')) this.processImageFile(file);
-      else this.toastManager.error('请上传图片文件');
+      else this.toastManager.error(this.i18nManager.t('toast.imageOnly'));
     }
   }
 
   processImageFile(file) {
+    if (!file.type.startsWith('image/')) {
+      this.toastManager.error(this.i18nManager.t('toast.imageOnly'));
+      return;
+    }
     if (file.size > 10 * 1024 * 1024) {
-      this.toastManager.error('图片文件过大，请选择小于10MB的图片');
+      this.toastManager.error(this.i18nManager.t('toast.imageTooLarge'));
       return;
     }
     AppState.imageFile = file;
@@ -537,7 +850,7 @@ class AppController {
       $(DOM.uploadZone).hide();
     };
     reader.readAsDataURL(file);
-    this.toastManager.success('图片已加载');
+    this.toastManager.success(this.i18nManager.t('toast.imageLoaded'));
     this.refreshPreview();
   }
 
@@ -579,6 +892,7 @@ class AppController {
       try {
         const c = JSON.parse(saved);
         Object.assign(AppState.config, c);
+        AppState.config.locale = normalizeUILocale(AppState.config.locale);
         this.syncUIFromConfig();
       }       catch (e) { /* 陈旧配置忽略 */ }
     }
@@ -603,6 +917,9 @@ class AppController {
     $(DOM.earlyTermination).prop('checked', c.earlyTermination);
     $(DOM.fontReduce).val(c.fontReduce);
     $(DOM.charSpace).val(c.charSpace);
+    $(DOM.glyphWidthProfile).val(c.glyphWidthProfile || 'default');
+    $(DOM.wideCharRegex).val(c.wideCharRegex || '');
+    $(DOM.wideCharRegexGroup).toggle((c.glyphWidthProfile || 'default') === 'custom');
     $(DOM.boxEnabled).prop('checked', c.boxEnabled);
     $(DOM.boxConfigBody).toggle(c.boxEnabled);
     $(DOM.boxStyle).val(c.boxStyle);
@@ -615,6 +932,7 @@ class AppController {
       document.documentElement.setAttribute('data-theme', c.themeName);
     }
     $(DOM.themeSelect).val(c.themeName || 'default');
+    $(DOM.languageSelect).val(c.locale || detectCoreLocale());
   }
 
   saveConfig() {
@@ -624,8 +942,8 @@ class AppController {
   // 预览
 
   async refreshPreview() {
-    if (AppState.mode === 'image' && !AppState.imageFile) { this.setPlaceholder('请上传图片'); return; }
-    if (AppState.mode === 'text' && !AppState.textContent.trim()) { this.setPlaceholder('请输入文字'); return; }
+    if (AppState.mode === 'image' && !AppState.imageFile) { this.setPlaceholder(this.i18nManager.t('preview.uploadImage')); return; }
+    if (AppState.mode === 'text' && !AppState.textContent.trim()) { this.setPlaceholder(this.i18nManager.t('preview.enterText')); return; }
 
     const validation = this.validateParams();
     if (!validation.valid) {
@@ -642,7 +960,7 @@ class AppController {
     const signal = this._abortController.signal;
 
     this.showLoading(true);
-    $(DOM.previewInfo).text('正在生成...');
+    $(DOM.previewInfo).text(this.i18nManager.t('preview.generating'));
 
     try {
       const result = await this.artGenerator.generate();
@@ -651,12 +969,12 @@ class AppController {
         AppState.result = result;
         this.displayResult(result);
       } else {
-        this.setPlaceholder('预览区域');
+        this.setPlaceholder(this.i18nManager.t('preview.placeholder'));
       }
     } catch (error) {
       if (signal.aborted) return;
-      this.toastManager.error('生成失败: ' + error.message);
-      this.setPlaceholder('生成失败');
+      this.toastManager.error(this.i18nManager.t('toast.generateFailed', { message: error.message }));
+      this.setPlaceholder(this.i18nManager.t('preview.failed'));
     } finally {
       if (!signal.aborted) {
         this.showLoading(false);
@@ -664,18 +982,28 @@ class AppController {
     }
   }
 
-  displayResult(result) {
+  displayResult(result, showToast = true) {
     $(DOM.artPreview).text(result.content);
-    $(DOM.previewInfo).text('就绪');
-    $(DOM.metaInfo).text(`宽度: ${result.cols} 高度: ${result.rows} 耗时: ${result.duration}ms`);
-    this.toastManager.success('字符画生成完成');
+    $(DOM.previewInfo).text(this.i18nManager.t('preview.ready'));
+    $(DOM.metaInfo).text(this.i18nManager.t('preview.meta.ready', {
+      cols: result.cols,
+      rows: result.rows,
+      duration: result.duration,
+    }));
+    if (showToast) this.toastManager.success(this.i18nManager.t('toast.generateDone'));
   }
 
   setPlaceholder(text) {
-    $(DOM.artPreview).html(`<code class="preview-placeholder">${text}</code>`);
-    $(DOM.previewInfo).text('等待输入');
-    $(DOM.metaInfo).text('宽度: -- 高度: -- 耗时: --ms');
+    $(DOM.artPreview).empty().append($('<code>').addClass('preview-placeholder').text(text));
+    $(DOM.previewInfo).text(this.i18nManager.t('preview.waiting'));
+    $(DOM.metaInfo).text(this.i18nManager.t('preview.meta.empty'));
     AppState.result = null;
+  }
+
+  getIdlePlaceholder() {
+    if (AppState.mode === 'image' && !AppState.imageFile) return this.i18nManager.t('preview.uploadImage');
+    if (AppState.mode === 'text' && !AppState.textContent.trim()) return this.i18nManager.t('preview.enterText');
+    return this.i18nManager.t('preview.placeholder');
   }
 
   // 参数校验
@@ -685,13 +1013,13 @@ class AppController {
     const m = parseInt(cfg.matrixSize);
     const r = parseFloat(cfg.ratio);
 
-    if (isNaN(h) || h < 1) return { valid: false, message: '高度必须大于0' };
-    if (cfg.width && (isNaN(parseInt(cfg.width)) || parseInt(cfg.width) < 1)) return { valid: false, message: '宽度必须大于0' };
-    if (isNaN(m) || m < 2 || m > 20) return { valid: false, message: '矩阵大小必须在2-20之间' };
-    if (isNaN(r) || r < 1.0 || r > 3.0) return { valid: false, message: '宽高比必须在1.0-3.0之间' };
+    if (isNaN(h) || h < 1) return { valid: false, message: this.i18nManager.t('validate.height') };
+    if (cfg.width && (isNaN(parseInt(cfg.width)) || parseInt(cfg.width) < 1)) return { valid: false, message: this.i18nManager.t('validate.width') };
+    if (isNaN(m) || m < 2 || m > 20) return { valid: false, message: this.i18nManager.t('validate.matrixSize') };
+    if (isNaN(r) || r < 1.0 || r > 3.0) return { valid: false, message: this.i18nManager.t('validate.ratio') };
 
     const wr = parseFloat(cfg.wideCharRatio);
-    if (isNaN(wr) || wr <= 0 || wr > 10) return { valid: false, message: '宽字符比例必须在0-10之间' };
+    if (isNaN(wr) || wr <= 0 || wr > 10) return { valid: false, message: this.i18nManager.t('validate.wideCharRatio') };
 
     return { valid: true };
   }
@@ -699,18 +1027,18 @@ class AppController {
   // 导出
 
   exportTxt() {
-    if (!AppState.result) { this.toastManager.warning('请先生成字符画'); return; }
+    if (!AppState.result) { this.toastManager.warning(this.i18nManager.t('toast.exportFirst')); return; }
     const content = this.getExportContent();
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     this.downloadBlob(blob, 'unicode-art.txt');
-    this.toastManager.success('已导出为TXT');
+    this.toastManager.success(this.i18nManager.t('toast.exportTxt'));
   }
 
   exportHtml() {
-    if (!AppState.result) { this.toastManager.warning('请先生成字符画'); return; }
+    if (!AppState.result) { this.toastManager.warning(this.i18nManager.t('toast.exportFirst')); return; }
     const content = this.getExportContent();
     const glyphFont = AppState.config.glyphFont;
-    const html = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n'
+    const html = '<!DOCTYPE html>\n<html lang="' + AppState.config.locale + '">\n<head>\n'
       + '<meta charset="UTF-8">\n'
       + '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
       + '<title>Unicode Art - UnicodeArtJs</title>\n'
@@ -751,11 +1079,11 @@ class AppController {
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     this.downloadBlob(blob, 'unicode-art.html');
-    this.toastManager.success('已导出为HTML');
+    this.toastManager.success(this.i18nManager.t('toast.exportHtml'));
   }
 
   async exportPng() {
-    if (!AppState.result) { this.toastManager.warning('请先生成字符画'); return; }
+    if (!AppState.result) { this.toastManager.warning(this.i18nManager.t('toast.exportFirst')); return; }
 
     try {
       const content = this.getExportContent();
@@ -770,7 +1098,7 @@ class AppController {
       // 用临时 canvas 逐行测宽
       const measureCanvas = document.createElement('canvas');
       const measureCtx = measureCanvas.getContext('2d');
-      if (!measureCtx) { this.toastManager.error('浏览器不支持Canvas'); return; }
+      if (!measureCtx) { this.toastManager.error(this.i18nManager.t('toast.exportPngFailed')); return; }
       measureCtx.font = fontSize + 'px ' + glyphFont;
 
       let maxWidth = 0;
@@ -778,11 +1106,12 @@ class AppController {
       lineWidths.forEach(function(w) { if (w > maxWidth) maxWidth = w; });
 
       const canvas = document.createElement('canvas');
+      canvas.className = 'art-export-canvas';
       canvas.width = Math.ceil(maxWidth + padding * 2);
       canvas.height = Math.ceil(lineCount * lineHeight + padding * 2);
 
       const ctx = canvas.getContext('2d');
-      if (!ctx) { this.toastManager.error('浏览器不支持Canvas'); return; }
+      if (!ctx) { this.toastManager.error(this.i18nManager.t('toast.exportPngFailed')); return; }
 
       // 白底
       ctx.fillStyle = '#ffffff';
@@ -800,22 +1129,22 @@ class AppController {
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       if (blob) {
         this.downloadBlob(blob, 'unicode-art.png');
-        this.toastManager.success('已导出为PNG');
+        this.toastManager.success(this.i18nManager.t('toast.exportPng'));
       } else {
-        this.toastManager.error('PNG导出失败');
+        this.toastManager.error(this.i18nManager.t('toast.exportPngFailed'));
       }
     } catch (error) {
       console.error('PNG导出失败:', error);
-      this.toastManager.error('PNG导出失败: ' + error.message);
+      this.toastManager.error(this.i18nManager.t('toast.generateFailed', { message: error.message }));
     }
   }
 
   async copyToClipboard() {
-    if (!AppState.result) { this.toastManager.warning('请先生成字符画'); return; }
+    if (!AppState.result) { this.toastManager.warning(this.i18nManager.t('toast.exportFirst')); return; }
     try {
       const content = this.getExportContent();
       await navigator.clipboard.writeText(content);
-      this.toastManager.success('已复制到剪贴板');
+      this.toastManager.success(this.i18nManager.t('toast.copyDone'));
     } catch (_) {
       // 降级: 创建临时textarea
       try {
@@ -827,9 +1156,9 @@ class AppController {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        this.toastManager.success('已复制到剪贴板');
+        this.toastManager.success(this.i18nManager.t('toast.copyDone'));
       } catch (_2) {
-        this.toastManager.error('复制失败，请手动选择文本复制');
+        this.toastManager.error(this.i18nManager.t('toast.copyFailed'));
       }
     }
   }

@@ -156,22 +156,6 @@
   --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* ========== 基础样式 ==========
-  --bg-secondary: #ffff99;
-  --bg-tertiary: #cccccc;
-  --bg-card: #ffffff;
-  --bg-input: #ffffff;
-  --bg-preview: #ffffff;
-
-  --text-primary: #000000;
-  --text-secondary: #000000;
-  --text-muted: #333333;
-  --text-on-primary: #ffffff;
-
-  --border-color: #000000;
-  --border-radius: 0;
-}
-
 /* ========== 基础样式 ========== */
 
 html, body {
@@ -229,14 +213,22 @@ a:hover { text-decoration: underline; }
   gap: var(--spacing-xs);
 }
 
-.theme-label {
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.theme-label,
+.language-label {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-secondary);
   white-space: nowrap;
 }
 
-.theme-dropdown {
+.theme-dropdown,
+.language-dropdown {
   padding: 4px 8px;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -250,11 +242,13 @@ a:hover { text-decoration: underline; }
   min-width: 120px;
 }
 
-.theme-dropdown:focus {
+.theme-dropdown:focus,
+.language-dropdown:focus {
   border-color: var(--color-primary);
 }
 
-.theme-dropdown option {
+.theme-dropdown option,
+.language-dropdown option {
   font-size: 0.8rem;
 }
 
@@ -483,6 +477,15 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
 }
 
+.upload-zone:focus-visible,
+.mode-btn:focus-visible,
+.btn:focus-visible,
+.btn-icon:focus-visible,
+.nav-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .checkbox-label {
   display: flex;
   flex-direction: row;
@@ -522,6 +525,19 @@ details.config-details summary:hover {
   flex-direction: column;
   gap: var(--spacing-sm);
   padding-top: var(--spacing-sm);
+}
+
+.field-help {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.experimental-field {
+  padding: var(--spacing-xs);
+  border-left: 3px solid var(--color-warning);
+  background: rgba(255, 193, 7, 0.08);
 }
 
 /* ========== 裱框设置 ========== */
@@ -785,8 +801,10 @@ details.config-details summary:hover {
   .mode-switcher { padding: var(--spacing-sm); gap: 4px; }
   .mode-btn { padding: 8px 10px; }
 
-  .theme-label { display: none; }
-  .theme-dropdown { min-width: 80px; font-size: 0.75rem; }
+  .theme-label,
+  .language-label { display: none; }
+  .theme-dropdown,
+  .language-dropdown { min-width: 80px; font-size: 0.75rem; }
 
   .card { padding: var(--spacing-sm); }
   .card-title { font-size: 0.85rem; }

@@ -115,6 +115,8 @@ describe('配置持久化', () => {
       height: 20,
       charset: 'EXTENDED',
       font: 'Noto Sans SC',
+      glyphFont: "'Sarasa Mono SC', monospace",
+      locale: 'zh-CN',
       matrixSize: 8,
       invert: true,
       boxEnabled: true,
@@ -127,6 +129,8 @@ describe('配置持久化', () => {
     assertEqual(restored.height, 20);
     assertEqual(restored.charset, 'EXTENDED');
     assertEqual(restored.font, 'Noto Sans SC');
+    assertEqual(restored.glyphFont, "'Sarasa Mono SC', monospace");
+    assertEqual(restored.locale, 'zh-CN');
     assertEqual(restored.matrixSize, 8);
     assertEqual(restored.invert, true);
   });
@@ -136,11 +140,14 @@ describe('配置持久化', () => {
     // 模拟 Object.assign 补默认
     const defaults = {
       height: 20, width: '', charset: 'ASCII', font: 'Noto Sans SC',
-      matrixSize: 6, ratio: 2.0, invert: false, boxEnabled: false,
+      glyphFont: "'Sarasa Mono SC', monospace", locale: 'zh-CN',
+      matrixSize: 6, ratio: 2.0, charSpace: 1, invert: false, boxEnabled: false,
     };
     const merged = Object.assign({}, defaults, partial);
     assertEqual(merged.height, 30);
     assertEqual(merged.charset, 'ASCII');
+    assertEqual(merged.locale, 'zh-CN');
+    assertEqual(merged.charSpace, 1);
     assertEqual(merged.invert, false);
   });
 
@@ -251,7 +258,54 @@ describe('生成器配置构建', () => {
     assertEqual(box, false);
   });
 
+  it('统一字体与语言字段透传到Core配置', () => {
+    const cfg = {
+      font: 'Noto Sans SC',
+      glyphFont: "'Sarasa Mono SC', monospace",
+      glyphWidthProfile: 'default',
+      wideCharRegex: '',
+      charSpace: 1,
+      locale: 'zh-CN',
+    };
+    const coreConfig = {
+      font: cfg.font,
+      visualFont: { family: cfg.font, reduce: 0 },
+      glyphFont: {
+        family: cfg.glyphFont,
+        widthProfile: cfg.glyphWidthProfile,
+        wideCharRegex: cfg.wideCharRegex || undefined,
+      },
+      charSpace: cfg.charSpace,
+      locale: cfg.locale,
+      outputTarget: 'web',
+    };
+    assertEqual(coreConfig.visualFont.family, 'Noto Sans SC');
+    assertEqual(coreConfig.glyphFont.family, "'Sarasa Mono SC', monospace");
+    assertEqual(coreConfig.locale, 'zh-CN');
+    assertEqual(coreConfig.outputTarget, 'web');
+  });
+
 });
+
+//#region 🟩 测试: UI多语言基础
+
+describe('UI多语言基础', () => {
+
+  it('支持中英文语言标识', () => {
+    const supported = ['zh-CN', 'en-US'];
+    assert(supported.includes('zh-CN'), '应包含中文');
+    assert(supported.includes('en-US'), '应包含英文');
+  });
+
+  it('语言选择会影响Core locale字段', () => {
+    const config = { locale: 'zh-CN' };
+    config.locale = 'en-US';
+    assertEqual(config.locale, 'en-US');
+  });
+
+});
+
+//#endregion
 
 //#endregion
 

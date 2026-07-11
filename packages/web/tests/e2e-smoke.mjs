@@ -124,6 +124,16 @@ async function main() {
       await page.waitForSelector('#themeSelect', { timeout: 5000 });
     });
 
+    await test('language selector switches major UI text', async () => {
+      await page.waitForSelector('#languageSelect', { timeout: 5000 });
+      await page.selectOption('#languageSelect', 'en-US');
+      await page.waitForFunction(() => document.documentElement.lang === 'en-US');
+      const englishLabel = await page.textContent('.mode-btn[data-mode="image"] .mode-text');
+      if (!englishLabel.includes('Image to Art')) throw new Error('English UI label not applied');
+      await page.selectOption('#languageSelect', 'zh-CN');
+      await page.waitForFunction(() => document.documentElement.lang === 'zh-CN');
+    });
+
     await test('preview exists', async () => {
       await page.waitForSelector('#artPreview', { timeout: 5000 });
     });
@@ -154,7 +164,9 @@ async function main() {
       await page.fill('#textInput', 'UnicodeArtJs');
       await page.waitForFunction(() => {
         const text = document.querySelector('#artPreview')?.textContent || '';
-        return text.trim().length > 0 && !text.includes('请输入') && !text.includes('预览区域');
+        return text.trim().length > 40
+          && text.split('\n').length > 2
+          && !/请输入|Please enter|预览区域|preview/i.test(text);
       }, { timeout: 10000 });
     });
 
@@ -182,6 +194,26 @@ async function main() {
     await test('glyph font selector can be changed', async () => {
       await page.selectOption('#glyphFont', '\'Sarasa Mono SC\', \'Sarasa Term SC\', monospace');
       await page.waitForTimeout(100);
+    });
+
+    await test('char spacing and glyph width controls exist', async () => {
+      await page.locator('details.config-details').evaluate((element) => { element.open = true; });
+      await page.fill('#charSpace', '2');
+      const charSpace = await page.inputValue('#charSpace');
+      if (charSpace !== '2') throw new Error('Char spacing not updated');
+
+      await page.selectOption('#glyphWidthProfile', 'custom');
+      const regexVisible = await page.isVisible('#wideCharRegexGroup');
+      if (!regexVisible) throw new Error('Wide char regex field not shown');
+      await page.fill('#wideCharRegex', '[\\u4e00-\\u9fff]');
+    });
+
+    await test('upload zone is keyboard accessible', async () => {
+      const role = await page.getAttribute('#uploadZone', 'role');
+      const tabindex = await page.getAttribute('#uploadZone', 'tabindex');
+      if (role !== 'button' || tabindex !== '0') {
+        throw new Error('Upload zone is not exposed as a keyboard button');
+      }
     });
 
     await test('switches to dark theme', async () => {

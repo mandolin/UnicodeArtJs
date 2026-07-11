@@ -1,125 +1,82 @@
-# @unicode-art/web
+# UnicodeArtJs Web
 
-> UnicodeArtJs Web Application - 浏览器端的 Unicode 字符画生成工具
+UnicodeArtJs Web 是一个浏览器端字符画工具站，可以把图片或文字转换成 Unicode 字符画，并提供预览、裱框、复制和导出功能。
 
-本 Web 应用基于 MIT 许可的 `unicode-art-js/browser` 独立实现构建，用于在浏览器中完成图片和文字到 Unicode 字符画的转换。项目功能目标参考 UnicodeArt 的公开行为和使用体验，但不以复制 GPL 源码或逐行翻译为实现方式。
+在线体验：<https://mandolin.github.io/UnicodeArtJs/>
 
-## 快速开始
+## 功能
 
-```bash
-# 安装依赖
-npm install
+- 图片转字符画，支持浏览器可解码的常见图片格式。
+- 文字 Banner，支持中文等双宽字符场景。
+- 自定义字符集、视觉字体、字素字体、矩阵大小、宽高比、反色和行尾裁剪。
+- 裱框、标题、留白和阴影。
+- 中英文界面切换，并将语言同步给 Core 的 `locale`。
+- TXT、HTML、PNG 导出和剪贴板复制。
+- 亮色、暗色、高对比度、Solarized Light、Nord 主题。
 
-# 开发模式
-npm run dev
+## 本地运行
 
-# 构建生产版本
-npm run build
-
-# 预览构建结果
-npm run preview
-```
-
-## 功能特性
-
-- 🖼️ **图片转字符画** - 上传图片转换为Unicode字符画
-- 📝 **文字Banner** - 输入文字生成艺术字
-- 📦 **裱框功能** - 为字符画添加装饰边框（圆角/双线/ASCII等）
-- 🎨 **5套主题** - 支持亮色/暗黑/高对比度/Solarized/Nord
-- 📤 **导出** - TXT/HTML/PNG/复制到剪贴板
-- 🌐 **语言基础设施** - 会将浏览器语言映射为 Core `locale`，为后续完整 UI 多语言做准备
-- 🔤 **统一配置模型** - 区分视觉字体与字素字体，并按 Core 新配置契约传参
-
-## 技术栈
-
-| 项目 | 选择 |
-|------|------|
-| 构建工具 | Vite 5 |
-| UI框架 | Vanilla JavaScript + jQuery 3 |
-| 样式 | 全量自写CSS（无外部依赖） |
-| Core库 | unicode-art-js (browser入口) |
-
-## 项目结构
-
-```
-packages/web/
-├── src/
-│   ├── main.js              # 应用主入口
-│   └── styles/
-│       └── main.css          # 主样式表 (含5套主题)
-├── tests/
-│   ├── unit.test.js          # 单元测试
-│   └── e2e-smoke.mjs         # E2E冒烟测试 (Playwright)
-├── docs/
-│   └── user-guide.md         # 用户指南
-├── index.html                # 入口HTML
-├── package.json              # 项目配置
-├── vite.config.js            # Vite构建配置
-└── README.md                 # 本文件
-```
-
-## 主题
-
-| 主题 | 风格 |
-|------|------|
-| default | 亮色简约 |
-| dark | 深色护眼 |
-| high-contrast | 黑白高对比 |
-| solarized-light | 温暖柔和 |
-| nord | 冷色调极冰 |
-
-## 组件架构
-
-应用的入口类为 `AppController`，职责：
-
-- **ThemeManager**: 主题管理（CSS变量切换）
-- **ToastManager**: 通知管理
-- **CoreAdapter**: Core API封装
-- **ArtGenerator**: 字符画生成（配置构建→调用Core）
-- **AppController**: 全局控制器（事件绑定/状态管理/导出）
-
-### 组件化规范
-
-所有UI组件遵循接口：
-
-```javascript
-class UIComponent {
-  constructor(container, options) {}
-  render() {}        // 渲染
-  bindEvents() {}    // 事件绑定
-  update(state) {}   // 更新状态
-  destroy() {}       // 清理
-}
-```
-
-## 浏览器兼容性
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-- 响应式适配: 宽屏/平板/手机
-
-## 测试
+在仓库根目录安装依赖后运行：
 
 ```bash
-# 单元测试
-npm test
-
-# E2E测试（需要Playwright）
-npx playwright install chromium
-npm run test:e2e
-
-# 完整检查
-npm run check
+npm --workspace packages/web run dev
 ```
+
+常用命令：
+
+```bash
+npm --workspace packages/web run build
+npm --workspace packages/web test
+npm --workspace packages/web run test:e2e
+npm --workspace packages/web run check
+```
+
+检查线上 GitHub Pages：
+
+```bash
+npm --workspace packages/web run test:pages
+```
+
+也可以指定任意部署地址：
+
+```bash
+BASE_URL=https://example.com/UnicodeArtJs/ npm --workspace packages/web run test:e2e
+```
+
+PowerShell：
+
+```powershell
+$env:BASE_URL = 'https://example.com/UnicodeArtJs/'
+npm --workspace packages/web run test:e2e
+Remove-Item Env:BASE_URL
+```
+
+## 二次开发
+
+Web 包使用 Vite 5、Vanilla JavaScript、jQuery 3 和自写 CSS。Core 通过 `unicode-art-js/browser` 入口加载。
+
+页面默认在 GitHub Pages 上优先使用 CDN 版 jQuery；如果 CDN 不可用，`src/main.js` 会动态导入 npm 依赖中的本地 jQuery。二次开发者使用 Vite 打包时，jQuery 会进入正常的 bundler 依赖图。
+
+主要文件：
+
+| 文件 | 说明 |
+| --- | --- |
+| `index.html` | 页面结构、SEO 元信息和无障碍标记。 |
+| `src/main.js` | UI 状态、Core 调用、语言切换、导出逻辑。 |
+| `src/styles/main.css` | 主题、布局、响应式和可访问性样式。 |
+| `tests/unit.test.js` | 轻量单元测试。 |
+| `tests/e2e-smoke.mjs` | Playwright 冒烟测试，可测本地或远端页面。 |
+
+## 字体
+
+`visualFont` 影响输入文字被渲染成中间图像时的形状；`glyphFont` 影响生成后的字符画在预览区、HTML 导出和 PNG 导出中的显示。为了获得稳定对齐效果，建议使用 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro、Liberation Mono 等开源等宽或混合等宽字体。
+
+“字素宽度规则”目前作为实验配置入口提供，后续会继续接入更细的字体宽度 profile 和自定义宽字符正则。
+
+## 浏览器基线
+
+当前以 Chrome 120+ 为主要验证基线。Firefox、Safari、Edge 等现代浏览器通常可用，但字体渲染、Canvas 导出和剪贴板权限可能存在浏览器差异。
 
 ## 许可证
 
-MIT License
-
-## 相关链接
-
-- [Core库](https://github.com/mandolin/UnicodeArtJs/tree/main/packages/core)
-- [CLI工具](https://github.com/mandolin/UnicodeArtJs/tree/main/packages/cli)
-- [主项目仓库](https://github.com/mandolin/UnicodeArtJs)
+MIT License。
