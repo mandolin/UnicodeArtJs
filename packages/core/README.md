@@ -97,6 +97,7 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - `unicode-art-js/browser` exports browser `imageToArt()`, browser `textToArt()`, `browserPlatformAdapter`, `loadBrowserFont`, cache controls, runtime capability checks, and pure conversion APIs for browser projects.
 - `unicode-art-js/pure` exports platform-independent sampling, matching, assembly, box, and `imageDataToArt()` APIs.
 - `validateConfig(config)` validates and fills defaults.
+- `getCoreCapabilities()` returns the current stable / experimental / reserved Core capability boundary for host UIs and documentation.
 - `isWideChar(char)` detects East Asian wide characters.
 - `getPresetChars(type)` returns preset character sets.
 - `t(key, params, locale)` renders built-in Core messages for `zh-CN` / `en-US`.
@@ -108,6 +109,8 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - Stable: Node `textToArt()`, Node `imageToArt()`, pure `imageDataToArt()`, config validation, preset charsets, output assembly, and post/outer `box` rendering.
 - Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, and layout-stage `box` modes such as `lines` / `grid`.
 - Reserved: `charSpace`, `maxParallelTasks`, `visualFont.reduceTop/right/bottom/left`, `glyphFont.widthProfile`, and `glyphFont.wideCharRegex`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
+
+Hosts can read the same boundary from `getCoreCapabilities()` instead of duplicating stability lists in UI code.
 
 Node image backend note: Core still defaults to `sharp` for compatibility. The experimental `napi-rs` backend can be enabled with `setNodeImageBackend('napi-rs')`; its first-batch format target is PNG / JPEG / WebP / BMP. GIF first-frame support and SVG / TIFF paths remain outside the stable default backend contract for now.
 

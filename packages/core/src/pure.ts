@@ -76,6 +76,19 @@ export type {
 } from './i18n';
 
 export type {
+  BrowserEntryCapabilities,
+  BoxCapabilities,
+  CoreCapabilities,
+  CoreCapabilityDescriptor,
+  CoreCapabilityStability,
+  NodeImageBackendCapabilities
+} from './capabilities';
+
+export {
+  getCoreCapabilities
+} from './capabilities';
+
+export type {
   BoxAlign,
   BoxCellOptions,
   BoxChars,
@@ -96,6 +109,14 @@ export type {
   NormalizedBoxTitleOptions,
   SpacingValue
 } from './box/types';
+
+//#endregion
+
+//#region 🟦 Version
+
+export {
+  VERSION
+} from './version';
 
 //#endregion
 

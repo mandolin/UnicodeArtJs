@@ -1,5 +1,6 @@
 import {
   calcDisplayWidth,
+  getCoreCapabilities,
   getPresetChars,
   isWideChar,
   validateConfig,
@@ -186,5 +187,24 @@ describe('public configuration helpers', () => {
     expect(isWideChar('中')).toBe(true);
     expect(calcDisplayWidth('A中')).toBe(3);
     expect(VERSION).toBe(pkg.version);
+  });
+
+  test('getCoreCapabilities exposes stable, experimental and reserved boundaries', () => {
+    const capabilities = getCoreCapabilities();
+
+    expect(capabilities.version).toBe(VERSION);
+    expect(capabilities.stableFeatures.map((feature) => feature.id)).toContain('node.textToArt');
+    expect(capabilities.experimentalFeatures.map((feature) => feature.id)).toContain('node.imageBackend.napi-rs');
+    expect(capabilities.reservedConfig.map((feature) => feature.id)).toContain('config.glyphWidthProfile');
+    expect(capabilities.nodeImageBackends.defaultBackend).toBe('sharp');
+    expect(capabilities.nodeImageBackends.napiRsFirstBatchFormats).toEqual([
+      'png',
+      'jpeg',
+      'jpg',
+      'webp',
+      'bmp'
+    ]);
+    expect(capabilities.browserEntry.supportsAbortSignal).toBe(true);
+    expect(capabilities.box.experimentalModes).toContain('layout:grid');
   });
 });

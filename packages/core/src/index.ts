@@ -157,6 +157,19 @@ export type {
   SupportedLocale
 } from './i18n';
 
+export type {
+  BrowserEntryCapabilities,
+  BoxCapabilities,
+  CoreCapabilities,
+  CoreCapabilityDescriptor,
+  CoreCapabilityStability,
+  NodeImageBackendCapabilities
+} from './capabilities';
+
+export {
+  getCoreCapabilities
+} from './capabilities';
+
 //#endregion
 
 //#region 🟦 常量导出
@@ -1097,7 +1110,7 @@ export function getPresetChars(type: PresetCharset, locale?: string): string {
       return EXTENDED_CHARS;
     case PresetCharset.CHINESE_SIMPLE:
       return CHINESE_SIMPLE_CHARS;
-    default:
+    default: {
       const safeLocale = normalizeLocale(locale);
       throw new UnicodeArtError(
         translateCoreMessage('charset.unsupported', { type }, safeLocale),
@@ -1109,6 +1122,7 @@ export function getPresetChars(type: PresetCharset, locale?: string): string {
           locale: safeLocale
         }
       );
+    }
   }
 }
 
@@ -1134,11 +1148,8 @@ export function calcDisplayWidth(text: string): number {
 
 //#region 🟦 版本信息
 
-/**
- * 🟢 库版本号
- * 
- * @constant {string} VERSION
- */
-export const VERSION = '1.1.2';
+export {
+  VERSION
+} from './version';
 
 //#endregion
