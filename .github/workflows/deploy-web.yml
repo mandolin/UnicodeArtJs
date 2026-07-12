@@ -15,6 +15,9 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/deploy-web.yml'
+      - 'package.json'
+      - 'package-lock.json'
       - 'packages/core/**'
       - 'packages/web/**'
   workflow_dispatch:
