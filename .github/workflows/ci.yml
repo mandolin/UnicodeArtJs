@@ -50,8 +50,30 @@ jobs:
         # 显式使用 Core workspace 的固定 Playwright，避免根目录 npx 隐式下载或解析其他版本。
         run: npm --workspace packages/core exec -- playwright install --with-deps chromium
 
-      - name: Run repository release gate
-        run: npm run release:gate
+      # 保持与本地 release:gate 相同的覆盖范围，但拆分步骤以便远端直接显示失败边界。
+      - name: Check Core
+        run: npm run check:core
+
+      - name: Check CLI
+        run: npm run check:cli
+
+      - name: Check Web
+        run: npm run check:web
+
+      - name: Check VS Code Extension
+        run: npm run check:vscode
+
+      - name: Pack Core
+        run: npm run pack:core
+
+      - name: Pack CLI
+        run: npm run pack:cli
+
+      - name: Package VS Code Extension
+        run: npm run package:vscode
+
+      - name: Verify release metadata and fixtures
+        run: npm run release:verify
 
   native-install:
     name: Native Install (${{ matrix.os }})
@@ -81,5 +103,10 @@ jobs:
       - name: Build Core
         run: npm run build:core
 
-      - name: Test Node consumers
-        run: npm run test:core && npm run test:cli
+      - name: Test Node consumers and native runtimes
+        run: >-
+          npm run typecheck:core &&
+          npm run test:core &&
+          npm --workspace packages/core run test:node-runtime &&
+          npm --workspace packages/core run test:node-package-runtime &&
+          npm run test:cli
