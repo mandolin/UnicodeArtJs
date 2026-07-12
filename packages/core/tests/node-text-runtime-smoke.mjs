@@ -51,6 +51,36 @@ for (let y = 0; y < 72; y++) {
 assert.ok(firstInkRow <= 1, 'Skia baseline placement must not leave a large top band');
 assert.ok(lastInkRow >= 70, 'Skia baseline placement must use the available lower line area');
 
+// 中文注释：测宽与渲染必须使用相同的逐字自动缩放字号；否则居中内容会在 auto
+// 裱框内保留异常大的左侧空白，并在 trimTrailingSpaces 后表现为左右 padding 不对称。
+const boxedResult = await core.textToArt('UnicodeArt 中文测试', {
+  height: 18,
+  heightMode: core.HeightMode.TOTAL,
+  textAlign: core.TextAlign.CENTER,
+  charset: { type: core.PresetCharset.EXTENDED },
+  visualFont: { family: 'Microsoft YaHei', reduce: 0 },
+  trimTrailingSpaces: true,
+  box: { style: 'round', padding: 1, title: 'Skia' }
+});
+const boxedBodyLines = boxedResult.content
+  .split(/\r?\n/)
+  .map((line) => /^│(.*)│$/u.exec(line)?.[1])
+  .filter((line) => line && /\S/u.test(line));
+const densestBoxLine = boxedBodyLines.reduce((best, line) => {
+  const inkCount = line.replace(/\s/gu, '').length;
+  return inkCount > best.replace(/\s/gu, '').length ? line : best;
+});
+const firstContentColumn = densestBoxLine.search(/\S/u);
+const lastContentColumn = densestBoxLine.search(/\s*$/u);
+assert.ok(
+  firstContentColumn <= 8,
+  `Auto box must not retain an oversized left blank band (actual: ${firstContentColumn})`
+);
+assert.ok(
+  densestBoxLine.length - lastContentColumn <= 3,
+  `Auto box must keep right padding near the configured width (actual: ${densestBoxLine.length - lastContentColumn})`
+);
+
 const result = await core.textToArt('Skia', {
   height: 4,
   charset: {

@@ -153,8 +153,18 @@ function resolveFittedTextFontSize(ctx: any, font: string, requestedFontSize: nu
 }
 
 function measureTextVerticalMetrics(ctx: any, sample: string): number {
-  const metrics = ctx.measureText(sample);
-  const height = Math.ceil(metrics.actualBoundingBoxAscent || 0) + Math.ceil(metrics.actualBoundingBoxDescent || 0);
+  let ascent = 0;
+  let descent = 0;
+
+  for (const glyph of Array.from(sample.length > 0 ? sample : ' ')) {
+    // 中文注释：必须与预处理器的逐字绘制、逐字高度度量保持一致，否则测宽阶段
+    // 与实际渲染阶段会得到不同的自动缩小字号，进而错误放大居中画布的左右留白。
+    const metrics = ctx.measureText(glyph);
+    ascent = Math.max(ascent, Math.ceil(metrics.actualBoundingBoxAscent || 0));
+    descent = Math.max(descent, Math.ceil(metrics.actualBoundingBoxDescent || 0));
+  }
+
+  const height = ascent + descent;
   if (height > 0) return height;
   return parseCanvasFontSize(ctx.font);
 }
