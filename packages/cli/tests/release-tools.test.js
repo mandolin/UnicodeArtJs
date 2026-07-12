@@ -43,13 +43,16 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'unicode-art-cli-release-t
 try {
   const tempPackagePath = path.join(tempDir, 'package.json');
   fs.copyFileSync(cliPackagePath, tempPackagePath);
+  const originalDependency = JSON.parse(fs.readFileSync(tempPackagePath, 'utf-8'))
+    .dependencies['unicode-art-js'];
 
   const env = {
     UNICODE_ART_CLI_PACKAGE_JSON: tempPackagePath,
     UNICODE_ART_CORE_PACKAGE_JSON: corePackagePath
   };
 
-  assert.strictEqual(runTool(['status'], env), 'file:../core');
+  // 发布前会将真实 package 切换为 npm 依赖；测试应验证当前状态，而非假定开发态。
+  assert.strictEqual(runTool(['status'], env), originalDependency);
   assert.strictEqual(runTool(['use-npm', '1.2.3'], env), '^1.2.3');
   assert.strictEqual(runTool(['verify-release'], env), 'ok ^1.2.3');
   assert.strictEqual(runTool(['use-local'], env), 'file:../core');
