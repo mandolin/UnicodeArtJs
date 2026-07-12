@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0
+
+First stable Marketplace release.
+
+### Changed
+
+- Upgraded to `unicode-art-js@^1.2.0` with the audited NAPI image and Skia text runtimes.
+- Improved text visual-font alignment for Skia metrics and centered auto-box width calculation.
+- Included Core and extension third-party runtime notices in the VSIX.
+- Moved the extension packaging default from Marketplace pre-release to stable release.
+
+### Verification
+
+- Core, CLI, Web, and extension checks pass through the repository release gate.
+- The isolated VSIX includes the fixed Core candidate and rejects legacy sharp/libvips/node-canvas runtime paths.
+
 ## 0.2.0
 
 VSCode extension pre-release refresh for the T-tea milestone.

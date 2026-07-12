@@ -2,7 +2,7 @@
   "name": "unicode-art-js-vscode",
   "displayName": "UnicodeArtJs",
   "description": "%extension.description%",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "publisher": "mandolin",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -318,8 +318,9 @@
     "core:dep:local": "node scripts/core-dependency.cjs use-local",
     "release:verify": "node scripts/core-dependency.cjs verify-release",
     "inspect:vsix": "node scripts/inspect-vsix.cjs",
-    "package": "npm run compile && node scripts/package-vsix.cjs --pre-release",
-    "package:release": "npm run compile && node scripts/package-vsix.cjs",
+    "package": "npm run compile && node scripts/package-vsix.cjs",
+    "package:pre-release": "npm run compile && node scripts/package-vsix.cjs --pre-release",
+    "package:release": "npm run package",
     "check": "npm run compile && npm test && npm run check:webview"
   },
   "dependencies": {

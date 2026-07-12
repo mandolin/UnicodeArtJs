@@ -23,9 +23,9 @@ npm run release:verify:publish
 | Package | Current version | Publish channel | Core dependency during normal development |
 | --- | --- | --- | --- |
 | `unicode-art-js` | `1.2.0` | npm | root workspace package |
-| `unicode-art-cli` | `1.0.1` | npm | `file:../core` during development; switch to `^1.2.0` for publish |
+| `unicode-art-cli` | `1.0.2` | npm | `file:../core` during development; switch to `^1.2.0` for publish |
 | `@unicode-art/web` | `0.1.0-alpha` | GitHub Pages / source package | `file:../core` |
-| `unicode-art-js-vscode` | `0.2.2` | VSCode Marketplace | `^1.2.0` |
+| `unicode-art-js-vscode` | `0.3.0` | VSCode Marketplace stable channel | `^1.2.0` |
 
 ## What The Gate Checks
 

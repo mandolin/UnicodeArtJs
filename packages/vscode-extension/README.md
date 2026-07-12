@@ -147,13 +147,13 @@ Manual verification before publishing is tracked in [`docs/manual-test-checklist
 After packaging, install the VSIX locally:
 
 ```bash
-code --install-extension .\unicode-art-js-vscode-0.2.2.vsix --force
+code --install-extension .\unicode-art-js-vscode-0.3.0.vsix --force
 ```
 
 For profile-specific testing:
 
 ```bash
-code --profile WebDev --install-extension .\unicode-art-js-vscode-0.2.2.vsix --force
+code --profile WebDev --install-extension .\unicode-art-js-vscode-0.3.0.vsix --force
 ```
 
 Then run `Developer: Reload Window` in that VSCode window.
@@ -166,5 +166,5 @@ Publishing requires a valid VSCode Marketplace publisher and PAT configured for 
 npm run check
 npm run package
 npm run inspect:vsix
-vsce publish --pre-release --packagePath .\unicode-art-js-vscode-0.2.2.vsix
+vsce publish --packagePath .\unicode-art-js-vscode-0.3.0.vsix
 ```

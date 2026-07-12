@@ -7,7 +7,7 @@ Use this checklist before publishing a new VSIX or Marketplace version.
 - [ ] Run `npm run check` in `packages/vscode-extension`.
 - [ ] Run `npm run package`.
 - [ ] Run `npm run inspect:vsix`.
-- [ ] Install locally with `code --profile WebDev --install-extension .\unicode-art-js-vscode-0.2.2.vsix --force`.
+- [ ] Install locally with `code --profile WebDev --install-extension .\unicode-art-js-vscode-0.3.0.vsix --force`.
 - [ ] Run `Developer: Reload Window` in the target VSCode profile.
 - [ ] Open the `UnicodeArtJs` Output Channel.
 
