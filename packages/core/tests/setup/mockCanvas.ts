@@ -55,7 +55,7 @@ function fillText(state: MockCanvasState, text: string): void {
 }
 
 jest.mock(
-  'canvas',
+  '@napi-rs/canvas/node-canvas',
   () => ({
     createCanvas: jest.fn((width: number, height: number) => {
       const state: MockCanvasState = {

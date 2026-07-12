@@ -10,11 +10,9 @@ UnicodeArtJs is an independent TypeScript / JavaScript implementation. Its featu
 npm install unicode-art-js
 ```
 
-For text rendering in Node.js, install the optional `canvas` peer dependency:
-
-```bash
-npm install canvas
-```
+Node text rendering is included through the audited
+`@napi-rs/canvas` Skia runtime. No extra `canvas` / node-canvas installation is
+required.
 
 ## Usage
 
@@ -86,13 +84,18 @@ console.log(capabilities, getBrowserAdapterCacheStats());
 clearBrowserAdapterCache({ glyphs: true, charData: true });
 ```
 
-The browser entry targets Chrome 120+ and does not import `sharp`, `canvas`, or Node filesystem APIs. URL image loading is subject to normal browser CORS rules. Browser APIs include glyph/font caches, cache statistics, runtime capability checks, progress callbacks, cancellation, and large-image limits.
+The browser entry targets Chrome 120+ and does not import `sharp`, Node canvas
+runtime packages, or Node filesystem APIs. URL image loading is subject to
+normal browser CORS rules. Browser APIs include glyph/font caches, cache
+statistics, runtime capability checks, progress callbacks, cancellation, and
+large-image limits.
 
 The browser entry is usable today, but cross-browser pixel-level parity is still treated as experimental. If exact output matching matters, pin the browser/runtime/font combination in your own tests.
 
 ## Main APIs
 
-- `textToArt(text, config)` converts text into Unicode art. Requires `canvas` in Node.js.
+- `textToArt(text, config)` converts text into Unicode art. Node uses the
+  bundled `@napi-rs/canvas` Skia runtime by default.
 - `imageToArt(imagePath, config)` converts an image file into Unicode art. The default Node backend uses `@napi-rs/image`.
 - `unicode-art-js/browser` exports browser `imageToArt()`, browser `textToArt()`, `browserPlatformAdapter`, `loadBrowserFont`, cache controls, runtime capability checks, and pure conversion APIs for browser projects.
 - `unicode-art-js/pure` exports platform-independent sampling, matching, assembly, box, and `imageDataToArt()` APIs.
@@ -112,7 +115,19 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 
 Hosts can read the same boundary from `getCoreCapabilities()` instead of duplicating stability lists in UI code.
 
-Node image backend note: Core no longer installs `sharp` by default. The default `napi-rs` backend targets PNG / JPEG / WebP / BMP. GIF first-frame support and SVG / TIFF paths remain outside the stable default backend contract for now. If you explicitly need the old sharp path, install `sharp` in your application and call `setNodeImageBackend('sharp')`.
+Node runtime note: Core no longer installs `sharp` or node-canvas by default.
+The default image backend targets PNG / JPEG / WebP / BMP; the default text
+backend is `@napi-rs/canvas` (Skia). GIF first-frame support and SVG / TIFF
+paths remain outside the stable default image contract for now. If you
+explicitly need the old sharp path, install `sharp` in your application and call
+`setNodeImageBackend('sharp')`.
+
+Changing a text rasterizer can change anti-aliasing and font metrics. If output
+must be reproducible, pin the Core version, Node runtime, selected visual font,
+and glyph font in your own regression tests. See
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) and the repository
+[runtime component inventory](https://github.com/mandolin/UnicodeArtJs/blob/main/docs/runtime-sbom.md)
+for the native runtime boundary.
 
 ## Configuration
 

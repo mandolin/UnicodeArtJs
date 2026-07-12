@@ -35,7 +35,7 @@
     "lint:core": "npm --workspace packages/core run lint",
     "lint:web": "npm --workspace packages/web run lint",
     "check": "npm run check:core && npm run check:cli && npm run check:web && npm run check:vscode",
-    "check:core": "npm run typecheck:core && npm run build:core && npm run test:core && npm run test:core:browser",
+    "check:core": "npm run typecheck:core && npm run build:core && npm run test:core && npm --workspace packages/core run test:node-runtime && npm run test:core:browser",
     "check:cli": "npm run test:cli",
     "check:web": "npm --workspace packages/web run check",
     "check:vscode": "npm --workspace packages/vscode-extension run check",

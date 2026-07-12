@@ -2,8 +2,9 @@
 /**
  * VSIX 内容检查。
  *
- * 目标是防止默认扩展包携带 sharp/libvips 运行时依赖，同时确认新的默认
- * Node 图片后端 `@napi-rs/image` 已进入包内。
+ * 目标是防止默认扩展包携带 sharp/libvips 或 node-canvas/Cairo 运行时依赖，
+ * 同时确认默认 Node 图片后端 `@napi-rs/image` 与默认文字渲染后端
+ * `@napi-rs/canvas` 均已进入包内并带有第三方通知。
  */
 
 const fs = require('node:fs');
@@ -25,28 +26,50 @@ const forbiddenPatterns = [
   /(^|\/)node_modules\/sharp\//,
   /(^|\/)node_modules\/@img\/sharp/i,
   /(^|\/)node_modules\/@img\/sharp-libvips/i,
+  /(^|\/)node_modules\/canvas\//i,
+  /(^|\/)(?:lib)?cairo(?:[._-]|\/|$)/i,
+  /(^|\/)pango(?:[._-]|\/|$)/i,
   /libvips/i
 ];
 const forbidden = entries.filter((entry) => forbiddenPatterns.some((pattern) => pattern.test(entry)));
 
 if (forbidden.length > 0) {
-  console.error('Forbidden sharp/libvips files found in VSIX:');
+  console.error('Forbidden legacy native runtime files found in VSIX:');
   forbidden.slice(0, 50).forEach((entry) => console.error(`  - ${entry}`));
   process.exit(1);
 }
 
 const hasCore = entries.some((entry) => /(^|\/)node_modules\/unicode-art-js\//.test(entry));
 const hasNapiImage = entries.some((entry) => /(^|\/)node_modules\/@napi-rs\/image\//.test(entry));
-const hasNapiNative = entries.some((entry) => /(^|\/)node_modules\/@napi-rs\/image-[^/]+\//.test(entry));
+const hasNapiImageNative = entries.some((entry) => /(^|\/)node_modules\/@napi-rs\/image-[^/]+\//.test(entry));
+const hasNapiCanvas = entries.some((entry) => /(^|\/)node_modules\/@napi-rs\/canvas\//.test(entry));
+const hasNapiCanvasNative = entries.some((entry) => /(^|\/)node_modules\/@napi-rs\/canvas-[^/]+\//.test(entry));
 
 if (!hasCore) {
   console.error('unicode-art-js was not found in VSIX node_modules.');
   process.exit(1);
 }
 
-if (!hasNapiImage && !hasNapiNative) {
+if (!hasNapiImage || !hasNapiImageNative) {
   console.error('@napi-rs/image was not found in VSIX node_modules.');
   process.exit(1);
+}
+
+if (!hasNapiCanvas || !hasNapiCanvasNative) {
+  console.error('@napi-rs/canvas was not found in VSIX node_modules.');
+  process.exit(1);
+}
+
+const requiredNotices = [
+  'extension/THIRD_PARTY_NOTICES.md',
+  'extension/node_modules/unicode-art-js/THIRD_PARTY_NOTICES.md'
+];
+
+for (const noticePath of requiredNotices) {
+  if (!entries.includes(noticePath)) {
+    console.error(`Required third-party notice was not found in VSIX: ${noticePath}`);
+    process.exit(1);
+  }
 }
 
 const packageEntry = zipEntries.find((entry) => entry.name === 'extension/package.json');
@@ -58,7 +81,25 @@ if (!coreSpec || coreSpec.startsWith('file:')) {
   process.exit(1);
 }
 
+assertPackagedDependencyVersion('extension/node_modules/@napi-rs/image/package.json', '@napi-rs/image', '1.14.0');
+assertPackagedDependencyVersion('extension/node_modules/@napi-rs/canvas/package.json', '@napi-rs/canvas', '1.0.2');
+
 console.log(`VSIX OK: ${path.basename(vsixPath)} (${entries.length} files)`);
+
+function assertPackagedDependencyVersion(entryName, packageName, expectedVersion) {
+  const entry = zipEntries.find((candidate) => candidate.name === entryName);
+
+  if (!entry) {
+    console.error(`${packageName} package.json was not found in VSIX.`);
+    process.exit(1);
+  }
+
+  const metadata = JSON.parse(readZipTextEntry(vsixBuffer, entry));
+  if (metadata.version !== expectedVersion || metadata.license !== 'MIT') {
+    console.error(`${packageName} must be ${expectedVersion} with MIT metadata, got ${metadata.version || '<missing>'} / ${metadata.license || '<missing>'}.`);
+    process.exit(1);
+  }
+}
 
 function findLatestVsix(directory) {
   const candidates = fs.readdirSync(directory)

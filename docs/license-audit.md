@@ -16,6 +16,22 @@ UnicodeArtJs 本身采用 [MIT License](../LICENSE)。项目优先选择 MIT、A
 
 ## 当前需要持续复核的依赖
 
+### 默认 Node 原生运行时
+
+Core 当前默认使用两个固定版本的 NAPI 原生运行时：
+
+- `@napi-rs/image@1.14.0`：PNG、JPEG、WebP、BMP 的读取与调整。
+- `@napi-rs/canvas@1.0.2`：通过 `@napi-rs/canvas/node-canvas` 兼容入口完成
+  Node 文本栅格化，底层为 Skia。
+
+两个 npm 主包与当前 Windows 平台包均声明 MIT。Canvas 平台二进制的已知文字
+栈包含 Skia（BSD-3-Clause）、FreeType（FTL）、HarfBuzz（MIT-style）和 ICU
+数据（Unicode-3.0），因此 Core 和 VSIX 都随包提供第三方通知。
+
+完整的固定版本、证据边界与再审计规则见
+[`runtime-sbom.md`](runtime-sbom.md)。这里的结论仅覆盖当前默认路径和已声明
+的稳定格式，不替代未来平台包、原生包升级或扩展格式的审计。
+
 ### sharp 与 libvips
 
 `sharp` 源码采用 Apache-2.0，但 npm 在常见平台上会安装预构建的 sharp/libvips 二进制。例如 Windows x64 包 `@img/sharp-win32-x64` 曾声明为 `Apache-2.0 AND LGPL-3.0-or-later`。
@@ -28,6 +44,20 @@ UnicodeArtJs 本身采用 [MIT License](../LICENSE)。项目优先选择 MIT、A
 - 发布前继续执行 npm pack、VSIX 内容检查和 `sharp` / `@img/sharp-*` / `libvips` 搜索。
 
 如果未来重新分发 sharp/libvips，需要另行补齐 NOTICE、可替换性和平台二进制许可证审查，不得沿用当前默认路径结论。
+
+### node-canvas / Cairo
+
+`node-canvas` 是旧 Node 文本渲染路径，底层依赖 Cairo/Pango。即使其 npm 顶层
+许可可接受，也不满足本项目对默认原生链的严格宽松许可证审计要求。
+
+- Core 不再在 `dependencies`、`optionalDependencies` 或 peer dependency 中
+  声明 `canvas`。
+- 默认文字渲染固定为 `@napi-rs/canvas@1.0.2` 的 Skia 路径。
+- 发布门禁会拒绝 `node_modules/canvas`、sharp 与 libvips 进入 lockfile 或 VSIX。
+
+Skia 与 Cairo 的抗锯齿、字距和纵向度量并非逐像素相同；这属于受控的渲染后端
+变更。发布回归以功能、边界不裁切、Core/CLI 一致性和固定后端输出为准，而不是
+要求与旧 Cairo 文本逐字节一致。
 
 ### 发布工具
 

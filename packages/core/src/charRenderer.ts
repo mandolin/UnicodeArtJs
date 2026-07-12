@@ -13,19 +13,19 @@
  * 
  * 🔶 性能考虑
  * - 预计算字符集避免重复渲染
- * - 使用canvas缓存渲染结果
+ * - 使用 Skia Canvas 缓存渲染结果
  * - 批量处理减少上下文切换
  * - 灰度化后缓存到内存
  * 
  * 🔶 算法说明
- * - 使用canvas绘制字符到位图
+ * - 使用 Canvas 兼容接口绘制字符到位图
  * - 提取像素数据并转换为灰度
  * - 归一化到[0, 1]范围
  * - 支持宽字符检测（中文、日文等）
  * 
  * @module charRenderer
  * @since 0.1.0
- * @see {@link https://github.com/Automattic/node-canvas}
+ * @see {@link https://github.com/Brooooooklyn/canvas}
  * ============================================================================
  */
 
@@ -37,16 +37,17 @@ import { rgbaToGrayscale } from './preprocessor';
 import { resizeInterpolate } from './sampler';
 import { isWideChar as detectWideChar } from './utils/wideCharDetector';
 import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants';
+import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './platform/node/nodeTextCanvas';
 
 //#region 🟩 字符渲染
 
 /**
  * 🟢 渲染单个字符为灰度矩阵
  * 
- * 🔹 使用canvas将字符绘制到指定尺寸的位图，然后转换为归一化的灰度矩阵。
+ * 🔹 使用默认 Skia Canvas 将字符绘制到指定尺寸的位图，然后转换为归一化的灰度矩阵。
  * 🔹 这是字符匹配的基础步骤。
  * 
- * ⚠️ **注意**: 此功能需要canvas依赖。
+ * ⚠️ **注意**: 此功能需要默认的 `@napi-rs/canvas` 运行时。
  * 
  * @param char - 要渲染的字符
  * @param matrixSize - 目标矩阵尺寸（如6×6）
@@ -62,7 +63,7 @@ import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants
  * console.log(matrix[0]); // 0.0-1.0之间的值
  * ```
  * 
- * @throws {UnicodeArtError} 当canvas未安装或渲染失败时抛出
+ * @throws {UnicodeArtError} 当 Canvas 运行时未安装或渲染失败时抛出
  * 
  * @remarks
  * - 背景为白色(1.0)，文字为黑色(0.0)
@@ -87,9 +88,7 @@ export async function renderCharToMatrix(
   ratio: number = 2.0
 ): Promise<Float32Array> {
   try {
-    // 🔹 动态导入canvas（可选依赖）
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createCanvas } = require('canvas');
+    const { createCanvas } = getNodeTextCanvas();
     
     // 🔹 判断是否为宽字符
     const wideChar = detectWideChar(char);
@@ -127,11 +126,11 @@ export async function renderCharToMatrix(
     
     return resizeGrayscaleToNormalized(grayData, canvasWidth, canvasHeight, targetWidth, matrixSize, interpolation);
   } catch (error: any) {
-    if (error.code === 'MODULE_NOT_FOUND' && error.message.includes('canvas')) {
+    if (isNodeTextCanvasUnavailable(error)) {
       throw new UnicodeArtError(
-        '字符渲染需要canvas依赖，请运行: npm install canvas',
+        '字符渲染需要 @napi-rs/canvas，请确认 Core 依赖已正确安装',
         ErrorCode.DEPENDENCY_MISSING,
-        { dependency: 'canvas' }
+        { dependency: '@napi-rs/canvas' }
       );
     }
     
@@ -310,7 +309,7 @@ export async function precomputeCharData(
  * 🔹 支持.ttf、.otf格式。
  * 
  * @param fontPath - 字体文件路径或字体名称
- * @returns Promise<string> 可用于canvas的字体标识符
+ * @returns Promise<string> 可用于默认 Canvas 运行时的字体标识符
  * 
  * @example
  * ```typescript
@@ -322,7 +321,7 @@ export async function precomputeCharData(
  * 
  * @remarks
  * - 如果是系统字体名称，直接返回
- * - 如果是文件路径，注册到canvas字体管理器
+ * - 如果是文件路径，注册到默认 Canvas 字体管理器
  * - 支持相对路径和绝对路径
  * 
  * @todo 实现字体缓存机制
@@ -330,9 +329,7 @@ export async function precomputeCharData(
  */
 export async function loadFont(fontPath: string, fontStyle: string = 'regular'): Promise<string> {
   try {
-    // 🔹 动态导入canvas
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { registerFont } = require('canvas');
+    const { registerFont } = getNodeTextCanvas();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const fs = require('fs') as typeof import('fs');
     
@@ -363,11 +360,11 @@ export async function loadFont(fontPath: string, fontStyle: string = 'regular'):
     
     return fontName;
   } catch (error: any) {
-    if (error.code === 'MODULE_NOT_FOUND' && error.message.includes('canvas')) {
+    if (isNodeTextCanvasUnavailable(error)) {
       throw new UnicodeArtError(
-        '字体加载需要canvas依赖，请运行: npm install canvas',
+        '字体加载需要 @napi-rs/canvas，请确认 Core 依赖已正确安装',
         ErrorCode.DEPENDENCY_MISSING,
-        { dependency: 'canvas' }
+        { dependency: '@napi-rs/canvas' }
       );
     }
     

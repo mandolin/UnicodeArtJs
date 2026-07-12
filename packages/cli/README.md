@@ -283,13 +283,11 @@ unicode-art image photo.jpg --format ansi
 
 ## 🔧 故障排除
 
-### canvas未安装
+### 文本渲染运行时加载失败
 
-如果遇到文本渲染错误，需要安装canvas：
-
-```bash
-npm install canvas
-```
+CLI 随 `unicode-art-js` 使用 `@napi-rs/canvas` 的 Skia 运行时，不需要额外
+安装 `canvas`。若出现原生运行时加载错误，请先确认当前 Node 版本受支持，并在
+干净目录重新安装 CLI；不要手动安装旧的 node-canvas 作为修复方式。
 
 ### 字体找不到
 

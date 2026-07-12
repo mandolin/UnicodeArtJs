@@ -28,7 +28,8 @@
   "files": [
     "dist/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "scripts": {
     "dev": "rollup -c -w",
@@ -37,28 +38,20 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:browser": "node tests/browser-smoke.mjs",
+    "test:node-runtime": "node tests/node-text-runtime-smoke.mjs",
+    "test:node-package-runtime": "node tests/node-text-package-smoke.mjs",
     "test:watch": "jest --watch",
     "benchmark": "node tools/benchmark.mjs",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "prepublishOnly": "npm run typecheck && npm run build && npm test",
+    "prepublishOnly": "npm run typecheck && npm run build && npm test && npm run test:node-runtime",
     "clean": "rm -rf dist/"
   },
   "dependencies": {
-    "@napi-rs/image": "^1.14.0",
+    "@napi-rs/canvas": "1.0.2",
+    "@napi-rs/image": "1.14.0",
     "ndarray": "^1.0.19",
     "ndarray-ops": "^1.2.2"
-  },
-  "optionalDependencies": {
-    "canvas": "^3.2.3"
-  },
-  "peerDependencies": {
-    "canvas": "^3.2.3"
-  },
-  "peerDependenciesMeta": {
-    "canvas": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

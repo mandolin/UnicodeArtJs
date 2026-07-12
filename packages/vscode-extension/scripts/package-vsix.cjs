@@ -74,6 +74,7 @@ function copyExtensionSources(targetRoot) {
     'CHANGELOG.md',
     'LICENSE',
     'README.md',
+    'THIRD_PARTY_NOTICES.md',
     'dist',
     'docs',
     'media',

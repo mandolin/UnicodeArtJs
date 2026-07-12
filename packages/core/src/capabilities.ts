@@ -46,6 +46,16 @@ export interface NodeImageBackendCapabilities {
   napiRsFirstBatchFormats: readonly ('png' | 'jpeg' | 'jpg' | 'webp' | 'bmp')[];
 }
 
+/** Node 文本渲染后端能力边界。 */
+export interface NodeTextRendererCapabilities {
+  /** 当前默认的文字栅格化后端。 */
+  defaultBackend: 'napi-rs-canvas';
+  /** 默认后端使用的 npm runtime 包。 */
+  runtimePackage: '@napi-rs/canvas';
+  /** 调用面采用的兼容入口。 */
+  compatibilityEntry: '@napi-rs/canvas/node-canvas';
+}
+
 /** 浏览器入口能力边界。 */
 export interface BrowserEntryCapabilities {
   /** 当前浏览器适配基线。 */
@@ -84,6 +94,8 @@ export interface CoreCapabilities {
   legacyAliases: readonly CoreCapabilityDescriptor[];
   /** Node 图像后端能力。 */
   nodeImageBackends: NodeImageBackendCapabilities;
+  /** Node 文本渲染后端能力。 */
+  nodeTextRenderer: NodeTextRendererCapabilities;
   /** 浏览器入口能力。 */
   browserEntry: BrowserEntryCapabilities;
   /** 裱框能力。 */
@@ -134,6 +146,11 @@ const STABLE_FEATURES: CoreCapabilityDescriptor[] = [
     id: 'node.imageBackend.napi-rs',
     stability: 'stable',
     description: '@napi-rs/image 默认 Node 图像后端，首批格式为 PNG / JPEG / WebP / BMP。'
+  },
+  {
+    id: 'node.textRenderer.napi-rs-canvas',
+    stability: 'stable',
+    description: '@napi-rs/canvas 默认 Node 文本渲染后端，使用 Skia 与 node-canvas 兼容入口。'
   }
 ];
 
@@ -239,6 +256,11 @@ export function getCoreCapabilities(): CoreCapabilities {
       availableBackends: ['napi-rs', 'sharp'],
       legacyBackends: ['sharp'],
       napiRsFirstBatchFormats: ['png', 'jpeg', 'jpg', 'webp', 'bmp']
+    },
+    nodeTextRenderer: {
+      defaultBackend: 'napi-rs-canvas',
+      runtimePackage: '@napi-rs/canvas',
+      compatibilityEntry: '@napi-rs/canvas/node-canvas'
     },
     browserEntry: {
       baseline: 'Chrome 120+',

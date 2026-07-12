@@ -7,13 +7,13 @@
  * 负责图像的加载、转换和预处理操作，包括：
  * - 从文件加载图像并转换为灰度数据
  * - RGB到灰度的转换算法
- * - 文本渲染为图像（需要canvas支持）
+ * - 文本渲染为图像（使用默认 Skia Canvas）
  * - 图像尺寸调整和归一化
  * 
  * 🔶 核心流程
  * 1. loadImage() - 使用当前Node图像后端加载图像文件
  * 2. grayscale() - 将RGB像素转换为灰度值（ITU-R BT.601标准）
- * 3. renderTextToImage() - 使用canvas将文本渲染为图像（可选功能）
+ * 3. renderTextToImage() - 使用 Canvas 将文本渲染为图像
  * 
  * 🔶 性能考虑
  * - 默认Node图像后端为宽松许可证口径的 napi-rs
@@ -22,18 +22,19 @@
  * 
  * 🔶 依赖说明
  * - Node图像后端: 默认 napi-rs；sharp 仅为显式 opt-in legacy adapter
- * - canvas: 可选依赖，仅用于文本渲染
+ * - @napi-rs/canvas: 默认 Node 文本渲染依赖
  * - 浏览器环境应使用Canvas API替代sharp
  * 
  * @module preprocessor
  * @since 0.1.0
- * @see {@link https://github.com/Automattic/node-canvas}
+ * @see {@link https://github.com/Brooooooklyn/canvas}
  * ============================================================================
  */
 
 import type { ImageData } from './types/image';
 import { UnicodeArtError, ErrorCode } from './types/output';
 import { getNodeImageBackend } from './platform/node/imageBackend';
+import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './platform/node/nodeTextCanvas';
 
 //#region 🟩 图像加载
 
@@ -172,7 +173,7 @@ export function rgbaToGrayscale(
 /**
  * 🟢 将文本渲染为灰度图像（支持多行、对齐、行间距）
  * 
- * 🔹 使用canvas将文本绘制到位图，然后转换为灰度。
+ * 🔹 使用默认 Skia Canvas 将文本绘制到位图，然后转换为灰度。
  * 🔹 **重要**: 必须逐个字符绘制以获取准确的字符宽度，避免混合宽度字体下对齐漂移。
  * 🔹 这是textToArt的核心步骤。
  * 
@@ -201,9 +202,7 @@ export async function renderTextToImage(
   lineSpacingPixelsOverride?: number
 ): Promise<ImageData> {
   try {
-    // 🔹 动态导入canvas（可选依赖）
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createCanvas } = require('canvas');
+    const { createCanvas } = getNodeTextCanvas();
     
     // 🔹 创建画布
     const canvas = createCanvas(width, height);
@@ -314,11 +313,11 @@ export async function renderTextToImage(
       data: grayData
     };
   } catch (error: any) {
-    if (error.code === 'MODULE_NOT_FOUND' && error.message.includes('canvas')) {
+    if (isNodeTextCanvasUnavailable(error)) {
       throw new UnicodeArtError(
-        '文本渲染需要canvas依赖，请运行: npm install canvas',
+        '文本渲染需要 @napi-rs/canvas，请确认 Core 依赖已正确安装',
         ErrorCode.DEPENDENCY_MISSING,
-        { dependency: 'canvas' }
+        { dependency: '@napi-rs/canvas' }
       );
     }
     
@@ -331,8 +330,8 @@ export async function renderTextToImage(
 }
 
 /**
- * 🔹 node-canvas在小字号多行文本的行首抗锯齿和其他渲染器可能存在轻微差异。
- * 🔹 仅在total模式的后续行做局部灰度校正，避免影响普通图片管线和line模式。
+ * 🔹 此历史兼容校正只服务于 total 模式的多行灰度稳定性，不依赖 Cairo。
+ * 🔹 默认 Skia 路径保留该逻辑，避免影响普通图片管线和 line 模式。
  */
 function applyTotalModeTextParityCorrection(
   data: Uint8Array,

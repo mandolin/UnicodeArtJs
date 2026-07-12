@@ -32,11 +32,13 @@ const paths = {
   rootReadme: path.join(repoRoot, 'README.md'),
   developmentDoc: path.join(repoRoot, 'docs', 'development.md'),
   releaseDoc: path.join(repoRoot, 'docs', 'release-gate.md'),
+  runtimeSbomDoc: path.join(repoRoot, 'docs', 'runtime-sbom.md'),
   vscodeReleaseChecklist: path.join(repoRoot, 'docs', 'vscode-extension-release-checklist.md'),
   fixtures: path.join(repoRoot, 'fixtures', 'release', 'fixtures.json'),
   corePackage: path.join(repoRoot, 'packages', 'core', 'package.json'),
   coreVersionSource: path.join(repoRoot, 'packages', 'core', 'src', 'version.ts'),
   coreDist: path.join(repoRoot, 'packages', 'core', 'dist', 'index.cjs.js'),
+  coreNotices: path.join(repoRoot, 'packages', 'core', 'THIRD_PARTY_NOTICES.md'),
   cliPackage: path.join(repoRoot, 'packages', 'cli', 'package.json'),
   cliEntry: path.join(repoRoot, 'packages', 'cli', 'src', 'console.js'),
   webPackage: path.join(repoRoot, 'packages', 'web', 'package.json'),
@@ -167,6 +169,9 @@ function checkCoreCapabilities() {
   assertGate(capabilities.nodeImageBackends?.defaultBackend === 'napi-rs', 'Core default Node image backend must be napi-rs.');
   assertGate(capabilities.nodeImageBackends?.legacyBackends?.includes('sharp'), 'Core capabilities must mark sharp as legacy.');
   assertGate(capabilities.stableFeatures?.some((item) => item.id === 'node.imageBackend.napi-rs'), 'Core stable features must include node.imageBackend.napi-rs.');
+  assertGate(capabilities.nodeTextRenderer?.defaultBackend === 'napi-rs-canvas', 'Core default Node text renderer must be napi-rs-canvas.');
+  assertGate(capabilities.nodeTextRenderer?.runtimePackage === '@napi-rs/canvas', 'Core Node text renderer must expose @napi-rs/canvas.');
+  assertGate(capabilities.stableFeatures?.some((item) => item.id === 'node.textRenderer.napi-rs-canvas'), 'Core stable features must include node.textRenderer.napi-rs-canvas.');
   assertGate(capabilities.supportedLocales?.includes('zh-CN'), 'Core capabilities must include zh-CN locale.');
   assertGate(capabilities.supportedLocales?.includes('en-US'), 'Core capabilities must include en-US locale.');
 }
@@ -177,6 +182,7 @@ function checkCoreCapabilities() {
 
 function checkForbiddenRuntimeDeps() {
   const lockfileText = readText(paths.lockfile);
+  const corePackage = readJson(paths.corePackage);
   const packageManifestText = [
     paths.corePackage,
     paths.cliPackage,
@@ -189,13 +195,25 @@ function checkForbiddenRuntimeDeps() {
     { pattern: /sharp-libvips/i, label: 'sharp-libvips' },
     { pattern: /packages\/core\/node_modules\/sharp/i, label: 'packages/core/node_modules/sharp' },
     { pattern: /packages\/vscode-extension\/node_modules\/sharp/i, label: 'packages/vscode-extension/node_modules/sharp' },
-    { pattern: /"sharp"\s*:\s*"[^"]+"/i, label: 'sharp dependency declaration' }
+    { pattern: /"sharp"\s*:\s*"[^"]+"/i, label: 'sharp dependency declaration' },
+    { pattern: /(^|["/])node_modules\/canvas(?:["/]|$)/i, label: 'node-canvas package' },
+    { pattern: /packages\/core\/node_modules\/canvas/i, label: 'packages/core/node_modules/canvas' }
   ];
 
   for (const { pattern, label } of forbiddenPatterns) {
     assertGate(!pattern.test(lockfileText), `package-lock.json must not contain ${label}.`);
     assertGate(!pattern.test(packageManifestText), `Package manifests must not contain ${label}.`);
   }
+
+  assertGate(corePackage.dependencies?.['@napi-rs/image'] === '1.14.0', 'Core must pin @napi-rs/image to 1.14.0.');
+  assertGate(corePackage.dependencies?.['@napi-rs/canvas'] === '1.0.2', 'Core must pin @napi-rs/canvas to 1.0.2.');
+  assertGate(!corePackage.dependencies?.canvas, 'Core dependencies must not contain node-canvas.');
+  assertGate(!corePackage.optionalDependencies?.canvas, 'Core optionalDependencies must not contain node-canvas.');
+  assertGate(!corePackage.peerDependencies?.canvas, 'Core peerDependencies must not contain node-canvas.');
+  assertGate(Array.isArray(corePackage.files) && corePackage.files.includes('THIRD_PARTY_NOTICES.md'), 'Core npm files must include THIRD_PARTY_NOTICES.md.');
+  assertGate(fs.existsSync(paths.coreNotices), 'Core THIRD_PARTY_NOTICES.md is required.');
+  assertGate(lockfileText.includes('node_modules/@napi-rs/canvas'), 'package-lock.json must contain @napi-rs/canvas.');
+  assertGate(lockfileText.includes('node_modules/@napi-rs/image'), 'package-lock.json must contain @napi-rs/image.');
 
   const lockfile = readJson(paths.lockfile);
   const forbiddenLicensePattern = /\b(AGPL|GPL|LGPL|MPL|EPL|CDDL)\b/i;
@@ -209,6 +227,21 @@ function checkForbiddenRuntimeDeps() {
   }
 
   assertGate(blockedLicenses.length === 0, `Forbidden runtime/dependency licenses found:\n${blockedLicenses.join('\n')}`);
+}
+
+//#endregion
+
+//#region 🟦 Native Runtime Checks
+
+function checkNodeTextRuntime() {
+  if (!fs.existsSync(paths.coreDist)) return;
+
+  run(npmBin, ['--workspace', 'packages/core', 'run', 'test:node-runtime'], {
+    shell: process.platform === 'win32'
+  });
+  run(npmBin, ['--workspace', 'packages/core', 'run', 'test:node-package-runtime'], {
+    shell: process.platform === 'win32'
+  });
 }
 
 //#endregion
@@ -341,12 +374,16 @@ function checkPublicDocs() {
   const rootReadme = readText(paths.rootReadme);
   const developmentDoc = readText(paths.developmentDoc);
   const releaseDoc = readText(paths.releaseDoc);
+  const runtimeSbomDoc = readText(paths.runtimeSbomDoc);
   const vscodeChecklist = readText(paths.vscodeReleaseChecklist);
 
   assertGate(rootReadme.includes(rootPackage.homepage), 'Root README must include the GitHub Pages homepage.');
   assertGate(developmentDoc.includes('npm run release:gate'), 'Development doc must mention npm run release:gate.');
   assertGate(releaseDoc.includes('release:gate'), 'Release gate doc must describe release:gate.');
   assertGate(releaseDoc.includes('W-art-P1.7'), 'Release gate doc must identify W-art-P1.7.');
+  assertGate(releaseDoc.includes('napi-rs/canvas'), 'Release gate doc must identify the default Node text renderer.');
+  assertGate(runtimeSbomDoc.includes('@napi-rs/canvas@1.0.2'), 'Runtime inventory must pin @napi-rs/canvas@1.0.2.');
+  assertGate(runtimeSbomDoc.includes('@napi-rs/image@1.14.0'), 'Runtime inventory must pin @napi-rs/image@1.14.0.');
   assertGate(vscodeChecklist.includes('inspect:vsix'), 'VSCode release checklist must include inspect:vsix.');
 }
 
@@ -358,6 +395,7 @@ async function main() {
   checkPackageGraph();
   checkCoreCapabilities();
   checkForbiddenRuntimeDeps();
+  checkNodeTextRuntime();
   checkVsix();
   await checkSharedFixtures();
   checkPublicDocs();

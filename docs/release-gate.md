@@ -32,11 +32,19 @@ npm run release:verify:publish
 - Root npm workspace shape and package version graph.
 - Core `VERSION` constant, package version, and `getCoreCapabilities()` alignment.
 - Default Node image backend is `napi-rs`; `sharp` is legacy opt-in only.
-- `package-lock.json` and package manifests do not include default `sharp`, `@img/sharp-*`, or libvips dependencies.
+- Default Node text rendering is `@napi-rs/canvas` (Skia), not node-canvas/Cairo.
+- `package-lock.json`, package manifests, and the VSIX do not include default
+  `sharp`, `@img/sharp-*`, libvips, or `node_modules/canvas` dependencies.
+- Fixed `@napi-rs/image` / `@napi-rs/canvas` versions and third-party notices
+  are present. Real Node text-runtime smoke tests render from both the workspace
+  and a freshly installed Core tarball before Core/CLI fixture parity is checked.
 - Lockfile package licenses do not include GPL/LGPL/AGPL/MPL/EPL/CDDL markers.
 - VSIX includes `unicode-art-js` and `@napi-rs/image`, does not include sharp/libvips, and does not declare a `file:` Core dependency.
 - Shared text/image/box fixtures from `fixtures/release/fixtures.json` produce matching Core and CLI output.
 - Public docs keep the GitHub Pages URL and release-gate instructions visible.
+
+The audited runtime inventory and redistribution notices are documented in
+[`runtime-sbom.md`](runtime-sbom.md).
 
 ## Publish Notes
 

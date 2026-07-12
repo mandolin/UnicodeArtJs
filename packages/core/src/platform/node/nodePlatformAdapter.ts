@@ -6,7 +6,7 @@
  * 🔶 Module responsibility
  * Centralizes Node-only image, font, and text rendering capabilities used by
  * the default Node entry. This keeps the pure core free from concrete Node image
- * backends, `node-canvas`, filesystem, and process assumptions.
+ * backends, Skia Canvas compatibility runtime, filesystem, and process assumptions.
  * ============================================================================
  */
 
@@ -23,6 +23,7 @@ import {
 } from '../../charRenderer';
 import type { CoreImageData } from '../../types/image';
 import { ErrorCode, UnicodeArtError } from '../../types/output';
+import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './nodeTextCanvas';
 
 //#region 🟦 Adapter
 
@@ -104,8 +105,7 @@ function measureTextWidthWithCanvas(
   fontReduce: number
 ): number {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createCanvas } = require('canvas');
+    const { createCanvas } = getNodeTextCanvas();
     const tempCanvas = createCanvas(1, 1);
     const tempCtx = tempCanvas.getContext('2d');
     const fittedFontSize = resolveFittedTextFontSize(tempCtx, font, fontSize);
@@ -117,11 +117,11 @@ function measureTextWidthWithCanvas(
       return sum + charWidth + fontReduce * 2;
     }, 0);
   } catch (error: any) {
-    if (error.code === 'MODULE_NOT_FOUND' && error.message.includes('canvas')) {
+    if (isNodeTextCanvasUnavailable(error)) {
       throw new UnicodeArtError(
-        'Text measurement requires canvas dependency, please run: npm install canvas',
+        'Text measurement requires @napi-rs/canvas; confirm that Core dependencies are installed',
         ErrorCode.DEPENDENCY_MISSING,
-        { dependency: 'canvas' }
+        { dependency: '@napi-rs/canvas' }
       );
     }
 
