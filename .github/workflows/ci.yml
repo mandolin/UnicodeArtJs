@@ -47,7 +47,8 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        # 显式使用 Core workspace 的固定 Playwright，避免根目录 npx 隐式下载或解析其他版本。
+        run: npm --workspace packages/core exec -- playwright install --with-deps chromium
 
       - name: Run repository release gate
         run: npm run release:gate
