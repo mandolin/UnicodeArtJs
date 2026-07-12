@@ -53,7 +53,8 @@ jobs:
         run: npm run build:core
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        # 使用 Web/Core 工作区已锁定的 Playwright，避免根目录 npx 隐式下载或解析版本。
+        run: npm --workspace packages/core exec -- playwright install --with-deps chromium
 
       - name: Lint Web
         run: npm run lint:web
