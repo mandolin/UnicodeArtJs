@@ -648,10 +648,13 @@ function measureTextVerticalMetrics(
 ): TextVerticalMetrics {
   let ascent = 0;
   let descent = 0;
-  const samples = lines.some((line) => line.length > 0) ? lines : ['Mg|中文测试jyqpQÅÄÉ国'];
+  const samples = lines.some((line) => line.length > 0)
+    ? lines.flatMap((line) => Array.from(line.length > 0 ? line : ' '))
+    : Array.from('Mg|中文测试jyqpQÅÄÉ国');
 
-  for (const line of samples) {
-    const metrics = ctx.measureText(line.length > 0 ? line : ' ');
+  for (const glyph of samples) {
+    // 中文注释：浏览器路径同样逐字绘制，逐字度量可覆盖混合字体 fallback 的边界。
+    const metrics = ctx.measureText(glyph);
     ascent = Math.max(ascent, Math.ceil(metrics.actualBoundingBoxAscent || 0));
     descent = Math.max(descent, Math.ceil(metrics.actualBoundingBoxDescent || 0));
   }

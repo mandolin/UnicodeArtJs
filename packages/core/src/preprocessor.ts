@@ -215,15 +215,16 @@ export async function renderTextToImage(
     // 🔹 处理多行文本
     const lines = text.split('\n');
     
-    // 🔹 计算实际字体大小，并根据真实字形高度自动收缩，避免部分本机系统字体下沿被裁切。
+    // 🔹 计算实际字体大小，并根据真实字形高度自动收缩，避免视觉字体上下沿被裁切。
     const requestedFontSize = Math.max(1, fontSize);
-    const useVerticalFit = needsVisualFontVerticalFit(font);
-    const fittedFontSize = useVerticalFit ? resolveFittedTextFontSize(ctx, font, requestedFontSize) : requestedFontSize;
+    const fittedFontSize = resolveFittedTextFontSize(ctx, font, requestedFontSize);
     
     // 🔹 设置字体和颜色
     ctx.fillStyle = '#000000';
     ctx.font = `${fittedFontSize}px ${formatCanvasFontFamily(font)}`;
-    ctx.textBaseline = useVerticalFit ? 'alphabetic' : 'top';
+    // 🔹 NAPI Skia 的 top baseline 与旧 Cairo 对部分字体的字框语义不同；统一按
+    // 🔹 alphabetic baseline 和实际墨迹度量定位，避免首行空白或文字贴下沿。
+    ctx.textBaseline = 'alphabetic';
     
     // 🔹 计算每行的rectunit，保持line/total两种高度模式的历史兼容行为。
     const effectiveLineSpacing = lineSpacingPixelsOverride ?? lineSpacing;
@@ -238,16 +239,11 @@ export async function renderTextToImage(
       rectunit = Math.floor(drawingHeight / lines.length);
     }
     
-    // 🔹 逐行绘制文本。
-    // 🔹 只有 YaHei 系列使用 alphabetic baseline + 实际字形度量，避免破坏默认字体路径的兼容输出。
-    const verticalMetrics = useVerticalFit ? measureTextVerticalMetrics(ctx, lines) : undefined;
+    // 🔹 逐行绘制文本。所有视觉字体都以实际字形度量在行高内居中。
+    const verticalMetrics = measureTextVerticalMetrics(ctx, lines);
     const drawableLineHeight = Math.max(1, rectunit - fontReduce * 2);
-    const verticalCenterOffset = verticalMetrics
-      ? Math.max(0, Math.floor((drawableLineHeight - verticalMetrics.height) / 2))
-      : 0;
-    let currentY = verticalMetrics
-      ? fontReduce + verticalCenterOffset + verticalMetrics.ascent
-      : fontReduce;
+    const verticalCenterOffset = Math.max(0, Math.floor((drawableLineHeight - verticalMetrics.height) / 2));
+    let currentY = fontReduce + verticalCenterOffset + verticalMetrics.ascent;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -390,12 +386,9 @@ interface TextVerticalMetrics {
 }
 
 function resolveFittedTextFontSize(ctx: any, font: string, requestedFontSize: number): number {
-  if (!needsVisualFontVerticalFit(font)) {
-    return requestedFontSize;
-  }
-
   const family = formatCanvasFontFamily(font);
   ctx.font = `${requestedFontSize}px ${family}`;
+  ctx.textBaseline = 'alphabetic';
   const metrics = measureTextVerticalMetrics(ctx, ['Mg|中文测试jyqpQÅÄÉ国']);
   if (metrics.height <= requestedFontSize || metrics.height <= 0) {
     return requestedFontSize;
@@ -410,10 +403,14 @@ function resolveFittedTextFontSize(ctx: any, font: string, requestedFontSize: nu
 function measureTextVerticalMetrics(ctx: any, lines: string[]): TextVerticalMetrics {
   let ascent = 0;
   let descent = 0;
-  const samples = lines.some((line) => line.length > 0) ? lines : ['Mg|中文测试jyqpQÅÄÉ国'];
+  const samples = lines.some((line) => line.length > 0)
+    ? lines.flatMap((line) => Array.from(line.length > 0 ? line : ' '))
+    : Array.from('Mg|中文测试jyqpQÅÄÉ国');
 
-  for (const line of samples) {
-    const metrics = ctx.measureText(line.length > 0 ? line : ' ');
+  for (const glyph of samples) {
+    // 中文注释：文本实际按字素逐个绘制，因此必须逐字取最大墨迹范围，避免混合
+    // 字体 fallback 时整行度量漏掉中日韩字形的上沿或下沿。
+    const metrics = ctx.measureText(glyph);
     ascent = Math.max(ascent, Math.ceil(metrics.actualBoundingBoxAscent || 0));
     descent = Math.max(descent, Math.ceil(metrics.actualBoundingBoxDescent || 0));
   }
@@ -434,13 +431,6 @@ function measureTextVerticalMetrics(ctx: any, lines: string[]): TextVerticalMetr
 function parseCanvasFontSize(font: string): number {
   const match = /(\d+(?:\.\d+)?)px/u.exec(font);
   return match ? Number(match[1]) : 1;
-}
-
-function needsVisualFontVerticalFit(font: string): boolean {
-  const normalized = font.toLowerCase();
-  return normalized.includes('microsoft yahei') ||
-    normalized.includes('微软雅黑') ||
-    normalized.includes('yahei');
 }
 
 //#endregion

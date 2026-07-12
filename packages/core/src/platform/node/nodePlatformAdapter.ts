@@ -110,6 +110,7 @@ function measureTextWidthWithCanvas(
     const tempCtx = tempCanvas.getContext('2d');
     const fittedFontSize = resolveFittedTextFontSize(tempCtx, font, fontSize);
     tempCtx.font = `${fittedFontSize}px ${formatCanvasFontFamily(font)}`;
+    tempCtx.textBaseline = 'alphabetic';
 
     return Array.from(text).reduce((sum, char) => {
       const measuredWidth = tempCtx.measureText(char).width;
@@ -139,12 +140,9 @@ function formatCanvasFontFamily(font: string): string {
 }
 
 function resolveFittedTextFontSize(ctx: any, font: string, requestedFontSize: number): number {
-  if (!needsVisualFontVerticalFit(font)) {
-    return requestedFontSize;
-  }
-
   const family = formatCanvasFontFamily(font);
   ctx.font = `${requestedFontSize}px ${family}`;
+  ctx.textBaseline = 'alphabetic';
   const metrics = measureTextVerticalMetrics(ctx, 'Mg|中文测试jyqpQÅÄÉ国');
   if (metrics <= requestedFontSize || metrics <= 0) {
     return requestedFontSize;
@@ -164,13 +162,6 @@ function measureTextVerticalMetrics(ctx: any, sample: string): number {
 function parseCanvasFontSize(font: string): number {
   const match = /(\d+(?:\.\d+)?)px/u.exec(font);
   return match ? Number(match[1]) : 1;
-}
-
-function needsVisualFontVerticalFit(font: string): boolean {
-  const normalized = font.toLowerCase();
-  return normalized.includes('microsoft yahei') ||
-    normalized.includes('微软雅黑') ||
-    normalized.includes('yahei');
 }
 
 //#endregion
