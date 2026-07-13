@@ -3,7 +3,8 @@ import { writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { imageToArt, textToArt } from '../src/index';
-import { PresetCharset } from '../src/types/charset';
+import { nodePlatformAdapter } from '../src/platform/node/nodePlatformAdapter';
+import { CharType, PresetCharset } from '../src/types/charset';
 import { OutputFormat } from '../src/types/output';
 
 describe('integration smoke tests', () => {
@@ -68,6 +69,28 @@ describe('integration smoke tests', () => {
 
     test('handles empty text gracefully', async () => {
       await expect(textToArt('', { height: 5 })).rejects.toThrow('文本不能为空');
+    });
+
+    test('uses glyphFont for Node text character templates', async () => {
+      const precompute = jest
+        .spyOn(nodePlatformAdapter, 'precomputeCharData')
+        .mockResolvedValue(createSingleGlyphMap());
+
+      try {
+        await textToArt('A', {
+          height: 2,
+          matrixSize: 4,
+          charset: { type: PresetCharset.CUSTOM, customChars: '#' },
+          visualFont: { family: 'Noto Sans SC' },
+          glyphFont: { family: 'Glyph Template Font' }
+        });
+
+        expect(precompute).toHaveBeenCalledWith(expect.objectContaining({
+          font: 'Glyph Template Font'
+        }));
+      } finally {
+        precompute.mockRestore();
+      }
     });
     test('renders layout-stage line boxes', async () => {
       const result = await textToArt('A\nB', {
@@ -166,8 +189,41 @@ describe('integration smoke tests', () => {
       expect(result.metadata.sourceWidth).toBe(4);
       expect(result.metadata.sourceHeight).toBe(4);
     });
+
+    test('uses glyphFont for Node image character templates', async () => {
+      const imagePath = join(tempDir, 'glyph-font-fixture.png');
+      await writeFile(imagePath, await createGrayPngFixture(4, 4, 128));
+      const precompute = jest
+        .spyOn(nodePlatformAdapter, 'precomputeCharData')
+        .mockResolvedValue(createSingleGlyphMap());
+
+      try {
+        await imageToArt(imagePath, {
+          height: 2,
+          matrixSize: 4,
+          charset: { type: PresetCharset.CUSTOM, customChars: '#' },
+          glyphFont: { family: 'Glyph Template Font' }
+        });
+
+        expect(precompute).toHaveBeenCalledWith(expect.objectContaining({
+          font: 'Glyph Template Font'
+        }));
+      } finally {
+        precompute.mockRestore();
+      }
+    });
   });
 });
+
+function createSingleGlyphMap() {
+  return new Map([['#', {
+    char: '#',
+    matrix: new Float32Array(16).fill(0),
+    type: CharType.NORMAL,
+    width: 4,
+    height: 4
+  }]]);
+}
 
 async function createGrayPngFixture(width: number, height: number, gray: number): Promise<Buffer> {
   const { Transformer } = await import('@napi-rs/image');

@@ -7,7 +7,7 @@ import {
   getBrowserRuntimeCapabilities,
   loadBrowserFont
 } from '../src/platform/browser/browserPlatformAdapter';
-import { imageToArt as browserImageToArt } from '../src/browser';
+import { imageToArt as browserImageToArt, textToArt as browserTextToArt } from '../src/browser';
 import { CharType, PresetCharset } from '../src/types/charset';
 import { ErrorCode, OutputFormat } from '../src/types/output';
 
@@ -22,6 +22,7 @@ class MockCanvas {
 }
 
 const mockFillTextBaselines: string[] = [];
+const mockFillTextFonts: string[] = [];
 
 class MockContext {
   fillStyle = '#000000';
@@ -44,6 +45,7 @@ class MockContext {
   fillText(text: string, x: number, y: number): void {
     this.ensurePixels();
     mockFillTextBaselines.push(this.textBaseline);
+    mockFillTextFonts.push(this.font);
     const startX = Math.max(0, Math.floor(x));
     const startY = Math.max(0, Math.floor(y));
     const width = Math.max(1, Math.min(this.canvas.width - startX, text.length || 1));
@@ -115,6 +117,7 @@ describe('browserPlatformAdapter', () => {
   beforeEach(() => {
     clearBrowserAdapterCache();
     mockFillTextBaselines.length = 0;
+    mockFillTextFonts.length = 0;
     (globalThis as any).OffscreenCanvas = undefined;
     (globalThis as any).document = {
       createElement: (tag: string) => {
@@ -352,6 +355,21 @@ describe('browserPlatformAdapter', () => {
     expect(result.content).toContain('#');
     expect(result.rows).toBeGreaterThan(0);
     expect(stages).toEqual(['start', 'loadImage', 'precomputeChars', 'convert', 'done']);
+  });
+
+  test('uses glyphFont for browser character templates', async () => {
+    const result = await browserTextToArt('A', {
+      height: 1,
+      matrixSize: 4,
+      charset: { type: PresetCharset.CUSTOM, customChars: '#' },
+      visualFont: { family: 'Visual Source Font' },
+      glyphFont: { family: 'Glyph Template Font' },
+      outputFormat: OutputFormat.PLAIN_TEXT
+    });
+
+    expect(result.content).toContain('#');
+    expect(mockFillTextFonts.some((font) => font.includes('Visual Source Font'))).toBe(true);
+    expect(mockFillTextFonts.some((font) => font.includes('Glyph Template Font'))).toBe(true);
   });
 
   test('browser imageToArt rejects oversized input images', async () => {

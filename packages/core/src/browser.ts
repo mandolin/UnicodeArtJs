@@ -197,7 +197,8 @@ async function precomputeBrowserChars(config: Partial<ArtConfig>): Promise<Map<s
   return browserPlatformAdapter.precomputeCharData({
     charset: config.charset || { type: PresetCharset.ASCII },
     matrixSize,
-    font: config.font || 'monospace',
+    // 字符模板使用字素字体；未指定时继续兼容旧版视觉字体回退。
+    font: config.glyphFontFamily || config.font || 'monospace',
     fontSize: matrixSize,
     fontReduce: 0,
     interpolation: config.interpolation,

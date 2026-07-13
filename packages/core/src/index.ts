@@ -489,7 +489,8 @@ export async function textToArt(
     const charDataMap = await nodePlatformAdapter.precomputeCharData({
       charset: fullConfig.charset,
       matrixSize: fullConfig.matrixSize,
-      font: resolvedFont,
+      // 字符模板按字素字体渲染；未设置时保持使用视觉字体的历史行为。
+      font: fullConfig.glyphFontFamily || resolvedFont,
       fontSize: fullConfig.matrixSize, // ← 修正：使用matrixSize而不是fontSize
       fontReduce: 0, // 字符模板不应用视觉字体收缩量，避免影响匹配基准。
       interpolation: fullConfig.interpolation,
@@ -857,7 +858,8 @@ export async function imageToArt(
     const charDataMap = await nodePlatformAdapter.precomputeCharData({
       charset: fullConfig.charset,
       matrixSize: fullConfig.matrixSize,
-      font: fullConfig.font || 'Noto Sans SC',
+      // 图片输入没有视觉字体渲染步骤，但字符模板仍应优先使用字素字体。
+      font: fullConfig.glyphFontFamily || fullConfig.font || 'Noto Sans SC',
       fontSize: fullConfig.matrixSize,
       fontReduce: 0, // 字符模板不应用视觉字体收缩量，避免影响匹配基准。
       interpolation: fullConfig.interpolation,
