@@ -40,5 +40,9 @@
     "config.yml",
     "README.md",
     "docs/"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }
