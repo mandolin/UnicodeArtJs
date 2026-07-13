@@ -31,6 +31,7 @@ const paths = {
   lockfile: path.join(repoRoot, 'package-lock.json'),
   rootReadme: path.join(repoRoot, 'README.md'),
   developmentDoc: path.join(repoRoot, 'docs', 'development.md'),
+  ecosystemCompatibilityDoc: path.join(repoRoot, 'docs', 'ecosystem-compatibility.md'),
   releaseDoc: path.join(repoRoot, 'docs', 'release-gate.md'),
   runtimeSbomDoc: path.join(repoRoot, 'docs', 'runtime-sbom.md'),
   vscodeReleaseChecklist: path.join(repoRoot, 'docs', 'vscode-extension-release-checklist.md'),
@@ -373,12 +374,21 @@ function checkPublicDocs() {
   const rootPackage = readJson(paths.rootPackage);
   const rootReadme = readText(paths.rootReadme);
   const developmentDoc = readText(paths.developmentDoc);
+  const ecosystemCompatibilityDoc = readText(paths.ecosystemCompatibilityDoc);
   const releaseDoc = readText(paths.releaseDoc);
   const runtimeSbomDoc = readText(paths.runtimeSbomDoc);
   const vscodeChecklist = readText(paths.vscodeReleaseChecklist);
 
   assertGate(rootReadme.includes(rootPackage.homepage), 'Root README must include the GitHub Pages homepage.');
   assertGate(developmentDoc.includes('npm run release:gate'), 'Development doc must mention npm run release:gate.');
+  assertGate(
+    ecosystemCompatibilityDoc.includes(`unicode-art-js@${readJson(paths.corePackage).version}`),
+    'Ecosystem compatibility doc must identify the current Core release baseline.'
+  );
+  assertGate(
+    ecosystemCompatibilityDoc.includes('Compatible'),
+    'Ecosystem compatibility doc must explain the Compatible distribution boundary.'
+  );
   assertGate(releaseDoc.includes('release:gate'), 'Release gate doc must describe release:gate.');
   assertGate(releaseDoc.includes('W-art-P1.7'), 'Release gate doc must identify W-art-P1.7.');
   assertGate(releaseDoc.includes('napi-rs/canvas'), 'Release gate doc must identify the default Node text renderer.');

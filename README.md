@@ -102,7 +102,8 @@ npm run install:packages
 npm run check
 ```
 
-更多命令和 lockfile 说明见 [docs/development.md](docs/development.md)。
+更多命令和 lockfile 说明见 [docs/development.md](docs/development.md)。跨入口的版本、升级和回退方式见
+[生态兼容性与升级说明](docs/ecosystem-compatibility.md)。
 
 ## 字体说明
 
@@ -124,4 +125,5 @@ Core、CLI、Web 和 VS Code 默认路径采用“清洁分发”策略，依赖
 - Core npm 包：<https://www.npmjs.com/package/unicode-art-js>
 - CLI npm 包：<https://www.npmjs.com/package/unicode-art-cli>
 - VS Code 插件：<https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode>
+- 生态兼容性与升级说明：[docs/ecosystem-compatibility.md](docs/ecosystem-compatibility.md)
 - 问题反馈：<https://github.com/mandolin/UnicodeArtJs/issues>
