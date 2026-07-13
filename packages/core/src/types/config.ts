@@ -155,7 +155,8 @@ export interface VisualFontConfig {
  * 🟢 字素字体配置
  *
  * 🔹 字素字体指字符画生成后，输出字素在终端、Web、VSCode、Electron 中实际显示的字体。
- * 🔹 `widthProfile` / `wideCharRegex` 是后续字素宽度字典的入口，本阶段先冻结契约。
+ * 🔹 `widthProfile` / `wideCharRegex` 会参与裱框、语义布局和输出列数计算。
+ * 🔹 profile 仍为 experimental；`wideCharRegex` 是完整宽字素集合，优先级更高。
  */
 export interface GlyphFontConfig {
   /** 输出字素展示字体，例如 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro 等开源等宽字体。 */
@@ -429,7 +430,7 @@ export interface ArtConfig {
    * 字素字体配置（推荐新字段）
    * - 用于描述字符画输出后实际显示字素的字体
    * - 不参与输入文字渲染，不应与 visualFont 混用
-   * - 当前阶段主要用于多端配置统一和后续宽字素 profile 接入
+   * - 会影响裱框、语义布局、导出和 ArtResult.cols 的字素显示宽度计算
    */
   glyphFont?: GlyphFontConfig;
 
@@ -442,13 +443,13 @@ export interface ArtConfig {
 
   /**
    * 字素宽度 profile 名称（兼容便捷字段，语义等同于 glyphFont.widthProfile）
-   * - 后续用于按字素字体选择宽字符判定规则
+   * - 会按内置字素字体 profile 参与宽字符判定
    */
   glyphWidthProfile?: string;
 
   /**
    * 用户自定义宽字素正则字符串（兼容便捷字段，语义等同于 glyphFont.wideCharRegex）
-   * - 后续优先级高于 glyphWidthProfile
+   * - 是完整宽字素字符类，优先级高于 glyphWidthProfile
    */
   wideCharRegex?: string;
   
@@ -730,11 +731,13 @@ function normalizeVisualFontConfig(config: Partial<ArtConfig>): VisualFontConfig
 
 function normalizeGlyphFontConfig(config: Partial<ArtConfig>): GlyphFontConfig {
   const source = config.glyphFont || {};
+  const wideCharRegex = source.wideCharRegex ?? config.wideCharRegex;
   return {
     ...source,
     family: source.family ?? config.glyphFontFamily,
     widthProfile: source.widthProfile ?? config.glyphWidthProfile ?? 'default',
-    wideCharRegex: source.wideCharRegex ?? config.wideCharRegex
+    // Web 表单的空值应等价于未设置规则，避免空规则意外改变 profile 行为。
+    wideCharRegex: wideCharRegex?.trim() || undefined
   };
 }
 

@@ -94,6 +94,25 @@ export type {
 } from './types/config';
 
 export type {
+  SemanticArtTextBlock,
+  SemanticArtTextRenderer,
+  SemanticBlock,
+  SemanticBlockDisplay,
+  SemanticCell,
+  SemanticCellRole,
+  SemanticDocument,
+  SemanticDocumentOptions,
+  SemanticDocumentV1,
+  SemanticDocumentVersion,
+  SemanticDslParseOptions,
+  SemanticJsonParseOptions,
+  SemanticRenderOptions,
+  SemanticRow,
+  SemanticRowRole,
+  SemanticRowSeparatorMode
+} from './types/semantic';
+
+export type {
   BoxAlign,
   BoxCellOptions,
   BoxChars,
@@ -230,6 +249,9 @@ import { assembleOutput, assembleTextOutput } from './assembler';
 import { isWideChar as detectWideChar, calculateDisplayWidth } from './utils/wideCharDetector';
 import { boxText, normalizeBoxOptions as normalizeBoxConfig } from './box/box';
 import { getGlyphWidth, padToWidth, repeatToWidth } from './box/width';
+import { createGlyphWidthCalculator, type GlyphWidthCalculator } from './glyph/width';
+import { renderSemanticDocumentWithAdapter } from './semantic/render';
+import type { SemanticDocument, SemanticRenderOptions } from './types/semantic';
 import { nodePlatformAdapter } from './platform/node/nodePlatformAdapter';
 import { normalizeLocale, t as translateCoreMessage } from './i18n';
 
@@ -341,6 +363,33 @@ export {
   padToWidth,
   cropToWidth
 } from './box/width';
+
+export type {
+  BuiltInGlyphWidthProfile,
+  GlyphWidthCalculatorOptions,
+  GlyphWidthProfile,
+  GlyphWidthProfileDefinition
+} from './glyph/width';
+
+export {
+  BUILT_IN_GLYPH_WIDTH_PROFILES,
+  createGlyphWidthCalculator,
+  getGlyphWidthProfiles,
+  isKnownGlyphWidthProfile,
+  normalizeGlyphWidthProfile,
+  normalizeWideCharRegex,
+  GlyphWidthCalculator
+} from './glyph/width';
+
+export {
+  parseSemanticDocumentJson,
+  parseSemanticDsl,
+  validateSemanticDocument
+} from './semantic/document';
+
+export {
+  renderSemanticDocumentWithAdapter
+} from './semantic/render';
 
 export {
   ZERO_SPACING,
@@ -538,6 +587,26 @@ export async function textToArt(
   }
 }
 
+/**
+ * 🟢 语义文档转字符画
+ *
+ * 🔹 消费版本化 JSON AST，支持标题/页脚、跨行跨列和 `{t:...}` 对应的原字输出块。
+ * 🔹 当前属于 experimental；请通过 `getCoreCapabilities()` 检查当前能力边界。
+ */
+export async function semanticDocumentToArt(
+  document: SemanticDocument | unknown,
+  config: Partial<ArtConfig>,
+  options: SemanticRenderOptions = {}
+): Promise<ArtResult> {
+  const fullConfig = validateConfig(config);
+  return renderSemanticDocumentWithAdapter(
+    document,
+    fullConfig,
+    async (text, blockConfig) => textToArt(text, blockConfig),
+    options
+  );
+}
+
 //#region 🔶 Layout-stage box rendering
 
 function isLayoutBoxConfig(config: ArtConfig): config is ArtConfig & { box: BoxOptions } {
@@ -553,6 +622,11 @@ async function textToLayoutArt(
   startTime: number
 ): Promise<ArtResult> {
   const normalized = normalizeBoxConfig(config.box);
+  const calculator = createGlyphWidthCalculator({
+    profile: config.glyphWidthProfile,
+    wideCharRegex: config.wideCharRegex,
+    locale: config.locale
+  });
   const plainConfig: ArtConfig = {
     ...config,
     box: false,
@@ -560,7 +634,7 @@ async function textToLayoutArt(
   };
 
   const blocks = await buildLayoutBlocks(text, plainConfig, normalized);
-  const layoutText = renderLayoutBlocks(blocks, normalized, config.box);
+  const layoutText = renderLayoutBlocks(blocks, normalized, config.box, calculator);
   const duration = Date.now() - startTime;
 
   return assembleTextOutput(
@@ -612,39 +686,41 @@ async function renderTextBlock(text: string, config: ArtConfig): Promise<string[
 function renderLayoutBlocks(
   rows: string[][][],
   box: RuntimeBoxOptions,
-  rawBox: BoxOptions
+  rawBox: BoxOptions,
+  calculator: GlyphWidthCalculator
 ): string {
   const separator = resolveLayoutSeparator(box, rawBox.separators);
-  const normalizedRows = rows.map((row) => normalizeLayoutRow(row, box, rawBox.cell));
+  const normalizedRows = rows.map((row) => normalizeLayoutRow(row, box, rawBox.cell, calculator));
   const bodyLines: string[] = [];
 
   normalizedRows.forEach((row, rowIndex) => {
     if (rowIndex > 0 && shouldRenderRowSeparator(separator, rowIndex)) {
-      bodyLines.push(renderRowSeparator(row, box));
+      bodyLines.push(renderRowSeparator(row, box, calculator));
     }
 
     bodyLines.push(...combineLayoutRow(row, separator.columns, box.chars.vertical || '|'));
   });
 
   const outerBox = toOuterBoxOptions(rawBox);
-  return boxText(bodyLines.join('\n'), outerBox);
+  return boxText(bodyLines.join('\n'), outerBox, calculator);
 }
 
 function normalizeLayoutRow(
   row: string[][],
   box: RuntimeBoxOptions,
-  cell: BoxOptions['cell']
+  cell: BoxOptions['cell'],
+  calculator: GlyphWidthCalculator
 ): string[][] {
   const minWidth = normalizeOptionalNonNegativeInteger(cell?.minWidth, 0, 'cell.minWidth');
   const minHeight = normalizeOptionalNonNegativeInteger(cell?.minHeight, 0, 'cell.minHeight');
   const cellPadding = normalizeCellPadding(cell?.padding);
   const maxWidth = Math.max(
     minWidth,
-    ...row.map((block) => block.reduce((max, line) => Math.max(max, getGlyphWidth(line)), 0))
+    ...row.map((block) => block.reduce((max, line) => Math.max(max, getGlyphWidth(line, calculator)), 0))
   );
   const maxHeight = Math.max(minHeight, ...row.map((block) => block.length));
 
-  return row.map((block) => normalizeLayoutBlock(block, maxWidth, maxHeight, box, cellPadding));
+  return row.map((block) => normalizeLayoutBlock(block, maxWidth, maxHeight, box, cellPadding, calculator));
 }
 
 function normalizeLayoutBlock(
@@ -652,9 +728,10 @@ function normalizeLayoutBlock(
   width: number,
   height: number,
   box: RuntimeBoxOptions,
-  padding: { top: number; right: number; bottom: number; left: number }
+  padding: { top: number; right: number; bottom: number; left: number },
+  calculator: GlyphWidthCalculator
 ): string[] {
-  const aligned = block.map((line) => padToWidth(line, width, box.align));
+  const aligned = block.map((line) => padToWidth(line, width, box.align, calculator));
   const extra = Math.max(0, height - aligned.length);
   const before = box.verticalAlign === 'bottom'
     ? extra
@@ -688,8 +765,16 @@ function combineLayoutRow(row: string[][], columnSeparator: boolean, separatorCh
   return result;
 }
 
-function renderRowSeparator(row: string[][], box: RuntimeBoxOptions): string {
-  return row.map((block) => repeatToWidth(box.chars.horizontal || '-', getGlyphWidth(block[0] ?? ''))).join(
+function renderRowSeparator(
+  row: string[][],
+  box: RuntimeBoxOptions,
+  calculator: GlyphWidthCalculator
+): string {
+  return row.map((block) => repeatToWidth(
+    box.chars.horizontal || '-',
+    getGlyphWidth(block[0] ?? '', calculator),
+    calculator
+  )).join(
     box.chars.cross || '+'
   );
 }
@@ -1050,7 +1135,18 @@ export function validateConfig(
 
   try {
     normalizeBoxConfig(fullConfig.box);
+    createGlyphWidthCalculator({
+      profile: fullConfig.glyphWidthProfile,
+      wideCharRegex: fullConfig.wideCharRegex,
+      locale
+    });
   } catch (error) {
+    if (error instanceof UnicodeArtError && (
+      error.code === ErrorCode.GLYPH_WIDTH_PROFILE_INVALID ||
+      error.code === ErrorCode.GLYPH_WIDTH_REGEX_INVALID
+    )) {
+      throw error;
+    }
     const message = error instanceof Error ? error.message : String(error);
     throw new UnicodeArtError(
       translateCoreMessage('config.box.invalid', { message }, locale),

@@ -12,27 +12,38 @@
  * ============================================================================
  */
 
-import { calculateDisplayWidth } from '../utils/wideCharDetector';
+import { createGlyphWidthCalculator, type GlyphWidthCalculator } from '../glyph/width';
+
+const DEFAULT_GLYPH_WIDTH_CALCULATOR = createGlyphWidthCalculator();
 
 //#region Width helpers
 
-export function getGlyphWidth(text: string): number {
-  return calculateDisplayWidth(text);
+export function getGlyphWidth(text: string, calculator: GlyphWidthCalculator = DEFAULT_GLYPH_WIDTH_CALCULATOR): number {
+  return calculator.getTextWidth(text);
 }
 
-export function repeatToWidth(glyph: string, width: number): string {
+export function repeatToWidth(
+  glyph: string,
+  width: number,
+  calculator: GlyphWidthCalculator = DEFAULT_GLYPH_WIDTH_CALCULATOR
+): string {
   if (width <= 0 || glyph.length === 0) {
     return '';
   }
 
-  const glyphWidth = Math.max(1, getGlyphWidth(glyph));
+  const glyphWidth = Math.max(1, getGlyphWidth(glyph, calculator));
   const count = Math.ceil(width / glyphWidth);
   const repeated = glyph.repeat(count);
-  return cropToWidth(repeated, width);
+  return cropToWidth(repeated, width, calculator);
 }
 
-export function padToWidth(text: string, width: number, align: 'left' | 'center' | 'right' = 'left'): string {
-  const textWidth = getGlyphWidth(text);
+export function padToWidth(
+  text: string,
+  width: number,
+  align: 'left' | 'center' | 'right' = 'left',
+  calculator: GlyphWidthCalculator = DEFAULT_GLYPH_WIDTH_CALCULATOR
+): string {
+  const textWidth = getGlyphWidth(text, calculator);
   if (textWidth >= width) {
     return text;
   }
@@ -51,7 +62,11 @@ export function padToWidth(text: string, width: number, align: 'left' | 'center'
   return `${text}${' '.repeat(extra)}`;
 }
 
-export function cropToWidth(text: string, width: number): string {
+export function cropToWidth(
+  text: string,
+  width: number,
+  calculator: GlyphWidthCalculator = DEFAULT_GLYPH_WIDTH_CALCULATOR
+): string {
   if (width <= 0) {
     return '';
   }
@@ -60,7 +75,7 @@ export function cropToWidth(text: string, width: number): string {
   let used = 0;
 
   for (const glyph of text) {
-    const glyphWidth = getGlyphWidth(glyph);
+    const glyphWidth = getGlyphWidth(glyph, calculator);
     if (used + glyphWidth > width) {
       break;
     }

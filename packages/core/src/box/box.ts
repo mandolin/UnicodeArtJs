@@ -28,10 +28,15 @@ import type {
   NormalizedBoxTitleOptions
 } from './types';
 import { cropToWidth, getGlyphWidth, padToWidth, repeatToWidth } from './width';
+import type { GlyphWidthCalculator } from '../glyph/width';
 
 //#region Public API
 
-export function boxText(content: string, options: false | BoxOptions = {}): string {
+export function boxText(
+  content: string,
+  options: false | BoxOptions = {},
+  calculator?: GlyphWidthCalculator
+): string {
   const normalized = normalizeBoxOptions(options);
   const lines = splitContentLines(content);
 
@@ -43,36 +48,40 @@ export function boxText(content: string, options: false | BoxOptions = {}): stri
     throw new Error('Layout box options require textToArt layout rendering');
   }
 
-  const contentWidth = getContentWidth(lines);
+  const contentWidth = getContentWidth(lines, calculator);
   const requestedInnerWidth = normalized.width === 'auto'
     ? contentWidth
     : normalized.overflow === 'expand'
       ? Math.max(contentWidth, normalized.width)
       : normalized.width;
-  const alignedInnerWidth = alignInnerWidthToFrame(requestedInnerWidth, normalized);
-  const contentLines = prepareContentLines(lines, normalized, alignedInnerWidth);
+  const alignedInnerWidth = alignInnerWidthToFrame(requestedInnerWidth, normalized, calculator);
+  const contentLines = prepareContentLines(lines, normalized, alignedInnerWidth, calculator);
   const paddedWidth = alignedInnerWidth + normalized.padding.left + normalized.padding.right;
-  const bodyLines = buildBodyLines(contentLines, alignedInnerWidth, normalized);
+  const bodyLines = buildBodyLines(contentLines, alignedInnerWidth, normalized, calculator);
   const topPadding = buildEmptyLines(normalized.padding.top, paddedWidth, normalized);
   const bottomPadding = buildEmptyLines(normalized.padding.bottom, paddedWidth, normalized);
   const framedLines = [
-    buildTopBorder(paddedWidth, normalized),
+    buildTopBorder(paddedWidth, normalized, calculator),
     ...topPadding,
     ...bodyLines,
     ...bottomPadding,
-    buildBottomBorder(paddedWidth, normalized)
+    buildBottomBorder(paddedWidth, normalized, calculator)
   ];
-  const withShadow = applyShadow(framedLines, normalized.shadow);
-  const withMargin = applyMargin(withShadow, normalized.margin);
+  const withShadow = applyShadow(framedLines, normalized.shadow, calculator);
+  const withMargin = applyMargin(withShadow, normalized.margin, calculator);
 
   return withMargin.join('\n');
 }
 
-export function previewBoxStyle(style: BoxOptions['style'], sample: string = 'Aa'): string {
+export function previewBoxStyle(
+  style: BoxOptions['style'],
+  sample: string = 'Aa',
+  calculator?: GlyphWidthCalculator
+): string {
   return boxText(sample, {
     style,
     padding: { left: 1, right: 1 }
-  });
+  }, calculator);
 }
 
 export function normalizeBoxOptions(options: false | BoxOptions = {}): NormalizedBoxOptions {
@@ -131,35 +140,29 @@ function splitContentLines(content: string): string[] {
   return normalized.split('\n');
 }
 
-function getContentWidth(lines: string[]): number {
-  return lines.reduce((max, line) => Math.max(max, getGlyphWidth(line)), 0);
+function getContentWidth(lines: string[], calculator?: GlyphWidthCalculator): number {
+  return lines.reduce((max, line) => Math.max(max, getGlyphWidth(line, calculator)), 0);
 }
 
 function prepareContentLines(
   lines: string[],
   options: NormalizedBoxOptions,
-  width: number = resolveContentWidth(lines, options)
+  width: number,
+  calculator?: GlyphWidthCalculator
 ): string[] {
-  const widthAdjusted = adjustLineWidths(lines, width, options.overflow);
+  const widthAdjusted = adjustLineWidths(lines, width, options.overflow, calculator);
   return adjustLineHeight(widthAdjusted, width, options);
 }
 
-function resolveContentWidth(lines: string[], options: NormalizedBoxOptions): number {
-  const contentWidth = getContentWidth(lines);
-  if (options.width === 'auto') {
-    return contentWidth;
-  }
-
-  return options.overflow === 'expand'
-    ? Math.max(contentWidth, options.width)
-    : options.width;
-}
-
-function alignInnerWidthToFrame(width: number, options: NormalizedBoxOptions): number {
+function alignInnerWidthToFrame(
+  width: number,
+  options: NormalizedBoxOptions,
+  calculator?: GlyphWidthCalculator
+): number {
   const horizontalWidth = Math.max(
     1,
-    getGlyphWidth(options.chars.top),
-    getGlyphWidth(options.chars.bottom)
+    getGlyphWidth(options.chars.top, calculator),
+    getGlyphWidth(options.chars.bottom, calculator)
   );
   const paddedWidth = width + options.padding.left + options.padding.right;
   const remainder = paddedWidth % horizontalWidth;
@@ -167,21 +170,26 @@ function alignInnerWidthToFrame(width: number, options: NormalizedBoxOptions): n
   return remainder === 0 ? width : width + horizontalWidth - remainder;
 }
 
-function adjustLineWidths(lines: string[], width: number, overflow: BoxOverflow): string[] {
+function adjustLineWidths(
+  lines: string[],
+  width: number,
+  overflow: BoxOverflow,
+  calculator?: GlyphWidthCalculator
+): string[] {
   if (overflow === 'wrap') {
-    return lines.flatMap((line) => wrapLineToWidth(line, width));
+    return lines.flatMap((line) => wrapLineToWidth(line, width, calculator));
   }
 
   if (overflow === 'truncate') {
-    return lines.map((line) => cropToWidth(line, width));
+    return lines.map((line) => cropToWidth(line, width, calculator));
   }
 
   return lines;
 }
 
-function wrapLineToWidth(line: string, width: number): string[] {
+function wrapLineToWidth(line: string, width: number, calculator?: GlyphWidthCalculator): string[] {
   if (width <= 0) {
-    return [line.length === 0 ? '' : cropToWidth(line, 0)];
+    return [line.length === 0 ? '' : cropToWidth(line, 0, calculator)];
   }
 
   if (line.length === 0) {
@@ -193,15 +201,15 @@ function wrapLineToWidth(line: string, width: number): string[] {
   let currentWidth = 0;
 
   for (const glyph of line) {
-    const glyphWidth = getGlyphWidth(glyph);
+    const glyphWidth = getGlyphWidth(glyph, calculator);
     if (currentWidth > 0 && currentWidth + glyphWidth > width) {
-      result.push(padToWidth(current, width));
+      result.push(padToWidth(current, width, 'left', calculator));
       current = '';
       currentWidth = 0;
     }
 
     if (glyphWidth > width) {
-      result.push(cropToWidth(glyph, width));
+      result.push(cropToWidth(glyph, width, calculator));
       continue;
     }
 
@@ -209,7 +217,7 @@ function wrapLineToWidth(line: string, width: number): string[] {
     currentWidth += glyphWidth;
   }
 
-  result.push(padToWidth(current, width));
+  result.push(padToWidth(current, width, 'left', calculator));
   return result;
 }
 
@@ -253,9 +261,14 @@ function getVerticalPaddingBefore(extra: number, align: BoxVerticalAlign): numbe
   return 0;
 }
 
-function buildBodyLines(lines: string[], innerWidth: number, options: NormalizedBoxOptions): string[] {
+function buildBodyLines(
+  lines: string[],
+  innerWidth: number,
+  options: NormalizedBoxOptions,
+  calculator?: GlyphWidthCalculator
+): string[] {
   return lines.map((line) => {
-    const aligned = padToWidth(line, innerWidth, options.align);
+    const aligned = padToWidth(line, innerWidth, options.align, calculator);
     const padded = `${' '.repeat(options.padding.left)}${aligned}${' '.repeat(options.padding.right)}`;
     return wrapContentLine(padded, options);
   });
@@ -274,18 +287,18 @@ function wrapContentLine(line: string, options: NormalizedBoxOptions): string {
   return `${options.chars.left}${line}${options.chars.right}`;
 }
 
-function buildTopBorder(width: number, options: NormalizedBoxOptions): string {
+function buildTopBorder(width: number, options: NormalizedBoxOptions, calculator?: GlyphWidthCalculator): string {
   const body = options.title?.position === 'top'
-    ? renderTitleBorder(width, options.title, options)
-    : repeatToWidth(options.chars.top, width);
+    ? renderTitleBorder(width, options.title, options, calculator)
+    : repeatToWidth(options.chars.top, width, calculator);
 
   return `${options.chars.topLeft}${body}${options.chars.topRight}`;
 }
 
-function buildBottomBorder(width: number, options: NormalizedBoxOptions): string {
+function buildBottomBorder(width: number, options: NormalizedBoxOptions, calculator?: GlyphWidthCalculator): string {
   const body = options.title?.position === 'bottom'
-    ? renderTitleBorder(width, options.title, options)
-    : repeatToWidth(options.chars.bottom, width);
+    ? renderTitleBorder(width, options.title, options, calculator)
+    : repeatToWidth(options.chars.bottom, width, calculator);
 
   return `${options.chars.bottomLeft}${body}${options.chars.bottomRight}`;
 }
@@ -293,14 +306,15 @@ function buildBottomBorder(width: number, options: NormalizedBoxOptions): string
 function renderTitleBorder(
   width: number,
   title: NormalizedBoxTitleOptions,
-  options: NormalizedBoxOptions
+  options: NormalizedBoxOptions,
+  calculator?: GlyphWidthCalculator
 ): string {
   const titleText = title.text;
-  const titleWidth = getGlyphWidth(titleText);
+  const titleWidth = getGlyphWidth(titleText, calculator);
   const titleSpace = titleWidth + title.padding * 2;
 
   if (titleSpace > width) {
-    return repeatToWidth(options.chars.top, width);
+    return repeatToWidth(options.chars.top, width, calculator);
   }
 
   const extra = width - titleSpace;
@@ -319,16 +333,20 @@ function renderTitleBorder(
   }
 
   return [
-    repeatToWidth(options.chars.top, left),
+    repeatToWidth(options.chars.top, left, calculator),
     ' '.repeat(title.padding),
     titleText,
     ' '.repeat(title.padding),
-    repeatToWidth(options.chars.top, right)
+    repeatToWidth(options.chars.top, right, calculator)
   ].join('');
 }
 
-function applyMargin(lines: string[], margin: NormalizedBoxOptions['margin']): string[] {
-  const lineWidth = lines.reduce((max, line) => Math.max(max, getGlyphWidth(line)), 0);
+function applyMargin(
+  lines: string[],
+  margin: NormalizedBoxOptions['margin'],
+  calculator?: GlyphWidthCalculator
+): string[] {
+  const lineWidth = lines.reduce((max, line) => Math.max(max, getGlyphWidth(line, calculator)), 0);
   const horizontalPrefix = ' '.repeat(margin.left);
   const horizontalSuffix = ' '.repeat(margin.right);
   const topBottomLine = ' '.repeat(margin.left + lineWidth + margin.right);
@@ -349,14 +367,18 @@ function applyMargin(lines: string[], margin: NormalizedBoxOptions['margin']): s
   return result;
 }
 
-function applyShadow(lines: string[], shadow: NormalizedBoxOptions['shadow']): string[] {
+function applyShadow(
+  lines: string[],
+  shadow: NormalizedBoxOptions['shadow'],
+  calculator?: GlyphWidthCalculator
+): string[] {
   if (!shadow || (shadow.offsetX === 0 && shadow.offsetY === 0)) {
     return lines;
   }
 
-  const lineWidth = lines.reduce((max, line) => Math.max(max, getGlyphWidth(line)), 0);
+  const lineWidth = lines.reduce((max, line) => Math.max(max, getGlyphWidth(line, calculator)), 0);
   const rightShadow = shadow.char.repeat(shadow.offsetX);
-  const result = lines.map((line) => `${padToWidth(line, lineWidth)}${rightShadow}`);
+  const result = lines.map((line) => `${padToWidth(line, lineWidth, 'left', calculator)}${rightShadow}`);
 
   for (let i = 0; i < shadow.offsetY; i++) {
     result.push(`${' '.repeat(shadow.offsetX)}${shadow.char.repeat(lineWidth)}`);

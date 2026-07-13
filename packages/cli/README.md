@@ -55,6 +55,22 @@ unicode-art text "Center" --text-align center
 unicode-art text "中文测试" --charset CHINESE_SIMPLE
 ```
 
+### 语义文档转字符画（实验性）
+
+`document` 命令默认读取版本化 JSON AST，可用于表头、页脚、跨行跨列单元格和原字输出。
+普通 `text` 命令不会隐式解析这些标记，因此已有脚本不会因为 DSL 语法产生歧义。
+
+```bash
+unicode-art document table.json --height 12 --box '{"style":"ascii","renderStage":"layout","mode":"grid"}'
+
+# 显式读取轻量 DSL；JSON 仍是推荐的长期保存格式
+unicode-art document table.uadsl --document-format dsl --row-separator semantic --height 12
+```
+
+JSON 使用 `rowSpan` / `colSpan`；轻量 DSL 使用 `{rowspan:2}` / `{colspan:2}`，并兼容旧的
+`{c:2}` / `{r:2}`。`{t:原字}` 表示原字直接输出，不经过字符画转换。DSL 的 `{h}` 和 `{f}`
+分别表示表头和页脚，默认单元格分隔符为 `|`，行分隔符可选换行、`{n}` 或二者配对。
+
 ## 📖 命令参考
 
 ### 通用选项
@@ -90,8 +106,8 @@ unicode-art image <input> [options]
 - `-f, --font <name>` - 视觉字体名称或路径（兼容旧参数）
 - `--visual-font <name>` - 视觉字体名称或路径
 - `--glyph-font <name>` - 字素显示字体
-- `--glyph-width-profile <name>` - 字素宽度 profile 名称（为后续宽字素规则预留）
-- `--wide-char-regex <regex>` - 自定义宽字素正则（为后续宽字素规则预留）
+- `--glyph-width-profile <name>` - 字素宽度 profile 名称（实验性，影响裱框、布局与输出列数）
+- `--wide-char-regex <regex>` - 完整宽字素字符类（实验性，优先于 profile）
 - `--font-style <style>` - 字体样式 (regular\|bold\|italic\|bold-italic)
 - `--font-reduce <number>` - 视觉字体渲染内边距/字号收缩量
 - `-m, --matrix <size>` - 矩阵大小（默认6）
@@ -127,6 +143,18 @@ unicode-art text <text> [options]
 ```bash
 echo "Hello" | unicode-art text - --height 8
 ```
+
+#### `document` 命令（实验性）
+
+```bash
+unicode-art document <input> [options]
+```
+
+- `<input>` - JSON / DSL 文档文件路径；传入 `-` 时从 stdin 读取。
+- `--document-format <format>` - `json`（默认）或 `dsl`。
+- `--row-separator <mode>` - DSL 行分隔模式：`lineBreak`、`semantic`、`both`。
+- `--column-separator <separator>` - DSL 单元格分隔符，默认 `|`。
+- 其余字符集、视觉字体、字素字体、尺寸、输出、`--box` 和语言选项与 `text` 命令一致。
 
 ## 📝 配置文件
 

@@ -97,6 +97,7 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - `textToArt(text, config)` converts text into Unicode art. Node uses the
   bundled `@napi-rs/canvas` Skia runtime by default.
 - `imageToArt(imagePath, config)` converts an image file into Unicode art. The default Node backend uses `@napi-rs/image`.
+- `semanticDocumentToArt(document, config)` renders an experimental versioned semantic document with tables, headers/footers, spans, and raw-text blocks.
 - `unicode-art-js/browser` exports browser `imageToArt()`, browser `textToArt()`, `browserPlatformAdapter`, `loadBrowserFont`, cache controls, runtime capability checks, and pure conversion APIs for browser projects.
 - `unicode-art-js/pure` exports platform-independent sampling, matching, assembly, box, and `imageDataToArt()` APIs.
 - `validateConfig(config)` validates and fills defaults.
@@ -110,8 +111,8 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 ## Stability Notes
 
 - Stable: Node `textToArt()`, Node `imageToArt()`, pure `imageDataToArt()`, config validation, preset charsets, output assembly, and post/outer `box` rendering.
-- Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, and layout-stage `box` modes such as `lines` / `grid`.
-- Reserved: `charSpace`, `maxParallelTasks`, `visualFont.reduceTop/right/bottom/left`, `glyphFont.widthProfile`, and `glyphFont.wideCharRegex`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
+- Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, layout-stage `box` modes such as `lines` / `grid`, semantic documents, and glyph-width profiles.
+- Reserved: `charSpace`, `maxParallelTasks`, and `visualFont.reduceTop/right/bottom/left`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
 
 Hosts can read the same boundary from `getCoreCapabilities()` instead of duplicating stability lists in UI code.
 For desktop, browser and custom decoder boundaries, see the repository-level
@@ -140,7 +141,7 @@ Important options:
 - `ratio`: vertical/horizontal ratio, default `2.0`.
 - `charset`: `PresetCharset.ASCII`, `EXTENDED`, `CHINESE_SIMPLE`, or `CUSTOM`.
 - `visualFont`: input text rendering font, replacing the old `font` / `fontStyle` / `fontReduce` naming in new integrations.
-- `glyphFont`: output glyph display font contract. `family` is descriptive for hosts; `widthProfile` and `wideCharRegex` are reserved for the later glyph-width dictionary.
+- `glyphFont`: output glyph display font contract. `family` is descriptive for hosts; experimental `widthProfile` and `wideCharRegex` control the shared glyph-cell width calculation used by boxes, semantic layouts, exports, and `ArtResult.cols`.
 - `outputFormat`: `OutputFormat.PLAIN_TEXT`, `HTML`, or `ANSI`.
 - `outputTarget`: host target such as `plain`, `terminal`, `web`, `vscode`, `electron`, `html`, or `ansi`. It is metadata for host coordination and does not change sampling today.
 - `invert`: invert grayscale values before matching.
@@ -165,6 +166,51 @@ await textToArt('UnicodeArtJs', {
   locale: 'zh-CN'
 });
 ```
+
+`wideCharRegex` is deliberately restricted to one Unicode character class, such as
+`[\\u4e00-\\u9fff]`. When supplied, it is the complete set of two-cell glyphs and takes
+precedence over `widthProfile`; this makes the rule deterministic across Node, browser,
+CLI, and editor hosts. Built-in `sarasa-mono-sc` and `lxgw-wenkai-mono` profiles are
+experimental and treat Box Drawing characters as one cell. Use an explicit custom rule
+when a display font differs from those assumptions.
+
+## Experimental Semantic Documents
+
+Semantic documents are a versioned JSON AST for layouts that need headers, footers,
+row/column spans, and source text that must remain literal. JSON is the canonical format;
+the lightweight DSL parser is an optional import convenience and can evolve independently.
+
+```ts
+import { semanticDocumentToArt } from 'unicode-art-js';
+
+const result = await semanticDocumentToArt({
+  version: 1,
+  rows: [
+    {
+      role: 'header',
+      cells: [
+        { blocks: [{ kind: 'raw-text', text: 'Name' }] },
+        { blocks: [{ kind: 'raw-text', text: 'Value' }] }
+      ]
+    },
+    {
+      cells: [
+        { blocks: [{ kind: 'art-text', text: 'UnicodeArtJs' }] },
+        { blocks: [{ kind: 'raw-text', text: 'kept exactly as typed' }] }
+      ]
+    }
+  ]
+}, {
+  height: 12,
+  box: { style: 'ascii', renderStage: 'layout', mode: 'grid' }
+});
+```
+
+Use `rowSpan` and `colSpan` in JSON. The DSL accepts `{rowspan:n}` and `{colspan:n}`;
+legacy `{c:n}` / `{r:n}` aliases remain parser-only compatibility input. `{t:...}` creates
+a `raw-text` block. Call `parseSemanticDocumentJson()`, `parseSemanticDsl()`, or
+`validateSemanticDocument()` before storing a document when an application needs explicit
+validation feedback.
 
 ## Core i18n
 

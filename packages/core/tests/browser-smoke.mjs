@@ -27,6 +27,7 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
         getBrowserRuntimeCapabilities,
         imageDataToArt,
         imageToArt,
+        semanticDocumentToArt,
         textToArt,
         boxText,
         CharType,
@@ -161,12 +162,30 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
       });
       assert(boxed.includes('ok'), 'boxText failed in browser bundle');
 
+      const semantic = await semanticDocumentToArt(
+        {
+          version: 1,
+          options: { glyphWidthProfile: 'sarasa-mono-sc' },
+          rows: [{ cells: [{ blocks: [{ kind: 'raw-text', text: '┌' }] }] }]
+        },
+        {
+          height: 1,
+          box: false,
+          outputFormat: OutputFormat.PLAIN_TEXT,
+          charset: { type: PresetCharset.ASCII }
+        },
+        { grid: false }
+      );
+      assert(semantic.content === '┌', 'browser semanticDocumentToArt content mismatch');
+      assert(semantic.cols === 1, 'browser semanticDocumentToArt glyph width mismatch');
+
       document.querySelector('#preview').textContent = art.content + '\n' + boxed;
       window.__UNICODE_ART_BROWSER_SMOKE__ = {
         ok: true,
         art: art.content,
         imageArt: browserImageArt.content,
         textArt: browserTextArt.content,
+        semanticArt: semantic.content,
         boxed,
         capabilities,
         cacheStats: getBrowserAdapterCacheStats(),
@@ -231,6 +250,7 @@ try {
     artLength: result.art.length,
     imageArtLength: result.imageArt.length,
     textArtLength: result.textArt.length,
+    semanticArtLength: result.semanticArt.length,
     boxedLength: result.boxed.length,
     glyphCacheEntries: result.cacheStats.glyphs,
     workerSupported: result.capabilities.worker,

@@ -86,12 +86,23 @@ void (async () => {
 
   assert.equal(core.getCoreCapabilities().nodeTextRenderer.defaultBackend, 'napi-rs-canvas');
   assert.ok(result.content.trim().length > 0, 'Installed Core tarball must render text');
+  const semantic = await core.semanticDocumentToArt({
+    version: 1,
+    rows: [{ cells: [{ blocks: [{ kind: 'raw-text', text: 'npm' }] }] }]
+  }, {
+    height: 1,
+    box: false
+  }, {
+    grid: false
+  });
+  assert.equal(semantic.content, 'npm', 'Installed Core tarball must render semantic documents');
   console.log(JSON.stringify({
     ok: true,
     renderer: 'napi-rs-canvas',
     packageInstall: true,
     rows: result.rows,
-    bytes: Buffer.byteLength(result.content)
+    bytes: Buffer.byteLength(result.content),
+    semanticColumns: semantic.cols
   }, null, 2));
 })().catch((error) => {
   console.error(error instanceof Error ? error.stack : String(error));

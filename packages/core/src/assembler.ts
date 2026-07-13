@@ -37,6 +37,7 @@ import { OutputFormat, UnicodeArtError, ErrorCode } from './types/output';
 import { boxText } from './box/box';
 import { getGlyphWidth } from './box/width';
 import type { BoxOptions } from './box/types';
+import { createGlyphWidthCalculator } from './glyph/width';
 
 //#region 🟩 纯文本组装
 
@@ -86,7 +87,12 @@ export function assemblePlainText(
   
   // 🔹 使用\n作为换行符（跨平台兼容）
   const text = lines.join('\n');
-  return isBoxEnabled(config.box) ? boxText(text, config.box) : text;
+  const calculator = createGlyphWidthCalculator({
+    profile: config.glyphWidthProfile,
+    wideCharRegex: config.wideCharRegex,
+    locale: config.locale
+  });
+  return isBoxEnabled(config.box) ? boxText(text, config.box, calculator) : text;
 }
 
 /**
@@ -390,10 +396,14 @@ export function assembleOutput(
       );
   }
   
-  const metrics = isBoxEnabled(config.box) ? calculateBoxedTextMetrics(assemblePlainText(charMatrix, config)) : {
-    rows: charMatrix.length,
-    cols: charMatrix[0]?.length || 0
-  };
+  const metrics = calculateBoxedTextMetrics(
+    assemblePlainText(charMatrix, config),
+    createGlyphWidthCalculator({
+      profile: config.glyphWidthProfile,
+      wideCharRegex: config.wideCharRegex,
+      locale: config.locale
+    })
+  );
 
   return {
     content,
@@ -448,7 +458,14 @@ export function assembleTextOutput(
       );
   }
 
-  const metrics = calculateBoxedTextMetrics(text);
+  const metrics = calculateBoxedTextMetrics(
+    text,
+    createGlyphWidthCalculator({
+      profile: config.glyphWidthProfile,
+      wideCharRegex: config.wideCharRegex,
+      locale: config.locale
+    })
+  );
   return {
     content,
     format,
@@ -472,11 +489,14 @@ function isBoxEnabled(box: ArtConfig['box']): box is BoxOptions {
     (box.mode === undefined || box.mode === 'outer');
 }
 
-function calculateBoxedTextMetrics(text: string): { rows: number; cols: number } {
+function calculateBoxedTextMetrics(
+  text: string,
+  calculator: ReturnType<typeof createGlyphWidthCalculator>
+): { rows: number; cols: number } {
   const lines = text.length === 0 ? [''] : text.split('\n');
   return {
     rows: lines.length,
-    cols: lines.reduce((max, line) => Math.max(max, getGlyphWidth(line)), 0)
+    cols: lines.reduce((max, line) => Math.max(max, getGlyphWidth(line, calculator)), 0)
   };
 }
 

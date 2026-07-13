@@ -17,6 +17,12 @@
       "completed": "✅ Completed in ${duration}ms",
       "size": "   Size: ${rows} rows × ${cols} cols"
     },
+    "document": {
+      "description": "Render an experimental semantic Unicode art document",
+      "processing": "Processing semantic document...",
+      "completed": "Completed in ${duration}ms",
+      "size": "   Size: ${rows} rows × ${cols} cols"
+    },
     "output": {
       "saved": "💾 Saved to: ${path}"
     }

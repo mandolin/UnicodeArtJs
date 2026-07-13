@@ -80,6 +80,9 @@ const cliPackage = require('../package.json');
 // 导入core库
 const {
   imageToArt,
+  parseSemanticDocumentJson,
+  parseSemanticDsl,
+  semanticDocumentToArt,
   textToArt,
   validateConfig,
   OutputFormat,
@@ -304,6 +307,58 @@ program
     }
   });
 
+/**
+ * 🟢 语义文档转字符画命令
+ *
+ * 🔹 默认读取版本化 JSON AST；`--document-format dsl` 可读取实验性轻量 DSL。
+ * 🔹 DSL 不作为普通 text 输入的隐式语法，避免已有文本转换行为发生歧义。
+ */
+program
+  .command('document')
+  .description('Render an experimental semantic Unicode art document')
+  .argument('<input>', 'Input JSON/DSL document path, or - for stdin')
+  .option('--document-format <format>', 'Document input format (json|dsl)', 'json')
+  .option('--row-separator <mode>', 'DSL row separator (lineBreak|semantic|both)')
+  .option('--column-separator <separator>', 'DSL cell separator')
+  .option('-o, --output <path>', 'Output file path')
+  .option('-p, --print [mode]', 'Print to terminal when output file is set (spec|all|debug)')
+  .option('-e, --height <number>', 'Art-text block height in rows', parseInt)
+  .option('-w, --width <number>', 'Art-text block width in columns', parseInt)
+  .option('-a, --chars <string>', 'Custom character set for art-text blocks')
+  .option('--charset <type>', 'Preset charset for art-text blocks (ASCII|EXTENDED|CHINESE_SIMPLE)')
+  .option('-f, --font <name>', 'Visual font name or path (legacy alias)')
+  .option('--visual-font <name>', 'Visual font name or path')
+  .option('--glyph-font <name>', 'Glyph display font family')
+  .option('--glyph-width-profile <name>', 'Glyph width profile name')
+  .option('--wide-char-regex <regex>', 'Custom wide glyph character class')
+  .option('--output-target <target>', 'Output target (plain|terminal|web|vscode|electron|html|ansi)')
+  .option('--font-style <style>', 'Font style (regular|bold|italic|bold-italic)')
+  .option('--font-reduce <number>', 'Visual font inset/reduction', parseInt)
+  .option('-m, --matrix <size>', 'Matrix size', parseInt)
+  .option('-r, --ratio <number>', 'Vertical/horizontal ratio', parseFloat)
+  .option('-v, --invert', 'Invert colors')
+  .option('--interpolation <type>', 'Interpolation algorithm (nearest|bilinear|bicubic|lanczos)')
+  .option('--wide-char-ratio <number>', 'Wide character matching ratio', parseFloat)
+  .option('--text-align <align>', 'Text alignment (left|center|right)')
+  .option('--line-spacing <number>', 'Line spacing', parseFloat)
+  .option('--height-mode <mode>', 'Height mode (line|total)')
+  .option('--trim-trailing-spaces', 'Trim trailing spaces')
+  .option('--format <format>', 'Output format (plain|html|ansi)')
+  .option('-b, --box <json-or-style>', 'Box options: true, false, style name, or JSON object')
+  .option('-c, --config <path>', 'Config file path')
+  .option('--no-config', 'Disable config file discovery')
+  .option('--lang <locale>', 'Language (zh-CN|en-US)')
+  .action(async (...args) => {
+    try {
+      const input = args[0];
+      const command = args[args.length - 1];
+      const options = getCommandOptions(command);
+      await handleDocumentCommand(input, options);
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
 //#endregion
 
 //#region 🟩 命令处理函数
@@ -397,6 +452,48 @@ async function handleTextCommand(text, options) {
     console.log(chalk.gray(t(i18n, 'commands.text.size', { rows: result.rows, cols: result.cols })));
     
     // 输出结果
+    await outputResult(result, options.output, options.print, i18n);
+  } catch (error) {
+    handleError(error, i18n);
+  }
+}
+
+/**
+ * 🟢 处理语义文档转换命令
+ *
+ * 🔹 JSON 是稳定候选 canonical 输入；DSL 仅通过显式 format 开关进入解析器。
+ * 🔹 文档 options 的字素宽度配置由 Core 统一处理，CLI 不重复解释。
+ */
+async function handleDocumentCommand(input, options) {
+  const config = await loadConfig(options.config);
+  const lang = options.lang || config.i18n?.lang || config.lang || 'zh-CN';
+  const i18n = loadLanguage(lang);
+  const fullConfig = mergeConfig(config, options);
+  fullConfig.locale = lang;
+  const validatedConfig = validateConfig(fullConfig);
+  const source = readDocumentInput(input);
+  const format = String(options.documentFormat || 'json').toLowerCase();
+  let document;
+
+  if (format === 'json') {
+    document = parseSemanticDocumentJson(source, { locale: lang });
+  } else if (format === 'dsl') {
+    document = parseSemanticDsl(source, {
+      rowSeparator: options.rowSeparator,
+      columnSeparator: options.columnSeparator,
+      locale: lang
+    });
+  } else {
+    throw new Error(`Unsupported document format: ${options.documentFormat}`);
+  }
+
+  console.log(chalk.blue(t(i18n, 'commands.document.processing')));
+  const startTime = Date.now();
+  try {
+    const result = await semanticDocumentToArt(document, validatedConfig);
+    const duration = Date.now() - startTime;
+    console.log(chalk.green(t(i18n, 'commands.document.completed', { duration })));
+    console.log(chalk.gray(t(i18n, 'commands.document.size', { rows: result.rows, cols: result.cols })));
     await outputResult(result, options.output, options.print, i18n);
   } catch (error) {
     handleError(error, i18n);
@@ -628,6 +725,21 @@ function readTextInput(text) {
   }
 
   return fs.readFileSync(0, 'utf-8').replace(/\r?\n$/, '');
+}
+
+/**
+ * 🟢 读取语义文档输入
+ *
+ * 🔹 语义文档命令始终把普通参数解释为文件路径；仅 `-` 从 stdin 读取。
+ */
+function readDocumentInput(input) {
+  if (input === '-') {
+    return fs.readFileSync(0, 'utf-8');
+  }
+  if (!fs.existsSync(input)) {
+    throw new Error(`Document file not found: ${input}`);
+  }
+  return fs.readFileSync(input, 'utf-8');
 }
 
 /**

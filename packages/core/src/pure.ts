@@ -40,6 +40,25 @@ export type {
   VisualFontConfig
 } from './types/config';
 
+export type {
+  SemanticArtTextBlock,
+  SemanticArtTextRenderer,
+  SemanticBlock,
+  SemanticBlockDisplay,
+  SemanticCell,
+  SemanticCellRole,
+  SemanticDocument,
+  SemanticDocumentOptions,
+  SemanticDocumentV1,
+  SemanticDocumentVersion,
+  SemanticDslParseOptions,
+  SemanticJsonParseOptions,
+  SemanticRenderOptions,
+  SemanticRow,
+  SemanticRowRole,
+  SemanticRowSeparatorMode
+} from './types/semantic';
+
 export {
   DEFAULT_CONFIG,
   FontStyle,
@@ -192,6 +211,33 @@ export {
   padToWidth,
   repeatToWidth
 } from './box/width';
+
+export type {
+  BuiltInGlyphWidthProfile,
+  GlyphWidthCalculatorOptions,
+  GlyphWidthProfile,
+  GlyphWidthProfileDefinition
+} from './glyph/width';
+
+export {
+  BUILT_IN_GLYPH_WIDTH_PROFILES,
+  createGlyphWidthCalculator,
+  getGlyphWidthProfiles,
+  isKnownGlyphWidthProfile,
+  normalizeGlyphWidthProfile,
+  normalizeWideCharRegex,
+  GlyphWidthCalculator
+} from './glyph/width';
+
+export {
+  parseSemanticDocumentJson,
+  parseSemanticDsl,
+  validateSemanticDocument
+} from './semantic/document';
+
+export {
+  renderSemanticDocumentWithAdapter
+} from './semantic/render';
 
 export {
   normalizeSpacing,

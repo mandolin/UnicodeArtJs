@@ -17,6 +17,12 @@
       "completed": "✅ 完成于 ${duration}ms",
       "size": "   尺寸: ${rows} 行 × ${cols} 列"
     },
+    "document": {
+      "description": "渲染实验性语义字符画文档",
+      "processing": "正在处理语义文档...",
+      "completed": "完成于 ${duration}ms",
+      "size": "   尺寸: ${rows} 行 × ${cols} 列"
+    },
     "output": {
       "saved": "💾 已保存到: ${path}"
     }

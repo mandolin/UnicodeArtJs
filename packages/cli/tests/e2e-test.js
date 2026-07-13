@@ -872,6 +872,64 @@ async function testImageTextConflict() {
   }
 }
 
+/**
+ * 🔶 Test 29: document 子命令读取 canonical JSON 与实验 DSL
+ */
+async function testSemanticDocumentCommand() {
+  const tempDir = createTempDir();
+  const jsonPath = path.join(tempDir, 'document.json');
+  const jsonOutputPath = path.join(tempDir, 'document-json.txt');
+  const dslPath = path.join(tempDir, 'document.dsl');
+  const dslOutputPath = path.join(tempDir, 'document-dsl.txt');
+
+  try {
+    fs.writeFileSync(jsonPath, JSON.stringify({
+      version: 1,
+      rows: [{
+        cells: [
+          { blocks: [{ kind: 'raw-text', text: 'CLI' }] },
+          { blocks: [{ kind: 'raw-text', text: 'OK' }] }
+        ]
+      }]
+    }), 'utf-8');
+    fs.writeFileSync(dslPath, '{h}A|B{n}C|{t:RAW}', 'utf-8');
+
+    const jsonResult = runCli([
+      'document', jsonPath,
+      '--height', '2',
+      '--box', 'false',
+      '--output', jsonOutputPath,
+      '--no-config',
+      '--lang', 'en-US'
+    ]);
+    if (jsonResult.status !== 0 || !jsonResult.stdout.includes('Processing semantic document')) {
+      throw new Error(jsonResult.stderr || jsonResult.stdout);
+    }
+    if (fs.readFileSync(jsonOutputPath, 'utf-8') !== 'CLI│OK') {
+      throw new Error('JSON semantic document output mismatch');
+    }
+
+    const dslResult = runCli([
+      'document', dslPath,
+      '--document-format', 'dsl',
+      '--row-separator', 'semantic',
+      '--height', '2',
+      '--box', 'false',
+      '--output', dslOutputPath,
+      '--no-config',
+      '--lang', 'en-US'
+    ]);
+    if (dslResult.status !== 0) {
+      throw new Error(dslResult.stderr || dslResult.stdout);
+    }
+    if (!fs.readFileSync(dslOutputPath, 'utf-8').includes('RAW')) {
+      throw new Error('DSL semantic document raw block was not preserved');
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
 //#endregion
 
 //#region 🟩 执行测试
@@ -905,6 +963,7 @@ async function testImageTextConflict() {
   await runTest('Test 26: CLI unicode output path', testUnicodeOutputPath);
   await runTest('Test 27: CLI napi-rs image backend parity', testImageCommandNapiBackendParity);
   await runTest('Test 28: CLI image/text conflict', testImageTextConflict);
+  await runTest('Test 29: CLI semantic document command', testSemanticDocumentCommand);
   
   console.log('\n' + '='.repeat(50));
   console.log(chalk.green(`✅ Passed: ${passed}`));

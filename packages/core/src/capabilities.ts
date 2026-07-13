@@ -169,6 +169,16 @@ const EXPERIMENTAL_FEATURES: CoreCapabilityDescriptor[] = [
     id: 'box.layoutStage',
     stability: 'experimental',
     description: 'layout 阶段 lines / cells / grid 裱框布局。'
+  },
+  {
+    id: 'glyph.widthCalculation',
+    stability: 'experimental',
+    description: '字素宽度 profile 与受限自定义宽字素规则，影响布局、裱框和结果列数。'
+  },
+  {
+    id: 'semantic.document',
+    stability: 'experimental',
+    description: '版本化语义文档 AST 与受限 DSL / JSON 解析入口。'
   }
 ];
 
@@ -187,16 +197,6 @@ const RESERVED_CONFIG: CoreCapabilityDescriptor[] = [
     id: 'config.visualFontDirectionalReduce',
     stability: 'reserved',
     description: '视觉字体四向手动纠偏入口已保留，当前不影响算法。'
-  },
-  {
-    id: 'config.glyphWidthProfile',
-    stability: 'reserved',
-    description: '字素宽度 profile 入口已保留，当前尚未接入裱框宽度计算。'
-  },
-  {
-    id: 'config.wideCharRegex',
-    stability: 'reserved',
-    description: '自定义宽字素正则入口已保留，当前尚未接入核心宽度检测链路。'
   },
   {
     id: 'config.outputTarget',

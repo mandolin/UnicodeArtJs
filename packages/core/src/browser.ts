@@ -23,6 +23,8 @@ import { imageDataToArt } from './pure/imageDataToArt';
 import { calculateDisplayWidth } from './utils/wideCharDetector';
 import { browserPlatformAdapter } from './platform/browser/browserPlatformAdapter';
 import { normalizeLocale, t as translateCoreMessage } from './i18n';
+import { renderSemanticDocumentWithAdapter } from './semantic/render';
+import type { SemanticDocument, SemanticRenderOptions } from './types/semantic';
 
 export type {
   CharRenderOptions,
@@ -190,6 +192,25 @@ export async function textToArt(
   );
   reportBrowserProgress(options, 'done', 1, 'Browser text conversion complete');
   return result;
+}
+
+/**
+ * 🟢 浏览器语义文档转字符画
+ *
+ * 🔹 复用 Core 的 AST、跨度和字素宽度算法，仅将艺术文本块委托给浏览器 textToArt。
+ * 🔹 仍属于 Chrome 120+ experimental 浏览器能力。
+ */
+export async function semanticDocumentToArt(
+  document: SemanticDocument | unknown,
+  config: ArtConfig,
+  options: SemanticRenderOptions = {}
+): Promise<ArtResult> {
+  return renderSemanticDocumentWithAdapter(
+    document,
+    normalizeArtConfigAliases(config) as ArtConfig,
+    async (text, blockConfig) => textToArt(text, blockConfig),
+    options
+  );
 }
 
 async function precomputeBrowserChars(config: Partial<ArtConfig>): Promise<Map<string, CharMatrix>> {
