@@ -140,7 +140,7 @@ describe('配置持久化', () => {
     // 模拟 Object.assign 补默认
     const defaults = {
       height: 20, width: '', charset: 'ASCII', font: 'Noto Sans SC',
-      glyphFont: "'Sarasa Mono SC', monospace", locale: 'zh-CN',
+      glyphFont: "'Sarasa Mono SC', 'Sarasa Term SC', monospace", locale: 'zh-CN',
       matrixSize: 6, ratio: 2.0, charSpace: 1, invert: false, boxEnabled: false,
     };
     const merged = Object.assign({}, defaults, partial);

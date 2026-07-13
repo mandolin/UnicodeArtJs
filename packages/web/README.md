@@ -69,9 +69,13 @@ Web 包使用 Vite 5、Vanilla JavaScript、jQuery 3 和自写 CSS。Core 通过
 
 ## 字体
 
-`visualFont` 影响输入文字被渲染成中间图像时的形状；`glyphFont` 影响生成后的字符画在预览区、HTML 导出和 PNG 导出中的显示。为了获得稳定对齐效果，建议使用 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro、Liberation Mono 等开源等宽或混合等宽字体。
+`visualFont` 仅在“文字 Banner”模式影响输入文字被渲染成中间图像时的形状，不会改变字符画预览区的字形。`glyphFont` 同时影响字符模板匹配、预览区、HTML 导出和 PNG 导出的显示；切换后会自动重新生成字符画。为了获得稳定对齐效果，建议使用 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro、Liberation Mono 等开源等宽或混合等宽字体。
+
+本项目不随网页打包字体文件。字体选项会使用访问者本机浏览器可用的字体；缺失时浏览器会按字体列表回退。若要比较字体差异，请在同一台设备上安装对应字体后重新生成。
 
 “字素宽度规则”目前作为实验配置入口提供，后续会继续接入更细的字体宽度 profile 和自定义宽字符正则。
+
+“字距”也是保留的配置契约，当前版本不会改变输出；页面会明确标注这一点，避免误以为设置未生效。
 
 ## 浏览器基线
 

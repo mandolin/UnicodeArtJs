@@ -14,6 +14,48 @@
 let $ = window.jQuery || window.$;
 
 const SUPPORTED_UI_LOCALES = ['zh-CN', 'en-US'];
+const WEB_CONFIG_STORAGE_KEY = 'unicode-art-config';
+
+/**
+ * Web 表单与 Core 配置共用的默认值。
+ *
+ * 字素字体默认值必须与下拉选项的 value 完全一致，避免首次进入页面时
+ * 出现“下拉框显示一种字体、实际生成使用另一种字体”的状态分叉。
+ */
+const DEFAULT_WEB_CONFIG = Object.freeze({
+  height: 20,
+  width: '',
+  charset: 'ASCII',
+  customChars: '',
+  font: 'Noto Sans SC',
+  glyphFont: "'Sarasa Mono SC', 'Sarasa Term SC', monospace",
+  glyphWidthProfile: 'default',
+  wideCharRegex: '',
+  matrixSize: 6,
+  ratio: 2.0,
+  interpolation: 'bicubic',
+  wideCharRatio: 2.0,
+  invert: false,
+  trimTrailing: false,
+  earlyTermination: true,
+  fontReduce: 0,
+  charSpace: 1,
+  locale: detectCoreLocale(),
+  outputFormat: 'plain',
+  boxEnabled: false,
+  boxStyle: 'round',
+  boxPadding: 1,
+  boxMargin: 0,
+  boxTitle: '',
+  boxShadow: false,
+  themeName: 'default',
+});
+
+/** 保留合法的 0，仅在输入无法解析时使用默认值。 */
+function parseIntegerOr(value, fallback) {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
 
 const UI_MESSAGES = {
   'zh-CN': {
@@ -51,7 +93,9 @@ const UI_MESSAGES = {
     'config.customChars': '自定义字符（从暗到亮排列）',
     'config.customCharsPlaceholder': '例如: .:-=+*#%@',
     'config.visualFont': '视觉字体（渲染用）',
+    'config.visualFontHelp': '仅在文字 Banner 模式影响输入文字的采样图像，不改变预览区的字素显示。',
     'config.glyphFont': '字素字体（显示用）',
+    'config.glyphFontHelp': '影响字符画预览、导出，以及字符模板的匹配形状。字体由浏览器使用本机已安装版本，缺失时会回退。',
     'config.advanced': '高级设置',
     'config.matrixSize': '矩阵大小',
     'config.ratio': '宽高比',
@@ -65,6 +109,7 @@ const UI_MESSAGES = {
     'config.earlyTermination': '启用早期终止优化',
     'config.fontReduce': '视觉字体内边距/收缩',
     'config.charSpace': '字距',
+    'config.charSpaceHelp': '当前为配置预留项，暂不改变转换结果。',
     'config.glyphWidthProfile': '字素宽度规则（实验）',
     'config.glyphWidthHelp': '该选项目前用于冻结配置契约，后续会进一步接入更精细的字素宽度计算。',
     'config.wideCharRegex': '自定义宽字素正则',
@@ -155,7 +200,9 @@ const UI_MESSAGES = {
     'config.customChars': 'Custom chars (dark to light)',
     'config.customCharsPlaceholder': 'Example: .:-=+*#%@',
     'config.visualFont': 'Visual font (rendering)',
+    'config.visualFontHelp': 'Only affects the sampled input image in Text Banner mode; it does not change the preview glyph display.',
     'config.glyphFont': 'Glyph font (display)',
+    'config.glyphFontHelp': 'Affects preview/export display and character-template matching. Fonts use locally installed browser fonts and fall back when unavailable.',
     'config.advanced': 'Advanced',
     'config.matrixSize': 'Matrix size',
     'config.ratio': 'Aspect ratio',
@@ -169,6 +216,7 @@ const UI_MESSAGES = {
     'config.earlyTermination': 'Enable early termination',
     'config.fontReduce': 'Visual font padding/reduce',
     'config.charSpace': 'Character spacing',
+    'config.charSpaceHelp': 'Reserved configuration only; it does not change conversion output yet.',
     'config.glyphWidthProfile': 'Glyph width rule (experimental)',
     'config.glyphWidthHelp': 'This option freezes the config contract for now; finer glyph-width calculation will be integrated later.',
     'config.wideCharRegex': 'Custom wide-glyph regex',
@@ -264,36 +312,7 @@ const AppState = {
   mode: 'image',
   imageFile: null,
   textContent: '',
-  config: {
-    height: 20,
-    width: '',
-    charset: 'ASCII',
-    customChars: '',
-    font: 'Noto Sans SC',
-    glyphFont: "'Sarasa Mono SC', 'LXGW WenKai Mono', 'Source Code Pro', 'Liberation Mono', monospace",
-    glyphWidthProfile: 'default',
-    wideCharRegex: '',
-    matrixSize: 6,
-    ratio: 2.0,
-    interpolation: 'bicubic',
-    wideCharRatio: 2.0,
-    invert: false,
-    trimTrailing: false,
-    earlyTermination: true,
-    fontReduce: 0,
-    charSpace: 1,
-    locale: detectCoreLocale(),
-    outputFormat: 'plain',
-    boxEnabled: false,
-    boxStyle: 'round',
-    boxPadding: 1,
-    boxMargin: 0,
-    boxTitle: '',
-    boxShadow: false,
-
-    // 主题
-    themeName: 'default',
-  },
+  config: { ...DEFAULT_WEB_CONFIG },
   result: null,
   loading: false,
 };
@@ -443,8 +462,7 @@ class ThemeManager {
       },
     ];
 
-    this.currentTheme = this.loadTheme() || 'default';
-    this.applyTheme(this.currentTheme);
+    this.currentTheme = DEFAULT_WEB_CONFIG.themeName;
   }
 
   // 获取所有主题
@@ -453,11 +471,11 @@ class ThemeManager {
   // 获取主题
   getTheme(key) { return this.themes.find(t => t.key === key); }
 
-  loadTheme() { return localStorage.getItem('unicode-art-theme') || AppState.config.themeName; }
-
   saveTheme(t) {
     AppState.config.themeName = t;
-    localStorage.setItem('unicode-art-theme', t);
+    // 主题与其他表单设置存入同一个配置对象，避免双键状态互相覆盖。
+    localStorage.setItem(WEB_CONFIG_STORAGE_KEY, JSON.stringify(AppState.config));
+    localStorage.removeItem('unicode-art-theme');
   }
 
   applyTheme(key) {
@@ -541,15 +559,15 @@ class ArtGenerator {
     const cfg = AppState.config;
     const charsetType = cfg.charset === '__CUSTOM__' ? 'CUSTOM' : cfg.charset;
     return {
-      height: parseInt(cfg.height) || 20,
-      width: cfg.width ? parseInt(cfg.width) : undefined,
+      height: parseIntegerOr(cfg.height, 20),
+      width: cfg.width ? parseIntegerOr(cfg.width, 0) : undefined,
       charset: charsetType === 'CUSTOM'
         ? { type: 'CUSTOM', customChars: cfg.customChars || ' .:-=+*#%@' }
         : { type: charsetType },
       font: cfg.font,
       visualFont: {
         family: cfg.font,
-        reduce: parseInt(cfg.fontReduce) || 0,
+        reduce: parseIntegerOr(cfg.fontReduce, 0),
       },
       glyphFont: {
         family: cfg.glyphFont,
@@ -559,15 +577,15 @@ class ArtGenerator {
       glyphFontFamily: cfg.glyphFont,
       glyphWidthProfile: cfg.glyphWidthProfile || 'default',
       wideCharRegex: cfg.wideCharRegex || undefined,
-      matrixSize: parseInt(cfg.matrixSize) || 6,
+      matrixSize: parseIntegerOr(cfg.matrixSize, 6),
       ratio: parseFloat(cfg.ratio) || 2.0,
       interpolation: cfg.interpolation,
       wideCharRatio: parseFloat(cfg.wideCharRatio) || 2.0,
       invert: cfg.invert,
       trimTrailingSpaces: cfg.trimTrailing,
       enableEarlyTermination: cfg.earlyTermination !== false,
-      fontReduce: parseInt(cfg.fontReduce) || 0,
-      charSpace: parseInt(cfg.charSpace) || 1,
+      fontReduce: parseIntegerOr(cfg.fontReduce, 0),
+      charSpace: parseIntegerOr(cfg.charSpace, 1),
       locale: cfg.locale || detectCoreLocale(),
       outputFormat: 'plain', // 预览统一用plain，导出时再切换
       outputTarget: 'web',
@@ -575,8 +593,8 @@ class ArtGenerator {
         ? {
             enabled: true,
             style: cfg.boxStyle,
-            padding: parseInt(cfg.boxPadding) || 1,
-            margin: parseInt(cfg.boxMargin) || 0,
+            padding: parseIntegerOr(cfg.boxPadding, 1),
+            margin: parseIntegerOr(cfg.boxMargin, 0),
             title: cfg.boxTitle || undefined,
             shadow: cfg.boxShadow ? { enabled: true } : false,
           }
@@ -641,6 +659,7 @@ class AppController {
   init() {
     this.bindEvents();
     this.loadConfig();
+    this.themeManager.applyTheme(AppState.config.themeName);
     this.i18nManager.apply(AppState.config.locale);
     this.detectTouchDevice();
     this.initBoxStylePreview();
@@ -711,8 +730,8 @@ class AppController {
     $doc.on('input', DOM.textInput, (e) => { AppState.textContent = $(e.target).val(); this.debouncedRefresh(); });
 
     // 基本配置（防抖）
-    $doc.on('input', DOM.heightInput, (e) => { this.setConfigQuiet('height', $(e.target).val()); });
-    $doc.on('input', DOM.widthInput, (e) => { this.setConfigQuiet('width', $(e.target).val()); });
+    $doc.on('input', DOM.heightInput, (e) => { this.setConfigQuiet('height', $(e.target).val()); this.debouncedRefresh(); });
+    $doc.on('input', DOM.widthInput, (e) => { this.setConfigQuiet('width', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('change', DOM.charsetSelect, (e) => { this.handleCharsetChange(e); });
     $doc.on('input', DOM.customChars, (e) => { this.setConfigQuiet('customChars', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('change', DOM.fontSelect, (e) => { this.setConfigQuiet('font', $(e.target).val()); this.debouncedRefresh(); });
@@ -724,9 +743,9 @@ class AppController {
     $doc.on('change', DOM.interpolation, (e) => { this.setConfigQuiet('interpolation', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('input', DOM.wideCharRatio, (e) => { this.setConfigQuiet('wideCharRatio', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('input', DOM.fontReduce, (e) => { this.setNumConfigQuiet('fontReduce', $(e.target).val()); this.debouncedRefresh(); });
-    $doc.on('input', DOM.charSpace, (e) => { this.setNumConfigQuiet('charSpace', $(e.target).val()); this.debouncedRefresh(); });
+    $doc.on('input', DOM.charSpace, (e) => { this.setNumConfigQuiet('charSpace', $(e.target).val()); });
     $doc.on('change', DOM.glyphWidthProfile, (e) => { this.handleGlyphWidthProfileChange(e); });
-    $doc.on('input', DOM.wideCharRegex, (e) => { this.setConfigQuiet('wideCharRegex', $(e.target).val()); this.debouncedRefresh(); });
+    $doc.on('input', DOM.wideCharRegex, (e) => { this.setConfigQuiet('wideCharRegex', $(e.target).val()); });
     $doc.on('change', DOM.invertCheckbox, (e) => { this.setConfigQuiet('invert', $(e.target).prop('checked')); this.debouncedRefresh(); });
     $doc.on('change', DOM.trimTrailing, (e) => { this.setConfigQuiet('trimTrailing', $(e.target).prop('checked')); this.debouncedRefresh(); });
     $doc.on('change', DOM.earlyTermination, (e) => { this.setConfigQuiet('earlyTermination', $(e.target).prop('checked')); this.debouncedRefresh(); });
@@ -779,16 +798,16 @@ class AppController {
   }
 
   handleGlyphFontChange(e) {
-    AppState.config.glyphFont = $(e.target).val();
+    this.setConfigQuiet('glyphFont', $(e.target).val());
     this.applyGlyphFont();
-    this.saveConfig();
+    // 字素字体既影响预览 CSS，也影响 Core 的字符模板，必须重新生成。
+    this.debouncedRefresh();
   }
 
   handleGlyphWidthProfileChange(e) {
     const profile = $(e.target).val();
     this.setConfigQuiet('glyphWidthProfile', profile);
     $(DOM.wideCharRegexGroup).toggle(profile === 'custom');
-    this.debouncedRefresh();
   }
 
   handleLanguageChange(e) {
@@ -887,16 +906,53 @@ class AppController {
   }
 
   loadConfig() {
-    const saved = localStorage.getItem('unicode-art-config');
+    const saved = localStorage.getItem(WEB_CONFIG_STORAGE_KEY);
+    let shouldPersist = false;
     if (saved) {
       try {
         const c = JSON.parse(saved);
         Object.assign(AppState.config, c);
         AppState.config.locale = normalizeUILocale(AppState.config.locale);
-        this.syncUIFromConfig();
-      }       catch (e) { /* 陈旧配置忽略 */ }
+      } catch (e) { /* 损坏或陈旧配置忽略 */ }
+    } else {
+      // 兼容旧版独立主题键；迁移后仅保留统一配置键。
+      const legacyTheme = localStorage.getItem('unicode-art-theme');
+      if (legacyTheme) {
+        AppState.config.themeName = legacyTheme;
+        shouldPersist = true;
+      }
     }
+
+    shouldPersist = this.normalizeConfigForUI() || shouldPersist;
+    this.syncUIFromConfig();
     this.applyGlyphFont();
+    if (shouldPersist) this.saveConfig();
+  }
+
+  /**
+   * 修复 localStorage 中已无法被当前下拉框表达的旧字体值。
+   *
+   * Web 页面目前只提供预设字体列表；保留不可选旧值会让 UI 与实际配置
+   * 分离，且用户无法通过界面恢复。因此统一回退到当前可选的默认字体。
+   */
+  normalizeConfigForUI() {
+    let changed = false;
+    const normalizeSelect = (key, selector) => {
+      const element = document.querySelector(selector);
+      const supported = element && Array.from(element.options).some((option) => option.value === AppState.config[key]);
+      if (!supported) {
+        AppState.config[key] = DEFAULT_WEB_CONFIG[key];
+        changed = true;
+      }
+    };
+
+    normalizeSelect('font', DOM.fontSelect);
+    normalizeSelect('glyphFont', DOM.glyphFont);
+    normalizeSelect('charset', DOM.charsetSelect);
+    normalizeSelect('interpolation', DOM.interpolation);
+    normalizeSelect('glyphWidthProfile', DOM.glyphWidthProfile);
+    normalizeSelect('themeName', DOM.themeSelect);
+    return changed;
   }
 
   syncUIFromConfig() {
@@ -927,16 +983,12 @@ class AppController {
     $(DOM.boxMargin).val(c.boxMargin);
     $(DOM.boxTitle).val(c.boxTitle);
     $(DOM.boxShadow).prop('checked', c.boxShadow);
-    // 主题
-    if (c.themeName && c.themeName !== 'default') {
-      document.documentElement.setAttribute('data-theme', c.themeName);
-    }
     $(DOM.themeSelect).val(c.themeName || 'default');
     $(DOM.languageSelect).val(c.locale || detectCoreLocale());
   }
 
   saveConfig() {
-    localStorage.setItem('unicode-art-config', JSON.stringify(AppState.config));
+    localStorage.setItem(WEB_CONFIG_STORAGE_KEY, JSON.stringify(AppState.config));
   }
 
   // 预览

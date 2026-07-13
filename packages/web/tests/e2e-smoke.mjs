@@ -160,6 +160,19 @@ async function main() {
       if (!visible) throw new Error('Text input panel not visible');
     });
 
+    await test('captures effective font configuration passed to Core', async () => {
+      await page.evaluate(() => {
+        const original = window.UnicodeArtCore.textToArt;
+        window.__unicodeArtTextCallCount = 0;
+        window.__unicodeArtLastTextConfig = null;
+        window.UnicodeArtCore.textToArt = async (text, config) => {
+          window.__unicodeArtTextCallCount += 1;
+          window.__unicodeArtLastTextConfig = config;
+          return original(text, config);
+        };
+      });
+    });
+
     await test('generates text banner preview', async () => {
       await page.fill('#textInput', 'UnicodeArtJs');
       await page.waitForFunction(() => {
@@ -168,6 +181,59 @@ async function main() {
           && text.split('\n').length > 2
           && !/请输入|Please enter|预览区域|preview/i.test(text);
       }, { timeout: 10000 });
+
+      const selectedGlyphFont = await page.inputValue('#glyphFont');
+      const effectiveGlyphFont = await page.evaluate(() => window.__unicodeArtLastTextConfig?.glyphFontFamily);
+      if (effectiveGlyphFont !== selectedGlyphFont) {
+        throw new Error('Initial glyph font does not match the value passed to Core');
+      }
+    });
+
+    await test('effective conversion settings regenerate text output', async () => {
+      const waitForRegeneration = async (before) => {
+        await page.waitForFunction((previous) => window.__unicodeArtTextCallCount > previous, before, { timeout: 10000 });
+      };
+
+      let before = await page.evaluate(() => window.__unicodeArtTextCallCount);
+      await page.selectOption('#font', 'LXGW WenKai');
+      await waitForRegeneration(before);
+      const visualFont = await page.evaluate(() => window.__unicodeArtLastTextConfig?.visualFont?.family);
+      if (visualFont !== 'LXGW WenKai') throw new Error('Visual font was not passed to Core');
+
+      before = await page.evaluate(() => window.__unicodeArtTextCallCount);
+      await page.selectOption('#glyphFont', "'LXGW WenKai Mono', 'LXGW WenKai', monospace");
+      await waitForRegeneration(before);
+      const glyph = await page.evaluate(() => ({
+        configured: window.__unicodeArtLastTextConfig?.glyphFontFamily,
+        computed: getComputedStyle(document.querySelector('#artPreview')).fontFamily,
+      }));
+      if (glyph.configured !== "'LXGW WenKai Mono', 'LXGW WenKai', monospace") {
+        throw new Error('Glyph font was not passed to Core');
+      }
+      if (!glyph.computed.includes('LXGW WenKai Mono')) {
+        throw new Error('Glyph preview CSS was not updated');
+      }
+
+      before = await page.evaluate(() => window.__unicodeArtTextCallCount);
+      await page.fill('#height', '13');
+      await waitForRegeneration(before);
+      const height = await page.evaluate(() => window.__unicodeArtLastTextConfig?.height);
+      if (height !== 13) throw new Error('Height was not passed to regenerated config');
+
+      before = await page.evaluate(() => window.__unicodeArtTextCallCount);
+      await page.fill('#width', '72');
+      await waitForRegeneration(before);
+      const width = await page.evaluate(() => window.__unicodeArtLastTextConfig?.width);
+      if (width !== 72) throw new Error('Width was not passed to regenerated config');
+
+      before = await page.evaluate(() => window.__unicodeArtTextCallCount);
+      await page.click('#boxEnabled');
+      await waitForRegeneration(before);
+      before = await page.evaluate(() => window.__unicodeArtTextCallCount);
+      await page.fill('#boxPadding', '0');
+      await waitForRegeneration(before);
+      const padding = await page.evaluate(() => window.__unicodeArtLastTextConfig?.box?.padding);
+      if (padding !== 0) throw new Error('Box padding 0 was not passed to Core');
     });
 
     await test('switches back to image mode', async () => {
@@ -230,9 +296,35 @@ async function main() {
       if (theme !== null) throw new Error('Theme not default');
     });
 
+    await test('migrates legacy theme storage into unified config', async () => {
+      const isolatedContext = await browser.newContext();
+      const migrationPage = await isolatedContext.newPage();
+      try {
+        await migrationPage.goto(testServer.baseUrl, { waitUntil: 'networkidle' });
+        await migrationPage.evaluate(() => {
+          localStorage.clear();
+          localStorage.setItem('unicode-art-theme', 'dark');
+        });
+        await migrationPage.reload({ waitUntil: 'networkidle' });
+
+        const migrated = await migrationPage.evaluate(() => ({
+          theme: document.documentElement.getAttribute('data-theme'),
+          selected: document.querySelector('#themeSelect')?.value,
+          legacy: localStorage.getItem('unicode-art-theme'),
+          config: JSON.parse(localStorage.getItem('unicode-art-config') || '{}').themeName,
+        }));
+        if (migrated.theme !== 'dark' || migrated.selected !== 'dark') {
+          throw new Error('Legacy theme was not applied consistently');
+        }
+        if (migrated.legacy !== null || migrated.config !== 'dark') {
+          throw new Error('Legacy theme was not migrated to unified config');
+        }
+      } finally {
+        await isolatedContext.close();
+      }
+    });
+
     await test('box panel toggle works', async () => {
-      await page.click('#boxEnabled');
-      await page.waitForTimeout(200);
       const checked = await page.isChecked('#boxEnabled');
       if (!checked) throw new Error('Box not enabled');
       await page.click('#boxEnabled');
