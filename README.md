@@ -92,7 +92,6 @@ unicode-art text "UnicodeArtJs" --box "{\"enabled\":true,\"style\":\"round\",\"p
 | `packages/cli` | 命令行工具，npm 包名为 `unicode-art-cli`。 |
 | `packages/web` | 在线工具站，部署到 GitHub Pages。 |
 | `packages/vscode-extension` | VS Code 插件。 |
-| `packages/electron-app` | 桌面端预留目录。 |
 
 ## 本地开发
 
@@ -117,7 +116,7 @@ npm run check
 
 UnicodeArtJs 是 TypeScript / JavaScript 的独立实现。它的功能目标参考了 [UnicodeArt](https://github.com/mandolin/UnicodeArt) 的公开行为和使用体验，并通过测试尽量保持常用参数下的结果接近；实现上不复制 GPL 源码、注释或逐行结构。
 
-项目依赖优先选择 MIT、Apache-2.0、BSD、ISC 等宽松许可证。更多说明见 [docs/license-audit.md](docs/license-audit.md)。
+Core、CLI、Web 和 VS Code 默认路径采用“清洁分发”策略，依赖优先选择 MIT、Apache-2.0、BSD、ISC 等宽松许可证。桌面应用或可选兼容 adapter 会作为独立项目发布；它们可能使用需要额外 NOTICE、源码获取或替换权利说明的组件，但不会改变 Core 的 MIT 许可或默认安装边界。更多说明见 [docs/license-audit.md](docs/license-audit.md)。
 
 ## 相关链接
 
