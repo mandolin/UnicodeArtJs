@@ -5,6 +5,7 @@
 - [公开路线](roadmap.md)
 - [依赖与许可证政策](license-audit.md)
 - [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
+- [宿主接入指南](host-integration.md)
 - [发布门禁与版本图](release-gate.md)
 - [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)
 - [VS Code Extension 发布检查](vscode-extension-release-checklist.md)

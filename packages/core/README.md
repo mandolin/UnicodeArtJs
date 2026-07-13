@@ -114,6 +114,8 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - Reserved: `charSpace`, `maxParallelTasks`, `visualFont.reduceTop/right/bottom/left`, `glyphFont.widthProfile`, and `glyphFont.wideCharRegex`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
 
 Hosts can read the same boundary from `getCoreCapabilities()` instead of duplicating stability lists in UI code.
+For desktop, browser and custom decoder boundaries, see the repository-level
+[host integration guide](../../docs/host-integration.md).
 
 Node runtime note: Core no longer installs `sharp` or node-canvas by default.
 The default image backend targets PNG / JPEG / WebP / BMP; the default text
