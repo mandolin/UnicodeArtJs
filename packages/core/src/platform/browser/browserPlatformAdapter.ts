@@ -28,6 +28,7 @@ import type {
 } from '../types';
 import { getPresetChars } from '../../constants';
 import { resizeInterpolate } from '../../sampler';
+import { formatCanvasFontFamily } from '../../utils/canvasFontFamily';
 import { isWideChar as detectWideChar } from '../../utils/wideCharDetector';
 
 //#region 🟦 Lightweight Browser Types
@@ -699,11 +700,6 @@ function resolveTextX(
   }
 
   return fontReduce;
-}
-
-function formatCanvasFontFamily(font: string): string {
-  const escapedFont = font.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `"${escapedFont}"`;
 }
 
 //#endregion

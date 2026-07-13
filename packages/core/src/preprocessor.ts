@@ -35,6 +35,7 @@ import type { ImageData } from './types/image';
 import { UnicodeArtError, ErrorCode } from './types/output';
 import { getNodeImageBackend } from './platform/node/imageBackend';
 import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './platform/node/nodeTextCanvas';
+import { formatCanvasFontFamily } from './utils/canvasFontFamily';
 
 //#region 🟩 图像加载
 
@@ -372,11 +373,6 @@ function darkenTextBand(
       }
     }
   }
-}
-
-function formatCanvasFontFamily(font: string): string {
-  const escapedFont = font.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `"${escapedFont}"`;
 }
 
 interface TextVerticalMetrics {

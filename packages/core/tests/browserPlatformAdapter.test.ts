@@ -205,6 +205,18 @@ describe('browserPlatformAdapter', () => {
     expect(matrix.length).toBe(16);
   });
 
+  test('preserves CSS glyph-font fallback lists for Canvas rendering', async () => {
+    const font = "'Sarasa Mono SC', 'Sarasa Term SC', monospace";
+
+    await browserPlatformAdapter.renderCharToMatrix('A', {
+      matrixSize: 4,
+      font,
+      fontSize: 4
+    });
+
+    expect(mockFillTextFonts).toContain(`4px ${font}`);
+  });
+
   test('caches browser glyph matrices by rendering options', async () => {
     const first = await browserPlatformAdapter.renderCharToMatrix('A', {
       matrixSize: 4,

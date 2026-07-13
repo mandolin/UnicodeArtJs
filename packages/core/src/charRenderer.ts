@@ -35,6 +35,7 @@ import { Interpolation } from './types/config';
 import { UnicodeArtError, ErrorCode } from './types/output';
 import { rgbaToGrayscale } from './preprocessor';
 import { resizeInterpolate } from './sampler';
+import { formatCanvasFontFamily } from './utils/canvasFontFamily';
 import { isWideChar as detectWideChar } from './utils/wideCharDetector';
 import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants';
 import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './platform/node/nodeTextCanvas';
@@ -449,11 +450,6 @@ function getFontExtension(fontPath: string): string {
 function getFileBaseName(filePath: string): string {
   const normalized = filePath.replace(/\\/g, '/');
   return normalized.slice(normalized.lastIndexOf('/') + 1);
-}
-
-function formatCanvasFontFamily(font: string): string {
-  const escapedFont = font.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `"${escapedFont}"`;
 }
 
 //#endregion

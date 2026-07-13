@@ -23,6 +23,7 @@ import {
 } from '../../charRenderer';
 import type { CoreImageData } from '../../types/image';
 import { ErrorCode, UnicodeArtError } from '../../types/output';
+import { formatCanvasFontFamily } from '../../utils/canvasFontFamily';
 import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './nodeTextCanvas';
 
 //#region 🟦 Adapter
@@ -132,11 +133,6 @@ function measureTextWidthWithCanvas(
       { originalError: error }
     );
   }
-}
-
-function formatCanvasFontFamily(font: string): string {
-  const escapedFont = font.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `"${escapedFont}"`;
 }
 
 function resolveFittedTextFontSize(ctx: any, font: string, requestedFontSize: number): number {

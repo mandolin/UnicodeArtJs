@@ -195,19 +195,19 @@ async function main() {
       };
 
       let before = await page.evaluate(() => window.__unicodeArtTextCallCount);
-      await page.selectOption('#font', 'LXGW WenKai');
+      await page.selectOption('#font', "'LXGW WenKai', '霞鹜文楷', serif");
       await waitForRegeneration(before);
       const visualFont = await page.evaluate(() => window.__unicodeArtLastTextConfig?.visualFont?.family);
-      if (visualFont !== 'LXGW WenKai') throw new Error('Visual font was not passed to Core');
+      if (visualFont !== "'LXGW WenKai', '霞鹜文楷', serif") throw new Error('Visual font was not passed to Core');
 
       before = await page.evaluate(() => window.__unicodeArtTextCallCount);
-      await page.selectOption('#glyphFont', "'LXGW WenKai Mono', 'LXGW WenKai', monospace");
+      await page.selectOption('#glyphFont', "'LXGW WenKai Mono', '霞鹜文楷等宽', 'LXGW WenKai', '霞鹜文楷', monospace");
       await waitForRegeneration(before);
       const glyph = await page.evaluate(() => ({
         configured: window.__unicodeArtLastTextConfig?.glyphFontFamily,
         computed: getComputedStyle(document.querySelector('#artPreview')).fontFamily,
       }));
-      if (glyph.configured !== "'LXGW WenKai Mono', 'LXGW WenKai', monospace") {
+      if (glyph.configured !== "'LXGW WenKai Mono', '霞鹜文楷等宽', 'LXGW WenKai', '霞鹜文楷', monospace") {
         throw new Error('Glyph font was not passed to Core');
       }
       if (!glyph.computed.includes('LXGW WenKai Mono')) {
@@ -258,7 +258,7 @@ async function main() {
     });
 
     await test('glyph font selector can be changed', async () => {
-      await page.selectOption('#glyphFont', '\'Sarasa Mono SC\', \'Sarasa Term SC\', monospace');
+      await page.selectOption('#glyphFont', "'Sarasa Mono SC', 'Sarasa Term SC', '等距更纱黑体 SC Nerd Font', '等距更纱黑体 SC', '等距更纱黑体', '等距更紗黑體 SC', monospace");
       await page.waitForTimeout(100);
     });
 
