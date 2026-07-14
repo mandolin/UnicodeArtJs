@@ -9,6 +9,12 @@
  * ============================================================================
  */
 
+import {
+  getGalleryLocalizedText,
+  parseUnicodeArtGalleryIndex,
+  resolveUnicodeArtGalleryArtworkUrl,
+} from './gallery-index.js';
+
 //#region 🟩 应用状态
 
 let $ = window.jQuery || window.$;
@@ -73,7 +79,7 @@ const UI_MESSAGES = {
     'mode.image': '图片转字符画',
     'mode.text': '文字Banner',
     'mode.editor': '编辑器',
-    'mode.editorSoon': '后期实现',
+    'mode.gallery': '作品画廊',
     'editor.sourceRegion': '编辑器源文件与模板',
     'editor.previewRegion': '编辑器预览',
     'editor.title': '艺术字与布局编辑器',
@@ -124,6 +130,47 @@ const UI_MESSAGES = {
     'editor.status.templateSelectionRequired': '请选择一个本地模板',
     'editor.status.copyDone': '预览已复制',
     'editor.status.copyFailed': '复制失败，请手动选择预览内容',
+    'gallery.region': 'UnicodeArtJs 作品画廊',
+    'gallery.previewRegion': '作品字符画预览',
+    'gallery.title': 'UnicodeArtJs 作品画廊',
+    'gallery.intro': '展示项目审核通过的原创静态示例；不会上传、下载或执行第三方内容。',
+    'gallery.filters': '画廊筛选',
+    'gallery.search': '搜索',
+    'gallery.searchPlaceholder': '按标题、说明或标签筛选',
+    'gallery.tag': '标签',
+    'gallery.tag.all': '全部标签',
+    'gallery.clearFilters': '清除筛选',
+    'gallery.status.ready': '正在准备作品索引',
+    'gallery.status.loading': '正在载入审核作品',
+    'gallery.status.loaded': '已载入 {count} 件审核作品',
+    'gallery.status.empty': '没有匹配的作品',
+    'gallery.status.error': '画廊载入失败：{message}',
+    'gallery.count': '显示 {visible} / {total} 件作品',
+    'gallery.noSelection': '选择一件作品以查看详情',
+    'gallery.previewPlaceholder': '从左侧选择一件作品',
+    'gallery.loadingPreview': '正在生成作品预览',
+    'gallery.previewFailed': '作品预览失败：{message}',
+    'gallery.reviewed': '已审核',
+    'gallery.author': '作者',
+    'gallery.license': '许可证',
+    'gallery.reviewedAt': '审核日期',
+    'gallery.kind.semantic-document': '语义布局文档',
+    'gallery.kind.unicode-art-font': 'Unicode 艺术字字体',
+    'gallery.copy': '复制字符画',
+    'gallery.download': '下载源文件',
+    'gallery.openEditor': '在编辑器中打开',
+    'gallery.copyDone': '画廊作品已复制到剪贴板',
+    'gallery.copyFailed': '复制失败，请手动选择预览内容',
+    'gallery.tag.banner': 'Banner',
+    'gallery.tag.font': '艺术字',
+    'gallery.tag.original': '原创',
+    'gallery.tag.layout': '布局',
+    'gallery.tag.table': '表格',
+    'gallery.tag.document': '文档',
+    'gallery.tag.box': '裱框',
+    'gallery.tag.text': '文本',
+    'gallery.tag.bilingual': '双语',
+    'gallery.tag.width': '宽度',
     'input.imageTitle': '上传图片',
     'input.uploadText': '拖拽图片到此处',
     'input.uploadHint': '或点击选择文件',
@@ -232,7 +279,7 @@ const UI_MESSAGES = {
     'mode.image': 'Image to Art',
     'mode.text': 'Text Banner',
     'mode.editor': 'Editor',
-    'mode.editorSoon': 'Planned for a later version',
+    'mode.gallery': 'Gallery',
     'editor.sourceRegion': 'Editor source and templates',
     'editor.previewRegion': 'Editor preview',
     'editor.title': 'Art Font and Layout Editor',
@@ -283,6 +330,47 @@ const UI_MESSAGES = {
     'editor.status.templateSelectionRequired': 'Choose a local template',
     'editor.status.copyDone': 'Preview copied',
     'editor.status.copyFailed': 'Copy failed. Select the preview content manually.',
+    'gallery.region': 'UnicodeArtJs art gallery',
+    'gallery.previewRegion': 'Artwork preview',
+    'gallery.title': 'UnicodeArtJs Art Gallery',
+    'gallery.intro': 'Reviewed, original static examples. The gallery does not upload, download, or execute third-party content.',
+    'gallery.filters': 'Gallery filters',
+    'gallery.search': 'Search',
+    'gallery.searchPlaceholder': 'Filter by title, description, or tag',
+    'gallery.tag': 'Tag',
+    'gallery.tag.all': 'All tags',
+    'gallery.clearFilters': 'Clear filters',
+    'gallery.status.ready': 'Preparing the artwork index',
+    'gallery.status.loading': 'Loading reviewed artworks',
+    'gallery.status.loaded': '{count} reviewed artworks loaded',
+    'gallery.status.empty': 'No artworks match the current filters',
+    'gallery.status.error': 'Gallery load failed: {message}',
+    'gallery.count': 'Showing {visible} / {total} artworks',
+    'gallery.noSelection': 'Select an artwork to view details',
+    'gallery.previewPlaceholder': 'Choose an artwork from the left',
+    'gallery.loadingPreview': 'Rendering artwork preview',
+    'gallery.previewFailed': 'Artwork preview failed: {message}',
+    'gallery.reviewed': 'Reviewed',
+    'gallery.author': 'Author',
+    'gallery.license': 'License',
+    'gallery.reviewedAt': 'Reviewed',
+    'gallery.kind.semantic-document': 'Semantic layout document',
+    'gallery.kind.unicode-art-font': 'Unicode art font',
+    'gallery.copy': 'Copy art',
+    'gallery.download': 'Download source',
+    'gallery.openEditor': 'Open in editor',
+    'gallery.copyDone': 'Gallery artwork copied to clipboard',
+    'gallery.copyFailed': 'Copy failed. Select the preview content manually.',
+    'gallery.tag.banner': 'Banner',
+    'gallery.tag.font': 'Art font',
+    'gallery.tag.original': 'Original',
+    'gallery.tag.layout': 'Layout',
+    'gallery.tag.table': 'Table',
+    'gallery.tag.document': 'Document',
+    'gallery.tag.box': 'Box',
+    'gallery.tag.text': 'Text',
+    'gallery.tag.bilingual': 'Bilingual',
+    'gallery.tag.width': 'Width',
     'input.imageTitle': 'Upload Image',
     'input.uploadText': 'Drop an image here',
     'input.uploadHint': 'or click to choose a file',
@@ -431,6 +519,7 @@ const DOM = {
   modeButtons: '.mode-btn',
   converterWorkbench: '#converterWorkbench',
   editorWorkbench: '#editorWorkbench',
+  galleryWorkbench: '#galleryWorkbench',
   imageInputPanel: '#imageInputPanel',
   textInputPanel: '#textInputPanel',
   uploadZone: '#uploadZone',
@@ -510,6 +599,26 @@ const DOM = {
   editorPreview: '#editorPreview',
   editorMeta: '#editorMeta',
   editorCopy: '#editorCopy',
+
+  galleryStatus: '#galleryStatus',
+  gallerySearch: '#gallerySearch',
+  galleryTag: '#galleryTag',
+  galleryClearFilters: '#galleryClearFilters',
+  galleryCount: '#galleryCount',
+  galleryGrid: '#galleryGrid',
+  galleryKind: '#galleryKind',
+  galleryTitle: '#galleryTitle',
+  galleryReview: '#galleryReview',
+  galleryMetadata: '#galleryMetadata',
+  galleryAuthor: '#galleryAuthor',
+  galleryLicense: '#galleryLicense',
+  galleryReviewedAt: '#galleryReviewedAt',
+  galleryDescription: '#galleryDescription',
+  galleryPreview: '#galleryPreview',
+  galleryPreviewMeta: '#galleryPreviewMeta',
+  galleryCopy: '#galleryCopy',
+  galleryDownload: '#galleryDownload',
+  galleryOpenEditor: '#galleryOpenEditor',
 };
 
 //#endregion
@@ -985,6 +1094,29 @@ class EditorController {
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
   }
 
+  /**
+   * 将已由同源画廊读取的 canonical JSON 交给 source-first 编辑器。
+   *
+   * 画廊不保留可编辑副本，也不绕过 Core 校验：作品源文件进入编辑器后仍须
+   * 按通常流程校验、渲染和保存。本方法只负责明确的本地工作区交接。
+   */
+  openExternalSource(kind, source, sample) {
+    const workspaceKind = kind === 'unicode-art-font' ? 'font' : 'document';
+    if (typeof source !== 'string' || !source.trim()) return;
+    this.workspace.kind = workspaceKind;
+    if (workspaceKind === 'font') {
+      this.workspace.fontSource = source;
+      if (typeof sample === 'string' && sample) this.workspace.fontSample = sample;
+    } else {
+      this.workspace.documentSource = source;
+    }
+    this.persistWorkspace();
+    this.syncControlsFromWorkspace();
+    this.refreshLocale();
+    this.result = null;
+    this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+  }
+
   syncControlsFromWorkspace() {
     $(DOM.editorKind).val(this.workspace.kind);
     $(DOM.editorSource).val(this.getCurrentSource());
@@ -1341,6 +1473,320 @@ class EditorController {
 
 //#endregion
 
+//#region 🟩 静态作品画廊
+
+/**
+ * 🟢 只读静态作品画廊控制器
+ *
+ * 🔹 画廊索引和资源始终来自当前站点的 `public/gallery` 静态目录。
+ * 🔹 每份资源都会先经画廊索引路径校验，再经 Core 的 UAF/语义文档校验。
+ * 🔹 本阶段不支持上传、远程 URL、账户、评论或任何可执行扩展。
+ */
+class GalleryController {
+  constructor(appController) {
+    this.appController = appController;
+    this.index = null;
+    this.selectedArtwork = null;
+    this.selectedSource = '';
+    this.selectedResult = null;
+    this.loadGeneration = 0;
+  }
+
+  bindEvents($doc) {
+    $doc.on('input', DOM.gallerySearch, () => this.renderGrid());
+    $doc.on('change', DOM.galleryTag, () => this.renderGrid());
+    $doc.on('click', DOM.galleryClearFilters, () => this.clearFilters());
+    $doc.on('click', '[data-gallery-artwork-id]', (event) => {
+      const id = String($(event.currentTarget).attr('data-gallery-artwork-id') || '');
+      void this.selectArtwork(id);
+    });
+    $doc.on('click', DOM.galleryCopy, () => void this.copySelectedArtwork());
+    $doc.on('click', DOM.galleryDownload, () => this.downloadSelectedArtwork());
+    $doc.on('click', DOM.galleryOpenEditor, () => this.openSelectedArtworkInEditor());
+  }
+
+  async activate() {
+    this.applyGlyphFont();
+    await this.ensureLoaded();
+  }
+
+  refreshLocale() {
+    if (!this.index) {
+      this.setStatus('gallery.status.ready');
+      return;
+    }
+    this.populateTagOptions();
+    this.renderGrid();
+    if (this.selectedArtwork) this.renderSelectedArtwork();
+  }
+
+  applyGlyphFont() {
+    $(DOM.galleryPreview).css('font-family', AppState.config.glyphFont);
+  }
+
+  t(key, params = {}) {
+    return this.appController.i18nManager.t(key, params);
+  }
+
+  getCoreAdapter() {
+    return this.appController.artGenerator.coreAdapter;
+  }
+
+  async ensureLoaded() {
+    if (this.index) {
+      this.populateTagOptions();
+      this.renderGrid();
+      if (!this.selectedArtwork && this.index.artworks.length > 0) {
+        await this.selectArtwork(this.index.artworks[0].id);
+      }
+      return;
+    }
+
+    this.setStatus('gallery.status.loading');
+    try {
+      const response = await fetch(new URL('./gallery/index.json', window.location.href), { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      this.index = parseUnicodeArtGalleryIndex(await response.text());
+      this.populateTagOptions();
+      this.renderGrid();
+      this.setStatus('gallery.status.loaded', { count: this.index.artworks.length }, 'success');
+      if (this.index.artworks.length > 0) await this.selectArtwork(this.index.artworks[0].id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.setStatus('gallery.status.error', { message }, 'error');
+      this.setInspectorPlaceholder('gallery.previewFailed', { message });
+    }
+  }
+
+  getAllTags() {
+    if (!this.index) return [];
+    return [...new Set(this.index.artworks.flatMap((artwork) => artwork.tags))].sort();
+  }
+
+  populateTagOptions() {
+    const $select = $(DOM.galleryTag);
+    const previousValue = $select.val();
+    $select.empty();
+    $('<option>').val('').text(this.t('gallery.tag.all')).appendTo($select);
+    this.getAllTags().forEach((tag) => {
+      const translated = this.t(`gallery.tag.${tag}`);
+      $('<option>').val(tag).text(translated === `gallery.tag.${tag}` ? tag : translated).appendTo($select);
+    });
+    if (previousValue && $select.find(`option[value="${previousValue}"]`).length > 0) {
+      $select.val(previousValue);
+    }
+  }
+
+  getFilteredArtworks() {
+    if (!this.index) return [];
+    const search = String($(DOM.gallerySearch).val() || '').trim().toLocaleLowerCase();
+    const tag = String($(DOM.galleryTag).val() || '');
+    return this.index.artworks.filter((artwork) => {
+      if (tag && !artwork.tags.includes(tag)) return false;
+      if (!search) return true;
+      const searchable = [
+        getGalleryLocalizedText(artwork.title, AppState.config.locale),
+        getGalleryLocalizedText(artwork.description, AppState.config.locale),
+        artwork.author,
+        ...artwork.tags,
+      ].join(' ').toLocaleLowerCase();
+      return searchable.includes(search);
+    });
+  }
+
+  renderGrid() {
+    const $grid = $(DOM.galleryGrid);
+    $grid.empty();
+    if (!this.index) return;
+
+    const artworks = this.getFilteredArtworks();
+    $(DOM.galleryCount).text(this.t('gallery.count', {
+      visible: artworks.length,
+      total: this.index.artworks.length,
+    }));
+
+    if (artworks.length === 0) {
+      $('<p>').addClass('gallery-empty').text(this.t('gallery.status.empty')).appendTo($grid);
+      return;
+    }
+
+    artworks.forEach((artwork) => {
+      const isSelected = artwork.id === this.selectedArtwork?.id;
+      const $button = $('<button>')
+        .attr({
+          type: 'button',
+          'data-gallery-artwork-id': artwork.id,
+          'aria-pressed': String(isSelected),
+        })
+        .addClass('gallery-artwork-card')
+        .toggleClass('selected', isSelected);
+
+      $('<span>')
+        .addClass('gallery-artwork-kind')
+        .text(this.t(`gallery.kind.${artwork.kind}`))
+        .appendTo($button);
+      $('<strong>')
+        .addClass('gallery-artwork-title')
+        .text(getGalleryLocalizedText(artwork.title, AppState.config.locale))
+        .appendTo($button);
+      $('<span>')
+        .addClass('gallery-artwork-description')
+        .text(getGalleryLocalizedText(artwork.description, AppState.config.locale))
+        .appendTo($button);
+
+      const $tags = $('<span>').addClass('gallery-artwork-tags');
+      artwork.tags.forEach((tag) => {
+        const label = this.t(`gallery.tag.${tag}`);
+        $('<span>')
+          .addClass('gallery-tag')
+          .text(label === `gallery.tag.${tag}` ? tag : label)
+          .appendTo($tags);
+      });
+      $tags.appendTo($button);
+      $('<article>').attr('role', 'listitem').append($button).appendTo($grid);
+    });
+  }
+
+  clearFilters() {
+    $(DOM.gallerySearch).val('');
+    $(DOM.galleryTag).val('');
+    this.renderGrid();
+  }
+
+  async selectArtwork(id) {
+    const artwork = this.index?.artworks.find((item) => item.id === id);
+    if (!artwork) return;
+
+    const request = ++this.loadGeneration;
+    this.selectedArtwork = artwork;
+    this.selectedSource = '';
+    this.selectedResult = null;
+    this.renderGrid();
+    this.setInspectorLoading(artwork);
+
+    try {
+      const assetUrl = resolveUnicodeArtGalleryArtworkUrl(artwork.source);
+      const response = await fetch(assetUrl, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const source = await response.text();
+      const adapter = this.getCoreAdapter();
+      const config = { ...this.appController.artGenerator.buildCoreConfig(), box: false };
+      let result;
+
+      if (artwork.kind === 'semantic-document') {
+        const document = adapter.validateSemanticDocument(JSON.parse(source), { locale: AppState.config.locale });
+        result = await adapter.semanticDocumentToArt(document, config, { grid: true });
+      } else {
+        const font = adapter.parseUnicodeArtFontJson(source, { locale: AppState.config.locale });
+        const rendered = adapter.renderUnicodeArtFontText(font, artwork.sample, {
+          glyphWidthProfile: config.glyphWidthProfile,
+          wideCharRegex: config.wideCharRegex,
+          locale: AppState.config.locale,
+        });
+        result = { content: rendered.content, rows: rendered.rows, cols: rendered.cols };
+      }
+
+      if (request !== this.loadGeneration) return;
+      this.selectedSource = source;
+      this.selectedResult = result;
+      this.renderSelectedArtwork();
+    } catch (error) {
+      if (request !== this.loadGeneration) return;
+      const message = error instanceof Error ? error.message : String(error);
+      this.setInspectorPlaceholder('gallery.previewFailed', { message });
+      $(DOM.galleryTitle).text(getGalleryLocalizedText(artwork.title, AppState.config.locale));
+      $(DOM.galleryDescription).text(getGalleryLocalizedText(artwork.description, AppState.config.locale));
+      this.setActionAvailability(false);
+    }
+  }
+
+  setInspectorLoading(artwork) {
+    $(DOM.galleryKind).text(this.t(`gallery.kind.${artwork.kind}`));
+    $(DOM.galleryTitle).text(getGalleryLocalizedText(artwork.title, AppState.config.locale));
+    $(DOM.galleryDescription).text(getGalleryLocalizedText(artwork.description, AppState.config.locale));
+    $(DOM.galleryMetadata).prop('hidden', true);
+    $(DOM.galleryReview).prop('hidden', true);
+    $(DOM.galleryPreview)
+      .empty()
+      .append($('<code>').addClass('preview-placeholder').text(this.t('gallery.loadingPreview')));
+    $(DOM.galleryPreviewMeta).text('');
+    this.setActionAvailability(false);
+  }
+
+  renderSelectedArtwork() {
+    const artwork = this.selectedArtwork;
+    const result = this.selectedResult;
+    if (!artwork || !result) return;
+
+    $(DOM.galleryKind).text(this.t(`gallery.kind.${artwork.kind}`));
+    $(DOM.galleryTitle).text(getGalleryLocalizedText(artwork.title, AppState.config.locale));
+    $(DOM.galleryDescription).text(getGalleryLocalizedText(artwork.description, AppState.config.locale));
+    $(DOM.galleryAuthor).text(artwork.author);
+    $(DOM.galleryLicense).text(artwork.license.expression);
+    $(DOM.galleryReviewedAt).text(artwork.reviewedAt);
+    $(DOM.galleryMetadata).prop('hidden', false);
+    $(DOM.galleryReview).prop('hidden', false);
+    $(DOM.galleryPreview).text(result.content);
+    $(DOM.galleryPreviewMeta).text(`${result.cols} × ${result.rows}`);
+    this.setActionAvailability(true);
+  }
+
+  setInspectorPlaceholder(key, params = {}) {
+    $(DOM.galleryPreview)
+      .empty()
+      .append($('<code>').addClass('preview-placeholder').text(this.t(key, params)));
+    $(DOM.galleryPreviewMeta).text('');
+    $(DOM.galleryMetadata).prop('hidden', true);
+    $(DOM.galleryReview).prop('hidden', true);
+    this.setActionAvailability(false);
+  }
+
+  setActionAvailability(enabled) {
+    $(DOM.galleryCopy).prop('disabled', !enabled);
+    $(DOM.galleryDownload).prop('disabled', !enabled);
+    $(DOM.galleryOpenEditor).prop('disabled', !enabled);
+  }
+
+  setStatus(key, params = {}, state = 'info') {
+    $(DOM.galleryStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
+  async copySelectedArtwork() {
+    if (!this.selectedResult?.content) return;
+    try {
+      await navigator.clipboard.writeText(this.selectedResult.content);
+      this.appController.toastManager.success(this.t('gallery.copyDone'));
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = this.selectedResult.content;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      if (copied) this.appController.toastManager.success(this.t('gallery.copyDone'));
+      else this.appController.toastManager.error(this.t('gallery.copyFailed'));
+    }
+  }
+
+  downloadSelectedArtwork() {
+    if (!this.selectedArtwork || !this.selectedSource) return;
+    const filename = this.selectedArtwork.source.split('/').at(-1) || 'unicode-art-artwork.json';
+    const blob = new Blob([this.selectedSource], { type: 'application/json;charset=utf-8' });
+    this.appController.downloadBlob(blob, filename);
+  }
+
+  openSelectedArtworkInEditor() {
+    if (!this.selectedArtwork || !this.selectedSource) return;
+    this.appController.openGalleryArtworkInEditor(this.selectedArtwork, this.selectedSource);
+  }
+}
+
+//#endregion
+
 //#region 🟩 应用控制器
 
 class AppController {
@@ -1350,6 +1796,7 @@ class AppController {
     this.toastManager = new ToastManager();
     this.artGenerator = new ArtGenerator();
     this.editorController = new EditorController(this);
+    this.galleryController = new GalleryController(this);
 
     //#region 🟩 防抖
 
@@ -1492,6 +1939,9 @@ class AppController {
     // 编辑器
     this.editorController.bindEvents($doc);
 
+    // 静态画廊
+    this.galleryController.bindEvents($doc);
+
     // 主题
     $doc.on('change', DOM.themeSelect, (e) => { this.themeManager.switchTheme($(e.target).val()); });
     $doc.on('change', DOM.languageSelect, (e) => { this.handleLanguageChange(e); });
@@ -1502,17 +1952,39 @@ class AppController {
     if ($btn.hasClass('disabled')) return;
     const mode = $btn.data('mode');
     if (mode === AppState.mode) return;
+    void this.switchMode(mode);
+  }
+
+  /**
+   * 切换三个独立工作台。
+   *
+   * 转换器、编辑器和画廊都使用 HTML `hidden` 语义，避免仅靠视觉样式隐藏
+   * 后仍被键盘焦点访问。画廊首次激活时才读取同源静态索引。
+   */
+  async switchMode(mode) {
+    if (!['image', 'text', 'editor', 'gallery'].includes(mode)) return;
     $(DOM.modeButtons).removeClass('active');
-    $btn.addClass('active');
+    $(`${DOM.modeButtons}[data-mode="${mode}"]`).addClass('active');
     if (mode === 'editor') {
       $(DOM.converterWorkbench).prop('hidden', true);
+      $(DOM.galleryWorkbench).prop('hidden', true);
       $(DOM.editorWorkbench).prop('hidden', false);
       AppState.mode = mode;
       this.editorController.activate();
       return;
     }
 
+    if (mode === 'gallery') {
+      $(DOM.converterWorkbench).prop('hidden', true);
+      $(DOM.editorWorkbench).prop('hidden', true);
+      $(DOM.galleryWorkbench).prop('hidden', false);
+      AppState.mode = mode;
+      await this.galleryController.activate();
+      return;
+    }
+
     $(DOM.editorWorkbench).prop('hidden', true);
+    $(DOM.galleryWorkbench).prop('hidden', true);
     $(DOM.converterWorkbench).prop('hidden', false);
     if (mode === 'image') { $(DOM.imageInputPanel).show(); $(DOM.textInputPanel).hide(); }
     else { $(DOM.imageInputPanel).hide(); $(DOM.textInputPanel).show(); }
@@ -1545,6 +2017,7 @@ class AppController {
     this.i18nManager.apply($(e.target).val());
     this.initBoxStylePreview();
     this.editorController.refreshLocale();
+    this.galleryController.refreshLocale();
     this.saveConfig();
     if (!AppState.result) {
       this.setPlaceholder(this.getIdlePlaceholder());
@@ -1565,6 +2038,13 @@ class AppController {
       $preview.css('font-size', '0.75rem');
     }
     this.editorController?.applyGlyphFont();
+    this.galleryController?.applyGlyphFont();
+  }
+
+  /** 将已加载的同源审核画廊资源显式交给 source-first 编辑器。 */
+  openGalleryArtworkInEditor(artwork, source) {
+    this.editorController.openExternalSource(artwork.kind, source, artwork.sample);
+    void this.switchMode('editor').then(() => this.editorController.renderPreview());
   }
 
   // 文件处理
@@ -1731,6 +2211,7 @@ class AppController {
       await this.editorController.renderPreview();
       return;
     }
+    if (AppState.mode === 'gallery') return;
     if (AppState.mode === 'image' && !AppState.imageFile) { this.setPlaceholder(this.i18nManager.t('preview.uploadImage')); return; }
     if (AppState.mode === 'text' && !AppState.textContent.trim()) { this.setPlaceholder(this.i18nManager.t('preview.enterText')); return; }
 

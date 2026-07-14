@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "UnicodeArtJs / Static Gallery"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "role": "column-header",
+          "blocks": [{ "kind": "raw-text", "text": "Asset" }]
+        },
+        {
+          "role": "column-header",
+          "blocks": [{ "kind": "raw-text", "text": "Status" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Line Banner" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Reviewed / MIT" }]
+        }
+      ]
+    }
+  ]
+}

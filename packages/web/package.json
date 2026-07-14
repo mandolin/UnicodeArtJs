@@ -13,7 +13,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/unit.test.js",
+    "test": "node tests/unit.test.js && node --test tests/gallery-index.test.mjs",
     "test:e2e": "node tests/e2e-smoke.mjs",
     "test:pages": "node tests/pages-smoke.mjs",
     "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\" \"tests/**/*.mjs\"",

@@ -1,0 +1,98 @@
+{
+  "format": "unicode-art-gallery-index",
+  "version": 1,
+  "meta": {
+    "name": {
+      "zh-CN": "UnicodeArtJs 静态作品画廊",
+      "en-US": "UnicodeArtJs Static Art Gallery"
+    },
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "reviewedAt": "2026-07-14"
+  },
+  "artworks": [
+    {
+      "id": "line-banner-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/line-banner.uafont.json",
+      "sample": "UAJ",
+      "title": {
+        "zh-CN": "线条 Banner",
+        "en-US": "Line Banner"
+      },
+      "description": {
+        "zh-CN": "使用项目原创 UAF 字形拼出的紧凑三字母 Banner。",
+        "en-US": "A compact three-letter banner rendered with original project UAF glyphs."
+      },
+      "tags": ["banner", "font", "original"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-14"
+    },
+    {
+      "id": "project-overview",
+      "kind": "semantic-document",
+      "source": "artworks/project-overview.uadoc.json",
+      "title": {
+        "zh-CN": "项目概览表",
+        "en-US": "Project Overview"
+      },
+      "description": {
+        "zh-CN": "展示标题、列标题和普通文本块的原创语义布局示例。",
+        "en-US": "An original semantic layout example with header, column headings, and text blocks."
+      },
+      "tags": ["layout", "table", "document"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-14"
+    },
+    {
+      "id": "boxed-note",
+      "kind": "semantic-document",
+      "source": "artworks/boxed-note.uadoc.json",
+      "title": {
+        "zh-CN": "裱框便签",
+        "en-US": "Boxed Note"
+      },
+      "description": {
+        "zh-CN": "展示多行原字输出与圆角边框字符组合的原创便签。",
+        "en-US": "An original note composed from multiline raw text and round border characters."
+      },
+      "tags": ["box", "layout", "text"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-14"
+    },
+    {
+      "id": "bilingual-grid",
+      "kind": "semantic-document",
+      "source": "artworks/bilingual-grid.uadoc.json",
+      "title": {
+        "zh-CN": "双语栅格",
+        "en-US": "Bilingual Grid"
+      },
+      "description": {
+        "zh-CN": "用于检视中英文混排字素宽度与单元格对齐的原创示例。",
+        "en-US": "An original specimen for reviewing mixed Chinese and Latin glyph widths in a grid."
+      },
+      "tags": ["layout", "bilingual", "width"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-14"
+    }
+  ]
+}

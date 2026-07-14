@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "字素 / Glyph" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "宽度 / Width" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "中" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "2" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "A" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "1" }]
+        }
+      ]
+    }
+  ]
+}

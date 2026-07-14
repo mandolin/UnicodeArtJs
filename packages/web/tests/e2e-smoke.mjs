@@ -142,7 +142,7 @@ async function main() {
 
     await test('mode buttons exist', async () => {
       const buttons = await page.$$('.mode-btn');
-      if (buttons.length < 3) throw new Error('Editor mode button is missing');
+      if (buttons.length < 4) throw new Error('Gallery mode button is missing');
     });
 
     await test('theme selector exists', async () => {
@@ -507,6 +507,74 @@ async function main() {
         if (layout.scrollWidth > layout.viewportWidth + 1) throw new Error('Editor introduced horizontal overflow on mobile');
         if (layout.workbenchWidth <= 0 || layout.previewTop < layout.sidebarBottom) {
           throw new Error('Editor did not stack source and preview panels on mobile');
+        }
+      } finally {
+        await mobileContext.close();
+      }
+    });
+
+    await test('loads reviewed static gallery assets and opens one in the editor', async () => {
+      await page.click('.mode-btn[data-mode="gallery"]');
+      await page.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
+      await page.waitForFunction(
+        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 4,
+        undefined,
+        { timeout: 10_000 },
+      );
+      await page.waitForFunction(
+        () => (document.querySelector('#galleryPreview')?.textContent || '').includes('/\\'),
+        undefined,
+        { timeout: 10_000 },
+      );
+
+      await page.fill('#gallerySearch', '双语');
+      await page.waitForFunction(
+        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 1,
+        undefined,
+        { timeout: 5000 },
+      );
+      await page.click('#galleryClearFilters');
+      await page.waitForFunction(
+        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 4,
+        undefined,
+        { timeout: 5000 },
+      );
+
+      await page.click('#galleryOpenEditor');
+      await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
+      const source = await page.inputValue('#editorSource');
+      if (!source.includes('org.unicodeartjs.gallery.line-banner')) {
+        throw new Error('Reviewed gallery source was not transferred into the editor');
+      }
+    });
+
+    await test('keeps the static gallery within a narrow viewport', async () => {
+      const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const mobilePage = await mobileContext.newPage();
+      try {
+        await mobilePage.goto(testServer.baseUrl, { waitUntil: 'networkidle' });
+        await mobilePage.click('.mode-btn[data-mode="gallery"]');
+        await mobilePage.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
+        await mobilePage.waitForFunction(
+          () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 4,
+          undefined,
+          { timeout: 10_000 },
+        );
+        const layout = await mobilePage.evaluate(() => {
+          const catalog = document.querySelector('.gallery-catalog')?.getBoundingClientRect();
+          const inspector = document.querySelector('.gallery-inspector')?.getBoundingClientRect();
+          return {
+            scrollWidth: document.documentElement.scrollWidth,
+            viewportWidth: window.innerWidth,
+            catalogBottom: catalog?.bottom || 0,
+            inspectorTop: inspector?.top || 0,
+          };
+        });
+        if (layout.scrollWidth > layout.viewportWidth + 1) {
+          throw new Error('Gallery introduced horizontal overflow on mobile');
+        }
+        if (layout.inspectorTop < layout.catalogBottom) {
+          throw new Error('Gallery catalog and inspector did not stack on mobile');
         }
       } finally {
         await mobileContext.close();

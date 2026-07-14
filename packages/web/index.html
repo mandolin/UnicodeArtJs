@@ -64,6 +64,10 @@
         <span class="mode-icon">✏️</span>
         <span class="mode-text" data-i18n="mode.editor">编辑器</span>
       </button>
+      <button class="mode-btn" data-mode="gallery" type="button">
+        <span class="mode-icon">🗂️</span>
+        <span class="mode-text" data-i18n="mode.gallery">作品画廊</span>
+      </button>
     </nav>
     <!--#endregion-->
 
@@ -406,6 +410,72 @@
         </div>
         <div class="export-actions">
           <button class="btn primary" id="editorCopy" type="button" data-i18n="editor.copy">复制预览</button>
+        </div>
+      </section>
+    </main>
+    <!--#endregion-->
+
+    <!--#region 🟩 静态作品画廊 -->
+    <main class="gallery-workbench" id="galleryWorkbench" hidden>
+      <section class="gallery-catalog" aria-label="UnicodeArtJs 作品画廊" data-i18n-aria-label="gallery.region">
+        <header class="gallery-header">
+          <div>
+            <h2 data-i18n="gallery.title">UnicodeArtJs 作品画廊</h2>
+            <p data-i18n="gallery.intro">展示项目审核通过的原创静态示例；不会上传、下载或执行第三方内容。</p>
+          </div>
+          <p class="gallery-status" id="galleryStatus" aria-live="polite" data-i18n="gallery.status.ready">正在准备作品索引</p>
+        </header>
+
+        <div class="gallery-toolbar" aria-label="画廊筛选" data-i18n-aria-label="gallery.filters">
+          <label class="gallery-search-field" for="gallerySearch">
+            <span data-i18n="gallery.search">搜索</span>
+            <input id="gallerySearch" type="search" maxlength="100" autocomplete="off"
+              placeholder="按标题、说明或标签筛选" data-i18n-placeholder="gallery.searchPlaceholder">
+          </label>
+          <label class="gallery-tag-field" for="galleryTag">
+            <span data-i18n="gallery.tag">标签</span>
+            <select id="galleryTag"></select>
+          </label>
+          <button class="btn" id="galleryClearFilters" type="button" data-i18n="gallery.clearFilters">清除筛选</button>
+        </div>
+
+        <p class="gallery-count" id="galleryCount" aria-live="polite"></p>
+        <div class="gallery-grid" id="galleryGrid" role="list" aria-live="polite"></div>
+      </section>
+
+      <section class="gallery-inspector" aria-label="作品预览" data-i18n-aria-label="gallery.previewRegion">
+        <header class="gallery-inspector-header">
+          <div>
+            <p class="gallery-eyebrow" id="galleryKind"></p>
+            <h2 id="galleryTitle" data-i18n="gallery.noSelection">选择一件作品以查看详情</h2>
+          </div>
+          <span class="gallery-review-badge" id="galleryReview" hidden data-i18n="gallery.reviewed">已审核</span>
+        </header>
+
+        <dl class="gallery-metadata" id="galleryMetadata" hidden>
+          <div>
+            <dt data-i18n="gallery.author">作者</dt>
+            <dd id="galleryAuthor"></dd>
+          </div>
+          <div>
+            <dt data-i18n="gallery.license">许可证</dt>
+            <dd id="galleryLicense"></dd>
+          </div>
+          <div>
+            <dt data-i18n="gallery.reviewedAt">审核日期</dt>
+            <dd id="galleryReviewedAt"></dd>
+          </div>
+        </dl>
+
+        <p class="gallery-description" id="galleryDescription"></p>
+        <div class="gallery-preview-container" role="region" aria-label="作品字符画预览" data-i18n-aria-label="gallery.previewRegion">
+          <pre class="art-preview gallery-preview" id="galleryPreview" aria-live="polite"><code class="preview-placeholder" data-i18n="gallery.previewPlaceholder">从左侧选择一件作品</code></pre>
+        </div>
+        <p class="gallery-preview-meta" id="galleryPreviewMeta"></p>
+        <div class="gallery-actions">
+          <button class="btn" id="galleryCopy" type="button" disabled data-i18n="gallery.copy">复制字符画</button>
+          <button class="btn" id="galleryDownload" type="button" disabled data-i18n="gallery.download">下载源文件</button>
+          <button class="btn primary" id="galleryOpenEditor" type="button" disabled data-i18n="gallery.openEditor">在编辑器中打开</button>
         </div>
       </section>
     </main>

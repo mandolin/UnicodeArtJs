@@ -1,0 +1,42 @@
+{
+  "format": "unicode-art-font",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.gallery.line-banner",
+    "name": "Gallery Line Banner",
+    "authors": ["UnicodeArtJs"],
+    "description": "Original compact line-art glyphs created for the UnicodeArtJs static gallery.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "human",
+      "tool": "unicodeartjs-web-gallery"
+    }
+  },
+  "metrics": {
+    "height": 5,
+    "defaultAdvance": 6,
+    "letterSpacing": 1,
+    "fallbackGlyph": "?"
+  },
+  "glyphs": {
+    "A": {
+      "lines": ["  /\\", " /  \\", "/----\\", "|    |", "|    |"],
+      "advance": 6
+    },
+    "U": {
+      "lines": ["|    |", "|    |", "|    |", "|    |", " \\__/"],
+      "advance": 6
+    },
+    "J": {
+      "lines": ["____|", "    |", "    |", "|   |", " \\__/"],
+      "advance": 6
+    },
+    "?": {
+      "lines": ["?????", "   ??", "  ??", "", "  ??"],
+      "advance": 6
+    }
+  }
+}

@@ -9,6 +9,7 @@
 - [宿主接入指南](host-integration.md)
 - [发布门禁与版本图](release-gate.md)
 - [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)
+- [静态作品画廊](gallery.md)
 - [VS Code Extension 发布检查](vscode-extension-release-checklist.md)
 
 各子项目还有独立文档：
