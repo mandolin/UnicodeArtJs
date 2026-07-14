@@ -63,6 +63,30 @@ describe('semantic document parsing', () => {
     );
   });
 
+  test('validates an embedded UAF font block and rejects missing font data', () => {
+    const document = validateSemanticDocument({
+      version: 1,
+      rows: [{
+        cells: [{
+          blocks: [{ kind: 'art-font-text', text: 'A', font: createReferenceFont() }]
+        }]
+      }]
+    });
+
+    expect(document.rows[0].cells[0].blocks[0]).toMatchObject({
+      kind: 'art-font-text',
+      text: 'A',
+      font: { format: 'unicode-art-font', version: 1 }
+    });
+    expectUnicodeArtError(
+      () => validateSemanticDocument({
+        version: 1,
+        rows: [{ cells: [{ blocks: [{ kind: 'art-font-text', text: 'A' }] }] }]
+      }),
+      ErrorCode.SEMANTIC_DOCUMENT_INVALID
+    );
+  });
+
   test('reports syntax problems as UnicodeArtError with a machine-readable code', () => {
     try {
       parseSemanticDsl('A|{t:broken', { rowSeparator: 'semantic' });
@@ -82,4 +106,19 @@ function expectUnicodeArtError(action: () => unknown, code: ErrorCode): void {
     expect(error).toBeInstanceOf(UnicodeArtError);
     expect((error as UnicodeArtError).code).toBe(code);
   }
+}
+
+function createReferenceFont(): Record<string, unknown> {
+  return {
+    format: 'unicode-art-font',
+    version: 1,
+    meta: {
+      id: 'org.unicodeartjs.semantic-reference',
+      name: 'Semantic Reference',
+      authors: ['UnicodeArtJs'],
+      license: { expression: 'MIT', origin: 'original' }
+    },
+    metrics: { height: 2, defaultAdvance: 2 },
+    glyphs: { A: { lines: ['/\\', '||'] } }
+  };
 }

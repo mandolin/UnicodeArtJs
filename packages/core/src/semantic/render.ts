@@ -25,6 +25,7 @@ import type {
   SemanticDocument,
   SemanticRenderOptions
 } from '../types/semantic';
+import { renderUnicodeArtFontText } from '../artFont/render';
 import { validateSemanticDocument } from './document';
 
 //#region 🟦 公共渲染入口
@@ -53,7 +54,7 @@ export async function renderSemanticDocumentWithAdapter(
       locale
     });
     const grid = placeDocumentCells(document, locale);
-    const renderedCells = await renderCells(grid.cells, documentConfig, renderArtText, calculator);
+    const renderedCells = await renderCells(grid.cells, documentConfig, renderArtText, calculator, locale);
     const layoutOptions = resolveLayoutOptions(documentConfig.box, options, calculator);
     const table = renderTable(grid, renderedCells, layoutOptions, calculator);
     const content = layoutOptions.frame
@@ -186,11 +187,12 @@ async function renderCells(
   cells: readonly PlacedCell[],
   config: ArtConfig,
   renderArtText: SemanticArtTextRenderer,
-  calculator: GlyphWidthCalculator
+  calculator: GlyphWidthCalculator,
+  locale: SupportedLocale
 ): Promise<Map<PlacedCell, RenderedCell>> {
   const results = await Promise.all(cells.map(async (placed) => [
     placed,
-    await renderCell(placed.cell, config, renderArtText, calculator)
+    await renderCell(placed.cell, config, renderArtText, calculator, locale)
   ] as const));
   return new Map(results);
 }
@@ -199,7 +201,8 @@ async function renderCell(
   cell: SemanticCell,
   config: ArtConfig,
   renderArtText: SemanticArtTextRenderer,
-  calculator: GlyphWidthCalculator
+  calculator: GlyphWidthCalculator,
+  locale: SupportedLocale
 ): Promise<RenderedCell> {
   const lines: string[] = [];
   let inlineBlocks: string[][] = [];
@@ -212,7 +215,7 @@ async function renderCell(
   };
 
   for (const block of cell.blocks) {
-    const blockLines = await renderBlock(block, config, renderArtText);
+    const blockLines = await renderBlock(block, config, renderArtText, calculator, locale);
     if (block.display === 'block') {
       flushInlineBlocks();
       lines.push(...blockLines);
@@ -233,10 +236,16 @@ async function renderCell(
 async function renderBlock(
   block: SemanticBlock,
   config: ArtConfig,
-  renderArtText: SemanticArtTextRenderer
+  renderArtText: SemanticArtTextRenderer,
+  calculator: GlyphWidthCalculator,
+  locale: SupportedLocale
 ): Promise<string[]> {
   if (block.kind === 'raw-text') {
     return block.text.replace(/\r\n|\r/gu, '\n').split('\n');
+  }
+
+  if (block.kind === 'art-font-text') {
+    return renderUnicodeArtFontText(block.font, block.text, { calculator, locale }).outputLines;
   }
 
   const result = await renderArtText(

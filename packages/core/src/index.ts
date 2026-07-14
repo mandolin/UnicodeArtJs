@@ -128,6 +128,8 @@ export type {
   UnicodeArtFontMetrics,
   UnicodeArtFontOrigin,
   UnicodeArtFontParseOptions,
+  UnicodeArtFontRenderOptions,
+  UnicodeArtFontRenderResult,
   UnicodeArtFontTextMeasurement,
   UnicodeArtFontV1,
   UnicodeArtFontVersion
@@ -421,6 +423,10 @@ export {
   measureUnicodeArtFontText,
   resolveUnicodeArtFontGlyph
 } from './artFont/metrics';
+
+export {
+  renderUnicodeArtFontText
+} from './artFont/render';
 
 export {
   UNICODE_ART_FONT_FORMAT

@@ -4,6 +4,7 @@ import {
   isSpdxExpressionSyntax,
   measureUnicodeArtFontText,
   parseUnicodeArtFontJson,
+  renderUnicodeArtFontText,
   resolveUnicodeArtFontGlyph,
   validateUnicodeArtFont
 } from '../src';
@@ -72,6 +73,45 @@ describe('Unicode art font documents', () => {
     expect(getUnicodeArtFontGlyphDisplayWidth(font, 'A')).toBe(3);
     expect(measureUnicodeArtFontText(font, 'A').cols).toBe(3);
     expect(measureUnicodeArtFontText(font, 'A', { glyphWidthProfile: 'default' }).cols).toBe(6);
+    expect(renderUnicodeArtFontText(font, 'A', { glyphWidthProfile: 'default' })).toMatchObject({
+      cols: 6,
+      outputLines: ['┌─┐']
+    });
+  });
+
+  test('renders advances, fallback glyphs, spacing and source line breaks deterministically', () => {
+    const font = validateUnicodeArtFont(createReferenceFont({
+      metrics: {
+        height: 2,
+        defaultAdvance: 2,
+        letterSpacing: 1,
+        fallbackGlyph: '?'
+      }
+    }));
+
+    const rendered = renderUnicodeArtFontText(font, 'AΩ\nA');
+
+    expect(rendered.outputLines).toEqual(['/\\ ??', '|| ??', '/\\', '||']);
+    expect(rendered.content).toBe('/\\ ??\n|| ??\n/\\\n||');
+    expect(rendered.rows).toBe(4);
+    expect(rendered.cols).toBe(5);
+    expect(rendered.missingGlyphs).toEqual(['Ω']);
+  });
+
+  test('rejects RTL metadata until a real bidirectional renderer is available', () => {
+    const rtlFont = createReferenceFont({
+      metrics: {
+        height: 2,
+        defaultAdvance: 2,
+        fallbackGlyph: '?',
+        direction: 'rtl'
+      }
+    });
+
+    expectUnicodeArtError(
+      () => renderUnicodeArtFontText(rtlFont, 'A'),
+      ErrorCode.ART_FONT_RENDER_FAILED
+    );
   });
 
   test('rejects unknown fields, dangling fallback and lossy trailing whitespace', () => {

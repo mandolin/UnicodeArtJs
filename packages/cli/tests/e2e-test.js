@@ -887,7 +887,24 @@ async function testSemanticDocumentCommand() {
       version: 1,
       rows: [{
         cells: [
-          { blocks: [{ kind: 'raw-text', text: 'CLI' }] },
+          {
+            blocks: [{
+              kind: 'art-font-text',
+              text: 'A',
+              font: {
+                format: 'unicode-art-font',
+                version: 1,
+                meta: {
+                  id: 'org.unicodeartjs.cli-semantic-art-font',
+                  name: 'CLI Semantic Art Font',
+                  authors: ['UnicodeArtJs'],
+                  license: { expression: 'MIT', origin: 'original' }
+                },
+                metrics: { height: 1, defaultAdvance: 2 },
+                glyphs: { A: { lines: ['AA'] } }
+              }
+            }]
+          },
           { blocks: [{ kind: 'raw-text', text: 'OK' }] }
         ]
       }]
@@ -905,7 +922,7 @@ async function testSemanticDocumentCommand() {
     if (jsonResult.status !== 0 || !jsonResult.stdout.includes('Processing semantic document')) {
       throw new Error(jsonResult.stderr || jsonResult.stdout);
     }
-    if (fs.readFileSync(jsonOutputPath, 'utf-8') !== 'CLI│OK') {
+    if (fs.readFileSync(jsonOutputPath, 'utf-8') !== 'AA│OK') {
       throw new Error('JSON semantic document output mismatch');
     }
 

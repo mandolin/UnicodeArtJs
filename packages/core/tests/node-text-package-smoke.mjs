@@ -111,6 +111,18 @@ void (async () => {
   const artFontMeasurement = core.measureUnicodeArtFontText(artFont, 'AΩ');
   assert.equal(artFontMeasurement.cols, 4, 'Installed Core tarball must measure Unicode art fonts');
   assert.deepEqual(artFontMeasurement.missingGlyphs, ['Ω'], 'Installed Core tarball must apply art-font fallback');
+  const artFontRendering = core.renderUnicodeArtFontText(artFont, 'AΩ');
+  assert.equal(artFontRendering.content, 'AA??', 'Installed Core tarball must render Unicode art fonts');
+  const semanticArtFont = await core.semanticDocumentToArt({
+    version: 1,
+    rows: [{ cells: [{ blocks: [{ kind: 'art-font-text', text: 'A', font: artFont }] }] }]
+  }, {
+    height: 1,
+    box: false
+  }, {
+    grid: false
+  });
+  assert.equal(semanticArtFont.content, 'AA', 'Installed Core tarball must render art-font semantic blocks');
   console.log(JSON.stringify({
     ok: true,
     renderer: 'napi-rs-canvas',
@@ -118,7 +130,8 @@ void (async () => {
     rows: result.rows,
     bytes: Buffer.byteLength(result.content),
     semanticColumns: semantic.cols,
-    artFontColumns: artFontMeasurement.cols
+    artFontColumns: artFontMeasurement.cols,
+    artFontBytes: Buffer.byteLength(artFontRendering.content)
   }, null, 2));
 })().catch((error) => {
   console.error(error instanceof Error ? error.stack : String(error));

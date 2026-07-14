@@ -10,6 +10,7 @@
  */
 
 import { normalizeLocale, t as translateCoreMessage, type SupportedLocale } from '../i18n';
+import { validateUnicodeArtFont } from '../artFont/document';
 import { ErrorCode, UnicodeArtError } from '../types/output';
 import type {
   SemanticBlock,
@@ -217,9 +218,7 @@ function validateBlock(
     cell: cellIndex + 1,
     block: blockIndex + 1
   });
-  assertOnlyKeys(block, ['kind', 'text', 'options', 'display'], locale, `block[${blockIndex}]`);
-
-  if (block.kind !== 'art-text' && block.kind !== 'raw-text') {
+  if (block.kind !== 'art-text' && block.kind !== 'raw-text' && block.kind !== 'art-font-text') {
     throw semanticError('semantic.block.kind', ErrorCode.SEMANTIC_DOCUMENT_INVALID, locale, {
       row: rowIndex + 1,
       cell: cellIndex + 1,
@@ -227,6 +226,12 @@ function validateBlock(
       kind: String(block.kind)
     });
   }
+  assertOnlyKeys(
+    block,
+    block.kind === 'art-font-text' ? ['kind', 'text', 'font', 'display'] : ['kind', 'text', 'options', 'display'],
+    locale,
+    `block[${blockIndex}]`
+  );
   if (typeof block.text !== 'string') {
     throw semanticError('semantic.block.text', ErrorCode.SEMANTIC_DOCUMENT_INVALID, locale, {
       row: rowIndex + 1,
@@ -247,6 +252,22 @@ function validateBlock(
     return {
       kind: 'raw-text',
       text: block.text,
+      ...(block.display !== undefined ? { display: block.display as 'inline' | 'block' } : {})
+    };
+  }
+
+  if (block.kind === 'art-font-text') {
+    if (block.font === undefined) {
+      throw semanticError('semantic.block.font', ErrorCode.SEMANTIC_DOCUMENT_INVALID, locale, {
+        row: rowIndex + 1,
+        cell: cellIndex + 1,
+        block: blockIndex + 1
+      });
+    }
+    return {
+      kind: 'art-font-text',
+      text: block.text,
+      font: validateUnicodeArtFont(block.font, { locale }),
       ...(block.display !== undefined ? { display: block.display as 'inline' | 'block' } : {})
     };
   }

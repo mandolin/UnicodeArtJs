@@ -11,6 +11,7 @@
 
 import type { ArtConfig } from './config';
 import type { ArtResult } from './output';
+import type { UnicodeArtFont } from './artFont';
 import type { BoxAlign, BoxVerticalAlign } from '../box/types';
 
 //#region 🟦 文档 AST
@@ -45,8 +46,21 @@ export interface SemanticRawTextBlock {
   display?: SemanticBlockDisplay;
 }
 
+/** 使用嵌入 UAF 字体直接拼接的艺术字文本块。 */
+export interface SemanticArtFontTextBlock {
+  kind: 'art-font-text';
+  text: string;
+  /**
+   * 完整的已声明 UAF 字体。V1 不接受路径、URL 或环境依赖的字体引用，确保文档可复现。
+   * 语义布局会使用文档级字素宽度规则统一计算实际列宽。
+   */
+  font: UnicodeArtFont;
+  /** 多个 inline block 在同一单元格内从左到右组装；缺省为 inline。 */
+  display?: SemanticBlockDisplay;
+}
+
 /** 可由布局引擎识别的基础内容块。 */
-export type SemanticBlock = SemanticArtTextBlock | SemanticRawTextBlock;
+export type SemanticBlock = SemanticArtTextBlock | SemanticRawTextBlock | SemanticArtFontTextBlock;
 
 /** 一个可跨行、跨列的文档单元格。 */
 export interface SemanticCell {

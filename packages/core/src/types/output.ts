@@ -299,7 +299,10 @@ export enum ErrorCode {
   ART_FONT_PARSE_FAILED = 'ART_FONT_PARSE_FAILED',
 
   /** Unicode 艺术字字体许可证或来源记录无效 */
-  ART_FONT_LICENSE_INVALID = 'ART_FONT_LICENSE_INVALID'
+  ART_FONT_LICENSE_INVALID = 'ART_FONT_LICENSE_INVALID',
+
+  /** Unicode 艺术字字体渲染失败或当前排版方向尚不支持 */
+  ART_FONT_RENDER_FAILED = 'ART_FONT_RENDER_FAILED'
 }
 
 /**

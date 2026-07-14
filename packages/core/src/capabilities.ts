@@ -184,6 +184,11 @@ const EXPERIMENTAL_FEATURES: CoreCapabilityDescriptor[] = [
     id: 'artFont.document',
     stability: 'experimental',
     description: 'Unicode Art Font v1 JSON 格式、SPDX/provenance 校验与字形度量。'
+  },
+  {
+    id: 'artFont.render',
+    stability: 'experimental',
+    description: '将嵌入 UAF 字体组装为多行艺术字，并可作为语义文档内容块参与布局。'
   }
 ];
 

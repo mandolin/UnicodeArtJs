@@ -188,4 +188,20 @@ export interface UnicodeArtFontMeasureOptions {
   locale?: string;
 }
 
+/**
+ * 🟢 Unicode 艺术字渲染选项
+ *
+ * 🔹 与度量使用同一套字素宽度规则，确保渲染结果可直接交给 Box、表格和其它布局器。
+ * 🔹 `rtl` 的正确重排算法尚未纳入 v1；声明 RTL 的字体会返回结构化错误，而不会被静默倒置。
+ */
+export interface UnicodeArtFontRenderOptions extends UnicodeArtFontMeasureOptions {}
+
+/** Unicode 艺术字的已展开多行输出。 */
+export interface UnicodeArtFontRenderResult extends UnicodeArtFontTextMeasurement {
+  /** 未格式化的多行字符画内容，保留为了 advance 而存在的行尾空格。 */
+  content: string;
+  /** 与 `content` 一一对应的输出行，便于语义布局直接组合。 */
+  outputLines: string[];
+}
+
 //#endregion

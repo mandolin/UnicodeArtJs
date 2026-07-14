@@ -97,7 +97,8 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 - `textToArt(text, config)` converts text into Unicode art. Node uses the
   bundled `@napi-rs/canvas` Skia runtime by default.
 - `imageToArt(imagePath, config)` converts an image file into Unicode art. The default Node backend uses `@napi-rs/image`.
-- `semanticDocumentToArt(document, config)` renders an experimental versioned semantic document with tables, headers/footers, spans, and raw-text blocks.
+- `semanticDocumentToArt(document, config)` renders an experimental versioned semantic document with tables, headers/footers, spans, raw-text blocks, and embedded UAF art-font blocks.
+- `renderUnicodeArtFontText(font, text)` expands an experimental UAF font into deterministic multi-line glyph art for custom composition.
 - `unicode-art-js/browser` exports browser `imageToArt()`, browser `textToArt()`, `browserPlatformAdapter`, `loadBrowserFont`, cache controls, runtime capability checks, and pure conversion APIs for browser projects.
 - `unicode-art-js/pure` exports platform-independent sampling, matching, assembly, box, and `imageDataToArt()` APIs.
 - `validateConfig(config)` validates and fills defaults.
@@ -219,16 +220,18 @@ glyphs. They are separate from `visualFont` and `glyphFont`: the former controls
 rasterization, the latter controls the display of generated glyph cells, while an art font is
 content that later layout/rendering APIs can compose.
 
-Core currently provides parsing, structural validation, provenance checks, glyph fallback, and
-deterministic cell measurement. It does not bundle third-party FIGlet assets, download font
+Core provides parsing, structural validation, provenance checks, glyph fallback, deterministic
+cell measurement, and multi-line glyph rendering. An embedded UAF object can be used as an
+`art-font-text` block in a semantic JSON document, where it shares the document's glyph-width
+calculator with tables and boxes. Core does not bundle third-party FIGlet assets, download font
 files, or claim a legal conclusion about a third-party asset. The format and APIs remain
-experimental; rendering art-font text into a semantic document is planned for the next composition
-stage.
+experimental.
 
 ```ts
 import {
   measureUnicodeArtFontText,
-  parseUnicodeArtFontJson
+  parseUnicodeArtFontJson,
+  renderUnicodeArtFontText
 } from 'unicode-art-js';
 
 const font = parseUnicodeArtFontJson(JSON.stringify({
@@ -248,13 +251,16 @@ const font = parseUnicodeArtFontJson(JSON.stringify({
 }));
 
 console.log(measureUnicodeArtFontText(font, 'A?'));
+console.log(renderUnicodeArtFontText(font, 'A?').content);
 ```
 
 Every glyph line must have exactly `metrics.height` rows across the glyph and must not store trailing
 whitespace. `advance` is measured with the same `GlyphWidthCalculator` used by boxes and semantic
 layouts. Imported or derived fonts must provide both `sourceUrl` and `attribution`; use
 `isPermissiveUnicodeArtFontLicense()` only as the project's official-bundle policy check, not as
-legal advice.
+legal advice. UAF v1 currently renders LTR fonts only: a font declaring `metrics.direction: "rtl"`
+returns a structured `ART_FONT_RENDER_FAILED` error until a real bidirectional composition rule is
+defined.
 
 ## Core i18n
 

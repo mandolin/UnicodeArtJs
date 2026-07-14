@@ -29,6 +29,7 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
         imageToArt,
         measureUnicodeArtFontText,
         parseUnicodeArtFontJson,
+        renderUnicodeArtFontText,
         semanticDocumentToArt,
         textToArt,
         boxText,
@@ -196,6 +197,22 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
       const artFontMeasurement = measureUnicodeArtFontText(artFont, 'AΩ');
       assert(artFontMeasurement.cols === 4, 'browser Unicode art font measurement mismatch');
       assert(artFontMeasurement.missingGlyphs[0] === 'Ω', 'browser Unicode art font fallback mismatch');
+      const artFontRendering = renderUnicodeArtFontText(artFont, 'AΩ');
+      assert(artFontRendering.content === 'AA??', 'browser Unicode art font rendering mismatch');
+      const semanticArtFont = await semanticDocumentToArt(
+        {
+          version: 1,
+          rows: [{ cells: [{ blocks: [{ kind: 'art-font-text', text: 'A', font: artFont }] }] }]
+        },
+        {
+          height: 1,
+          box: false,
+          outputFormat: OutputFormat.PLAIN_TEXT,
+          charset: { type: PresetCharset.ASCII }
+        },
+        { grid: false }
+      );
+      assert(semanticArtFont.content === 'AA', 'browser semantic art-font rendering mismatch');
 
       document.querySelector('#preview').textContent = art.content + '\n' + boxed;
       window.__UNICODE_ART_BROWSER_SMOKE__ = {
@@ -205,6 +222,8 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
         textArt: browserTextArt.content,
         semanticArt: semantic.content,
         artFontColumns: artFontMeasurement.cols,
+        artFontContent: artFontRendering.content,
+        semanticArtFont: semanticArtFont.content,
         boxed,
         capabilities,
         cacheStats: getBrowserAdapterCacheStats(),
@@ -271,6 +290,8 @@ try {
     textArtLength: result.textArt.length,
     semanticArtLength: result.semanticArt.length,
     artFontColumns: result.artFontColumns,
+    artFontLength: result.artFontContent.length,
+    semanticArtFontLength: result.semanticArtFont.length,
     boxedLength: result.boxed.length,
     glyphCacheEntries: result.cacheStats.glyphs,
     workerSupported: result.capabilities.worker,

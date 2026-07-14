@@ -2,6 +2,7 @@ import {
   renderSemanticDocumentWithAdapter,
   validateConfig,
   type ArtConfig,
+  type UnicodeArtFont,
   type SemanticDocumentV1
 } from '../src';
 import { ErrorCode, OutputFormat, type ArtResult } from '../src/types/output';
@@ -129,6 +130,29 @@ describe('semantic document layout renderer', () => {
     expect(result.cols).toBe(1);
   });
 
+  test('mixes embedded art-font and raw blocks through the shared table and Box layout', async () => {
+    const document: SemanticDocumentV1 = {
+      version: 1,
+      rows: [{
+        cells: [{
+          blocks: [
+            { kind: 'raw-text', text: '>' },
+            { kind: 'art-font-text', text: 'A', font: createReferenceFont() }
+          ]
+        }]
+      }]
+    };
+    const failIfCalled = async (): Promise<ArtResult> => {
+      throw new Error('art-font-text must not invoke the regular text renderer');
+    };
+
+    const result = await renderSemanticDocumentWithAdapter(document, config(), failIfCalled);
+
+    expect(result.content).toBe(['+---+', '|>/\\|', '| |||', '+---+'].join('\n'));
+    expect(result.rows).toBe(4);
+    expect(result.cols).toBe(5);
+  });
+
   test('reports span bounds with a machine-readable semantic error code', async () => {
     const document: SemanticDocumentV1 = {
       version: 1,
@@ -140,3 +164,18 @@ describe('semantic document layout renderer', () => {
     });
   });
 });
+
+function createReferenceFont(): UnicodeArtFont {
+  return {
+    format: 'unicode-art-font',
+    version: 1,
+    meta: {
+      id: 'org.unicodeartjs.semantic-render-reference',
+      name: 'Semantic Render Reference',
+      authors: ['UnicodeArtJs'],
+      license: { expression: 'MIT', origin: 'original' }
+    },
+    metrics: { height: 2, defaultAdvance: 2 },
+    glyphs: { A: { lines: ['/\\', '||'] } }
+  };
+}

@@ -57,7 +57,8 @@ unicode-art text "中文测试" --charset CHINESE_SIMPLE
 
 ### 语义文档转字符画（实验性）
 
-`document` 命令默认读取版本化 JSON AST，可用于表头、页脚、跨行跨列单元格和原字输出。
+`document` 命令默认读取版本化 JSON AST，可用于表头、页脚、跨行跨列单元格、原字输出和嵌入式
+Unicode 艺术字（`art-font-text`）区块。
 普通 `text` 命令不会隐式解析这些标记，因此已有脚本不会因为 DSL 语法产生歧义。
 
 ```bash
@@ -155,6 +156,8 @@ unicode-art document <input> [options]
 - `--row-separator <mode>` - DSL 行分隔模式：`lineBreak`、`semantic`、`both`。
 - `--column-separator <separator>` - DSL 单元格分隔符，默认 `|`。
 - 其余字符集、视觉字体、字素字体、尺寸、输出、`--box` 和语言选项与 `text` 命令一致。
+- canonical JSON 可使用 `{ "kind": "art-font-text", "text": "A", "font": { ...UAF v1... } }`
+  嵌入已校验的 UAF 字体；DSL 暂不提供艺术字标签，避免字体资产与轻量文本语法耦合。
 
 #### `font` 命令（实验性）
 
