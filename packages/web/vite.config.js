@@ -13,14 +13,18 @@ import { defineConfig } from 'vite';
 import path from 'path';
 
 //#region 🟩 路径别名配置
-const alias = {
-  '@': path.resolve(__dirname, './src'),
-  '@components': path.resolve(__dirname, './src/components'),
-  '@styles': path.resolve(__dirname, './src/styles'),
-  '@utils': path.resolve(__dirname, './src/utils'),
-  // Core库浏览器入口别名
-  'unicode-art-js': path.resolve(__dirname, '../core/dist/browser.esm.js'),
-};
+const coreBrowserEntry = path.resolve(__dirname, '../core/dist/browser.esm.js');
+
+const alias = [
+  { find: '@components', replacement: path.resolve(__dirname, './src/components') },
+  { find: '@styles', replacement: path.resolve(__dirname, './src/styles') },
+  { find: '@utils', replacement: path.resolve(__dirname, './src/utils') },
+  { find: '@', replacement: path.resolve(__dirname, './src') },
+  // 必须先匹配完整 browser 子路径，避免旧前缀 alias 生成 `browser.esm.js/browser`。
+  { find: 'unicode-art-js/browser', replacement: coreBrowserEntry },
+  // 兼容 Web 内已有的根包导入，始终指向已构建的浏览器入口。
+  { find: 'unicode-art-js', replacement: coreBrowserEntry },
+];
 //#endregion
 
 //#region 🟩 插件配置

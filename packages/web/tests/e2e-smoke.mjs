@@ -87,6 +87,31 @@ async function launchBrowser() {
   }
 }
 
+/**
+ * 等待编辑器预览满足断言；超时后附带当前工作区快照，避免只得到无上下文的超时信息。
+ * @param {import('playwright').Page} page Playwright 页面实例
+ * @param {string} description 失败说明
+ * @param {string} previewText 预览中必须出现的文字
+ */
+async function waitForEditorPreview(page, description, previewText) {
+  try {
+    await page.waitForFunction(
+      (expectedText) => (document.querySelector('#editorPreview')?.textContent || '').includes(expectedText),
+      previewText,
+      { timeout: 10_000 },
+    );
+  } catch {
+    const state = await page.evaluate(() => ({
+      kind: document.querySelector('#editorKind')?.value,
+      status: document.querySelector('#editorStatus')?.textContent,
+      statusState: document.querySelector('#editorStatus')?.dataset.state,
+      preview: document.querySelector('#editorPreview')?.textContent,
+      source: document.querySelector('#editorSource')?.value,
+    }));
+    throw new Error(`${description}; editor state: ${JSON.stringify(state)}`);
+  }
+}
+
 //#endregion
 
 //#region Main Flow
@@ -117,7 +142,7 @@ async function main() {
 
     await test('mode buttons exist', async () => {
       const buttons = await page.$$('.mode-btn');
-      if (buttons.length < 2) throw new Error('Less than 2 mode buttons');
+      if (buttons.length < 3) throw new Error('Editor mode button is missing');
     });
 
     await test('theme selector exists', async () => {
@@ -333,6 +358,123 @@ async function main() {
     await test('advanced settings panel exists', async () => {
       const details = await page.$('details.config-details');
       if (!details) throw new Error('Advanced settings details not found');
+    });
+
+    await test('opens the source-first editor workspace', async () => {
+      await page.click('.mode-btn[data-mode="editor"]');
+      await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 3000 });
+      const state = await page.evaluate(() => ({
+        active: document.querySelector('.mode-btn[data-mode="editor"]')?.classList.contains('active'),
+        converterHidden: document.querySelector('#converterWorkbench')?.hidden,
+        converterDisplay: getComputedStyle(document.querySelector('#converterWorkbench')).display,
+        source: document.querySelector('#editorSource')?.value,
+      }));
+      if (!state.active || !state.converterHidden || state.converterDisplay !== 'none' || !state.source?.includes('"version": 1')) {
+        throw new Error('Editor workspace did not become active with a canonical source');
+      }
+    });
+
+    await test('localizes editor controls and exposes preview region semantics', async () => {
+      await page.selectOption('#languageSelect', 'en-US');
+      await page.waitForFunction(() => document.querySelector('#editorKind option[value="document"]')?.textContent === 'Layout document');
+      const regionLabel = await page.getAttribute('.editor-preview-container', 'aria-label');
+      if (regionLabel !== 'Editor preview') throw new Error('Editor preview region was not localized');
+      await page.selectOption('#languageSelect', 'zh-CN');
+      await page.waitForFunction(() => document.querySelector('#editorKind option[value="document"]')?.textContent === '布局文档');
+    });
+
+    await test('renders and validates a semantic document from editor source', async () => {
+      await page.selectOption('#editorKind', 'document');
+      await page.click('#editorLoadPreset');
+      await page.click('#editorValidate');
+      await page.waitForFunction(
+        () => document.querySelector('#editorStatus')?.dataset.state === 'success',
+        undefined,
+        { timeout: 10_000 },
+      );
+      await page.click('#editorRender');
+      await waitForEditorPreview(page, 'Semantic document preview did not render', 'UnicodeArtJs');
+    });
+
+    await test('saves and restores a local semantic template', async () => {
+      await page.fill('#editorTemplateName', 'P3.4 E2E document');
+      await page.click('#editorSaveTemplate');
+      await page.waitForFunction(() => {
+        const status = document.querySelector('#editorStatus')?.textContent || '';
+        return status.includes('保存') || status.includes('saved');
+      });
+      const option = await page.$eval('#editorSavedTemplate', (select) => (
+        Array.from(select.options).some((item) => item.textContent === 'P3.4 E2E document')
+      ));
+      if (!option) throw new Error('Local editor template was not added to the selector');
+      await page.selectOption('#editorSavedTemplate', { label: 'P3.4 E2E document' });
+      await page.click('#editorLoadTemplate');
+      const source = await page.inputValue('#editorSource');
+      if (!source.includes('UnicodeArtJs')) throw new Error('Saved semantic template was not restored');
+    });
+
+    await test('renders a UAF font and can embed it back into a semantic document', async () => {
+      await page.selectOption('#editorKind', 'font');
+      await page.waitForSelector('#editorFontOptions:not([hidden])', { timeout: 3000 });
+      await page.click('#editorLoadPreset');
+      await page.fill('#editorFontSample', 'A?');
+      await page.click('#editorRender');
+      await waitForEditorPreview(page, 'UAF font preview did not render', '???');
+      await page.click('#editorEmbedFont');
+      await page.waitForFunction(() => document.querySelector('#editorKind')?.value === 'document');
+      const source = await page.inputValue('#editorSource');
+      if (!source.includes('"art-font-text"')) throw new Error('Embedded document source is missing art-font-text');
+    });
+
+    await test('rejects invalid imports without replacing the current editor source', async () => {
+      const before = await page.inputValue('#editorSource');
+      await page.setInputFiles('#editorImportFile', {
+        name: 'broken.json',
+        mimeType: 'application/json',
+        buffer: Buffer.from('{"version":', 'utf8'),
+      });
+      await page.waitForFunction(() => document.querySelector('#editorStatus')?.dataset.state === 'error');
+      const after = await page.inputValue('#editorSource');
+      if (after !== before) throw new Error('Invalid import replaced the editor source');
+    });
+
+    await test('exports the current canonical JSON source', async () => {
+      await page.selectOption('#editorKind', 'document');
+      await page.click('#editorLoadPreset');
+      const download = page.waitForEvent('download');
+      await page.click('#editorExport');
+      const file = await download;
+      if (!file.suggestedFilename().endsWith('.uadoc.json')) {
+        throw new Error(`Unexpected editor export filename: ${file.suggestedFilename()}`);
+      }
+    });
+
+    await test('keeps editor controls within a narrow viewport', async () => {
+      const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const mobilePage = await mobileContext.newPage();
+      try {
+        await mobilePage.goto(testServer.baseUrl, { waitUntil: 'networkidle' });
+        await mobilePage.click('.mode-btn[data-mode="editor"]');
+        await mobilePage.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 3000 });
+        const layout = await mobilePage.evaluate(() => {
+          const workbench = document.querySelector('#editorWorkbench')?.getBoundingClientRect();
+          const sidebar = document.querySelector('.editor-sidebar')?.getBoundingClientRect();
+          const preview = document.querySelector('.editor-preview-section')?.getBoundingClientRect();
+          return {
+            scrollWidth: document.documentElement.scrollWidth,
+            viewportWidth: window.innerWidth,
+            workbenchWidth: workbench?.width || 0,
+            sidebarBottom: sidebar?.bottom || 0,
+            previewTop: preview?.top || 0,
+          };
+        });
+        if (layout.scrollWidth > layout.viewportWidth + 1) throw new Error('Editor introduced horizontal overflow on mobile');
+        if (layout.workbenchWidth <= 0 || layout.previewTop < layout.sidebarBottom) {
+          throw new Error('Editor did not stack source and preview panels on mobile');
+        }
+      } finally {
+        await mobileContext.close();
+      }
     });
 
     console.log('\n  === Summary ===');

@@ -15,6 +15,8 @@ let $ = window.jQuery || window.$;
 
 const SUPPORTED_UI_LOCALES = ['zh-CN', 'en-US'];
 const WEB_CONFIG_STORAGE_KEY = 'unicode-art-config';
+const EDITOR_WORKSPACE_STORAGE_KEY = 'unicode-art-editor-workspace-v1';
+const EDITOR_TEMPLATE_STORAGE_KEY = 'unicode-art-editor-templates-v1';
 
 /**
  * Web 表单与 Core 配置共用的默认值。
@@ -72,6 +74,48 @@ const UI_MESSAGES = {
     'mode.text': '文字Banner',
     'mode.editor': '编辑器',
     'mode.editorSoon': '后期实现',
+    'editor.sourceRegion': '编辑器源文件与模板',
+    'editor.previewRegion': '编辑器预览',
+    'editor.title': '艺术字与布局编辑器',
+    'editor.experimental': '实验性',
+    'editor.kind': '编辑内容',
+    'editor.kind.document': '布局文档',
+    'editor.kind.font': 'UAF 艺术字字体',
+    'editor.preset': '内置示例',
+    'editor.preset.documentTable': '标题表格',
+    'editor.preset.documentArtFont': '嵌入艺术字 Banner',
+    'editor.preset.fontLine': '线条艺术字',
+    'editor.loadPreset': '载入',
+    'editor.templateName': '模板名称',
+    'editor.templateNamePlaceholder': '例如：我的标题表格',
+    'editor.saveTemplate': '保存模板',
+    'editor.savedTemplates': '本地模板',
+    'editor.loadTemplate': '载入',
+    'editor.deleteTemplate': '删除',
+    'editor.fileActions': '导入导出',
+    'editor.import': '导入 JSON',
+    'editor.export': '导出 JSON',
+    'editor.source': 'Canonical JSON',
+    'editor.sourceHelp': '保存和导入使用 Core 校验的 canonical JSON；浏览器不会上传内容。',
+    'editor.fontSample': '预览文字',
+    'editor.embedFont': '嵌入文档',
+    'editor.ready': '就绪',
+    'editor.previewPlaceholder': '选择一个示例或输入 JSON 后渲染预览',
+    'editor.validate': '校验',
+    'editor.render': '渲染预览',
+    'editor.copy': '复制预览',
+    'editor.metaEmpty': '宽度: -- 高度: --',
+    'editor.metaReady': '宽度: {cols} 高度: {rows}',
+    'editor.status.valid': '校验通过 · {summary}',
+    'editor.status.rendered': '渲染完成',
+    'editor.status.error': '无效：{message}',
+    'editor.status.imported': '已导入并校验',
+    'editor.status.templateSaved': '本地模板已保存',
+    'editor.status.templateDeleted': '本地模板已删除',
+    'editor.status.templateNameRequired': '请先填写模板名称',
+    'editor.status.templateSelectionRequired': '请选择一个本地模板',
+    'editor.status.copyDone': '预览已复制',
+    'editor.status.copyFailed': '复制失败，请手动选择预览内容',
     'input.imageTitle': '上传图片',
     'input.uploadText': '拖拽图片到此处',
     'input.uploadHint': '或点击选择文件',
@@ -114,8 +158,10 @@ const UI_MESSAGES = {
     'config.glyphWidthHelp': '该选项目前用于冻结配置契约，后续会进一步接入更精细的字素宽度计算。',
     'config.wideCharRegex': '自定义宽字素正则',
     'config.wideCharRegexPlaceholder': '例如: [\\u4e00-\\u9fff]',
-    'glyphWidth.default': '默认',
-    'glyphWidth.mixedCjk': '混合等宽 CJK',
+    'glyphWidth.default': 'Unicode 参考宽度',
+    'glyphWidth.nsimsun': '新宋体',
+    'glyphWidth.sarasaMonoSc': '等距更纱黑体 SC',
+    'glyphWidth.lxgwWenkaiMono': '霞鹜文楷等宽',
     'glyphWidth.custom': '自定义正则',
     'box.title': '裱框设置',
     'box.enable': '启用裱框',
@@ -179,6 +225,48 @@ const UI_MESSAGES = {
     'mode.text': 'Text Banner',
     'mode.editor': 'Editor',
     'mode.editorSoon': 'Planned for a later version',
+    'editor.sourceRegion': 'Editor source and templates',
+    'editor.previewRegion': 'Editor preview',
+    'editor.title': 'Art Font and Layout Editor',
+    'editor.experimental': 'Experimental',
+    'editor.kind': 'Content type',
+    'editor.kind.document': 'Layout document',
+    'editor.kind.font': 'UAF art font',
+    'editor.preset': 'Built-in example',
+    'editor.preset.documentTable': 'Header table',
+    'editor.preset.documentArtFont': 'Embedded art-font banner',
+    'editor.preset.fontLine': 'Line art font',
+    'editor.loadPreset': 'Load',
+    'editor.templateName': 'Template name',
+    'editor.templateNamePlaceholder': 'Example: My header table',
+    'editor.saveTemplate': 'Save template',
+    'editor.savedTemplates': 'Local templates',
+    'editor.loadTemplate': 'Load',
+    'editor.deleteTemplate': 'Delete',
+    'editor.fileActions': 'Import and export',
+    'editor.import': 'Import JSON',
+    'editor.export': 'Export JSON',
+    'editor.source': 'Canonical JSON',
+    'editor.sourceHelp': 'Saving and importing use Core-validated canonical JSON. The browser does not upload your content.',
+    'editor.fontSample': 'Sample text',
+    'editor.embedFont': 'Embed in document',
+    'editor.ready': 'Ready',
+    'editor.previewPlaceholder': 'Load an example or enter JSON to render a preview',
+    'editor.validate': 'Validate',
+    'editor.render': 'Render preview',
+    'editor.copy': 'Copy preview',
+    'editor.metaEmpty': 'Width: -- Height: --',
+    'editor.metaReady': 'Width: {cols} Height: {rows}',
+    'editor.status.valid': 'Valid · {summary}',
+    'editor.status.rendered': 'Rendered',
+    'editor.status.error': 'Invalid: {message}',
+    'editor.status.imported': 'Imported and validated',
+    'editor.status.templateSaved': 'Local template saved',
+    'editor.status.templateDeleted': 'Local template deleted',
+    'editor.status.templateNameRequired': 'Enter a template name first',
+    'editor.status.templateSelectionRequired': 'Choose a local template',
+    'editor.status.copyDone': 'Preview copied',
+    'editor.status.copyFailed': 'Copy failed. Select the preview content manually.',
     'input.imageTitle': 'Upload Image',
     'input.uploadText': 'Drop an image here',
     'input.uploadHint': 'or click to choose a file',
@@ -221,8 +309,10 @@ const UI_MESSAGES = {
     'config.glyphWidthHelp': 'This option freezes the config contract for now; finer glyph-width calculation will be integrated later.',
     'config.wideCharRegex': 'Custom wide-glyph regex',
     'config.wideCharRegexPlaceholder': 'Example: [\\u4e00-\\u9fff]',
-    'glyphWidth.default': 'Default',
-    'glyphWidth.mixedCjk': 'Mixed-width CJK',
+    'glyphWidth.default': 'Unicode reference width',
+    'glyphWidth.nsimsun': 'NSimSun',
+    'glyphWidth.sarasaMonoSc': 'Sarasa Mono SC',
+    'glyphWidth.lxgwWenkaiMono': 'LXGW WenKai Mono',
     'glyphWidth.custom': 'Custom regex',
     'box.title': 'Box',
     'box.enable': 'Enable box',
@@ -323,6 +413,8 @@ const AppState = {
 
 const DOM = {
   modeButtons: '.mode-btn',
+  converterWorkbench: '#converterWorkbench',
+  editorWorkbench: '#editorWorkbench',
   imageInputPanel: '#imageInputPanel',
   textInputPanel: '#textInputPanel',
   uploadZone: '#uploadZone',
@@ -376,6 +468,29 @@ const DOM = {
   languageSelect: '#languageSelect',
   loadingOverlay: '#loadingOverlay',
   toastContainer: '#toastContainer',
+
+  editorKind: '#editorKind',
+  editorPreset: '#editorPreset',
+  editorLoadPreset: '#editorLoadPreset',
+  editorTemplateName: '#editorTemplateName',
+  editorSaveTemplate: '#editorSaveTemplate',
+  editorSavedTemplate: '#editorSavedTemplate',
+  editorLoadTemplate: '#editorLoadTemplate',
+  editorDeleteTemplate: '#editorDeleteTemplate',
+  editorImport: '#editorImport',
+  editorImportFile: '#editorImportFile',
+  editorExport: '#editorExport',
+  editorSource: '#editorSource',
+  editorFontOptions: '#editorFontOptions',
+  editorFontSample: '#editorFontSample',
+  editorEmbedFont: '#editorEmbedFont',
+  editorStatus: '#editorStatus',
+  editorFormatLabel: '#editorFormatLabel',
+  editorValidate: '#editorValidate',
+  editorRender: '#editorRender',
+  editorPreview: '#editorPreview',
+  editorMeta: '#editorMeta',
+  editorCopy: '#editorCopy',
 };
 
 //#endregion
@@ -531,6 +646,22 @@ class CoreAdapter {
     if (!this.core?.textToArt) throw new Error('Core库未加载');
     return await this.core.textToArt(text, config);
   }
+  async semanticDocumentToArt(document, config, options) {
+    if (!this.core?.semanticDocumentToArt) throw new Error('Core语义文档功能未加载');
+    return await this.core.semanticDocumentToArt(document, config, options);
+  }
+  validateSemanticDocument(document, options) {
+    if (!this.core?.validateSemanticDocument) throw new Error('Core语义文档校验功能未加载');
+    return this.core.validateSemanticDocument(document, options);
+  }
+  parseUnicodeArtFontJson(source, options) {
+    if (!this.core?.parseUnicodeArtFontJson) throw new Error('Core艺术字字体功能未加载');
+    return this.core.parseUnicodeArtFontJson(source, options);
+  }
+  renderUnicodeArtFontText(font, text, options) {
+    if (!this.core?.renderUnicodeArtFontText) throw new Error('Core艺术字渲染功能未加载');
+    return this.core.renderUnicodeArtFontText(font, text, options);
+  }
   boxText(text, options) {
     if (!this.core?.boxText) throw new Error('Core boxText未加载');
     return this.core.boxText(text, options);
@@ -558,6 +689,11 @@ class ArtGenerator {
   buildCoreConfig() {
     const cfg = AppState.config;
     const charsetType = cfg.charset === '__CUSTOM__' ? 'CUSTOM' : cfg.charset;
+    // `custom` 是 Web 表单的显示状态；实际宽度由 wideCharRegex 覆盖，
+    // 不能把它作为 Core profile 传入，否则会触发未知 profile 的结构化错误。
+    const glyphWidthProfile = cfg.glyphWidthProfile === 'custom'
+      ? 'default'
+      : cfg.glyphWidthProfile || 'default';
     return {
       height: parseIntegerOr(cfg.height, 20),
       width: cfg.width ? parseIntegerOr(cfg.width, 0) : undefined,
@@ -571,11 +707,11 @@ class ArtGenerator {
       },
       glyphFont: {
         family: cfg.glyphFont,
-        widthProfile: cfg.glyphWidthProfile || 'default',
+        widthProfile: glyphWidthProfile,
         wideCharRegex: cfg.wideCharRegex || undefined,
       },
       glyphFontFamily: cfg.glyphFont,
-      glyphWidthProfile: cfg.glyphWidthProfile || 'default',
+      glyphWidthProfile,
       wideCharRegex: cfg.wideCharRegex || undefined,
       matrixSize: parseIntegerOr(cfg.matrixSize, 6),
       ratio: parseFloat(cfg.ratio) || 2.0,
@@ -625,6 +761,499 @@ class ArtGenerator {
 
 //#endregion
 
+//#region 🟩 艺术字与布局编辑器
+
+/**
+ * 生成项目原创 UAF 示例字体。
+ *
+ * 字形行不保留行尾空格，以符合 UAF v1 的可序列化约束；视觉列宽由 advance 补齐。
+ */
+function createEditorDemoFont() {
+  return {
+    format: 'unicode-art-font',
+    version: 1,
+    meta: {
+      id: 'org.unicodeartjs.web-line-demo',
+      name: 'Web Line Demo',
+      authors: ['UnicodeArtJs'],
+      license: { expression: 'MIT', origin: 'original' },
+      creation: { method: 'human', tool: 'unicodeartjs-web-editor' },
+    },
+    metrics: { height: 3, defaultAdvance: 5, letterSpacing: 1, fallbackGlyph: '?' },
+    glyphs: {
+      A: { lines: [' /\\', '/--\\', '|  |'] },
+      '?': { lines: ['???', '  ?', '  ?'] },
+    },
+  };
+}
+
+/** 返回每次独立创建的内置模板，避免用户编辑时意外改变示例对象。 */
+function getEditorBuiltinTemplates() {
+  const font = createEditorDemoFont();
+  return [
+    {
+      id: 'document-table',
+      kind: 'document',
+      labelKey: 'editor.preset.documentTable',
+      source: JSON.stringify({
+        version: 1,
+        rows: [
+          {
+            role: 'header',
+            cells: [
+              { role: 'column-header', blocks: [{ kind: 'raw-text', text: 'Name' }] },
+              { role: 'column-header', blocks: [{ kind: 'raw-text', text: 'Value' }] },
+            ],
+          },
+          {
+            cells: [
+              { blocks: [{ kind: 'raw-text', text: 'UnicodeArtJs' }] },
+              { blocks: [{ kind: 'raw-text', text: 'Ready' }] },
+            ],
+          },
+        ],
+      }, null, 2),
+    },
+    {
+      id: 'document-art-font',
+      kind: 'document',
+      labelKey: 'editor.preset.documentArtFont',
+      source: JSON.stringify({
+        version: 1,
+        rows: [
+          {
+            role: 'header',
+            cells: [{ blocks: [{ kind: 'raw-text', text: 'Embedded UAF' }] }],
+          },
+          {
+            cells: [{
+              blocks: [
+                { kind: 'art-font-text', text: 'A?', font, display: 'block' },
+                { kind: 'raw-text', text: 'Canonical JSON + shared glyph widths', display: 'block' },
+              ],
+            }],
+          },
+        ],
+      }, null, 2),
+    },
+    {
+      id: 'font-line',
+      kind: 'font',
+      labelKey: 'editor.preset.fontLine',
+      source: JSON.stringify(font, null, 2),
+    },
+  ];
+}
+
+/** P3.4 的浏览器本地工作区结构。 */
+function createDefaultEditorWorkspace() {
+  const templates = getEditorBuiltinTemplates();
+  return {
+    kind: 'document',
+    documentSource: templates.find((template) => template.id === 'document-table').source,
+    fontSource: templates.find((template) => template.id === 'font-line').source,
+    fontSample: 'A?',
+  };
+}
+
+/**
+ * 🟢 source-first 编辑器控制器
+ *
+ * 🔹 仅保存 JSON 文本与本地模板；每次校验、导入、渲染都委托 Core API。
+ * 🔹 工作区可临时保留未完成 JSON，保存为模板和替换导入内容则必须先校验成功。
+ */
+class EditorController {
+  constructor(appController) {
+    this.appController = appController;
+    this.workspace = this.loadWorkspace();
+    this.savedTemplates = this.loadSavedTemplates();
+    this.result = null;
+    this.renderGeneration = 0;
+  }
+
+  initialize() {
+    this.syncControlsFromWorkspace();
+    this.refreshLocale();
+    this.applyGlyphFont();
+    this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+  }
+
+  bindEvents($doc) {
+    $doc.on('change', DOM.editorKind, (event) => this.changeKind($(event.target).val()));
+    $doc.on('click', DOM.editorLoadPreset, () => this.loadPreset());
+    $doc.on('input', DOM.editorSource, (event) => this.updateCurrentSource($(event.target).val()));
+    $doc.on('input', DOM.editorFontSample, (event) => {
+      this.workspace.fontSample = $(event.target).val();
+      this.persistWorkspace();
+    });
+    $doc.on('click', DOM.editorValidate, () => this.validateCurrentSource());
+    $doc.on('click', DOM.editorRender, () => this.renderPreview());
+    $doc.on('click', DOM.editorSaveTemplate, () => this.saveTemplate());
+    $doc.on('click', DOM.editorLoadTemplate, () => this.loadSavedTemplate());
+    $doc.on('click', DOM.editorDeleteTemplate, () => this.deleteSavedTemplate());
+    $doc.on('click', DOM.editorImport, () => $(DOM.editorImportFile).click());
+    $doc.on('change', DOM.editorImportFile, (event) => this.importFile(event));
+    $doc.on('click', DOM.editorExport, () => this.exportSource());
+    $doc.on('click', DOM.editorEmbedFont, () => this.embedFontInDocument());
+    $doc.on('click', DOM.editorCopy, () => this.copyPreview());
+  }
+
+  activate() {
+    this.applyGlyphFont();
+    if (!this.result) {
+      this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+    }
+  }
+
+  refreshLocale() {
+    this.populatePresetSelect();
+    this.populateSavedTemplateSelect();
+    this.updateKindUi();
+    if (!this.result) this.setStatus('editor.ready');
+  }
+
+  applyGlyphFont() {
+    $(DOM.editorPreview).css('font-family', AppState.config.glyphFont);
+  }
+
+  t(key, params = {}) {
+    return this.appController.i18nManager.t(key, params);
+  }
+
+  getCoreAdapter() {
+    return this.appController.artGenerator.coreAdapter;
+  }
+
+  getCurrentSource() {
+    return this.workspace.kind === 'font' ? this.workspace.fontSource : this.workspace.documentSource;
+  }
+
+  updateCurrentSource(source) {
+    if (this.workspace.kind === 'font') this.workspace.fontSource = source;
+    else this.workspace.documentSource = source;
+    this.persistWorkspace();
+  }
+
+  changeKind(kind) {
+    if (kind !== 'document' && kind !== 'font') return;
+    this.workspace.kind = kind;
+    this.persistWorkspace();
+    this.syncControlsFromWorkspace();
+    // 两种内容类型拥有各自的内置示例和本地模板列表，切换后立即重建选项。
+    this.populatePresetSelect();
+    this.populateSavedTemplateSelect();
+    this.result = null;
+    this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+  }
+
+  syncControlsFromWorkspace() {
+    $(DOM.editorKind).val(this.workspace.kind);
+    $(DOM.editorSource).val(this.getCurrentSource());
+    $(DOM.editorFontSample).val(this.workspace.fontSample);
+    this.updateKindUi();
+  }
+
+  updateKindUi() {
+    const isFont = this.workspace.kind === 'font';
+    $(DOM.editorFontOptions).prop('hidden', !isFont);
+    $(DOM.editorFormatLabel).text(isFont ? 'unicode-art-font@1' : 'semantic-document@1');
+  }
+
+  populatePresetSelect() {
+    const $select = $(DOM.editorPreset);
+    const selected = $select.val();
+    $select.empty();
+    getEditorBuiltinTemplates()
+      .filter((template) => template.kind === this.workspace.kind)
+      .forEach((template) => {
+        $('<option>').val(template.id).text(this.t(template.labelKey)).appendTo($select);
+      });
+    if (selected && $select.find(`option[value="${selected}"]`).length > 0) {
+      $select.val(selected);
+    }
+  }
+
+  populateSavedTemplateSelect() {
+    const $select = $(DOM.editorSavedTemplate);
+    const selected = $select.val();
+    $select.empty();
+    $('<option>').val('').text('—').appendTo($select);
+    this.savedTemplates
+      .filter((template) => template.kind === this.workspace.kind)
+      .sort((left, right) => right.updatedAt - left.updatedAt)
+      .forEach((template) => {
+        $('<option>').val(template.id).text(template.name).appendTo($select);
+      });
+    if (selected && $select.find(`option[value="${selected}"]`).length > 0) {
+      $select.val(selected);
+    }
+  }
+
+  loadPreset() {
+    const template = getEditorBuiltinTemplates().find((item) => item.id === $(DOM.editorPreset).val());
+    if (!template) return;
+    this.updateCurrentSource(template.source);
+    $(DOM.editorSource).val(template.source);
+    this.result = null;
+    this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+  }
+
+  validateSource(source, kind = this.workspace.kind) {
+    const adapter = this.getCoreAdapter();
+    if (kind === 'font') {
+      const font = adapter.parseUnicodeArtFontJson(source, { locale: AppState.config.locale });
+      return {
+        kind,
+        value: font,
+        summary: `${font.meta.name} · ${Object.keys(font.glyphs).length}`,
+      };
+    }
+
+    const parsed = JSON.parse(source);
+    const document = adapter.validateSemanticDocument(parsed, { locale: AppState.config.locale });
+    return {
+      kind,
+      value: document,
+      summary: `${document.rows.length}`,
+    };
+  }
+
+  validateCurrentSource() {
+    try {
+      const validated = this.validateSource(this.getCurrentSource());
+      this.setStatus('editor.status.valid', { summary: validated.summary }, 'success');
+      return validated;
+    } catch (error) {
+      this.handleEditorError(error);
+      return null;
+    }
+  }
+
+  async renderPreview() {
+    const request = ++this.renderGeneration;
+    let validated;
+    try {
+      validated = this.validateSource(this.getCurrentSource());
+      this.setStatus('editor.status.valid', { summary: validated.summary }, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+      return;
+    }
+
+    this.appController.showLoading(true);
+    try {
+      const config = this.appController.artGenerator.buildCoreConfig();
+      let result;
+      if (validated.kind === 'document') {
+        result = await this.getCoreAdapter().semanticDocumentToArt(validated.value, config, { grid: true });
+      } else {
+        const rendered = this.getCoreAdapter().renderUnicodeArtFontText(
+          validated.value,
+          this.workspace.fontSample || '?',
+          {
+            glyphWidthProfile: config.glyphWidthProfile,
+            wideCharRegex: config.wideCharRegex,
+            locale: AppState.config.locale,
+          },
+        );
+        const content = config.box ? this.getCoreAdapter().boxText(rendered.content, config.box) : rendered.content;
+        result = { content, rows: rendered.rows, cols: rendered.cols, duration: 0 };
+      }
+
+      if (request !== this.renderGeneration) return;
+      this.result = result;
+      $(DOM.editorPreview).text(result.content);
+      $(DOM.editorMeta).text(this.t('editor.metaReady', { cols: result.cols, rows: result.rows }));
+      this.setStatus('editor.status.rendered', {}, 'success');
+    } catch (error) {
+      if (request === this.renderGeneration) this.handleEditorError(error);
+    } finally {
+      if (request === this.renderGeneration) this.appController.showLoading(false);
+    }
+  }
+
+  saveTemplate() {
+    const name = String($(DOM.editorTemplateName).val() || '').trim();
+    if (!name) {
+      this.setStatus('editor.status.templateNameRequired', {}, 'error');
+      return;
+    }
+    if (!this.validateCurrentSource()) return;
+
+    const now = Date.now();
+    const existing = this.savedTemplates.find((template) => template.kind === this.workspace.kind && template.name === name);
+    const template = {
+      id: existing?.id || `local-${now}`,
+      name,
+      kind: this.workspace.kind,
+      source: this.getCurrentSource(),
+      updatedAt: now,
+    };
+    this.savedTemplates = existing
+      ? this.savedTemplates.map((item) => item.id === existing.id ? template : item)
+      : [...this.savedTemplates, template];
+    this.persistTemplates();
+    this.populateSavedTemplateSelect();
+    $(DOM.editorSavedTemplate).val(template.id);
+    this.setStatus('editor.status.templateSaved', {}, 'success');
+  }
+
+  loadSavedTemplate() {
+    const id = $(DOM.editorSavedTemplate).val();
+    const template = this.savedTemplates.find((item) => item.id === id && item.kind === this.workspace.kind);
+    if (!template) {
+      this.setStatus('editor.status.templateSelectionRequired', {}, 'error');
+      return;
+    }
+    this.updateCurrentSource(template.source);
+    $(DOM.editorSource).val(template.source);
+    $(DOM.editorTemplateName).val(template.name);
+    this.result = null;
+    this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+  }
+
+  deleteSavedTemplate() {
+    const id = $(DOM.editorSavedTemplate).val();
+    if (!id) {
+      this.setStatus('editor.status.templateSelectionRequired', {}, 'error');
+      return;
+    }
+    this.savedTemplates = this.savedTemplates.filter((template) => template.id !== id);
+    this.persistTemplates();
+    this.populateSavedTemplateSelect();
+    this.setStatus('editor.status.templateDeleted', {}, 'success');
+  }
+
+  async importFile(event) {
+    const file = event.target.files?.[0];
+    $(DOM.editorImportFile).val('');
+    if (!file) return;
+
+    try {
+      const source = await file.text();
+      const parsed = JSON.parse(source);
+      const kind = parsed?.format === 'unicode-art-font' ? 'font' : 'document';
+      this.validateSource(source, kind);
+      this.workspace.kind = kind;
+      this.updateCurrentSource(source);
+      this.syncControlsFromWorkspace();
+      this.refreshLocale();
+      this.result = null;
+      this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+      this.setStatus('editor.status.imported', {}, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  exportSource() {
+    const extension = this.workspace.kind === 'font' ? 'uafont.json' : 'uadoc.json';
+    const blob = new Blob([this.getCurrentSource()], { type: 'application/json;charset=utf-8' });
+    this.appController.downloadBlob(blob, `unicode-art-${this.workspace.kind}.${extension}`);
+  }
+
+  embedFontInDocument() {
+    let font;
+    try {
+      const validated = this.validateSource(this.getCurrentSource(), 'font');
+      font = validated.value;
+    } catch (error) {
+      this.handleEditorError(error);
+      return;
+    }
+
+    const document = {
+      version: 1,
+      rows: [{
+        cells: [{
+          blocks: [{
+            kind: 'art-font-text',
+            text: this.workspace.fontSample || '?',
+            font,
+            display: 'block',
+          }],
+        }],
+      }],
+    };
+    this.workspace.kind = 'document';
+    this.workspace.documentSource = JSON.stringify(document, null, 2);
+    this.persistWorkspace();
+    this.syncControlsFromWorkspace();
+    this.refreshLocale();
+    void this.renderPreview();
+  }
+
+  async copyPreview() {
+    if (!this.result?.content) return;
+    try {
+      await navigator.clipboard.writeText(this.result.content);
+      this.setStatus('editor.status.copyDone', {}, 'success');
+    } catch {
+      this.setStatus('editor.status.copyFailed', {}, 'error');
+    }
+  }
+
+  setPreviewPlaceholder(text) {
+    $(DOM.editorPreview).empty().append($('<code>').addClass('preview-placeholder').text(text));
+    $(DOM.editorMeta).text(this.t('editor.metaEmpty'));
+  }
+
+  setStatus(key, params = {}, state = 'info') {
+    $(DOM.editorStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
+  handleEditorError(error) {
+    const message = error instanceof Error ? error.message : String(error);
+    this.setStatus('editor.status.error', { message }, 'error');
+    this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+  }
+
+  loadWorkspace() {
+    const fallback = createDefaultEditorWorkspace();
+    try {
+      const stored = JSON.parse(localStorage.getItem(EDITOR_WORKSPACE_STORAGE_KEY) || 'null');
+      if (!stored || typeof stored !== 'object') return fallback;
+      return {
+        kind: stored.kind === 'font' ? 'font' : 'document',
+        documentSource: typeof stored.documentSource === 'string' ? stored.documentSource : fallback.documentSource,
+        fontSource: typeof stored.fontSource === 'string' ? stored.fontSource : fallback.fontSource,
+        fontSample: typeof stored.fontSample === 'string' ? stored.fontSample : fallback.fontSample,
+      };
+    } catch {
+      return fallback;
+    }
+  }
+
+  loadSavedTemplates() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(EDITOR_TEMPLATE_STORAGE_KEY) || '[]');
+      if (!Array.isArray(stored)) return [];
+      return stored.filter((template) => (
+        template
+        && (template.kind === 'document' || template.kind === 'font')
+        && typeof template.id === 'string'
+        && typeof template.name === 'string'
+        && typeof template.source === 'string'
+        && Number.isFinite(template.updatedAt)
+      ));
+    } catch {
+      return [];
+    }
+  }
+
+  persistWorkspace() {
+    localStorage.setItem(EDITOR_WORKSPACE_STORAGE_KEY, JSON.stringify(this.workspace));
+  }
+
+  persistTemplates() {
+    localStorage.setItem(EDITOR_TEMPLATE_STORAGE_KEY, JSON.stringify(this.savedTemplates));
+  }
+}
+
+//#endregion
+
 //#region 🟩 应用控制器
 
 class AppController {
@@ -633,6 +1262,7 @@ class AppController {
     this.themeManager = new ThemeManager();
     this.toastManager = new ToastManager();
     this.artGenerator = new ArtGenerator();
+    this.editorController = new EditorController(this);
 
     //#region 🟩 防抖
 
@@ -661,6 +1291,7 @@ class AppController {
     this.loadConfig();
     this.themeManager.applyTheme(AppState.config.themeName);
     this.i18nManager.apply(AppState.config.locale);
+    this.editorController.initialize();
     this.detectTouchDevice();
     this.initBoxStylePreview();
     this.handleResize();
@@ -771,6 +1402,9 @@ class AppController {
     $doc.on('click', DOM.exportPng, () => this.exportPng());
     $doc.on('click', DOM.copyBtn, () => this.copyToClipboard());
 
+    // 编辑器
+    this.editorController.bindEvents($doc);
+
     // 主题
     $doc.on('change', DOM.themeSelect, (e) => { this.themeManager.switchTheme($(e.target).val()); });
     $doc.on('change', DOM.languageSelect, (e) => { this.handleLanguageChange(e); });
@@ -783,6 +1417,16 @@ class AppController {
     if (mode === AppState.mode) return;
     $(DOM.modeButtons).removeClass('active');
     $btn.addClass('active');
+    if (mode === 'editor') {
+      $(DOM.converterWorkbench).prop('hidden', true);
+      $(DOM.editorWorkbench).prop('hidden', false);
+      AppState.mode = mode;
+      this.editorController.activate();
+      return;
+    }
+
+    $(DOM.editorWorkbench).prop('hidden', true);
+    $(DOM.converterWorkbench).prop('hidden', false);
     if (mode === 'image') { $(DOM.imageInputPanel).show(); $(DOM.textInputPanel).hide(); }
     else { $(DOM.imageInputPanel).hide(); $(DOM.textInputPanel).show(); }
     AppState.mode = mode;
@@ -813,6 +1457,7 @@ class AppController {
   handleLanguageChange(e) {
     this.i18nManager.apply($(e.target).val());
     this.initBoxStylePreview();
+    this.editorController.refreshLocale();
     this.saveConfig();
     if (!AppState.result) {
       this.setPlaceholder(this.getIdlePlaceholder());
@@ -832,6 +1477,7 @@ class AppController {
     } else {
       $preview.css('font-size', '0.75rem');
     }
+    this.editorController?.applyGlyphFont();
   }
 
   // 文件处理
@@ -994,6 +1640,10 @@ class AppController {
   // 预览
 
   async refreshPreview() {
+    if (AppState.mode === 'editor') {
+      await this.editorController.renderPreview();
+      return;
+    }
     if (AppState.mode === 'image' && !AppState.imageFile) { this.setPlaceholder(this.i18nManager.t('preview.uploadImage')); return; }
     if (AppState.mode === 'text' && !AppState.textContent.trim()) { this.setPlaceholder(this.i18nManager.t('preview.enterText')); return; }
 

@@ -60,7 +60,7 @@
         <span class="mode-icon">📝</span>
         <span class="mode-text" data-i18n="mode.text">文字Banner</span>
       </button>
-      <button class="mode-btn disabled" data-mode="editor" type="button" aria-disabled="true" title="后期实现" data-i18n-title="mode.editorSoon">
+      <button class="mode-btn" data-mode="editor" type="button">
         <span class="mode-icon">✏️</span>
         <span class="mode-text" data-i18n="mode.editor">编辑器</span>
       </button>
@@ -68,7 +68,7 @@
     <!--#endregion-->
 
     <!--#region 🟩 主内容区 -->
-    <main class="app-main">
+    <main class="app-main" id="converterWorkbench">
       <!-- 左侧：输入区 + 参数面板 + 裱框设置 -->
       <aside class="sidebar">
         <!-- 输入区域 -->
@@ -222,8 +222,10 @@
                 <div class="form-group experimental-field">
                   <label for="glyphWidthProfile" data-i18n="config.glyphWidthProfile">字素宽度规则（实验）</label>
                   <select id="glyphWidthProfile">
-                    <option value="default" data-i18n="glyphWidth.default">默认</option>
-                    <option value="mixed-cjk" data-i18n="glyphWidth.mixedCjk">混合等宽 CJK</option>
+                    <option value="default" data-i18n="glyphWidth.default">Unicode 参考宽度</option>
+                    <option value="nsimsun" data-i18n="glyphWidth.nsimsun">新宋体</option>
+                    <option value="sarasa-mono-sc" data-i18n="glyphWidth.sarasaMonoSc">等距更纱黑体 SC</option>
+                    <option value="lxgw-wenkai-mono" data-i18n="glyphWidth.lxgwWenkaiMono">霞鹜文楷等宽</option>
                     <option value="custom" data-i18n="glyphWidth.custom">自定义正则</option>
                   </select>
                   <p class="field-help" data-i18n="config.glyphWidthHelp">该选项目前用于冻结配置契约，后续会进一步接入更精细的字素宽度计算。</p>
@@ -313,6 +315,92 @@
     </main>
     <!--#endregion-->
 
+    <!--#region 🟩 艺术字与布局编辑器 -->
+    <main class="editor-workbench" id="editorWorkbench" hidden>
+      <section class="editor-sidebar" aria-label="编辑器源文件与模板" data-i18n-aria-label="editor.sourceRegion">
+        <header class="editor-sidebar-header">
+          <h2 data-i18n="editor.title">艺术字与布局编辑器</h2>
+          <span class="experimental-badge" data-i18n="editor.experimental">实验性</span>
+        </header>
+
+        <div class="editor-control-group">
+          <label for="editorKind" data-i18n="editor.kind">编辑内容</label>
+          <select id="editorKind">
+            <option value="document" data-i18n="editor.kind.document">布局文档</option>
+            <option value="font" data-i18n="editor.kind.font">UAF 艺术字字体</option>
+          </select>
+        </div>
+
+        <div class="editor-control-group">
+          <label for="editorPreset" data-i18n="editor.preset">内置示例</label>
+          <div class="editor-inline-actions">
+            <select id="editorPreset"></select>
+            <button class="btn" id="editorLoadPreset" type="button" data-i18n="editor.loadPreset">载入</button>
+          </div>
+        </div>
+
+        <div class="editor-control-group">
+          <label for="editorTemplateName" data-i18n="editor.templateName">模板名称</label>
+          <div class="editor-inline-actions">
+            <input id="editorTemplateName" type="text" maxlength="64" data-i18n-placeholder="editor.templateNamePlaceholder" placeholder="例如：我的标题表格">
+            <button class="btn primary" id="editorSaveTemplate" type="button" data-i18n="editor.saveTemplate">保存模板</button>
+          </div>
+        </div>
+
+        <div class="editor-control-group">
+          <label for="editorSavedTemplate" data-i18n="editor.savedTemplates">本地模板</label>
+          <div class="editor-inline-actions editor-template-actions">
+            <select id="editorSavedTemplate"></select>
+            <button class="btn" id="editorLoadTemplate" type="button" data-i18n="editor.loadTemplate">载入</button>
+            <button class="btn danger" id="editorDeleteTemplate" type="button" data-i18n="editor.deleteTemplate">删除</button>
+          </div>
+        </div>
+
+        <div class="editor-file-actions" aria-label="导入导出" data-i18n-aria-label="editor.fileActions">
+          <button class="btn" id="editorImport" type="button" data-i18n="editor.import">导入 JSON</button>
+          <input id="editorImportFile" type="file" accept="application/json,.json,.uafont.json" hidden>
+          <button class="btn" id="editorExport" type="button" data-i18n="editor.export">导出 JSON</button>
+        </div>
+
+        <div class="editor-source-group">
+          <label for="editorSource" data-i18n="editor.source">Canonical JSON</label>
+          <textarea id="editorSource" class="editor-source" spellcheck="false" aria-describedby="editorSourceHint"></textarea>
+          <p class="field-help" id="editorSourceHint" data-i18n="editor.sourceHelp">保存和导入使用 Core 校验的 canonical JSON；浏览器不会上传内容。</p>
+        </div>
+
+        <div class="editor-font-options" id="editorFontOptions" hidden>
+          <label for="editorFontSample" data-i18n="editor.fontSample">预览文字</label>
+          <div class="editor-inline-actions">
+            <input id="editorFontSample" type="text" value="A?" maxlength="160">
+            <button class="btn" id="editorEmbedFont" type="button" data-i18n="editor.embedFont">嵌入文档</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="editor-preview-section" aria-label="编辑器预览" data-i18n-aria-label="editor.previewRegion">
+        <div class="editor-preview-toolbar">
+          <div>
+            <span class="preview-info" id="editorStatus" aria-live="polite" data-i18n="editor.ready">就绪</span>
+            <span class="editor-format-label" id="editorFormatLabel">document</span>
+          </div>
+          <div class="editor-toolbar-actions">
+            <button class="btn" id="editorValidate" type="button" data-i18n="editor.validate">校验</button>
+            <button class="btn primary" id="editorRender" type="button" data-i18n="editor.render">渲染预览</button>
+          </div>
+        </div>
+        <div class="preview-container editor-preview-container" role="region" aria-label="编辑器预览" data-i18n-aria-label="editor.previewRegion">
+          <pre class="art-preview" id="editorPreview" aria-live="polite"><code class="preview-placeholder" data-i18n="editor.previewPlaceholder">选择一个示例或输入 JSON 后渲染预览</code></pre>
+        </div>
+        <div class="preview-meta">
+          <span id="editorMeta" data-i18n="editor.metaEmpty">宽度: -- 高度: --</span>
+        </div>
+        <div class="export-actions">
+          <button class="btn primary" id="editorCopy" type="button" data-i18n="editor.copy">复制预览</button>
+        </div>
+      </section>
+    </main>
+    <!--#endregion-->
+
     <!--#region 🟩 Footer -->
     <footer class="app-footer">
       <p>© 2026 UnicodeArtJs | MIT License | <a href="https://github.com/mandolin/UnicodeArtJs" target="_blank">GitHub</a></p>
@@ -336,8 +424,30 @@
 
   <!-- Core (Browser) -->
   <script type="module">
-    import { imageToArt, textToArt, boxText, previewBoxStyle, getBoxStyleNames, getBoxStyleMetadata } from 'unicode-art-js';
-    window.UnicodeArtCore = { imageToArt, textToArt, boxText, previewBoxStyle, getBoxStyleNames, getBoxStyleMetadata };
+    import {
+      imageToArt,
+      textToArt,
+      semanticDocumentToArt,
+      validateSemanticDocument,
+      parseUnicodeArtFontJson,
+      renderUnicodeArtFontText,
+      boxText,
+      previewBoxStyle,
+      getBoxStyleNames,
+      getBoxStyleMetadata
+    } from 'unicode-art-js/browser';
+    window.UnicodeArtCore = {
+      imageToArt,
+      textToArt,
+      semanticDocumentToArt,
+      validateSemanticDocument,
+      parseUnicodeArtFontJson,
+      renderUnicodeArtFontText,
+      boxText,
+      previewBoxStyle,
+      getBoxStyleNames,
+      getBoxStyleMetadata
+    };
   </script>
 
   <!-- 应用入口 -->

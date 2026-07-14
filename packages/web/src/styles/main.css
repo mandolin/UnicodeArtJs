@@ -674,6 +674,231 @@ details.config-details summary:hover {
   background: var(--color-primary-hover);
 }
 
+/* ========== 艺术字与布局编辑器 ========== */
+
+.editor-workbench {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  overflow: hidden;
+}
+
+.editor-workbench[hidden] {
+  display: none;
+}
+
+/* 转换器与编辑器都使用 hidden 切换；app-main 的 flex 布局不能覆盖该语义。 */
+.app-main[hidden] {
+  display: none;
+}
+
+.editor-sidebar,
+.editor-preview-section {
+  min-height: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+}
+
+.editor-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  overflow-y: auto;
+}
+
+.editor-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.editor-sidebar-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.experimental-badge {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border: 1px solid var(--color-warning);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+}
+
+.editor-control-group,
+.editor-source-group,
+.editor-font-options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* `hidden` 的 UA 样式会被上面的 display:flex 覆盖，需在组件层明确恢复隐藏语义。 */
+.editor-font-options[hidden] {
+  display: none;
+}
+
+.editor-control-group > label,
+.editor-source-group > label,
+.editor-font-options > label {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.editor-control-group select,
+.editor-control-group input,
+.editor-font-options input {
+  min-width: 0;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.editor-control-group select:focus,
+.editor-control-group input:focus,
+.editor-font-options input:focus,
+.editor-source:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+  outline: none;
+}
+
+.editor-inline-actions,
+.editor-file-actions,
+.editor-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.editor-inline-actions > select,
+.editor-inline-actions > input {
+  flex: 1 1 auto;
+}
+
+.editor-inline-actions .btn,
+.editor-file-actions .btn,
+.editor-toolbar-actions .btn {
+  flex: 0 0 auto;
+}
+
+.editor-template-actions .btn {
+  min-width: 52px;
+}
+
+.btn.danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.btn.danger:hover {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
+}
+
+.editor-source-group {
+  flex: 1 1 auto;
+  min-height: 260px;
+}
+
+.editor-source {
+  flex: 1 1 auto;
+  min-height: 260px;
+  width: 100%;
+  resize: vertical;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-preview);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  tab-size: 2;
+}
+
+.editor-preview-section {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+}
+
+.editor-format-label {
+  margin-left: var(--spacing-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.editor-preview-container {
+  min-height: 360px;
+}
+
+@media (max-width: 900px) {
+  .editor-workbench {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .editor-sidebar {
+    overflow: visible;
+  }
+
+  .editor-preview-section {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 560px) {
+  .editor-workbench {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+
+  .editor-inline-actions,
+  .editor-file-actions,
+  .editor-toolbar-actions {
+    flex-wrap: wrap;
+  }
+
+  .editor-inline-actions > select,
+  .editor-inline-actions > input {
+    flex-basis: 100%;
+  }
+
+  .editor-preview-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 /* ========== Footer ========== */
 
 .app-footer {
@@ -819,6 +1044,37 @@ details.config-details summary:hover {
 
 /* 小屏手机 (≤480px) */
 @media (max-width: 480px) {
+  .app-header {
+    gap: 4px;
+    padding: 0 8px;
+  }
+
+  .header-nav {
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .theme-selector,
+  .language-selector {
+    min-width: 0;
+  }
+
+  .theme-dropdown {
+    min-width: 0;
+    width: 88px;
+  }
+
+  .language-dropdown {
+    min-width: 0;
+    width: 72px;
+  }
+
+  .nav-link {
+    flex: 0 0 30px;
+    height: 30px;
+    width: 30px;
+  }
+
   .app-main { padding: 4px; gap: 4px; }
 
   .sidebar { gap: var(--spacing-sm); }
