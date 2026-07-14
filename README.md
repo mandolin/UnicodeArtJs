@@ -141,5 +141,6 @@ Core、CLI、Web 和 VS Code 默认路径采用“清洁分发”策略，依赖
 - VS Code 插件：<https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode>
 - 生态兼容性与升级说明：[docs/ecosystem-compatibility.md](docs/ecosystem-compatibility.md)
 - 声明式扩展清单说明：[docs/extension-manifest.md](docs/extension-manifest.md)
+- 声明式扩展作者指南：[docs/extension-authoring.md](docs/extension-authoring.md)
 - 静态作品画廊说明：[docs/gallery.md](docs/gallery.md)
 - 问题反馈：<https://github.com/mandolin/UnicodeArtJs/issues>

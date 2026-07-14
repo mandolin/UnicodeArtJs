@@ -6,6 +6,9 @@ UnicodeArtJs Extension Manifest（UAEM）v1 是一份 JSON 清单，用于描述
 - semantic-document：版本化语义文档，文件后缀为 .uadoc.json。
 - unicode-art-font：Unicode 艺术字字体，文件后缀为 .uafont.json。
 
+如果你要创建扩展包，请先阅读[声明式扩展作者指南](extension-authoring.md)。本文只定义
+清单格式、兼容性与安全约束。
+
 UAEM v1 不是通用脚本插件格式。清单不能声明 JavaScript、WASM、shell 命令、网络
 下载地址或安装钩子。Core 只校验清单结构和兼容性；文件读取、真实路径复核、资源解析
 和用户信任提示由各宿主负责。
