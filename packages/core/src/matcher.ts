@@ -126,7 +126,7 @@ export function calculateSAD(
  * @param sample - 采样矩阵
  * @param charDataMap - 预计算的字符数据映射
  * @param enableEarlyTermination - 是否启用早期终止
- * @returns { char: string, sad: number, isWideChar: boolean } 最佳匹配结果
+ * @returns {{char: string, sad: number, isWideChar: boolean}} 最佳匹配结果
  * 
  * @example
  * ```typescript
@@ -265,7 +265,7 @@ function mergeBlocksForWideChar(
  * 🔹 根据CharType枚举分离字符，便于分别匹配。
  * 
  * @param charDataMap - 预计算的字符数据映射
- * @returns { normalChars: CharMatrix[], wideChars: CharMatrix[] } 分组结果
+ * @returns {{normalChars: CharMatrix[], wideChars: CharMatrix[]}} 分组结果
  * 
  * @internal
  */

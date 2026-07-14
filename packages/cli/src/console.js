@@ -63,11 +63,16 @@
  * - `-c, --config <path>` - 配置文件路径
  * - `--help` - 显示帮助信息
  * - `--version` - 显示版本号
- * 
+ * ============================================================================
+ *
+ * @lang zh-CN UnicodeArtJs 的命令行入口，负责将命令行参数、配置文件和本地输入安全地归一化为 Core 可消费的转换请求。
+ * @lang en UnicodeArtJs command-line entry point that normalizes command arguments, configuration files, and local input into conversion requests consumable by Core.
+ *
  * @module @unicode-art/cli
  * @since 1.0.0
  * @license MIT
- * ============================================================================
+ * @example
+ * unicode-art text "UnicodeArtJs" --height 12 --chars "@#o:. "
  */
 
 const { Command } = require('commander');
@@ -107,9 +112,12 @@ const {
 
 /**
  * 🟢 加载语言文件
- * 
- * @param {string} lang - 语言代码 (zh-CN|en-US)
- * @returns {Object} 翻译对象
+ *
+ * @lang zh-CN 读取受支持语言的本地翻译字典；语言代码无效或文件缺失时由调用方的错误处理流程接管。
+ * @lang en Loads a locale dictionary for a supported language; invalid language codes and missing files are handled by the caller's error flow.
+ *
+ * @param {string} lang - <lang key="cli.loadLanguage.param.lang"><zh-CN>语言代码，例如 `zh-CN` 或 `en-US`。</zh-CN><en>Locale code, for example `zh-CN` or `en-US`.</en></lang>
+ * @returns {Object} <lang key="cli.loadLanguage.returns"><zh-CN>已解析的翻译字典。</zh-CN><en>Parsed translation dictionary.</en></lang>
  */
 function loadLanguage(lang) {
   const supportedLangs = ['zh-CN', 'en-US'];
@@ -129,11 +137,14 @@ function loadLanguage(lang) {
 
 /**
  * 🟢 翻译文本（支持变量替换）
- * 
- * @param {Object} i18n - 翻译对象
- * @param {string} key - 键路径（如 "commands.image.processing"）
- * @param {Object} vars - 变量替换对象
- * @returns {string} 翻译后的文本
+ *
+ * @lang zh-CN 解析点分翻译键并替换模板变量；找不到键时返回键本身，使 CLI 错误路径仍然可诊断。
+ * @lang en Resolves a dotted translation key and replaces template variables; returns the key itself when missing so CLI error paths remain diagnosable.
+ *
+ * @param {Object} i18n - <lang key="cli.translate.param.i18n"><zh-CN>翻译字典。</zh-CN><en>Translation dictionary.</en></lang>
+ * @param {string} key - <lang key="cli.translate.param.key"><zh-CN>键路径，例如 `commands.image.processing`。</zh-CN><en>Key path, for example `commands.image.processing`.</en></lang>
+ * @param {Object} vars - <lang key="cli.translate.param.vars"><zh-CN>用于替换 `{{name}}` 占位符的变量。</zh-CN><en>Variables used to replace `{{name}}` placeholders.</en></lang>
+ * @returns {string} <lang key="cli.translate.returns"><zh-CN>可显示的本地化文本。</zh-CN><en>Displayable localized text.</en></lang>
  */
 function t(i18n, key, vars = {}) {
   const keys = key.split('.');
@@ -455,9 +466,12 @@ extensionCommand
 
 /**
  * 🟢 获取Commander解析后的选项
- * 
- * @param {Command|Object} command - Commander命令对象或选项对象
- * @returns {Object} 解析后的选项
+ *
+ * @lang zh-CN 兼容 Commander 命令对象与已解析选项对象，避免各子命令重复判断输入形态。
+ * @lang en Accepts either a Commander command object or an already parsed options object so subcommands do not repeat input-shape checks.
+ *
+ * @param {Command|Object} command - <lang key="cli.commandOptions.param.command"><zh-CN>Commander 命令对象或选项对象。</zh-CN><en>Commander command object or options object.</en></lang>
+ * @returns {Object} <lang key="cli.commandOptions.returns"><zh-CN>解析后的命令选项。</zh-CN><en>Resolved command options.</en></lang>
  */
 function getCommandOptions(command) {
   if (command && typeof command.optsWithGlobals === 'function') {
@@ -858,9 +872,12 @@ function mergeConfig(fileConfig, cliOptions) {
 
 /**
  * 🟢 将CLI配置文件结构规范化为core库ArtConfig结构
- * 
- * @param {Object} fileConfig - 配置文件中的原始配置
- * @returns {Object} core库可直接验证的配置对象
+ *
+ * @lang zh-CN 将 CLI 配置中的别名、Box 节点和宿主输出选项归一化，再交给 Core 执行统一校验。
+ * @lang en Normalizes CLI aliases, Box nodes, and host output options before Core performs its shared validation.
+ *
+ * @param {Object} fileConfig - <lang key="cli.normalizeConfig.param.fileConfig"><zh-CN>配置文件中的原始对象。</zh-CN><en>Raw object read from the configuration file.</en></lang>
+ * @returns {Object} <lang key="cli.normalizeConfig.returns"><zh-CN>可直接交给 Core 校验的配置对象。</zh-CN><en>Configuration object ready for Core validation.</en></lang>
  */
 function normalizeConfig(fileConfig = {}) {
   const normalized = {};
@@ -991,7 +1008,7 @@ function readStructuredInput(input, label) {
  * 🔹 imageBackend 是宿主运行时选择，不属于 Core ArtConfig，验证前需要移出。
  *
  * @param {Object} fullConfig - 合并后的配置对象
- * @returns {{ imageBackend?: string }} 运行时配置
+ * @returns {Object} <lang key="cli.extractRuntimeConfig.returns"><zh-CN>运行时配置；指定时包含 `imageBackend`。</zh-CN><en>Runtime configuration; includes `imageBackend` when it was specified.</en></lang>
  */
 function extractRuntimeConfig(fullConfig) {
   const runtimeConfig = {
@@ -1034,10 +1051,13 @@ function applyImageBackend(backend) {
 /**
  * 🔶 解析命令行 box 参数
  *
- * 支持 `true`、`false`、内置样式名和 JSON 对象字符串。
+ * @lang zh-CN 将 `--box` 的布尔值、内置样式名或 JSON 字符串转换为 Core 的 BoxOptions；非法 JSON 会抛出可定位的参数错误。
+ * @lang en Converts the boolean, built-in style name, or JSON string supplied to `--box` into Core BoxOptions; invalid JSON throws a locatable argument error.
  *
- * @param {string|boolean} value - CLI 输入值
- * @returns {false|Object} core BoxOptions 或 false
+ * @param {string|boolean} value - <lang key="cli.parseBox.param.value"><zh-CN>CLI 传入的 box 值。</zh-CN><en>Box value supplied by the CLI.</en></lang>
+ * @returns {false|Object} <lang key="cli.parseBox.returns"><zh-CN>Core `BoxOptions` 或 `false`。</zh-CN><en>Core `BoxOptions` or `false`.</en></lang>
+ * @example
+ * parseBoxOption('{"style":"round","padding":1}')
  */
 function parseBoxOption(value) {
   if (typeof value === 'boolean') {

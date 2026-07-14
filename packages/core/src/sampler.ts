@@ -42,7 +42,7 @@ import { UnicodeArtError, ErrorCode } from './types/output';
  * 
  * @param image - 源图像数据
  * @param config - 艺术生成配置
- * @returns { height: number, width: number } 输出的行数和列数
+ * @returns {{height: number, width: number}} 输出的行数和列数
  * 
  * @example
  * ```typescript
@@ -93,7 +93,7 @@ export function calculateOutputSize(
  * @param outputHeight - 输出行数
  * @param outputWidth - 输出列数
  * @param ratio - 垂直水平比例
- * @returns { blockH: number, blockW: number } 块的高度和宽度
+ * @returns {{blockH: number, blockW: number}} 块的高度和宽度
  * 
  * @example
  * ```typescript

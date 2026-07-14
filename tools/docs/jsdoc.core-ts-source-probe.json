@@ -1,0 +1,40 @@
+{
+  "plugins": [
+    "node_modules/@mandolin/jsdoc-plugin-hia-sys/src/index.cjs"
+  ],
+  "source": {
+    "include": [
+      "packages/core/src/capabilities.ts"
+    ],
+    "includePattern": "\\.ts$"
+  },
+  "opts": {
+    "template": "node_modules/@mandolin/jsdoc-theme-hia",
+    "destination": ".generated-docs/core-ts-source",
+    "encoding": "utf8",
+    "recurse": false,
+    "hia": {
+      "mode": "hiaIntegration",
+      "source": {
+        "basePath": ".",
+        "mode": "all",
+        "link": {
+          "enabled": true,
+          "rootUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main",
+          "openMode": "new-tab"
+        }
+      },
+      "i18n": {
+        "enabled": true,
+        "defaultLocale": "zh-CN",
+        "fallbackLocale": "en",
+        "locales": ["zh-CN", "en"],
+        "mode": "runtimeSwitch"
+      },
+      "integration": {
+        "enabled": true,
+        "outputFile": ".generated-docs/core-ts-source/hia-integration.json"
+      }
+    }
+  }
+}

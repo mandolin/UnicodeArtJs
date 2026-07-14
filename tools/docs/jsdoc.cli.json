@@ -1,0 +1,61 @@
+{
+  "plugins": [
+    "node_modules/@mandolin/jsdoc-plugin-hia-sys/src/index.cjs"
+  ],
+  "source": {
+    "include": [
+      "packages/cli/src/console.js"
+    ]
+  },
+  "opts": {
+    "template": "node_modules/@mandolin/jsdoc-theme-hia",
+    "destination": ".generated-docs/cli",
+    "encoding": "utf8",
+    "recurse": false,
+    "hia": {
+      "mode": "hiaIntegration",
+      "source": {
+        "basePath": ".",
+        "mode": "all",
+        "link": {
+          "enabled": true,
+          "rootUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main",
+          "openMode": "new-tab"
+        },
+        "preview": {
+          "enabled": true,
+          "defaultExpanded": false,
+          "rangeStrategy": "parser-js"
+        }
+      },
+      "i18n": {
+        "enabled": true,
+        "defaultLocale": "zh-CN",
+        "fallbackLocale": "en",
+        "locales": [
+          "zh-CN",
+          "en"
+        ],
+        "mode": "runtimeSwitch"
+      },
+      "integration": {
+        "enabled": true,
+        "outputFile": ".generated-docs/cli/hia-integration.json"
+      },
+      "theme": {
+        "skin": "classic",
+        "languageControls": {
+          "mode": "buttons"
+        },
+        "code": {
+          "controls": true,
+          "fontFamily": "sarasa",
+          "fontSize": 13,
+          "lineHeight": 1.55,
+          "tabSize": 2,
+          "wrap": false
+        }
+      }
+    }
+  }
+}

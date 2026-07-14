@@ -57,6 +57,25 @@ npm run check:vscode
 
 不要提交本地生成的 `.vsix`、`.tgz`、调试截图、临时对比输出或一次性测试脚本。如果临时文件有长期价值，应先整理成正式 fixture 或自动化测试。
 
+## CLI API 文档试点
+
+根工作区将 HIA JSDoc 工具作为开发依赖使用，不会进入 Core、CLI、Web 或 VS Code 扩展的运行时依赖。当前已为 CLI 提供可重复的双语 API 文档试点：
+
+```bash
+npm run docs:cli
+npm run docs:cli:check
+```
+
+生成结果位于被 Git 忽略的 `.generated-docs/cli/`，其中包括本地 HTML、双语索引、搜索索引、源码链接元数据和 HIA integration JSON。`docs:cli:check` 会从干净目录重新生成，并检查双语输出、关键 doclet 与 GitHub 源码链接。
+
+Core 与 VS Code Extension 的 TypeScript 文档化仍在适配阶段，因此当前不将编译产物生成的文档作为公开 API 文档发布。开发者可运行下列探针复核当前边界：
+
+```bash
+npm run docs:core:probe
+```
+
+该探针会记录直接 TypeScript 输入与保留注释的编译 JavaScript 输入的实际结果；它用于工具链评估，不是稳定文档生成入口。
+
 ## 改动提示
 
 修改 Core 行为时，需要同时关注 CLI、Web 和 VSCode Extension 是否共享同一契约。Node 图像解码后端单独规划，因为它影响 Core、CLI 和 VSCode，但不直接影响浏览器运行时。
