@@ -37,6 +37,7 @@
     "lint:web": "npm --workspace packages/web run lint",
     "docs:cli": "node scripts/generate-cli-docs.cjs",
     "docs:cli:check": "npm run docs:cli && node scripts/check-cli-docs.cjs",
+    "docs:contract:check": "node scripts/check-documentation-contract.cjs",
     "docs:core:probe": "node scripts/probe-core-ts-docs.cjs",
     "check": "npm run check:core && npm run check:cli && npm run check:web && npm run check:vscode",
     "check:core": "npm run typecheck:core && npm run build:core && npm run test:core && npm --workspace packages/core run test:node-runtime && npm run test:core:browser",

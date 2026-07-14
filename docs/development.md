@@ -64,6 +64,7 @@ npm run check:vscode
 ```bash
 npm run docs:cli
 npm run docs:cli:check
+npm run docs:contract:check
 ```
 
 生成结果位于被 Git 忽略的 `.generated-docs/cli/`，其中包括本地 HTML、双语索引、搜索索引、源码链接元数据和 HIA integration JSON。`docs:cli:check` 会从干净目录重新生成，并检查双语输出、关键 doclet 与 GitHub 源码链接。
@@ -75,6 +76,8 @@ npm run docs:core:probe
 ```
 
 该探针会记录直接 TypeScript 输入与保留注释的编译 JavaScript 输入的实际结果；它用于工具链评估，不是稳定文档生成入口。
+
+贡献代码时还应遵循[代码注释与 API 文档约定](code-documentation.md)。`docs:contract:check` 检查当前已冻结的术语、CLI 双语试点标记和常见 JSDoc 类型写法；它是质量下限，不替代对行为、术语和示例的人工复核。
 
 ## 改动提示
 
