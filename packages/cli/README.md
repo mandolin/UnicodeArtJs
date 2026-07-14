@@ -156,6 +156,21 @@ unicode-art document <input> [options]
 - `--column-separator <separator>` - DSL 单元格分隔符，默认 `|`。
 - 其余字符集、视觉字体、字素字体、尺寸、输出、`--box` 和语言选项与 `text` 命令一致。
 
+#### `font` 命令（实验性）
+
+```bash
+unicode-art font validate <input> [--json] [--lang zh-CN|en-US]
+unicode-art font inspect <input> [--json] [--lang zh-CN|en-US]
+```
+
+- `<input>` - `.uafont.json` 文件路径；传入 `-` 时从 stdin 读取。
+- `validate` - 校验 UAF 版本、字形行数、advance、宽度规则、SPDX expression 和来源字段。
+- `inspect` - 输出字体 ID、作者、许可证、字形数量和度量信息，不渲染艺术字。
+- `--json` - 输出机器可读摘要，便于 CI 或后续编辑器工具使用。
+
+当前命令不会下载、安装或打包第三方 FIGlet 字体。`official bundle candidate` 仅表示该 SPDX
+expression 是否符合 UnicodeArtJs 的首轮宽松许可白名单，不能替代对字体来源和版权的人工审计。
+
 ## 📝 配置文件
 
 支持以下格式的配置文件：

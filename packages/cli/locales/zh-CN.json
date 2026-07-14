@@ -23,6 +23,12 @@
       "completed": "完成于 ${duration}ms",
       "size": "   尺寸: ${rows} 行 × ${cols} 列"
     },
+    "font": {
+      "description": "检查实验性 Unicode 艺术字字体",
+      "valid": "✅ Unicode 艺术字字体校验通过",
+      "summary": "${name} (${id}) · ${glyphs} 个字形 · ${height} 行 · 默认步进 ${defaultAdvance} 列",
+      "license": "许可: ${license} · 来源: ${origin} · 官方随包候选: ${permissiveForOfficialBundle}"
+    },
     "output": {
       "saved": "💾 已保存到: ${path}"
     }

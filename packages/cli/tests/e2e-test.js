@@ -930,6 +930,48 @@ async function testSemanticDocumentCommand() {
   }
 }
 
+/**
+ * 🔶 Test 30: font 子命令校验与查看 UAF JSON
+ */
+async function testUnicodeArtFontCommands() {
+  const tempDir = createTempDir();
+  const fontPath = path.join(tempDir, 'reference.uafont.json');
+
+  try {
+    fs.writeFileSync(fontPath, JSON.stringify({
+      format: 'unicode-art-font',
+      version: 1,
+      meta: {
+        id: 'org.unicodeartjs.cli-reference',
+        name: 'CLI Reference',
+        authors: ['UnicodeArtJs'],
+        license: { expression: 'MIT', origin: 'original' }
+      },
+      metrics: { height: 1, defaultAdvance: 2, fallbackGlyph: '?' },
+      glyphs: {
+        A: { lines: ['AA'] },
+        '?': { lines: ['??'] }
+      }
+    }), 'utf-8');
+
+    const validation = runCli(['font', 'validate', fontPath, '--lang', 'en-US']);
+    if (validation.status !== 0 || !validation.stdout.includes('validation passed')) {
+      throw new Error(validation.stderr || validation.stdout);
+    }
+
+    const inspect = runCli(['font', 'inspect', fontPath, '--json', '--lang', 'en-US']);
+    if (inspect.status !== 0) {
+      throw new Error(inspect.stderr || inspect.stdout);
+    }
+    const summary = JSON.parse(inspect.stdout);
+    if (summary.id !== 'org.unicodeartjs.cli-reference' || summary.permissiveForOfficialBundle !== true) {
+      throw new Error(`Unexpected art font summary: ${inspect.stdout}`);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
 //#endregion
 
 //#region 🟩 执行测试
@@ -964,6 +1006,7 @@ async function testSemanticDocumentCommand() {
   await runTest('Test 27: CLI napi-rs image backend parity', testImageCommandNapiBackendParity);
   await runTest('Test 28: CLI image/text conflict', testImageTextConflict);
   await runTest('Test 29: CLI semantic document command', testSemanticDocumentCommand);
+  await runTest('Test 30: CLI Unicode art font commands', testUnicodeArtFontCommands);
   
   console.log('\n' + '='.repeat(50));
   console.log(chalk.green(`✅ Passed: ${passed}`));

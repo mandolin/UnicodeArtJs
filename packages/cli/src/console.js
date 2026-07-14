@@ -80,6 +80,8 @@ const cliPackage = require('../package.json');
 // 导入core库
 const {
   imageToArt,
+  isPermissiveUnicodeArtFontLicense,
+  parseUnicodeArtFontJson,
   parseSemanticDocumentJson,
   parseSemanticDsl,
   semanticDocumentToArt,
@@ -359,6 +361,48 @@ program
     }
   });
 
+/**
+ * 🟢 Unicode 艺术字字体检查命令组
+ *
+ * 🔹 只读取本地文件或 stdin，不下载、安装或执行第三方字体资产。
+ * 🔹 UAF 格式仍是 experimental；该命令用于创作者和二次开发者的预检。
+ */
+const fontCommand = program
+  .command('font')
+  .description('Inspect experimental Unicode art font documents');
+
+fontCommand
+  .command('validate')
+  .description('Validate a .uafont.json document')
+  .argument('<input>', 'Input UAF JSON path, or - for stdin')
+  .option('--json', 'Print machine-readable font summary')
+  .option('--lang <locale>', 'Language (zh-CN|en-US)')
+  .action(async (...args) => {
+    try {
+      const input = args[0];
+      const command = args[args.length - 1];
+      await handleArtFontCommand(input, getCommandOptions(command), 'validate');
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
+fontCommand
+  .command('inspect')
+  .description('Inspect a .uafont.json document without rendering it')
+  .argument('<input>', 'Input UAF JSON path, or - for stdin')
+  .option('--json', 'Print machine-readable font summary')
+  .option('--lang <locale>', 'Language (zh-CN|en-US)')
+  .action(async (...args) => {
+    try {
+      const input = args[0];
+      const command = args[args.length - 1];
+      await handleArtFontCommand(input, getCommandOptions(command), 'inspect');
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
 //#endregion
 
 //#region 🟩 命令处理函数
@@ -471,7 +515,7 @@ async function handleDocumentCommand(input, options) {
   const fullConfig = mergeConfig(config, options);
   fullConfig.locale = lang;
   const validatedConfig = validateConfig(fullConfig);
-  const source = readDocumentInput(input);
+  const source = readStructuredInput(input, 'Document');
   const format = String(options.documentFormat || 'json').toLowerCase();
   let document;
 
@@ -498,6 +542,43 @@ async function handleDocumentCommand(input, options) {
   } catch (error) {
     handleError(error, i18n);
   }
+}
+
+/**
+ * 🟢 处理 Unicode 艺术字字体校验和查看命令
+ *
+ * 🔹 许可证政策结果只是“是否可进入官方随包候选”的机器判断，不是法律意见。
+ * 🔹 该命令不渲染艺术字，完整布局输出由后续 P3.3 渲染引擎承接。
+ */
+async function handleArtFontCommand(input, options, operation) {
+  const lang = options.lang || 'zh-CN';
+  const i18n = loadLanguage(lang);
+  const source = readStructuredInput(input, 'Font');
+  const font = parseUnicodeArtFontJson(source, { locale: lang });
+  const summary = {
+    format: font.format,
+    version: font.version,
+    id: font.meta.id,
+    name: font.meta.name,
+    authors: font.meta.authors,
+    license: font.meta.license.expression,
+    origin: font.meta.license.origin,
+    glyphs: Object.keys(font.glyphs).length,
+    height: font.metrics.height,
+    defaultAdvance: font.metrics.defaultAdvance,
+    permissiveForOfficialBundle: isPermissiveUnicodeArtFontLicense(font.meta.license.expression)
+  };
+
+  if (options.json) {
+    console.log(JSON.stringify(summary, null, 2));
+    return;
+  }
+
+  if (operation === 'validate') {
+    console.log(chalk.green(t(i18n, 'commands.font.valid')));
+  }
+  console.log(chalk.blue(t(i18n, 'commands.font.summary', summary)));
+  console.log(chalk.gray(t(i18n, 'commands.font.license', summary)));
 }
 
 //#endregion
@@ -728,16 +809,16 @@ function readTextInput(text) {
 }
 
 /**
- * 🟢 读取语义文档输入
+ * 🟢 读取结构化 JSON 输入
  *
- * 🔹 语义文档命令始终把普通参数解释为文件路径；仅 `-` 从 stdin 读取。
+ * 🔹 语义文档与 Unicode 艺术字命令均把普通参数解释为文件路径；仅 `-` 从 stdin 读取。
  */
-function readDocumentInput(input) {
+function readStructuredInput(input, label) {
   if (input === '-') {
     return fs.readFileSync(0, 'utf-8');
   }
   if (!fs.existsSync(input)) {
-    throw new Error(`Document file not found: ${input}`);
+    throw new Error(`${label} file not found: ${input}`);
   }
   return fs.readFileSync(input, 'utf-8');
 }

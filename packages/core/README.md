@@ -111,7 +111,7 @@ The browser entry is usable today, but cross-browser pixel-level parity is still
 ## Stability Notes
 
 - Stable: Node `textToArt()`, Node `imageToArt()`, pure `imageDataToArt()`, config validation, preset charsets, output assembly, and post/outer `box` rendering.
-- Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, layout-stage `box` modes such as `lines` / `grid`, semantic documents, and glyph-width profiles.
+- Experimental: browser high-level conversion, browser cache lifecycle, browser cancellation, layout-stage `box` modes such as `lines` / `grid`, semantic documents, glyph-width profiles, and Unicode art font documents.
 - Reserved: `charSpace`, `maxParallelTasks`, and `visualFont.reduceTop/right/bottom/left`. These fields are normalized for future multi-host configuration, but they do not all change current Core output yet.
 
 Hosts can read the same boundary from `getCoreCapabilities()` instead of duplicating stability lists in UI code.
@@ -211,6 +211,50 @@ legacy `{c:n}` / `{r:n}` aliases remain parser-only compatibility input. `{t:...
 a `raw-text` block. Call `parseSemanticDocumentJson()`, `parseSemanticDsl()`, or
 `validateSemanticDocument()` before storing a document when an application needs explicit
 validation feedback.
+
+## Experimental Unicode Art Fonts
+
+Unicode art fonts are versioned UTF-8 `.uafont.json` documents for handcrafted multi-line
+glyphs. They are separate from `visualFont` and `glyphFont`: the former controls input-text
+rasterization, the latter controls the display of generated glyph cells, while an art font is
+content that later layout/rendering APIs can compose.
+
+Core currently provides parsing, structural validation, provenance checks, glyph fallback, and
+deterministic cell measurement. It does not bundle third-party FIGlet assets, download font
+files, or claim a legal conclusion about a third-party asset. The format and APIs remain
+experimental; rendering art-font text into a semantic document is planned for the next composition
+stage.
+
+```ts
+import {
+  measureUnicodeArtFontText,
+  parseUnicodeArtFontJson
+} from 'unicode-art-js';
+
+const font = parseUnicodeArtFontJson(JSON.stringify({
+  format: 'unicode-art-font',
+  version: 1,
+  meta: {
+    id: 'org.example.line-banner',
+    name: 'Line Banner',
+    authors: ['Example Author'],
+    license: { expression: 'MIT', origin: 'original' }
+  },
+  metrics: { height: 1, defaultAdvance: 2, fallbackGlyph: '?' },
+  glyphs: {
+    A: { lines: ['AA'] },
+    '?': { lines: ['??'] }
+  }
+}));
+
+console.log(measureUnicodeArtFontText(font, 'A?'));
+```
+
+Every glyph line must have exactly `metrics.height` rows across the glyph and must not store trailing
+whitespace. `advance` is measured with the same `GlyphWidthCalculator` used by boxes and semantic
+layouts. Imported or derived fonts must provide both `sourceUrl` and `attribution`; use
+`isPermissiveUnicodeArtFontLicense()` only as the project's official-bundle policy check, not as
+legal advice.
 
 ## Core i18n
 

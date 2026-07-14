@@ -197,6 +197,7 @@ describe('public configuration helpers', () => {
     expect(capabilities.stableFeatures.map((feature) => feature.id)).toContain('node.imageBackend.napi-rs');
     expect(capabilities.experimentalFeatures.map((feature) => feature.id)).toContain('glyph.widthCalculation');
     expect(capabilities.experimentalFeatures.map((feature) => feature.id)).toContain('semantic.document');
+    expect(capabilities.experimentalFeatures.map((feature) => feature.id)).toContain('artFont.document');
     expect(capabilities.nodeImageBackends.defaultBackend).toBe('napi-rs');
     expect(capabilities.nodeImageBackends.legacyBackends).toContain('sharp');
     expect(capabilities.nodeImageBackends.napiRsFirstBatchFormats).toEqual([

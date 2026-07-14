@@ -27,6 +27,8 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
         getBrowserRuntimeCapabilities,
         imageDataToArt,
         imageToArt,
+        measureUnicodeArtFontText,
+        parseUnicodeArtFontJson,
         semanticDocumentToArt,
         textToArt,
         boxText,
@@ -179,6 +181,22 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
       assert(semantic.content === '┌', 'browser semanticDocumentToArt content mismatch');
       assert(semantic.cols === 1, 'browser semanticDocumentToArt glyph width mismatch');
 
+      const artFont = parseUnicodeArtFontJson(JSON.stringify({
+        format: 'unicode-art-font',
+        version: 1,
+        meta: {
+          id: 'org.unicodeartjs.browser-smoke',
+          name: 'Browser Smoke',
+          authors: ['UnicodeArtJs'],
+          license: { expression: 'MIT', origin: 'original' }
+        },
+        metrics: { height: 1, defaultAdvance: 2, fallbackGlyph: '?' },
+        glyphs: { A: { lines: ['AA'] }, '?': { lines: ['??'] } }
+      }));
+      const artFontMeasurement = measureUnicodeArtFontText(artFont, 'AΩ');
+      assert(artFontMeasurement.cols === 4, 'browser Unicode art font measurement mismatch');
+      assert(artFontMeasurement.missingGlyphs[0] === 'Ω', 'browser Unicode art font fallback mismatch');
+
       document.querySelector('#preview').textContent = art.content + '\n' + boxed;
       window.__UNICODE_ART_BROWSER_SMOKE__ = {
         ok: true,
@@ -186,6 +204,7 @@ const createHtml = (browserEntryUrl) => String.raw`<!doctype html>
         imageArt: browserImageArt.content,
         textArt: browserTextArt.content,
         semanticArt: semantic.content,
+        artFontColumns: artFontMeasurement.cols,
         boxed,
         capabilities,
         cacheStats: getBrowserAdapterCacheStats(),
@@ -251,6 +270,7 @@ try {
     imageArtLength: result.imageArt.length,
     textArtLength: result.textArt.length,
     semanticArtLength: result.semanticArt.length,
+    artFontColumns: result.artFontColumns,
     boxedLength: result.boxed.length,
     glyphCacheEntries: result.cacheStats.glyphs,
     workerSupported: result.capabilities.worker,

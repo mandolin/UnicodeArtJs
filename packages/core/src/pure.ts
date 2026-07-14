@@ -59,6 +59,27 @@ export type {
   SemanticRowSeparatorMode
 } from './types/semantic';
 
+export type {
+  ResolvedUnicodeArtFontGlyph,
+  UnicodeArtFont,
+  UnicodeArtFontCreation,
+  UnicodeArtFontCreationMethod,
+  UnicodeArtFontDirection,
+  UnicodeArtFontExtensions,
+  UnicodeArtFontFormat,
+  UnicodeArtFontGlyph,
+  UnicodeArtFontLicense,
+  UnicodeArtFontLineMeasurement,
+  UnicodeArtFontMeasureOptions,
+  UnicodeArtFontMetadata,
+  UnicodeArtFontMetrics,
+  UnicodeArtFontOrigin,
+  UnicodeArtFontParseOptions,
+  UnicodeArtFontTextMeasurement,
+  UnicodeArtFontV1,
+  UnicodeArtFontVersion
+} from './types/artFont';
+
 export {
   DEFAULT_CONFIG,
   FontStyle,
@@ -234,6 +255,24 @@ export {
   parseSemanticDsl,
   validateSemanticDocument
 } from './semantic/document';
+
+export {
+  PERMISSIVE_UNICODE_ART_FONT_LICENSES,
+  isPermissiveUnicodeArtFontLicense,
+  isSpdxExpressionSyntax,
+  parseUnicodeArtFontJson,
+  validateUnicodeArtFont
+} from './artFont/document';
+
+export {
+  getUnicodeArtFontGlyphDisplayWidth,
+  measureUnicodeArtFontText,
+  resolveUnicodeArtFontGlyph
+} from './artFont/metrics';
+
+export {
+  UNICODE_ART_FONT_FORMAT
+} from './types/artFont';
 
 export {
   renderSemanticDocumentWithAdapter

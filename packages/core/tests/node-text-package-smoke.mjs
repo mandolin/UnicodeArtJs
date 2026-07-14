@@ -96,13 +96,29 @@ void (async () => {
     grid: false
   });
   assert.equal(semantic.content, 'npm', 'Installed Core tarball must render semantic documents');
+  const artFont = core.parseUnicodeArtFontJson(JSON.stringify({
+    format: 'unicode-art-font',
+    version: 1,
+    meta: {
+      id: 'org.unicodeartjs.package-smoke',
+      name: 'Package Smoke',
+      authors: ['UnicodeArtJs'],
+      license: { expression: 'MIT', origin: 'original' }
+    },
+    metrics: { height: 1, defaultAdvance: 2, fallbackGlyph: '?' },
+    glyphs: { A: { lines: ['AA'] }, '?': { lines: ['??'] } }
+  }));
+  const artFontMeasurement = core.measureUnicodeArtFontText(artFont, 'AΩ');
+  assert.equal(artFontMeasurement.cols, 4, 'Installed Core tarball must measure Unicode art fonts');
+  assert.deepEqual(artFontMeasurement.missingGlyphs, ['Ω'], 'Installed Core tarball must apply art-font fallback');
   console.log(JSON.stringify({
     ok: true,
     renderer: 'napi-rs-canvas',
     packageInstall: true,
     rows: result.rows,
     bytes: Buffer.byteLength(result.content),
-    semanticColumns: semantic.cols
+    semanticColumns: semantic.cols,
+    artFontColumns: artFontMeasurement.cols
   }, null, 2));
 })().catch((error) => {
   console.error(error instanceof Error ? error.stack : String(error));

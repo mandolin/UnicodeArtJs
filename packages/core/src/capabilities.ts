@@ -179,6 +179,11 @@ const EXPERIMENTAL_FEATURES: CoreCapabilityDescriptor[] = [
     id: 'semantic.document',
     stability: 'experimental',
     description: '版本化语义文档 AST 与受限 DSL / JSON 解析入口。'
+  },
+  {
+    id: 'artFont.document',
+    stability: 'experimental',
+    description: 'Unicode Art Font v1 JSON 格式、SPDX/provenance 校验与字形度量。'
   }
 ];
 
