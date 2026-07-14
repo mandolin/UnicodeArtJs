@@ -174,6 +174,20 @@ unicode-art font inspect <input> [--json] [--lang zh-CN|en-US]
 当前命令不会下载、安装或打包第三方 FIGlet 字体。`official bundle candidate` 仅表示该 SPDX
 expression 是否符合 UnicodeArtJs 的首轮宽松许可白名单，不能替代对字体来源和版权的人工审计。
 
+#### extension 命令（实验性）
+
+    unicode-art extension validate <manifest> [--json] [--lang zh-CN|en-US]
+    unicode-art extension inspect <manifest> [--json] [--lang zh-CN|en-US]
+
+- manifest 是本地 unicode-art-extension.json 文件，不能使用 stdin。
+- validate 会校验 UAEM 清单、当前 CLI/Core 兼容性，并在 manifest 所在目录内逐个读取和
+  校验已声明的 UAF 字体或语义文档资源。
+- inspect 输出相同的本地资源摘要；即使与当前 CLI 不兼容，也会保留兼容性原因供开发者查看。
+- 两个命令都不会安装、注册、下载或执行扩展代码。读取资源前会复核 realpath 仍位于
+  manifest 根目录内，以避免符号链接逃逸。
+
+完整格式请见仓库的 docs/extension-manifest.md，以及 packages/extension-line-banner 官方示例。
+
 ## 📝 配置文件
 
 支持以下格式的配置文件：

@@ -95,6 +95,14 @@ const UI_MESSAGES = {
     'editor.fileActions': '导入导出',
     'editor.import': '导入 JSON',
     'editor.export': '导出 JSON',
+    'editor.extension': '扩展清单（开发者）',
+    'editor.extensionInspect': '检查 UAEM JSON',
+    'editor.extensionHelp': '只解析所选清单并评估 Web 兼容性；不会读取同目录资源、安装或执行扩展代码。',
+    'editor.extensionReady': '尚未选择扩展清单',
+    'editor.extensionSummary': '{name} · {resources} 个资源声明 · {compatible}',
+    'editor.extensionCompatible': 'Web 兼容',
+    'editor.extensionIncompatible': 'Web 不兼容：{reasons}',
+    'editor.extensionError': '清单无效：{message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': '保存和导入使用 Core 校验的 canonical JSON；浏览器不会上传内容。',
     'editor.fontSample': '预览文字',
@@ -246,6 +254,14 @@ const UI_MESSAGES = {
     'editor.fileActions': 'Import and export',
     'editor.import': 'Import JSON',
     'editor.export': 'Export JSON',
+    'editor.extension': 'Extension manifest (developer)',
+    'editor.extensionInspect': 'Inspect UAEM JSON',
+    'editor.extensionHelp': 'Only parses the chosen manifest and evaluates Web compatibility. It does not read sibling resources, install, or execute extension code.',
+    'editor.extensionReady': 'No extension manifest selected',
+    'editor.extensionSummary': '{name} · {resources} declared resources · {compatible}',
+    'editor.extensionCompatible': 'Web compatible',
+    'editor.extensionIncompatible': 'Web incompatible: {reasons}',
+    'editor.extensionError': 'Invalid manifest: {message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': 'Saving and importing use Core-validated canonical JSON. The browser does not upload your content.',
     'editor.fontSample': 'Sample text',
@@ -480,6 +496,9 @@ const DOM = {
   editorImport: '#editorImport',
   editorImportFile: '#editorImportFile',
   editorExport: '#editorExport',
+  editorExtensionInspect: '#editorExtensionInspect',
+  editorExtensionFile: '#editorExtensionFile',
+  editorExtensionStatus: '#editorExtensionStatus',
   editorSource: '#editorSource',
   editorFontOptions: '#editorFontOptions',
   editorFontSample: '#editorFontSample',
@@ -657,6 +676,24 @@ class CoreAdapter {
   parseUnicodeArtFontJson(source, options) {
     if (!this.core?.parseUnicodeArtFontJson) throw new Error('Core艺术字字体功能未加载');
     return this.core.parseUnicodeArtFontJson(source, options);
+  }
+  parseUnicodeArtExtensionManifestJson(source, options) {
+    if (!this.core?.parseUnicodeArtExtensionManifestJson) throw new Error('Core扩展清单功能未加载');
+    return this.core.parseUnicodeArtExtensionManifestJson(source, options);
+  }
+  evaluateUnicodeArtExtensionCompatibility(manifest, host) {
+    if (!this.core?.evaluateUnicodeArtExtensionCompatibility) throw new Error('Core扩展兼容性功能未加载');
+    return this.core.evaluateUnicodeArtExtensionCompatibility(manifest, host);
+  }
+  getCoreCapabilities() {
+    if (!this.core?.getCoreCapabilities) throw new Error('Core能力查询功能未加载');
+    return this.core.getCoreCapabilities();
+  }
+  getExtensionResourceCapabilities() {
+    if (!this.core?.UNICODE_ART_EXTENSION_RESOURCE_CAPABILITIES) {
+      throw new Error('Core扩展资源能力未加载');
+    }
+    return this.core.UNICODE_ART_EXTENSION_RESOURCE_CAPABILITIES;
   }
   renderUnicodeArtFontText(font, text, options) {
     if (!this.core?.renderUnicodeArtFontText) throw new Error('Core艺术字渲染功能未加载');
@@ -894,6 +931,8 @@ class EditorController {
     $doc.on('click', DOM.editorImport, () => $(DOM.editorImportFile).click());
     $doc.on('change', DOM.editorImportFile, (event) => this.importFile(event));
     $doc.on('click', DOM.editorExport, () => this.exportSource());
+    $doc.on('click', DOM.editorExtensionInspect, () => $(DOM.editorExtensionFile).click());
+    $doc.on('change', DOM.editorExtensionFile, (event) => this.inspectExtensionManifest(event));
     $doc.on('click', DOM.editorEmbedFont, () => this.embedFontInDocument());
     $doc.on('click', DOM.editorCopy, () => this.copyPreview());
   }
@@ -1146,6 +1185,47 @@ class EditorController {
     }
   }
 
+  /**
+   * 🟢 检查一个由用户显式选择的 UAEM 清单
+   *
+   * 🔹 浏览器 File API 不会因选择一个清单而自动获得其相邻目录的读取权限。
+   * 🔹 因而 Web v1 只解析 manifest 并报告兼容性，资源读取仍由未来受控目录导入流程承担。
+   */
+  async inspectExtensionManifest(event) {
+    const file = event.target.files?.[0];
+    $(DOM.editorExtensionFile).val('');
+    if (!file) return;
+
+    try {
+      const source = await file.text();
+      const adapter = this.getCoreAdapter();
+      const manifest = adapter.parseUnicodeArtExtensionManifestJson(source, {
+        locale: AppState.config.locale,
+      });
+      const coreCapabilities = adapter.getCoreCapabilities();
+      const compatibility = adapter.evaluateUnicodeArtExtensionCompatibility(manifest, {
+        target: 'web',
+        coreVersion: coreCapabilities.version,
+        capabilities: adapter.getExtensionResourceCapabilities(),
+      });
+      if (compatibility.compatible) {
+        this.setExtensionStatus('editor.extensionSummary', {
+          name: manifest.meta.name,
+          resources: manifest.resources.length,
+          compatible: this.t('editor.extensionCompatible'),
+        }, 'success');
+        return;
+      }
+      const reasons = compatibility.reasons
+        .map((reason) => reason.code + ': ' + reason.value)
+        .join(', ');
+      this.setExtensionStatus('editor.extensionIncompatible', { reasons }, 'error');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.setExtensionStatus('editor.extensionError', { message }, 'error');
+    }
+  }
+
   exportSource() {
     const extension = this.workspace.kind === 'font' ? 'uafont.json' : 'uadoc.json';
     const blob = new Blob([this.getCurrentSource()], { type: 'application/json;charset=utf-8' });
@@ -1200,6 +1280,13 @@ class EditorController {
 
   setStatus(key, params = {}, state = 'info') {
     $(DOM.editorStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
+  /** 更新独立扩展清单检查状态，不改变编辑器源文件或预览状态。 */
+  setExtensionStatus(key, params = {}, state = 'info') {
+    $(DOM.editorExtensionStatus)
       .text(this.t(key, params))
       .attr('data-state', state);
   }

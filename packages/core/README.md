@@ -262,6 +262,20 @@ legal advice. UAF v1 currently renders LTR fonts only: a font declaring `metrics
 returns a structured `ART_FONT_RENDER_FAILED` error until a real bidirectional composition rule is
 defined.
 
+## Experimental Declarative Extensions
+
+UAEM v1 describes a local extension package that contributes only versioned semantic documents
+and UAF art fonts. The Core parser validates a strict manifest, safe relative resource paths,
+license and provenance metadata, Core version bounds, host targets, and declared capabilities. It
+does not read files, load sibling assets, install packages, execute JavaScript or WASM, or make
+network requests.
+
+Hosts are responsible for actual file-system trust boundaries. For example, the CLI resolves every
+resource real path inside the selected manifest directory before parsing it; the browser currently
+inspects only an explicitly selected manifest because it cannot automatically read sibling files.
+See the public [UAEM reference](../../docs/extension-manifest.md) and the official
+[Line Banner example](../extension-line-banner/).
+
 ## Core i18n
 
 Core errors include machine-readable `code`, optional `messageKey`, optional `messageParams`, and optional `locale`. Hosts such as CLI, Web, VSCode, and Electron can pass `locale` in `ArtConfig` and reuse exported message helpers:

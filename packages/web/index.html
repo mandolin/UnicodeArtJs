@@ -362,6 +362,16 @@
           <button class="btn" id="editorExport" type="button" data-i18n="editor.export">导出 JSON</button>
         </div>
 
+        <div class="editor-extension-section" aria-label="扩展清单（开发者）" data-i18n-aria-label="editor.extension">
+          <span class="editor-section-label" data-i18n="editor.extension">扩展清单（开发者）</span>
+          <div class="editor-file-actions">
+            <button class="btn" id="editorExtensionInspect" type="button" data-i18n="editor.extensionInspect">检查 UAEM JSON</button>
+            <input id="editorExtensionFile" type="file" accept="application/json,.json" hidden>
+          </div>
+          <p class="field-help" data-i18n="editor.extensionHelp">只解析所选清单并评估 Web 兼容性；不会读取同目录资源、安装或执行扩展代码。</p>
+          <p class="editor-extension-status" id="editorExtensionStatus" aria-live="polite" data-i18n="editor.extensionReady">尚未选择扩展清单</p>
+        </div>
+
         <div class="editor-source-group">
           <label for="editorSource" data-i18n="editor.source">Canonical JSON</label>
           <textarea id="editorSource" class="editor-source" spellcheck="false" aria-describedby="editorSourceHint"></textarea>
@@ -430,7 +440,11 @@
       semanticDocumentToArt,
       validateSemanticDocument,
       parseUnicodeArtFontJson,
+      parseUnicodeArtExtensionManifestJson,
       renderUnicodeArtFontText,
+      evaluateUnicodeArtExtensionCompatibility,
+      getCoreCapabilities,
+      UNICODE_ART_EXTENSION_RESOURCE_CAPABILITIES,
       boxText,
       previewBoxStyle,
       getBoxStyleNames,
@@ -442,7 +456,11 @@
       semanticDocumentToArt,
       validateSemanticDocument,
       parseUnicodeArtFontJson,
+      parseUnicodeArtExtensionManifestJson,
       renderUnicodeArtFontText,
+      evaluateUnicodeArtExtensionCompatibility,
+      getCoreCapabilities,
+      UNICODE_ART_EXTENSION_RESOURCE_CAPABILITIES,
       boxText,
       previewBoxStyle,
       getBoxStyleNames,

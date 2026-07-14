@@ -8,7 +8,8 @@
     "packages/core",
     "packages/cli",
     "packages/web",
-    "packages/vscode-extension"
+    "packages/vscode-extension",
+    "packages/extension-line-banner"
   ],
   "engines": {
     "node": ">=22.0.0",

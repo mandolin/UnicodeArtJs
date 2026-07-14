@@ -189,6 +189,16 @@ const EXPERIMENTAL_FEATURES: CoreCapabilityDescriptor[] = [
     id: 'artFont.render',
     stability: 'experimental',
     description: '将嵌入 UAF 字体组装为多行艺术字，并可作为语义文档内容块参与布局。'
+  },
+  {
+    id: 'extension.manifest',
+    stability: 'experimental',
+    description: 'UAEM v1 声明式扩展清单、版本兼容性协商和安全相对资源路径校验。'
+  },
+  {
+    id: 'extension.declarativeResources',
+    stability: 'experimental',
+    description: '仅声明 semantic-document 与 unicode-art-font 本地资源；不执行第三方代码。'
   }
 ];
 

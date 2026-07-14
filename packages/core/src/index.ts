@@ -432,6 +432,34 @@ export {
   UNICODE_ART_FONT_FORMAT
 } from './types/artFont';
 
+export type {
+  UnicodeArtExtensionCapability,
+  UnicodeArtExtensionCompatibility,
+  UnicodeArtExtensionCompatibilityReason,
+  UnicodeArtExtensionCompatibilityResult,
+  UnicodeArtExtensionFormat,
+  UnicodeArtExtensionHost,
+  UnicodeArtExtensionManifest,
+  UnicodeArtExtensionManifestV1,
+  UnicodeArtExtensionMetadata,
+  UnicodeArtExtensionParseOptions,
+  UnicodeArtExtensionResource,
+  UnicodeArtExtensionTarget,
+  UnicodeArtExtensionVersion
+} from './types/extension';
+
+export {
+  UNICODE_ART_EXTENSION_FORMAT
+} from './types/extension';
+
+export {
+  UNICODE_ART_EXTENSION_RESOURCE_CAPABILITIES,
+  evaluateUnicodeArtExtensionCompatibility,
+  isPermissiveUnicodeArtExtensionLicense,
+  parseUnicodeArtExtensionManifestJson,
+  validateUnicodeArtExtensionManifest
+} from './extensions/document';
+
 export {
   renderSemanticDocumentWithAdapter
 } from './semantic/render';

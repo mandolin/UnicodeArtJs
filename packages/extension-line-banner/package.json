@@ -1,0 +1,12 @@
+{
+  "name": "@unicode-art/extension-line-banner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Official declarative UnicodeArtJs extension example",
+  "license": "MIT",
+  "files": [
+    "unicode-art-extension.json",
+    "assets/",
+    "README.md"
+  ]
+}

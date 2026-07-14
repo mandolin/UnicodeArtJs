@@ -29,6 +29,15 @@
       "summary": "${name} (${id}) · ${glyphs} glyphs · ${height} rows · default advance ${defaultAdvance} cols",
       "license": "License: ${license} · origin: ${origin} · official bundle candidate: ${permissiveForOfficialBundle}"
     },
+    "extension": {
+      "description": "Validate local declarative UnicodeArtJs extension manifests",
+      "valid": "✅ UnicodeArtJs extension manifest and resources passed validation",
+      "summary": "${name} (${id}) · ${resources} local resources",
+      "compatibility": "Current CLI compatibility: ${compatible}",
+      "compatible": "compatible",
+      "incompatibleLabel": "incompatible",
+      "incompatible": "Extension is incompatible with the current CLI: ${reasons}"
+    },
     "output": {
       "saved": "💾 Saved to: ${path}"
     }

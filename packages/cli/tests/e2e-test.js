@@ -41,6 +41,13 @@ let passed = 0;
 let failed = 0;
 const cliPath = path.resolve(__dirname, '..', 'src', 'console.js');
 const fixtureImagePath = path.resolve(__dirname, '..', '..', 'core', 'tests', 'test-image-zhong.png');
+const officialExtensionManifestPath = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  'extension-line-banner',
+  'unicode-art-extension.json'
+);
 const cliPackage = require('../package.json');
 
 /**
@@ -989,6 +996,42 @@ async function testUnicodeArtFontCommands() {
   }
 }
 
+/**
+ * 🔶 Test 31: 本地声明式扩展可被 CLI 侧载预检，但不会被安装或执行
+ */
+async function testDeclarativeExtensionCommands() {
+  const validation = runCli([
+    'extension',
+    'validate',
+    officialExtensionManifestPath,
+    '--lang',
+    'en-US'
+  ]);
+  if (validation.status !== 0 || !validation.stdout.includes('passed validation')) {
+    throw new Error(validation.stderr || validation.stdout);
+  }
+
+  const inspect = runCli([
+    'extension',
+    'inspect',
+    officialExtensionManifestPath,
+    '--json',
+    '--lang',
+    'en-US'
+  ]);
+  if (inspect.status !== 0) {
+    throw new Error(inspect.stderr || inspect.stdout);
+  }
+  const summary = JSON.parse(inspect.stdout);
+  if (
+    summary.id !== 'org.unicodeartjs.line-banner'
+    || summary.compatibility.compatible !== true
+    || summary.resources.length !== 2
+  ) {
+    throw new Error('Unexpected declarative extension summary: ' + inspect.stdout);
+  }
+}
+
 //#endregion
 
 //#region 🟩 执行测试
@@ -1024,6 +1067,7 @@ async function testUnicodeArtFontCommands() {
   await runTest('Test 28: CLI image/text conflict', testImageTextConflict);
   await runTest('Test 29: CLI semantic document command', testSemanticDocumentCommand);
   await runTest('Test 30: CLI Unicode art font commands', testUnicodeArtFontCommands);
+  await runTest('Test 31: CLI declarative extension commands', testDeclarativeExtensionCommands);
   
   console.log('\n' + '='.repeat(50));
   console.log(chalk.green(`✅ Passed: ${passed}`));

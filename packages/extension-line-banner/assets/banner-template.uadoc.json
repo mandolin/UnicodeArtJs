@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "role": "column-header",
+          "blocks": [
+            {
+              "kind": "art-font-text",
+              "text": "UAJ",
+              "font": {
+                "format": "unicode-art-font",
+                "version": 1,
+                "meta": {
+                  "id": "org.unicodeartjs.line-banner-font-embedded",
+                  "name": "Line Banner Font Embedded",
+                  "authors": [
+                    "UnicodeArtJs"
+                  ],
+                  "license": {
+                    "expression": "MIT",
+                    "origin": "original"
+                  }
+                },
+                "metrics": {
+                  "height": 2,
+                  "defaultAdvance": 2,
+                  "letterSpacing": 1,
+                  "fallbackGlyph": "?"
+                },
+                "glyphs": {
+                  "A": {
+                    "lines": [
+                      "/\\",
+                      "||"
+                    ]
+                  },
+                  "U": {
+                    "lines": [
+                      "||",
+                      "\\/"
+                    ]
+                  },
+                  "J": {
+                    "lines": [
+                      "_|",
+                      "\\/"
+                    ]
+                  },
+                  "?": {
+                    "lines": [
+                      "??",
+                      "??"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "column-header",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Extension"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

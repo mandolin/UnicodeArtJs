@@ -29,6 +29,15 @@
       "summary": "${name} (${id}) · ${glyphs} 个字形 · ${height} 行 · 默认步进 ${defaultAdvance} 列",
       "license": "许可: ${license} · 来源: ${origin} · 官方随包候选: ${permissiveForOfficialBundle}"
     },
+    "extension": {
+      "description": "检查本地声明式 UnicodeArtJs 扩展清单",
+      "valid": "✅ UnicodeArtJs 扩展清单及资源校验通过",
+      "summary": "${name} (${id}) · ${resources} 个本地资源",
+      "compatibility": "当前 CLI 兼容性: ${compatible}",
+      "compatible": "兼容",
+      "incompatibleLabel": "不兼容",
+      "incompatible": "扩展与当前 CLI 不兼容: ${reasons}"
+    },
     "output": {
       "saved": "💾 已保存到: ${path}"
     }

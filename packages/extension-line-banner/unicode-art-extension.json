@@ -1,0 +1,50 @@
+{
+  "format": "unicode-art-extension",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.line-banner",
+    "name": "Line Banner",
+    "authors": [
+      "UnicodeArtJs"
+    ],
+    "description": "Official UAEM v1 sample containing an original UAF font and semantic document template.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "human",
+      "tool": "unicodeartjs-extension-example"
+    }
+  },
+  "capabilities": [
+    "unicode-art-font",
+    "semantic-document"
+  ],
+  "compatibility": {
+    "minCoreVersion": "1.2.1",
+    "maxCoreVersionExclusive": "2.0.0",
+    "targets": [
+      "cli",
+      "web",
+      "vscode",
+      "desktop"
+    ]
+  },
+  "resources": [
+    {
+      "id": "line-font",
+      "kind": "unicode-art-font",
+      "path": "assets/line-font.uafont.json",
+      "name": "Line Font",
+      "description": "A small original line-art UAF font for extension validation."
+    },
+    {
+      "id": "banner-template",
+      "kind": "semantic-document",
+      "path": "assets/banner-template.uadoc.json",
+      "name": "Banner Template",
+      "description": "A compact semantic document template with an embedded original UAF font."
+    }
+  ]
+}

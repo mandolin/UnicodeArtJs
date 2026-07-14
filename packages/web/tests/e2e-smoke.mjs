@@ -383,6 +383,42 @@ async function main() {
       await page.waitForFunction(() => document.querySelector('#editorKind option[value="document"]')?.textContent === '布局文档');
     });
 
+    await test('inspects a declaration-only extension manifest without loading resources', async () => {
+      const manifest = {
+        format: 'unicode-art-extension',
+        version: 1,
+        meta: {
+          id: 'org.unicodeartjs.web-e2e-extension',
+          name: 'Web E2E Extension',
+          authors: ['UnicodeArtJs'],
+          license: { expression: 'MIT', origin: 'original' },
+        },
+        capabilities: ['semantic-document'],
+        compatibility: { minCoreVersion: '1.2.1', targets: ['web'] },
+        resources: [
+          {
+            id: 'document',
+            kind: 'semantic-document',
+            path: 'assets/template.uadoc.json',
+          },
+        ],
+      };
+      await page.setInputFiles('#editorExtensionFile', {
+        name: 'unicode-art-extension.json',
+        mimeType: 'application/json',
+        buffer: Buffer.from(JSON.stringify(manifest), 'utf8'),
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#editorExtensionStatus')?.dataset.state === 'success',
+        undefined,
+        { timeout: 5000 },
+      );
+      const status = await page.textContent('#editorExtensionStatus');
+      if (!status.includes('Web E2E Extension') || !status.includes('兼容')) {
+        throw new Error('Extension manifest did not report a compatible Web inspection');
+      }
+    });
+
     await test('renders and validates a semantic document from editor source', async () => {
       await page.selectOption('#editorKind', 'document');
       await page.click('#editorLoadPreset');

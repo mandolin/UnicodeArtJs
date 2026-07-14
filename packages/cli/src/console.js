@@ -79,8 +79,11 @@ const cliPackage = require('../package.json');
 
 // 导入core库
 const {
+  evaluateUnicodeArtExtensionCompatibility,
   imageToArt,
   isPermissiveUnicodeArtFontLicense,
+  isPermissiveUnicodeArtExtensionLicense,
+  parseUnicodeArtExtensionManifestJson,
   parseUnicodeArtFontJson,
   parseSemanticDocumentJson,
   parseSemanticDsl,
@@ -92,6 +95,7 @@ const {
   Interpolation,
   FontStyle,
   TextAlign,
+  UNICODE_ART_EXTENSION_RESOURCE_CAPABILITIES,
   HeightMode,
   getCoreCapabilities,
   isBoxStyleName,
@@ -403,6 +407,48 @@ fontCommand
     }
   });
 
+/**
+ * 🟢 声明式扩展检查命令组
+ *
+ * 🔹 只支持 UAEM v1 本地资源清单，不支持安装、联网下载或执行第三方代码。
+ * 🔹 宿主会复核真实资源路径，拒绝符号链接或路径穿越离开扩展根目录。
+ */
+const extensionCommand = program
+  .command('extension')
+  .description('Validate local declarative UnicodeArtJs extension manifests');
+
+extensionCommand
+  .command('validate')
+  .description('Validate a local UAEM manifest and every declared resource')
+  .argument('<manifest>', 'Path to unicode-art-extension.json')
+  .option('--json', 'Print machine-readable extension summary')
+  .option('--lang <locale>', 'Language (zh-CN|en-US)')
+  .action(async (...args) => {
+    try {
+      const manifestPath = args[0];
+      const command = args[args.length - 1];
+      await handleExtensionCommand(manifestPath, getCommandOptions(command), 'validate');
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
+extensionCommand
+  .command('inspect')
+  .description('Inspect a local UAEM manifest without registering it')
+  .argument('<manifest>', 'Path to unicode-art-extension.json')
+  .option('--json', 'Print machine-readable extension summary')
+  .option('--lang <locale>', 'Language (zh-CN|en-US)')
+  .action(async (...args) => {
+    try {
+      const manifestPath = args[0];
+      const command = args[args.length - 1];
+      await handleExtensionCommand(manifestPath, getCommandOptions(command), 'inspect');
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
 //#endregion
 
 //#region 🟩 命令处理函数
@@ -579,6 +625,122 @@ async function handleArtFontCommand(input, options, operation) {
   }
   console.log(chalk.blue(t(i18n, 'commands.font.summary', summary)));
   console.log(chalk.gray(t(i18n, 'commands.font.license', summary)));
+}
+
+/**
+ * 🟢 检查本地 UAEM 扩展包
+ *
+ * 🔹 这是开发者侧载预检，不会把扩展写入任何全局目录，也不会改变 CLI 配置。
+ * 🔹 资源均在读取前用真实路径确认仍位于 manifest 所在目录，防止符号链接逃逸。
+ */
+async function handleExtensionCommand(input, options, operation) {
+  const lang = options.lang || 'zh-CN';
+  const i18n = loadLanguage(lang);
+  if (input === '-') {
+    throw new Error('Extension manifest must be a local file path; stdin has no trusted resource root');
+  }
+  if (!fs.existsSync(input)) {
+    throw new Error('Extension manifest file not found: ' + input);
+  }
+
+  const manifestPath = fs.realpathSync(input);
+  const extensionRoot = path.dirname(manifestPath);
+  const manifest = parseUnicodeArtExtensionManifestJson(fs.readFileSync(manifestPath, 'utf-8'), { locale: lang });
+  const compatibility = evaluateUnicodeArtExtensionCompatibility(manifest, {
+    target: 'cli',
+    coreVersion: getCoreCapabilities().version,
+    capabilities: UNICODE_ART_EXTENSION_RESOURCE_CAPABILITIES
+  });
+  const resources = manifest.resources.map((resource) =>
+    inspectExtensionResource(extensionRoot, resource, lang)
+  );
+  const summary = {
+    format: manifest.format,
+    version: manifest.version,
+    id: manifest.meta.id,
+    name: manifest.meta.name,
+    authors: manifest.meta.authors,
+    license: manifest.meta.license.expression,
+    origin: manifest.meta.license.origin,
+    capabilities: manifest.capabilities,
+    compatibility,
+    permissiveForOfficialBundle: isPermissiveUnicodeArtExtensionLicense(manifest.meta.license.expression),
+    resources
+  };
+
+  if (operation === 'validate' && !compatibility.compatible) {
+    throw new Error(t(i18n, 'commands.extension.incompatible', {
+      reasons: compatibility.reasons.map((reason) => reason.code + ':' + reason.value).join(', ')
+    }));
+  }
+  if (options.json) {
+    console.log(JSON.stringify(summary, null, 2));
+    return;
+  }
+  if (operation === 'validate') {
+    console.log(chalk.green(t(i18n, 'commands.extension.valid')));
+  }
+  console.log(chalk.blue(t(i18n, 'commands.extension.summary', {
+    name: summary.name,
+    id: summary.id,
+    resources: resources.length
+  })));
+  console.log(chalk.gray(t(i18n, 'commands.extension.compatibility', {
+    compatible: compatibility.compatible ? t(i18n, 'commands.extension.compatible') : t(i18n, 'commands.extension.incompatibleLabel')
+  })));
+  for (const resource of resources) {
+    console.log(chalk.gray('  - ' + resource.id + ' [' + resource.kind + '] ' + resource.path));
+  }
+}
+
+/**
+ * 🟢 在扩展根目录内读取并预检一个声明式资源
+ *
+ * @param {string} extensionRoot - 已 realpath 的 manifest 所在目录
+ * @param {{id:string, kind:string, path:string}} resource - 已由 Core 校验的资源声明
+ * @param {string} lang - Core 错误语言
+ * @returns {{id:string, kind:string, path:string, summary:Object}} 资源摘要
+ */
+function inspectExtensionResource(extensionRoot, resource, lang) {
+  const candidate = path.resolve(extensionRoot, ...resource.path.split('/'));
+  const resourcePath = fs.realpathSync(candidate);
+  assertExtensionResourceInsideRoot(extensionRoot, resourcePath, resource.path);
+  const source = fs.readFileSync(resourcePath, 'utf-8');
+
+  if (resource.kind === 'unicode-art-font') {
+    const font = parseUnicodeArtFontJson(source, { locale: lang });
+    return {
+      id: resource.id,
+      kind: resource.kind,
+      path: resource.path,
+      summary: {
+        id: font.meta.id,
+        glyphs: Object.keys(font.glyphs).length,
+        height: font.metrics.height,
+        permissiveForOfficialBundle: isPermissiveUnicodeArtFontLicense(font.meta.license.expression)
+      }
+    };
+  }
+
+  const document = parseSemanticDocumentJson(source, { locale: lang });
+  return {
+    id: resource.id,
+    kind: resource.kind,
+    path: resource.path,
+    summary: { version: document.version, rows: document.rows.length }
+  };
+}
+
+/**
+ * 🟢 复核资源真实路径仍在扩展根目录内
+ *
+ * 🔹 Core 已禁止清单中的 ..，这里仍检查 realpath，防御符号链接离开扩展目录。
+ */
+function assertExtensionResourceInsideRoot(extensionRoot, resourcePath, declaredPath) {
+  const root = extensionRoot.endsWith(path.sep) ? extensionRoot : extensionRoot + path.sep;
+  if (!resourcePath.startsWith(root)) {
+    throw new Error('Extension resource escapes manifest root: ' + declaredPath);
+  }
 }
 
 //#endregion

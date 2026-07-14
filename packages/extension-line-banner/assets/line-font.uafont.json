@@ -1,0 +1,52 @@
+{
+  "format": "unicode-art-font",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.line-banner-font",
+    "name": "Line Banner Font",
+    "authors": [
+      "UnicodeArtJs"
+    ],
+    "description": "Original compact line-art glyphs for the official declaration-only extension example.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "human",
+      "tool": "unicodeartjs-extension-example"
+    }
+  },
+  "metrics": {
+    "height": 2,
+    "defaultAdvance": 2,
+    "letterSpacing": 1,
+    "fallbackGlyph": "?"
+  },
+  "glyphs": {
+    "A": {
+      "lines": [
+        "/\\",
+        "||"
+      ]
+    },
+    "U": {
+      "lines": [
+        "||",
+        "\\/"
+      ]
+    },
+    "J": {
+      "lines": [
+        "_|",
+        "\\/"
+      ]
+    },
+    "?": {
+      "lines": [
+        "??",
+        "??"
+      ]
+    }
+  }
+}
