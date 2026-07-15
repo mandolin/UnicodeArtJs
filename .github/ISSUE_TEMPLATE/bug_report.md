@@ -12,7 +12,7 @@ assignees: ""
 - [ ] CLI (`unicode-art-cli`)
 - [ ] Web
 - [ ] VSCode Extension
-- [ ] Electron
+- [ ] Desktop app / Compatible adapter
 
 ## Version
 
@@ -41,3 +41,5 @@ What happened instead?
 ## Input / Config
 
 Paste the text, image details, CLI command, or config that reproduces the issue.
+
+If the issue only affects `UnicodeArt App`, `electron-uniart`, or another Compatible application, please also consider filing it in that application's own repository so its installer and runtime logs stay with the right project.

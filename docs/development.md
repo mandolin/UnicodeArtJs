@@ -49,7 +49,7 @@ npm run check:vscode
 
 ## Lockfile 策略
 
-现阶段由根目录维护唯一 `package-lock.json`。旧根原型 lockfile 已归档到 WorkZone，不进入公开仓库状态。
+现阶段由根目录维护唯一 `package-lock.json`。旧的原型 lockfile 不再作为公开仓库状态的一部分；当前根 lockfile 是开发、CI 和发布门禁的唯一依赖基线。
 
 如果后续发现原生 optional dependency、发布打包或跨平台 CI 有不可接受问题，可回退到“私有根编排 + 各包 lockfile”的保守模式。
 

@@ -12,7 +12,7 @@ assignees: ""
 - [ ] CLI
 - [ ] Web
 - [ ] VSCode Extension
-- [ ] Electron
+- [ ] Desktop app / Compatible adapter
 - [ ] Documentation
 
 ## Problem
@@ -30,3 +30,5 @@ Describe any workaround or alternative design you considered.
 ## Notes
 
 Add examples, screenshots, or reference links if useful.
+
+If the request is specific to a standalone desktop application, please mention whether it targets Tauri, Electron, or a general host integration.

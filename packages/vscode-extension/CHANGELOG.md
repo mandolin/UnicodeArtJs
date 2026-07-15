@@ -6,7 +6,7 @@ First stable Marketplace release.
 
 ### Changed
 
-- Upgraded to `unicode-art-js@^1.2.0` with the audited NAPI image and Skia text runtimes.
+- Upgraded to `unicode-art-js@^1.2.1` with the audited NAPI image and Skia text runtimes.
 - Improved text visual-font alignment for Skia metrics and centered auto-box width calculation.
 - Included Core and extension third-party runtime notices in the VSIX.
 - Moved the extension packaging default from Marketplace pre-release to stable release.
@@ -18,7 +18,7 @@ First stable Marketplace release.
 
 ## 0.2.0
 
-VSCode extension pre-release refresh for the T-tea milestone.
+VSCode extension pre-release refresh.
 
 ### Added
 
@@ -72,4 +72,4 @@ Initial VSCode extension release candidate.
 
 - WebView cancellation currently stops result updates but does not hard-abort core computation.
 - Image conversion is currently focused on local files.
-- Multi-preset management and PNG export are planned for later phases.
+- Multi-preset management and PNG export are planned for a future release.

@@ -1,6 +1,6 @@
 # Release Gate and Version Graph
 
-`W-art-P1.7` adds a repository-level release gate so Core, CLI, Web, and the VSCode extension can be checked with one repeatable command.
+The repository-level release gate checks Core, CLI, Web, and the VSCode extension with one repeatable command before a publish or release candidate.
 
 ## Command
 
