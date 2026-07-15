@@ -41,7 +41,7 @@ import { resizeInterpolate } from './sampler';
 import { formatCanvasFontFamily } from './utils/canvasFontFamily';
 import { isWideChar as detectWideChar } from './utils/wideCharDetector';
 import { FONT_STYLE_SUFFIX, WINDOWS_FONT_DIR, getPresetChars } from './constants';
-import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './platform/node/nodeTextCanvas';
+import { getNodeRuntimeRequire, getNodeTextCanvas, isNodeTextCanvasUnavailable } from './platform/node/nodeTextCanvas';
 
 //#region 🟩 字符渲染
 
@@ -334,8 +334,7 @@ export async function precomputeCharData(
 export async function loadFont(fontPath: string, fontStyle: string = 'regular'): Promise<string> {
   try {
     const { registerFont } = getNodeTextCanvas();
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs') as typeof import('fs');
+    const fs = getNodeRuntimeRequire()('node:fs') as typeof import('node:fs');
     
     // 🔹 检查是否为系统字体名称（不包含路径分隔符）
     if (!fontPath.includes('/') && !fontPath.includes('\\')) {

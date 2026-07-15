@@ -15,6 +15,8 @@
  * ============================================================================
  */
 
+import { createRequire } from 'node:module';
+
 //#region 🟦 Runtime module loading
 
 /** npm 包提供的 node-canvas API 兼容层。 */
@@ -31,18 +33,33 @@ let cachedCanvasModule: NodeTextCanvasModule | undefined;
 /**
  * 获取默认的 Node 文本 Canvas 运行时。
  *
- * 中文说明：使用变量 `require()` 保持浏览器构建不静态追踪 Node 原生模块。
+ * 中文说明：使用 `createRequire()` 让 Node ESM 入口也能同步加载原生 Canvas，
+ * 同时继续避免浏览器构建静态追踪 `@napi-rs/canvas`。
  */
 export function getNodeTextCanvas(): NodeTextCanvasModule {
   if (!cachedCanvasModule) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const loaded = require(NODE_TEXT_CANVAS_MODULE) as NodeTextCanvasModule & {
+    const loaded = getNodeRuntimeRequire()(NODE_TEXT_CANVAS_MODULE) as NodeTextCanvasModule & {
       default?: NodeTextCanvasModule;
     };
     cachedCanvasModule = loaded.default ?? loaded;
   }
 
   return cachedCanvasModule;
+}
+
+/**
+ * 获取能解析 Core 自身依赖的同步 require。
+ *
+ * CJS 入口直接使用宿主 `require`；ESM 入口没有 `require`，因此先从当前工作目录
+ * 创建一个解析器，定位 `unicode-art-js/package.json` 后再创建以 Core 包为锚点的
+ * require，避免要求用户把 `@napi-rs/canvas` 声明为自己的直接依赖。
+ */
+export function getNodeRuntimeRequire(): NodeJS.Require {
+  if (typeof require === 'function') return require;
+
+  const consumerRequire = createRequire(`${process.cwd()}/package.json`);
+  const packageManifest = consumerRequire.resolve('unicode-art-js/package.json');
+  return createRequire(packageManifest);
 }
 
 /** 判断异常是否来自默认 Skia Canvas 运行时无法加载。 */

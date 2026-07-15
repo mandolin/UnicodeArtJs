@@ -46,12 +46,13 @@ export default [
         globals: {
           sharp: 'sharp',
           '@napi-rs/image': 'napiRsImage',
+          'node:module': 'nodeModule',
           ndarray: 'ndarray',
           'ndarray-ops': 'ndarrayOps'
         }
       }
     ],
-    external: ['sharp', '@napi-rs/image', 'ndarray', 'ndarray-ops'],
+    external: ['sharp', '@napi-rs/image', 'node:module', 'ndarray', 'ndarray-ops'],
     plugins: createPlugins()
   },
   {

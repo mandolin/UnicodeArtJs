@@ -10,6 +10,7 @@
 - [发布门禁与版本图](release-gate.md)
 - [代码注释与 API 文档约定](code-documentation.md)
 - [文档生成流水线](documentation-pipeline.md)
+- [常见使用 Recipes](recipes.md)
 - [Web 集成与数据边界](web-integration.md)
 - [VS Code Extension 集成与数据边界](vscode-extension-integration.md)
 - [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)

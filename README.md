@@ -49,33 +49,48 @@ npm install -g unicode-art-cli
 ### 在 Node.js 中使用
 
 ```js
-const { textToArt, imageToArt } = require('unicode-art-js');
+import {
+  imageToArt,
+  OutputFormat,
+  PresetCharset,
+  textToArt
+} from 'unicode-art-js';
 
-const textArt = textToArt('Hello', {
-  font: 'Noto Sans SC',
+const textArt = await textToArt('Hello', {
   height: 10,
-  charset: 'ASCII'
+  charset: { type: PresetCharset.ASCII },
+  outputFormat: OutputFormat.PLAIN_TEXT
 });
 
-console.log(textArt);
+console.log(textArt.content);
 
 const imageArt = await imageToArt('photo.jpg', {
   width: 80,
-  matrixSize: 6
+  matrixSize: 6,
+  outputFormat: OutputFormat.PLAIN_TEXT
 });
 
-console.log(imageArt);
+console.log(imageArt.content);
 ```
 
 ### 在浏览器中使用
 
 ```js
-import { textToArt } from 'unicode-art-js/browser';
+import {
+  OutputFormat,
+  PresetCharset,
+  textToArt
+} from 'unicode-art-js/browser';
 
 const result = await textToArt('中文测试', {
   height: 20,
-  charset: 'EXTENDED',
-  font: 'Noto Sans SC'
+  charset: { type: PresetCharset.EXTENDED },
+  outputFormat: OutputFormat.PLAIN_TEXT,
+  visualFont: { family: 'Noto Sans SC, Noto Sans, sans-serif' },
+  glyphFont: {
+    family: 'Sarasa Mono SC, LXGW WenKai Mono, Source Code Pro, Liberation Mono, monospace',
+    widthProfile: 'default'
+  }
 });
 
 document.querySelector('pre').textContent = result.content;
@@ -97,6 +112,8 @@ unicode-art font validate line-banner.uafont.json --lang zh-CN
 # 将嵌入 UAF 字体的 canonical JSON 文档渲染为字符画
 unicode-art document banner.json --height 12 --box false
 ```
+
+更多可运行示例见 [docs/recipes.md](docs/recipes.md) 和 [examples/](examples/)。
 
 ## 包和应用
 
@@ -140,6 +157,7 @@ Core、CLI、Web 和 VS Code 默认路径采用“清洁分发”策略，依赖
 - CLI npm 包：<https://www.npmjs.com/package/unicode-art-cli>
 - VS Code 插件：<https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode>
 - 生态兼容性与升级说明：[docs/ecosystem-compatibility.md](docs/ecosystem-compatibility.md)
+- 常见使用 Recipes：[docs/recipes.md](docs/recipes.md)
 - 声明式扩展清单说明：[docs/extension-manifest.md](docs/extension-manifest.md)
 - 声明式扩展作者指南：[docs/extension-authoring.md](docs/extension-authoring.md)
 - 静态作品画廊说明：[docs/gallery.md](docs/gallery.md)
