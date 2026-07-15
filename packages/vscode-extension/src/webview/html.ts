@@ -1,6 +1,16 @@
 import * as vscode from 'vscode';
 import { getNonce } from '../utils/nonce';
 
+/**
+ * 🟢 生成 Converter WebView HTML
+ *
+ * 🔹 只引用扩展本地 bundled 资源，并通过 nonce + CSP 限制脚本执行。
+ * 🔹 不加载 CDN 或远程脚本，避免把 Marketplace 扩展暴露到不可控网络依赖。
+ *
+ * @param webview - VS Code WebView 实例。
+ * @param extensionUri - 扩展安装根 URI。
+ * @returns 可直接赋给 `panel.webview.html` 的 HTML 字符串。
+ */
 export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   const nonce = getNonce();
   const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'main.css'));

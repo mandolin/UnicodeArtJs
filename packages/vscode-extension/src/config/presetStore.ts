@@ -6,21 +6,42 @@ const DEFAULT_TEMPLATE_KEY = 'unicodeArtJs.defaultTemplate';
 const TEMPLATE_SLOT_KEY_PREFIX = 'unicodeArtJs.templateSlot.';
 export const TEMPLATE_SLOT_COUNT = 3;
 
+/**
+ * 🟢 模板槽摘要
+ *
+ * 🔹 用于 Converter WebView 初始化和模板下拉展示，不包含完整配置内容。
+ */
 export interface TemplateSlotSummary {
+  /** 模板槽编号。 */
   slot: number;
+  /** 展示标签。 */
   label: string;
+  /** 是否已经保存过配置。 */
   configured: boolean;
+  /** 保存配置中的 preset 标识。 */
   preset?: string;
 }
 
+/**
+ * 🟢 读取最近一次 Converter 配置
+ */
 export function loadRecentConfig(context: vscode.ExtensionContext): ExtensionArtConfig | undefined {
   return context.globalState.get<ExtensionArtConfig>(RECENT_CONFIG_KEY);
 }
 
+/**
+ * 🟢 读取默认模板配置
+ */
 export function loadDefaultTemplate(context: vscode.ExtensionContext): ExtensionArtConfig | undefined {
   return context.globalState.get<ExtensionArtConfig>(DEFAULT_TEMPLATE_KEY);
 }
 
+/**
+ * 🟢 读取指定模板槽配置
+ *
+ * @param context - VS Code 扩展上下文。
+ * @param slot - 模板槽编号，当前为 1 到 3。
+ */
 export function loadTemplateSlot(
   context: vscode.ExtensionContext,
   slot: number
@@ -28,6 +49,9 @@ export function loadTemplateSlot(
   return context.globalState.get<ExtensionArtConfig>(getTemplateSlotKey(slot));
 }
 
+/**
+ * 🟢 获取模板槽摘要列表
+ */
 export function getTemplateSlotSummaries(context: vscode.ExtensionContext): TemplateSlotSummary[] {
   return Array.from({ length: TEMPLATE_SLOT_COUNT }, (_, index) => {
     const slot = index + 1;
@@ -41,6 +65,9 @@ export function getTemplateSlotSummaries(context: vscode.ExtensionContext): Temp
   });
 }
 
+/**
+ * 🟢 保存最近一次 Converter 配置
+ */
 export async function saveRecentConfig(
   context: vscode.ExtensionContext,
   config: ExtensionArtConfig
@@ -48,6 +75,9 @@ export async function saveRecentConfig(
   await context.globalState.update(RECENT_CONFIG_KEY, sanitizeConfig(config));
 }
 
+/**
+ * 🟢 保存默认模板
+ */
 export async function saveDefaultTemplate(
   context: vscode.ExtensionContext,
   config: ExtensionArtConfig
@@ -55,6 +85,13 @@ export async function saveDefaultTemplate(
   await context.globalState.update(DEFAULT_TEMPLATE_KEY, sanitizeConfig({ ...config, preset: 'default' }));
 }
 
+/**
+ * 🟢 保存指定模板槽
+ *
+ * @param context - VS Code 扩展上下文。
+ * @param slot - 模板槽编号，当前为 1 到 3。
+ * @param config - 待保存配置。
+ */
 export async function saveTemplateSlot(
   context: vscode.ExtensionContext,
   slot: number,

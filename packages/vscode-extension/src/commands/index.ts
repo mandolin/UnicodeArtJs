@@ -11,6 +11,15 @@ import { openSettings } from './openSettings';
 import { saveCurrentPreset } from './saveCurrentPreset';
 import type { ExtensionLogger } from '../utils/logger';
 
+/**
+ * 🟢 注册 UnicodeArtJs VS Code 命令
+ *
+ * 🔹 将 package.json 中声明的命令绑定到实际处理函数。
+ * 🔹 所有 disposable 都加入 `context.subscriptions`，由 VS Code 生命周期统一释放。
+ *
+ * @param context - VS Code 扩展上下文。
+ * @param logger - 扩展输出日志器。
+ */
 export function registerCommands(context: vscode.ExtensionContext, logger: ExtensionLogger): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('unicodeArtJs.openConverter', () => openConverter(context, logger)),

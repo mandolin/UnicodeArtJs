@@ -1,0 +1,100 @@
+{
+  "$schema": "https://mandolin.github.io/HIA-Documentation/schemas/tsdoc-config-0.1.0-draft.schema.json",
+  "schemaVersion": "0.1.0-draft",
+  "workspaceRoot": ".",
+  "outputDirectory": ".generated-docs/tsdoc/vscode-extension",
+  "inputs": [
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/extension.ts",
+      "artifactBasePath": "api/vscode/extension"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/commands/index.ts",
+      "artifactBasePath": "api/vscode/commands"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/commands/convertSelection.ts",
+      "artifactBasePath": "api/vscode/commands/convert-selection"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/commands/convertImageFile.ts",
+      "artifactBasePath": "api/vscode/commands/convert-image-file"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/config/types.ts",
+      "artifactBasePath": "api/vscode/config/types"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/config/configResolver.ts",
+      "artifactBasePath": "api/vscode/config/resolver"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/config/presetStore.ts",
+      "artifactBasePath": "api/vscode/config/preset-store"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/core/coreAdapter.ts",
+      "artifactBasePath": "api/vscode/core-adapter"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/output/resultWriter.ts",
+      "artifactBasePath": "api/vscode/output/result-writer"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/webview/protocol.ts",
+      "artifactBasePath": "api/vscode/webview/protocol"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/webview/messaging.ts",
+      "artifactBasePath": "api/vscode/webview/messaging"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/webview/panel.ts",
+      "artifactBasePath": "api/vscode/webview/panel"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/webview/html.ts",
+      "artifactBasePath": "api/vscode/webview/html"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/i18n.ts",
+      "artifactBasePath": "api/vscode/i18n"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/ui/statusBar.ts",
+      "artifactBasePath": "api/vscode/ui/status-bar"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/vscode-extension/src/utils/logger.ts",
+      "artifactBasePath": "api/vscode/utils/logger"
+    }
+  ],
+  "options": {
+    "emitDocSourceMap": true,
+    "ignoreConfig": true,
+    "lib": ["ES2022", "DOM"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "skipLibCheck": true,
+    "sourcesContentPolicy": "none",
+    "target": "ES2022",
+    "types": ["node", "vscode"],
+    "writeResultManifest": true
+  }
+}

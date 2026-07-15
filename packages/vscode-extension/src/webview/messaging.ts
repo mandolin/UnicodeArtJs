@@ -29,6 +29,17 @@ const OUTPUT_TARGETS: ExtensionArtConfig['outputTarget'][] = ['vscode'];
 const LOCALES: ExtensionArtConfig['locale'][] = ['zh-CN', 'en-US'];
 const canceledRequests = new WeakMap<vscode.WebviewPanel, Set<string>>();
 
+/**
+ * 🟢 处理 Converter WebView 发来的消息
+ *
+ * 🔹 入口先执行协议校验，再按消息类型分派到转换、模板、复制、插入和保存流程。
+ * 🔹 图片数据先写入扩展 globalStorage 下的临时文件，再交给 Core Node 图像路径处理。
+ *
+ * @param panel - Converter WebView 面板。
+ * @param message - WebView 发送的未知输入。
+ * @param context - VS Code 扩展上下文。
+ * @param logger - 扩展输出日志器。
+ */
 export async function handleWebviewMessage(
   panel: vscode.WebviewPanel,
   message: unknown,

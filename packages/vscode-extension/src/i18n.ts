@@ -249,16 +249,39 @@ const messages: Record<Locale, Record<string, string>> = {
   }
 };
 
+/**
+ * 🟢 获取 VS Code 扩展当前语言
+ *
+ * 🔹 根据 `vscode.env.language` 在中文和英文之间选择。
+ *
+ * @returns 扩展层 locale。
+ */
 export function getLocale(): Locale {
   return vscode.env.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US';
 }
 
+/**
+ * 🟢 获取本地化消息
+ *
+ * 🔹 用于命令、通知和 WebView 宿主消息；Core 错误信息仍由 Core locale 处理。
+ *
+ * @param key - 消息键。
+ * @param params - 插值参数。
+ * @returns 本地化后的消息文本。
+ */
 export function t(key: string, params: Record<string, string | number> = {}): string {
   const locale = getLocale();
   const template = messages[locale][key] ?? messages['en-US'][key] ?? key;
   return template.replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? `{${name}}`));
 }
 
+/**
+ * 🟢 获取 WebView 消息表
+ *
+ * 🔹 初始化 Converter 面板时发送给前端脚本，避免 WebView 自行推断 VS Code 语言。
+ *
+ * @returns 当前 locale 对应的消息字典。
+ */
 export function getWebviewMessages(): Record<string, string> {
   const locale = getLocale();
   return messages[locale];

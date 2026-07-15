@@ -9,6 +9,16 @@ const IMAGE_FILTERS = {
   Images: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'],
 };
 
+/**
+ * 🟢 转换本地图片文件为字符画
+ *
+ * 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。
+ * 🔹 当前阶段只接受本地 `file` URI，远程工作区资源需要后续独立适配。
+ *
+ * @param context - VS Code 扩展上下文。
+ * @param logger - 扩展输出日志器。
+ * @param resource - 可选图片资源 URI。
+ */
 export async function convertImageFile(
   context: vscode.ExtensionContext,
   logger: ExtensionLogger,

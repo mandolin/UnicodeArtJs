@@ -5,10 +5,24 @@ import { DEFAULT_EXTENSION_CONFIG } from './defaults';
 import { loadDefaultTemplate, loadRecentConfig } from './presetStore';
 import type { ExtensionArtConfig } from './types';
 
+/**
+ * 🟢 配置解析选项
+ */
 export interface ResolveArtConfigOptions {
+  /** 是否叠加最近一次 Converter 保存的配置。 */
   includeRecent?: boolean;
 }
 
+/**
+ * 🟢 解析 VS Code 扩展当前有效配置
+ *
+ * 🔹 合并顺序为内置默认值、工作区/用户设置、默认模板和最近配置。
+ * 🔹 返回值会补齐 Core 需要的 locale 与 `outputTarget: "vscode"`。
+ *
+ * @param context - 可选扩展上下文；存在时读取模板与最近配置。
+ * @param options - 解析行为选项。
+ * @returns 扩展内部统一配置。
+ */
 export function resolveArtConfig(
   context?: vscode.ExtensionContext,
   options: ResolveArtConfigOptions = {}

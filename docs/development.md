@@ -68,6 +68,8 @@ npm run docs:web
 npm run docs:web:check
 npm run docs:tsdoc:core
 npm run docs:tsdoc:core:check
+npm run docs:tsdoc:vscode
+npm run docs:tsdoc:vscode:check
 npm run docs:contract:check
 ```
 
@@ -75,7 +77,9 @@ npm run docs:contract:check
 
 Core 的 TypeScript 文档已接入 `@hia-doc/tsdoc-runner@0.1.2`。其 40 个输入文件覆盖主要公开导出图，并生成可校验的中间 artifact；`docs:tsdoc:core:check` 会验证导出覆盖、诊断和 source map 隐私。该产物不是已经部署的 API 文档站，公开站点聚合将在后续文档阶段完成。
 
-VS Code Extension 的 TypeScript 文档化仍在适配阶段，因此当前不将其编译产物生成的文档作为公开 API 文档发布。开发者可运行下列 Core 历史探针复核 TypeScript 输入与编译 JavaScript 输入的差异：
+VS Code Extension 的 TypeScript 文档也已接入 `@hia-doc/tsdoc-runner@0.1.2`。其 16 个输入文件覆盖命令、配置、模板、Core adapter、WebView 协议、HTML/CSP、i18n 和日志边界；`docs:tsdoc:vscode:check` 会验证导出覆盖、诊断和 source map 隐私。扩展的架构与数据边界见 [VS Code Extension 集成与数据边界](vscode-extension-integration.md)。
+
+开发者仍可运行下列 Core 历史探针复核 TypeScript 输入与编译 JavaScript 输入的差异：
 
 ```bash
 npm run docs:core:probe
@@ -85,7 +89,7 @@ npm run docs:core:probe
 
 Web 的 `gallery-index` 是当前可独立导入的 JavaScript 模块，其 API 文档可通过 `docs:web` 生成。页面主入口 `packages/web/src/main.js` 是 DOM 工作台实现，不承诺为第三方库 API；其浏览器接入、存储和安全边界见[Web 集成与数据边界](web-integration.md)。
 
-贡献代码时还应遵循[代码注释与 API 文档约定](code-documentation.md)。修改公开 Core TypeScript 契约时，须运行 `npm run docs:tsdoc:core:check`；修改 CLI 或 Web JavaScript 文档时，须运行对应的 `docs:*:check`。`docs:contract:check` 检查当前已冻结的术语、CLI 双语试点标记和常见 JSDoc 类型写法；它是质量下限，不替代对行为、术语和示例的人工复核。
+贡献代码时还应遵循[代码注释与 API 文档约定](code-documentation.md)。修改公开 Core TypeScript 契约时，须运行 `npm run docs:tsdoc:core:check`；修改 VS Code Extension 命令、配置、WebView 协议或宿主边界时，须运行 `npm run docs:tsdoc:vscode:check`；修改 CLI 或 Web JavaScript 文档时，须运行对应的 `docs:*:check`。`docs:contract:check` 检查当前已冻结的术语、CLI 双语试点标记和常见 JSDoc 类型写法；它是质量下限，不替代对行为、术语和示例的人工复核。
 
 ## 改动提示
 

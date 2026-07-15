@@ -7,6 +7,12 @@ import { t } from '../i18n';
 import { InsertMode, writeResult } from '../output/resultWriter';
 import type { ExtensionLogger } from '../utils/logger';
 
+/**
+ * 🟢 使用当前有效配置转换编辑器选中文本
+ *
+ * @param context - VS Code 扩展上下文。
+ * @param logger - 扩展输出日志器。
+ */
 export async function convertSelection(
   context: vscode.ExtensionContext,
   logger: ExtensionLogger
@@ -14,6 +20,11 @@ export async function convertSelection(
   await convertSelectedText(context, logger, resolveArtConfig(context), 'selection');
 }
 
+/**
+ * 🟢 使用默认模板转换编辑器选中文本
+ *
+ * 🔹 不叠加最近一次 Converter 配置，适合右键菜单的稳定默认入口。
+ */
 export async function generateWithDefaultTemplate(
   context: vscode.ExtensionContext,
   logger: ExtensionLogger
@@ -22,6 +33,15 @@ export async function generateWithDefaultTemplate(
   await convertSelectedText(context, logger, config, 'default template', false);
 }
 
+/**
+ * 🟢 使用指定自定义模板槽转换编辑器选中文本
+ *
+ * 🔹 未配置的模板槽会提示用户打开 Converter 面板。
+ *
+ * @param context - VS Code 扩展上下文。
+ * @param logger - 扩展输出日志器。
+ * @param slot - 模板槽编号，当前为 1 到 3。
+ */
 export async function generateWithTemplateSlot(
   context: vscode.ExtensionContext,
   logger: ExtensionLogger,
@@ -82,6 +102,11 @@ async function convertSelectedText(
   }
 }
 
+/**
+ * 🟢 转换选中文本并临时选择插入方式
+ *
+ * 🔹 仅覆盖本次插入方式，并保存到最近配置，便于下次 Converter 或命令复用。
+ */
 export async function convertSelectionWithOptions(
   context: vscode.ExtensionContext,
   logger: ExtensionLogger

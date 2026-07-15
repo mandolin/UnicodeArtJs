@@ -43,6 +43,8 @@
     "docs:core:probe": "node scripts/probe-core-ts-docs.cjs",
     "docs:tsdoc:core": "hia-tsdoc --config tsdoc.core.json",
     "docs:tsdoc:core:check": "npm run docs:tsdoc:core && node scripts/check-core-tsdoc.cjs",
+    "docs:tsdoc:vscode": "hia-tsdoc --config tsdoc.vscode-extension.json",
+    "docs:tsdoc:vscode:check": "npm run docs:tsdoc:vscode && node scripts/check-vscode-tsdoc.cjs",
     "check": "npm run check:core && npm run check:cli && npm run check:web && npm run check:vscode",
     "check:core": "npm run typecheck:core && npm run build:core && npm run test:core && npm --workspace packages/core run test:node-runtime && npm run test:core:browser",
     "check:cli": "npm run test:cli",
@@ -75,6 +77,7 @@
     "@mandolin/jsdoc-plugin-hia-sys": "0.1.1",
     "@mandolin/jsdoc-theme-hia": "0.1.1",
     "@types/node": "20.19.43",
+    "@types/vscode": "1.90.0",
     "jsdoc": "4.0.5"
   }
 }

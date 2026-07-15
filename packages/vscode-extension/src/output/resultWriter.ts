@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
 import { t } from '../i18n';
 
+/**
+ * 🟢 生成结果写入模式
+ *
+ * 🔹 控制字符画插入到当前编辑器、打开新文档或复制到剪贴板的方式。
+ */
 export type InsertMode =
   | 'replaceSelection'
   | 'beforeSelection'
@@ -10,6 +15,15 @@ export type InsertMode =
   | 'newDocument'
   | 'clipboardOnly';
 
+/**
+ * 🟢 将字符画结果写入 VS Code
+ *
+ * 🔹 根据插入模式替换选区、插入到相邻位置、打开新文档或复制到剪贴板。
+ *
+ * @param editor - 当前活动文本编辑器。
+ * @param content - 已生成的字符画文本。
+ * @param mode - 写入模式。
+ */
 export async function writeResult(
   editor: vscode.TextEditor,
   content: string,
