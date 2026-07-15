@@ -39,7 +39,7 @@ npm run docs:all:check
 
 ## CI 与发布门禁
 
-GitHub Actions 的 `CI / Full Check` 会运行 `npm run docs:all:check`。文档、脚本、TSDoc 配置或包源码变化都会触发该检查。
+GitHub Actions 的 `CI / Full Check` 会分步骤运行与 `npm run docs:all:check` 等价的文档检查。文档、脚本、TSDoc 配置或包源码变化都会触发该检查；分步骤执行是为了让远端失败时能直接定位到 CLI、Web、Core TSDoc、VS Code TSDoc、术语契约或 manifest。
 
 发布前总入口 `npm run release:gate` 也会运行 `docs:all:check`，确保发布包、VSIX 检查和开发者文档使用同一套质量底线。
 

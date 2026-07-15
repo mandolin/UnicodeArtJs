@@ -60,8 +60,23 @@ jobs:
         # 显式使用 Core workspace 的固定 Playwright，避免根目录 npx 隐式下载或解析其他版本。
         run: npm --workspace packages/core exec -- playwright install --with-deps chromium
 
-      - name: Check Documentation
-        run: npm run docs:all:check
+      - name: Check CLI Docs
+        run: npm run docs:cli:check
+
+      - name: Check Web Docs
+        run: npm run docs:web:check
+
+      - name: Check Core TSDoc
+        run: npm run docs:tsdoc:core:check
+
+      - name: Check VS Code TSDoc
+        run: npm run docs:tsdoc:vscode:check
+
+      - name: Check Documentation Contract
+        run: npm run docs:contract:check
+
+      - name: Check Documentation Manifest
+        run: npm run docs:manifest:check
 
       # 保持与本地 release:gate 相同的覆盖范围，但拆分步骤以便远端直接显示失败边界。
       - name: Check Core
