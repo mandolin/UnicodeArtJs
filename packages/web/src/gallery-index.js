@@ -12,20 +12,44 @@
  * - 只允许 UAF 与语义文档这两类已由 Core 校验的声明式 JSON。
  * - 所有展示文本由调用方以 textContent 写入页面，不能拼接为 HTML。
  *
- * @module gallery-index
+ * @lang zh-CN 审核静态画廊索引的浏览器模块；只处理同源 JSON 元数据与安全相对路径，不加载或执行第三方作品代码。
+ * @lang en Browser module for reviewed static gallery indexes; handles only same-origin JSON metadata and safe relative paths, without loading or executing third-party artwork code.
+ *
+ * @module @unicode-art/web/gallery-index
  * @license MIT
  * ============================================================================
  */
 
 //#region 🟩 格式常量
 
-/** 静态画廊索引的固定格式名。 */
+/**
+ * 静态画廊索引的固定格式名。
+ *
+ * @lang zh-CN 静态画廊索引的固定格式标识；解析器拒绝其它格式，防止把任意 JSON 当作作品目录消费。
+ * @lang en Fixed format identifier for static gallery indexes; the parser rejects other formats so arbitrary JSON cannot be consumed as an artwork catalog.
+ * @constant {string}
+ * @readonly
+ */
 export const UNICODE_ART_GALLERY_INDEX_FORMAT = 'unicode-art-gallery-index';
 
-/** 当前支持的静态画廊索引版本。 */
+/**
+ * 当前支持的静态画廊索引版本。
+ *
+ * @lang zh-CN 当前支持的静态画廊索引版本；版本不匹配时必须由调用方更新索引或解析器。
+ * @lang en Currently supported static gallery index version; callers must update the index or parser when versions differ.
+ * @constant {number}
+ * @readonly
+ */
 export const UNICODE_ART_GALLERY_INDEX_VERSION = 1;
 
-/** 画廊首版允许的、可由现有 Core 解析的资源种类。 */
+/**
+ * 画廊首版允许的、可由现有 Core 解析的资源种类。
+ *
+ * @lang zh-CN 画廊首版允许的声明式资源种类；不包含脚本、远程 URL、压缩包或可执行扩展。
+ * @lang en Declarative resource kinds allowed by the first gallery release; excludes scripts, remote URLs, archives, and executable extensions.
+ * @constant {string[]}
+ * @readonly
+ */
 export const UNICODE_ART_GALLERY_ARTWORK_KINDS = Object.freeze([
   'semantic-document',
   'unicode-art-font',
@@ -115,8 +139,15 @@ function parseTags(value, name) {
  *
  * 解析结果为冻结对象，避免调用方意外改写已审核作品的元数据。
  *
- * @param {string} source 画廊 index.json 文本。
- * @returns {{format: string, version: number, meta: object, artworks: readonly object[]}}
+ * @lang zh-CN 解析并严格校验静态画廊索引；该入口只接受审核后的同源 JSON 元数据，不读取、下载或执行作品内容。
+ * @lang en Parses and strictly validates a static gallery index; this entry accepts only reviewed same-origin JSON metadata and never reads, downloads, or executes artwork content.
+ *
+ * @param {string} source - <lang key="web.gallery.parse.param.source"><zh-CN>画廊 `index.json` 的 UTF-8 文本。</zh-CN><en>UTF-8 text from the gallery `index.json` file.</en></lang>
+ * @returns {Object} <lang key="web.gallery.parse.returns"><zh-CN>冻结后的索引、元数据和作品列表。</zh-CN><en>Frozen index, metadata, and artwork list.</en></lang>
+ * @throws {Error} <lang key="web.gallery.parse.throws"><zh-CN>当 JSON、格式版本、字段、许可证或资源路径不符合静态画廊契约时抛出。</zh-CN><en>Thrown when JSON, format version, fields, licenses, or resource paths violate the static-gallery contract.</en></lang>
+ * @example
+ * const index = parseUnicodeArtGalleryIndex(indexJsonText);
+ * const firstArtwork = index.artworks[0];
  */
 export function parseUnicodeArtGalleryIndex(source) {
   let value;
@@ -198,7 +229,16 @@ export function parseUnicodeArtGalleryIndex(source) {
   });
 }
 
-/** 根据 UI 语言读取双语元数据，并在必要时采用英文回退。 */
+/**
+ * 根据 UI 语言读取双语元数据，并在必要时采用英文回退。
+ *
+ * @lang zh-CN 按 UI 语言读取已校验的双语元数据；中文缺失时回退英文，英文缺失时回退中文。
+ * @lang en Reads validated localized metadata for the UI locale; falls back to English when Chinese is missing and to Chinese when English is missing.
+ *
+ * @param {Object} value - <lang key="web.gallery.localizedText.param.value"><zh-CN>包含 `zh-CN` 与 `en-US` 的已校验文本对象。</zh-CN><en>Validated text object containing `zh-CN` and `en-US`.</en></lang>
+ * @param {string} locale - <lang key="web.gallery.localizedText.param.locale"><zh-CN>当前 UI 语言。</zh-CN><en>Current UI locale.</en></lang>
+ * @returns {string} <lang key="web.gallery.localizedText.returns"><zh-CN>可安全写入文本节点的本地化文本。</zh-CN><en>Localized text safe to write into a text node.</en></lang>
+ */
 export function getGalleryLocalizedText(value, locale) {
   if (!value || typeof value !== 'object') return '';
   return locale === 'en-US' ? value['en-US'] || value['zh-CN'] || '' : value['zh-CN'] || value['en-US'] || '';
@@ -207,8 +247,15 @@ export function getGalleryLocalizedText(value, locale) {
 /**
  * 将已校验的作品相对路径解析为固定画廊根目录内的同源 URL。
  *
- * @param {string} source 画廊索引中的作品路径。
- * @param {string} [pageUrl] 当前页面 URL，便于 Node 测试提供确定性输入。
+ * @lang zh-CN 将已校验作品路径解析为固定画廊根目录内的同源 URL；额外的 origin 与路径前缀检查防止调用方绕过索引约束。
+ * @lang en Resolves a validated artwork path into a same-origin URL under the fixed gallery root; extra origin and path-prefix checks prevent callers from bypassing index constraints.
+ *
+ * @param {string} source - <lang key="web.gallery.resolveUrl.param.source"><zh-CN>画廊索引中已校验的作品相对路径。</zh-CN><en>Validated relative artwork path from the gallery index.</en></lang>
+ * @param {string} [pageUrl] - <lang key="web.gallery.resolveUrl.param.pageUrl"><zh-CN>当前页面 URL；Node 测试可传入确定性值。</zh-CN><en>Current page URL; Node tests may provide a deterministic value.</en></lang>
+ * @returns {URL} <lang key="web.gallery.resolveUrl.returns"><zh-CN>受同源与画廊根目录限制的作品 URL。</zh-CN><en>Artwork URL constrained to the same origin and gallery root.</en></lang>
+ * @throws {Error} <lang key="web.gallery.resolveUrl.throws"><zh-CN>当路径解析后离开画廊静态资源根目录时抛出。</zh-CN><en>Thrown when the resolved path leaves the gallery static-asset root.</en></lang>
+ * @example
+ * const url = resolveUnicodeArtGalleryArtworkUrl('artworks/example.uafont.json', 'https://example.test/UnicodeArtJs/');
  */
 export function resolveUnicodeArtGalleryArtworkUrl(source, pageUrl = window.location.href) {
   const root = new URL('./gallery/', pageUrl);

@@ -32,6 +32,36 @@ for (const relativePath of requiredFiles) {
 const integrationPath = path.join(outputDirectory, 'hia-integration.json');
 const integration = JSON.parse(fs.readFileSync(integrationPath, 'utf8'));
 const nodes = integration.ir?.nodes ?? [];
+const expectedFunctionNames = [
+  'loadLanguage',
+  't',
+  'getCommandOptions',
+  'handleImageCommand',
+  'handleTextCommand',
+  'handleDocumentCommand',
+  'handleArtFontCommand',
+  'handleExtensionCommand',
+  'inspectExtensionResource',
+  'assertExtensionResourceInsideRoot',
+  'loadConfig',
+  'mergeConfig',
+  'normalizeConfig',
+  'readTextInput',
+  'readStructuredInput',
+  'extractRuntimeConfig',
+  'applyImageBackend',
+  'parseBoxOption',
+  'normalizeBoxConfig',
+  'normalizeCharset',
+  'hasOption',
+  'requireFiniteNumber',
+  'normalizeFontStyle',
+  'normalizeHeightMode',
+  'inferOutputTarget',
+  'outputResult',
+  'handleError'
+];
+const functionNodes = nodes.filter((node) => node.kind === 'function');
 const loadLanguageNode = nodes.find((node) => node.name === 'loadLanguage');
 const normalizeConfigNode = nodes.find((node) => node.name === 'normalizeConfig');
 const moduleNode = nodes.find((node) => node.longname === 'module:@unicode-art/cli');
@@ -42,6 +72,29 @@ if (!loadLanguageNode) {
 
 if (!normalizeConfigNode) {
   throw new Error('HIA integration output does not contain the normalizeConfig doclet.');
+}
+
+if (functionNodes.length !== expectedFunctionNames.length) {
+  throw new Error(
+    `CLI documentation emitted ${functionNodes.length} function doclets; expected ${expectedFunctionNames.length}. `
+    + 'Update the explicit public-maintainer documentation inventory deliberately.'
+  );
+}
+
+for (const functionName of expectedFunctionNames) {
+  const node = functionNodes.find((candidate) => candidate.name === functionName);
+  if (!node) {
+    throw new Error(`CLI documentation is missing the ${functionName} function doclet.`);
+  }
+
+  const description = node.i18n?.fields?.description?.localizedText;
+  if (!description?.['zh-CN'] || !description?.en) {
+    throw new Error(`CLI function ${functionName} is missing a bilingual localized description.`);
+  }
+
+  if (!node.jsdoc?.params?.length || !node.jsdoc?.returns?.length) {
+    throw new Error(`CLI function ${functionName} is missing parameter or return documentation.`);
+  }
 }
 
 const localizedDescription = loadLanguageNode.i18n?.fields?.description?.localizedText;
@@ -76,6 +129,16 @@ if (!chineseHtml.includes('加载语言文件')) {
 
 if (!englishHtml.includes('Loads a locale dictionary')) {
   throw new Error('English documentation output is missing the localized CLI description.');
+}
+
+// 直接核验已生成的字段文案，避免只在 HIA 集成 JSON 中存在英文、
+// 而主题页面因回退元数据错误显示中文的情况再次出现。
+if (!englishHtml.includes('Locale code, for example `zh-CN` or `en-US`.')) {
+  throw new Error('English documentation output is rendering the loadLanguage parameter with an unexpected fallback locale.');
+}
+
+if (!englishHtml.includes('Parsed translation dictionary.')) {
+  throw new Error('English documentation output is missing the localized loadLanguage return description.');
 }
 
 process.stdout.write('CLI HIA JSDoc output passed the smoke checks.\n');

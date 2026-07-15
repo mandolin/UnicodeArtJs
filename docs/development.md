@@ -64,6 +64,8 @@ npm run check:vscode
 ```bash
 npm run docs:cli
 npm run docs:cli:check
+npm run docs:web
+npm run docs:web:check
 npm run docs:contract:check
 ```
 
@@ -76,6 +78,8 @@ npm run docs:core:probe
 ```
 
 该探针会记录直接 TypeScript 输入与保留注释的编译 JavaScript 输入的实际结果；它用于工具链评估，不是稳定文档生成入口。
+
+Web 的 `gallery-index` 是当前可独立导入的 JavaScript 模块，其 API 文档可通过 `docs:web` 生成。页面主入口 `packages/web/src/main.js` 是 DOM 工作台实现，不承诺为第三方库 API；其浏览器接入、存储和安全边界见[Web 集成与数据边界](web-integration.md)。
 
 贡献代码时还应遵循[代码注释与 API 文档约定](code-documentation.md)。`docs:contract:check` 检查当前已冻结的术语、CLI 双语试点标记和常见 JSDoc 类型写法；它是质量下限，不替代对行为、术语和示例的人工复核。
 

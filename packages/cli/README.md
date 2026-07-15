@@ -257,6 +257,17 @@ i18n:
 
 `--lang` / `i18n.lang` 会同步传递给 Core 的 `locale` 配置，因此 Core 层配置错误也会尽量使用对应语言输出。
 
+## 开发者文档
+
+CLI 的命令入口、配置归并和输出边界可通过仓库根目录的 HIA 文档生成器检查：
+
+```bash
+npm run docs:cli:check
+```
+
+该文档用于追溯当前实现。稳定使用方式仍以本 README、`unicode-art --help` 和已发布的配置契约为准；
+`src/console.js` 中的辅助函数不是可由第三方稳定 `require` 的 SDK。
+
 ## 发布准备
 
 仓库开发态默认使用本地 Core：

@@ -13,6 +13,7 @@ const path = require('node:path');
 const repositoryRoot = path.resolve(__dirname, '..');
 const guidePath = path.join(repositoryRoot, 'docs', 'code-documentation.md');
 const cliSourcePath = path.join(repositoryRoot, 'packages', 'cli', 'src', 'console.js');
+const galleryIndexSourcePath = path.join(repositoryRoot, 'packages', 'web', 'src', 'gallery-index.js');
 const coreSourceRoot = path.join(repositoryRoot, 'packages', 'core', 'src');
 
 function readUtf8(filePath) {
@@ -27,7 +28,7 @@ function requireText(content, expected, label) {
 
 function findFunctionComment(source, functionName) {
   const expression = new RegExp(
-    String.raw`/\*\*([\s\S]*?)\*/\s*function\s+${functionName}\s*\(`
+    String.raw`/\*\*([\s\S]*?)\*/\s*(?:export\s+)?(?:async\s+)?function\s+${functionName}\s*\(`
   );
   const match = source.match(expression);
 
@@ -59,8 +60,51 @@ for (const requirement of ['@lang zh-CN', '@lang en', '@deprecated', 'getCoreCap
 }
 
 const cliSource = readUtf8(cliSourcePath);
-for (const functionName of ['loadLanguage', 't', 'getCommandOptions', 'normalizeConfig', 'parseBoxOption']) {
+const cliFunctionNames = [
+  'loadLanguage',
+  't',
+  'getCommandOptions',
+  'handleImageCommand',
+  'handleTextCommand',
+  'handleDocumentCommand',
+  'handleArtFontCommand',
+  'handleExtensionCommand',
+  'inspectExtensionResource',
+  'assertExtensionResourceInsideRoot',
+  'loadConfig',
+  'mergeConfig',
+  'normalizeConfig',
+  'readTextInput',
+  'readStructuredInput',
+  'extractRuntimeConfig',
+  'applyImageBackend',
+  'parseBoxOption',
+  'normalizeBoxConfig',
+  'normalizeCharset',
+  'hasOption',
+  'requireFiniteNumber',
+  'normalizeFontStyle',
+  'normalizeHeightMode',
+  'inferOutputTarget',
+  'outputResult',
+  'handleError'
+];
+
+for (const functionName of cliFunctionNames) {
   const comment = findFunctionComment(cliSource, functionName);
+  requireText(comment, '@lang zh-CN', `${functionName} Chinese description`);
+  requireText(comment, '@lang en', `${functionName} English description`);
+  requireText(comment, '@param', `${functionName} parameter contract`);
+  requireText(comment, '@returns', `${functionName} return contract`);
+}
+
+const galleryIndexSource = readUtf8(galleryIndexSourcePath);
+for (const functionName of [
+  'parseUnicodeArtGalleryIndex',
+  'getGalleryLocalizedText',
+  'resolveUnicodeArtGalleryArtworkUrl'
+]) {
+  const comment = findFunctionComment(galleryIndexSource, functionName);
   requireText(comment, '@lang zh-CN', `${functionName} Chinese description`);
   requireText(comment, '@lang en', `${functionName} English description`);
   requireText(comment, '@param', `${functionName} parameter contract`);
@@ -72,6 +116,19 @@ const invalidFiles = listSourceFiles(coreSourceRoot).filter((filePath) => invali
 if (invalidFiles.length > 0) {
   const relativeFiles = invalidFiles.map((filePath) => path.relative(repositoryRoot, filePath));
   throw new Error(`JSDoc object return type needs double braces in: ${relativeFiles.join(', ')}`);
+}
+
+const invalidReadonlyType = /@(returns|constant|type|param)\s+\{readonly\s+/;
+const javaScriptSourceRoots = [
+  path.join(repositoryRoot, 'packages', 'cli', 'src'),
+  path.join(repositoryRoot, 'packages', 'web', 'src')
+];
+const invalidReadonlyFiles = javaScriptSourceRoots
+  .flatMap((directory) => listSourceFiles(directory))
+  .filter((filePath) => invalidReadonlyType.test(readUtf8(filePath)));
+if (invalidReadonlyFiles.length > 0) {
+  const relativeFiles = invalidReadonlyFiles.map((filePath) => path.relative(repositoryRoot, filePath));
+  throw new Error(`JSDoc does not accept TypeScript readonly type syntax in: ${relativeFiles.join(', ')}`);
 }
 
 process.stdout.write('Documentation contract checks passed.\n');

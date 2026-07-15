@@ -93,8 +93,7 @@ const result = imageDataToArt(pixels, config, { charDataMap });
 ## 配置、结果与错误
 
 - 新接入应使用 `visualFont`、`glyphFont`、`outputTarget` 和 `locale` 的分组配置；旧 `font` 等字段仅为兼容别名。
-- `glyphFont.widthProfile`、`glyphFont.wideCharRegex`、四向视觉字体纠偏和 `outputTarget` 仍属于 reserved 配置，
-  以 `getCoreCapabilities()` 为准。
+- `glyphFont.widthProfile` 与 `glyphFont.wideCharRegex` 为 experimental 配置，会参与裱框、语义布局和输出列数计算；四向视觉字体纠偏和 `outputTarget` 仍属于 reserved 配置。所有稳定性状态均以 `getCoreCapabilities()` 为准。
 - `ArtResult` 提供内容、行列数、耗时与 metadata。保存文件、HTML 包装、复制到剪贴板和项目状态属于宿主责任。
 - 捕获 `UnicodeArtError` 时优先读取 `code`、`messageKey`、`messageParams` 和 `locale`，不要依赖人类可读错误文本。
 
