@@ -91,6 +91,8 @@ npm run docs:tsdoc:vscode:check
 
 修改 VS Code 命令、WebView 协议、配置解析或安全边界时，应同步更新对应注释和 [VS Code Extension 集成与数据边界](vscode-extension-integration.md)。
 
+VS Code Extension 源码通过 npm 包名导入 Core 类型。为保证干净 CI 环境和本地环境一致，`docs:tsdoc:vscode` 会先运行 `build:core`，再执行 TSDoc 提取。
+
 ## 统一文档清单
 
 仓库根目录提供统一文档入口：
