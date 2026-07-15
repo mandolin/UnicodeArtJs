@@ -59,7 +59,7 @@
     "pack:cli": "npm --workspace packages/cli pack --dry-run",
     "release:verify": "node scripts/release-gate.cjs",
     "release:verify:publish": "node scripts/release-gate.cjs --strict-publish",
-    "release:gate": "npm run check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
+    "release:gate": "npm run check && npm run docs:all:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
   },
   "optionalDependencies": {
     "@rollup/rollup-darwin-arm64": "4.62.2",

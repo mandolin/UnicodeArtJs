@@ -10,7 +10,7 @@ From the repository root:
 npm run release:gate
 ```
 
-The command runs package checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
+The command runs package checks, documentation checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
 
 For npm/Marketplace publish preparation after switching all publish-time dependencies to npm versions:
 
@@ -22,10 +22,10 @@ npm run release:verify:publish
 
 | Package | Current version | Publish channel | Core dependency during normal development |
 | --- | --- | --- | --- |
-| `unicode-art-js` | `1.2.0` | npm | root workspace package |
-| `unicode-art-cli` | `1.0.2` | npm | `file:../core` during development; switch to `^1.2.0` for publish |
+| `unicode-art-js` | `1.2.1` | npm | root workspace package |
+| `unicode-art-cli` | `1.0.2` | npm | `file:../core` during development; switch to `^1.2.1` for publish |
 | `@unicode-art/web` | `0.1.0-alpha` | GitHub Pages / source package | `file:../core` |
-| `unicode-art-js-vscode` | `0.3.0` | VSCode Marketplace stable channel | `^1.2.0` |
+| `unicode-art-js-vscode` | `0.3.0` | VSCode Marketplace stable channel | `^1.2.1` |
 
 ## What The Gate Checks
 
@@ -42,6 +42,7 @@ npm run release:verify:publish
 - VSIX includes `unicode-art-js` and `@napi-rs/image`, does not include sharp/libvips, and does not declare a `file:` Core dependency.
 - Shared text/image/box fixtures from `fixtures/release/fixtures.json` produce matching Core and CLI output.
 - Public docs keep the GitHub Pages URL and release-gate instructions visible.
+- `docs:all:check` can regenerate CLI/Web JSDoc, Core/VS Code TSDoc, the terminology contract, and the documentation manifest.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).

@@ -12,7 +12,12 @@ on:
     paths:
       - ".github/workflows/ci.yml"
       - "package.json"
+      - "package-lock.json"
       - "mise.toml"
+      - "tsdoc.*.json"
+      - "docs/**"
+      - "scripts/**"
+      - "tools/docs/**"
       - "packages/**"
   pull_request:
     branches:
@@ -20,7 +25,12 @@ on:
     paths:
       - ".github/workflows/ci.yml"
       - "package.json"
+      - "package-lock.json"
       - "mise.toml"
+      - "tsdoc.*.json"
+      - "docs/**"
+      - "scripts/**"
+      - "tools/docs/**"
       - "packages/**"
   workflow_dispatch:
 
@@ -49,6 +59,9 @@ jobs:
       - name: Install Playwright browser
         # 显式使用 Core workspace 的固定 Playwright，避免根目录 npx 隐式下载或解析其他版本。
         run: npm --workspace packages/core exec -- playwright install --with-deps chromium
+
+      - name: Check Documentation
+        run: npm run docs:all:check
 
       # 保持与本地 release:gate 相同的覆盖范围，但拆分步骤以便远端直接显示失败边界。
       - name: Check Core

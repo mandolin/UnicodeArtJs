@@ -37,6 +37,12 @@ npm run docs:all:check
 
 清单包含每条文档线的入口、输出目录、生成器版本、产物数量、公开说明页和检查命令。它不包含源码正文，也不引用 WorkZone 内部资料。
 
+## CI 与发布门禁
+
+GitHub Actions 的 `CI / Full Check` 会运行 `npm run docs:all:check`。文档、脚本、TSDoc 配置或包源码变化都会触发该检查。
+
+发布前总入口 `npm run release:gate` 也会运行 `docs:all:check`，确保发布包、VSIX 检查和开发者文档使用同一套质量底线。
+
 ## 单项检查
 
 修改范围较小时，可以先运行对应单项命令：
