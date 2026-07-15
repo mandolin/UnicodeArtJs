@@ -470,27 +470,21 @@ export {
 } from './box/spacing';
 
 /**
- * ============================================================================
- * 🟦 文本转字符画
- * ============================================================================
- * 
- * 🔶 核心思路
- * 文本转字符画的正确流程是：**先渲染为图像，再进行SAD匹配**，而非逐字符匹配。
- * 
- * ✅ 正确流程
- * 1. 使用宿主平台字体渲染器将文本渲染为位图（支持多行、对齐、行间距）
- * 2. 对渲染后的图像进行采样（与imageToArt相同）
- * 3. 预计算字符集数据
- * 4. 批量SAD匹配
- * 5. 组装输出
- * 
- * ❌ 错误做法
- * - 逐个字符渲染并匹配（会导致宽字符/窄字符尺寸不匹配问题）
- * - 忽略height参数（应该用于控制字体大小）
- * 
- * @param text - 输入文本字符串
- * @param config - 配置对象
- * @returns ArtResult 字符画结果
+ * Renders text through the Node visual-font adapter, then converts it to Unicode art.
+ *
+ * 使用 Node 视觉字体 adapter 将输入文本先栅格化，再转换为 Unicode 字符画；这不是逐字符
+ * 匹配。字素模板由 `glyphFont`（或兼容字段）控制，视觉字体与字素字体的职责不同。
+ *
+ * @public
+ * @remarks
+ * 多行文本、对齐和行间距在视觉字体栅格化阶段生效；随后采用与 {@link imageToArt} 相同的
+ * 采样、SAD 匹配和输出组装路径。配置 layout-stage 裱框时，改由语义布局渲染路径处理。
+ *
+ * @param text - Text to rasterize. 要栅格化的输入文本。
+ * @param config - Partial conversion configuration. 部分转换配置。
+ * @returns The generated Unicode-art result. 生成后的字符画结果。
+ * @throws - Throws `UnicodeArtError` when text or configuration is invalid, a
+ * required font cannot render, or conversion fails. 文本、配置无效，所需字体无法渲染或转换失败时抛出。
  */
 export async function textToArt(
   text: string,
@@ -661,10 +655,22 @@ export async function textToArt(
 }
 
 /**
- * 🟢 语义文档转字符画
+ * Renders a versioned semantic document into Unicode art.
  *
- * 🔹 消费版本化 JSON AST，支持标题/页脚、跨行跨列和 `{t:...}` 对应的原字输出块。
- * 🔹 当前属于 experimental；请通过 `getCoreCapabilities()` 检查当前能力边界。
+ * 消费版本化 JSON AST，支持标题、页脚、跨行跨列与 `{t:...}` 对应的原字输出块。
+ *
+ * @public
+ * @remarks
+ * **Stability / 稳定性：**该能力为 experimental；调用方应通过
+ * {@link getCoreCapabilities} 检查当前能力边界。输入仅限版本化语义文档或受限可解析值，
+ * 不执行任意 HTML 或脚本。
+ *
+ * @param document - Semantic document value or parseable input. 语义文档值或可解析输入。
+ * @param config - Partial conversion configuration. 部分转换配置。
+ * @param options - Semantic-layout render options. 语义布局渲染选项。
+ * @returns The assembled Unicode-art result. 组装后的字符画结果。
+ * @throws - Throws `UnicodeArtError` when semantic validation or layout rendering
+ * fails. 语义校验或布局渲染失败时抛出。
  */
 export async function semanticDocumentToArt(
   document: SemanticDocument | unknown,
@@ -947,14 +953,14 @@ function normalizeOptionalNonNegativeInteger(
 //#endregion
 
 /**
- * 🟢 图片转字符画
- * 
- * 🔹 将图像文件转换为字符画。
- * 🔹 完整流程：加载 → 灰度化 → 采样 → 匹配 → 组装。
- * 
- * @param imagePath - 图像文件路径
- * @param config - 配置选项
- * @returns Promise<ArtResult> 生成结果
+ * Converts a local image file into Unicode art.
+ *
+ * 将本地图像文件转换为 Unicode 字符画。完整流程为：加载、灰度化、采样、匹配与组装。
+ *
+ * @public
+ * @param imagePath - Local image path. 本地图像路径。
+ * @param config - Conversion options. 转换配置。
+ * @returns The generated art result. 生成后的字符画结果。
  * 
  * @example
  * ```typescript
@@ -966,15 +972,13 @@ function normalizeOptionalNonNegativeInteger(
  * console.log(result.content);
  * ```
  * 
- * @throws {UnicodeArtError} 当图像加载失败或参数无效时
- * 
- * @performance
- * - 时间复杂度: O(W × H + R × C × N × M²)
- *   - W, H = 源图像尺寸
- *   - R, C = 输出行列数
- *   - N = 字符集大小
- *   - M = matrixSize
- * - 典型耗时: 100-2000ms
+ * @throws - Throws a `UnicodeArtError` when the image cannot be loaded or the
+ * configuration is invalid. 图像加载失败或配置无效时抛出 `UnicodeArtError`。
+ *
+ * @remarks
+ * **Performance / 性能：**时间复杂度为 `O(W x H + R x C x N x M^2)`；其中 `W`
+ * 与 `H` 是源图像尺寸，`R` 与 `C` 是输出行列数，`N` 是字符集大小，`M` 是
+ * `matrixSize`。典型耗时约为 100 至 2000 ms，取决于输入尺寸和字符集。
  */
 export async function imageToArt(
   imagePath: string,
@@ -1066,13 +1070,13 @@ export async function imageToArt(
 }
 
 /**
- * 🟢 验证配置参数
- * 
- * 🔹 检查配置参数的有效性，并应用默认值。
- * 🔹 返回完整的配置对象。
- * 
- * @param config - 用户提供的配置（可能不完整）
- * @returns ArtConfig 完整的配置对象
+ * Validates a partial conversion configuration and applies defaults.
+ *
+ * 校验不完整的转换配置并补齐默认值，返回完整的配置对象。
+ *
+ * @public
+ * @param config - User-supplied partial configuration. 用户提供的部分配置。
+ * @returns The normalized complete configuration. 规范化后的完整配置。
  * 
  * @example
  * ```typescript
@@ -1083,7 +1087,8 @@ export async function imageToArt(
  * // 返回包含所有默认值的完整配置
  * ```
  * 
- * @throws {UnicodeArtError} 当配置参数无效时
+ * @throws - Throws a `UnicodeArtError` when a configuration value is invalid.
+ * 当任一配置值无效时抛出 `UnicodeArtError`。
  */
 export function validateConfig(
   config: Partial<ArtConfig>
@@ -1241,12 +1246,14 @@ export function validateConfig(
 //#region 🟦 工具函数导出
 
 /**
- * 🟢 判断字符是否为宽字符
- * 
- * 🔹 根据Unicode标准判断字符宽度。
- * 
- * @param char - 要判断的字符
- * @returns boolean true表示宽字符
+ * Tests whether a glyph is wide under the historical Unicode reference rule.
+ *
+ * 按历史 Unicode 参考规则判断字素是否为宽字素。它不读取 `glyphWidthProfile` 或自定义
+ * `wideCharRegex`；需要按配置计算显示宽度时请使用 `GlyphWidthCalculator`。
+ *
+ * @public
+ * @param char - Glyph to test. 要判断的字素。
+ * @returns Whether the glyph is classified as wide. 该字素是否被判定为宽字素。
  * 
  * @example
  * ```typescript
@@ -1260,12 +1267,17 @@ export function isWideChar(char: string): boolean {
 }
 
 /**
- * 🟢 获取预定义字符集
- * 
- * 🔹 根据类型返回对应的字符字符串。
- * 
- * @param type - 字符集类型
- * @returns string 字符字符串
+ * Gets the characters for a built-in matching charset.
+ *
+ * 根据类型返回内置匹配字符集的字符串。字符顺序会影响匹配遍历顺序，不应由调用方原地修改
+ * 或假设其为稳定的视觉密度排序之外的语义数据。
+ *
+ * @public
+ * @param type - Built-in charset type. 内置字符集类型。
+ * @param locale - Locale used if an unsupported type is reported. 不支持类型时用于错误消息的语言。
+ * @returns The charset character string. 字符集字符串。
+ * @throws - Throws `UnicodeArtError` when the charset type is unsupported.
+ * 字符集类型不受支持时抛出。
  * 
  * @example
  * ```typescript
@@ -1298,12 +1310,14 @@ export function getPresetChars(type: PresetCharset, locale?: string): string {
 }
 
 /**
- * 🟢 计算文本的显示宽度
- * 
- * 🔹 考虑宽字符的影响，计算文本在终端中的实际显示宽度。
- * 
- * @param text - 要计算的文本
- * @returns number 显示宽度（字符单位）
+ * Calculates display width using the historical Unicode reference rule.
+ *
+ * 考虑宽字素影响，计算文本在严格混合等宽显示环境中的列宽。它不应用配置化 profile 或自定义
+ * 正则；裱框、语义布局和输出列数使用 `GlyphWidthCalculator`。
+ *
+ * @public
+ * @param text - Text to measure. 要测量的文本。
+ * @returns Display width in glyph-cell columns. 以字素单元列为单位的显示宽度。
  * 
  * @example
  * ```typescript

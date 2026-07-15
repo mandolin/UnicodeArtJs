@@ -9,6 +9,8 @@
  * - RGB到灰度的转换算法
  * - 文本渲染为图像（使用默认 Skia Canvas）
  * - 图像尺寸调整和归一化
+ * Provides Node-side image loading, grayscale conversion, visual-text
+ * rasterization, and resize helpers behind the Node platform adapter.
  * 
  * 🔶 核心流程
  * 1. loadImage() - 使用当前Node图像后端加载图像文件
@@ -24,6 +26,7 @@
  * - Node图像后端: 默认 napi-rs；sharp 仅为显式 opt-in legacy adapter
  * - @napi-rs/canvas: 默认 Node 文本渲染依赖
  * - 浏览器环境应使用Canvas API替代sharp
+ * - Browser hosts must use the browser adapter instead of importing this module.
  * 
  * @module preprocessor
  * @since 0.1.0
@@ -55,7 +58,7 @@ import { formatCanvasFontFamily } from './utils/canvasFontFamily';
  * console.log(`像素数: ${imageData.data.length}`);
  * ```
  * 
- * @throws {UnicodeArtError} 当文件不存在或格式不支持时抛出
+ * @throws 当文件不存在或格式不支持时抛出 `UnicodeArtError`。
  * 
  * @remarks
  * - 当前默认后端支持 PNG / JPEG / WebP / BMP
@@ -103,7 +106,7 @@ export async function loadImage(imagePath: string): Promise<ImageData> {
  * 
  * @performance
  * - 时间复杂度: O(1)
- * - 使用位运算代替除法（>> 8等价于/ 256）
+ * - 使用右移八位代替除以 256
  * - 比浮点运算快约30%
  * 
  * @see {@link https://en.wikipedia.org/wiki/Rec._601}
@@ -178,7 +181,7 @@ export function rgbaToGrayscale(
  * 🔹 **重要**: 必须逐个字符绘制以获取准确的字符宽度，避免混合宽度字体下对齐漂移。
  * 🔹 这是textToArt的核心步骤。
  * 
- * @param text - 要渲染的文本字符串（支持\n分隔的多行）
+ * @param text - 要渲染的文本字符串（支持 LF 分隔的多行）
  * @param font - 字体名称或路径
  * @param fontSize - 字体大小（像素）
  * @param width - 画布宽度（像素）

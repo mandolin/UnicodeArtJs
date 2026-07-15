@@ -1,16 +1,12 @@
 /**
  * ============================================================================
- * 🟦 Pure image-data conversion module
- * ============================================================================
+ * Pure grayscale-image-data conversion.
  *
- * 🔶 Module responsibility
- * Converts already-normalized Core grayscale image data into Unicode art without
- * loading files, rendering fonts, or touching Node/browser platform APIs.
+ * 将已规范化的 Core 灰度图像数据转换为 Unicode 字符画，不加载文件、不渲染字体，也不触及
+ * Node 或浏览器平台 API。调用方必须提供预计算字素矩阵；矩阵的生成依赖字体渲染器，因此由
+ * 宿主平台 adapter 负责。
  *
- * 🔶 Platform boundary
- * The caller must provide precomputed character matrices. Generating those
- * matrices requires a platform adapter because it depends on a font renderer.
- * ============================================================================
+ * @packageDocumentation
  */
 
 import type { CharMatrix } from '../types/charset';
@@ -30,18 +26,20 @@ import { normalizeLocale, t as translateCoreMessage } from '../i18n';
 
 /**
  * Options for pure `imageDataToArt` conversion.
+ *
+ * 纯 `imageDataToArt` 转换的选项。
+ *
+ * @public
  */
 export interface ImageDataToArtOptions {
   /**
-   * Precomputed glyph matrices keyed by glyph character.
-   *
-   * Browser and Node adapters are responsible for generating this map using
-   * their own font rendering backend.
+   * Precomputed glyph matrices keyed by glyph character. 浏览器与 Node adapter 使用各自的
+   * 字体渲染后端生成此映射。
    */
   charDataMap: Map<string, CharMatrix>;
 
   /**
-   * Optional time source for deterministic tests.
+   * Optional time source for deterministic tests. 用于确定性测试的可选时间源。
    */
   now?: () => number;
 }
@@ -51,11 +49,24 @@ export interface ImageDataToArtOptions {
 //#region 🟦 Public API
 
 /**
- * Converts Core grayscale image data into Unicode art.
+ * Converts normalized Core grayscale image data into Unicode art.
  *
- * This is the first pure core entry for browser adaptation. It accepts only
- * normalized grayscale data and precomputed character matrices, so it does not
- * import `sharp`, `canvas`, `fs`, `Buffer`, `process`, or DOM APIs.
+ * 将已规范化的 Core 灰度图像数据转换为 Unicode 字符画。这是浏览器适配和自定义宿主可用的
+ * 纯 Core 入口：它只接受灰度数据与预计算字素矩阵，不导入 `sharp`、`canvas`、`fs`、
+ * `Buffer`、`process` 或 DOM API。
+ *
+ * @public
+ * @remarks
+ * `imageData.data` 必须是长度严格等于 `width x height` 的 `Uint8Array`，每个字节表示一个
+ * 灰度像素。该函数不渲染字体；请通过宿主 adapter 生成 `charDataMap`。裱框、字符集、输出
+ * 格式和宽字素规则仍由 `config` 控制。
+ *
+ * @param imageData - Normalized grayscale input. 已规范化的灰度输入。
+ * @param config - Partial pure-conversion configuration. 纯转换的部分配置。
+ * @param options - Precomputed glyph data and optional time source. 预计算字素数据与可选时间源。
+ * @returns The assembled Unicode-art result. 已组装的字符画结果。
+ * @throws - Throws `UnicodeArtError` when image data, glyph matrices, or
+ * configuration are invalid. 图像数据、字素矩阵或配置无效时抛出。
  */
 export async function imageDataToArt(
   imageData: CoreImageData,

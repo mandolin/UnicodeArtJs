@@ -66,13 +66,8 @@ export enum CharType {
  * 🔹 表示一个字符渲染后的灰度矩阵数据。
  * 🔹 用于与采样块进行SAD匹配，找到最相似的字符。
  * 
- * @interface CharMatrix
- * 
- * @property {string} char - 字符本身
- * @property {Float32Array} matrix - 归一化灰度矩阵，范围 [0, 1]
- * @property {CharType} type - 字符类型（NORMAL或WIDE）
- * @property {number} width - 矩阵宽度（普通字符=matrixSize，宽字符=2×matrixSize）
- * @property {number} height - 矩阵高度（=matrixSize）
+ * **字段：** `char` 是字素；`matrix` 为归一化数据；`type` 表示普通或宽字素；`width` 和
+ * `height` 为矩阵的像素维度。
  * 
  * @example
  * ```typescript
@@ -93,10 +88,9 @@ export enum CharType {
  * - 宽字符的width是普通字符的2倍
  * - 预计算所有字符的matrix可大幅提升性能
  * 
- * @performance
- * - 空间复杂度: O(W × H)，W=width, H=height
- * - 普通字符: M²个Float32（M=matrixSize）
- * - 宽字符: 2M²个Float32
+ * 空间复杂度为 O(W x H)；宽字素通常比普通字素多占一倍矩阵列。
+ *
+ * @public
  */
 export interface CharMatrix {
   /** 字符本身（UTF-8编码） */
@@ -199,10 +193,8 @@ export enum PresetCharset {
  * 
  * 🔹 配置字符集的类型和自定义字符内容。
  * 
- * @interface CharsetConfig
- * 
- * @property {PresetCharset} type - 字符集类型
- * @property {string} [customChars] - 自定义字符字符串（仅当type=CUSTOM时有效）
+ * **字段：** `type` 指定预设类型；当 `type` 为 `CUSTOM` 时，`customChars` 提供自定义
+ * 字符串。
  * 
  * @example
  * ```typescript
@@ -229,9 +221,9 @@ export enum PresetCharset {
  * - 字符顺序影响匹配结果（建议按亮度排序）
  * - 字符数量越多，匹配精度越高，但速度越慢
  * 
- * @performance
- * - 字符数量N对性能的影响: O(N) 线性增长
- * - 推荐数量: 10-20个（平衡精度和速度）
+ * 匹配开销随字符数线性增长；一般 10 到 20 个字符可平衡精度与速度。
+ *
+ * @public
  */
 export interface CharsetConfig {
   /** 字符集类型 */

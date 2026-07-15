@@ -1,0 +1,220 @@
+{
+  "$schema": "https://mandolin.github.io/HIA-Documentation/schemas/tsdoc-config-0.1.0-draft.schema.json",
+  "schemaVersion": "0.1.0-draft",
+  "workspaceRoot": ".",
+  "outputDirectory": ".generated-docs/tsdoc/core",
+  "inputs": [
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/index.ts",
+      "artifactBasePath": "api/index"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/pure.ts",
+      "artifactBasePath": "api/pure"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/browser.ts",
+      "artifactBasePath": "api/browser"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/types/image.ts",
+      "artifactBasePath": "api/types/image"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/types/charset.ts",
+      "artifactBasePath": "api/types/charset"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/pure/imageDataToArt.ts",
+      "artifactBasePath": "api/pure/image-data-to-art"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/types/config.ts",
+      "artifactBasePath": "api/types/config"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/types/output.ts",
+      "artifactBasePath": "api/types/output"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/types/semantic.ts",
+      "artifactBasePath": "api/types/semantic"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/types/artFont.ts",
+      "artifactBasePath": "api/types/art-font"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/types/extension.ts",
+      "artifactBasePath": "api/types/extension"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/capabilities.ts",
+      "artifactBasePath": "api/capabilities"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/constants.ts",
+      "artifactBasePath": "api/constants"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/version.ts",
+      "artifactBasePath": "api/version"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/i18n/index.ts",
+      "artifactBasePath": "api/i18n"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/i18n/types.ts",
+      "artifactBasePath": "api/i18n/types"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/preprocessor.ts",
+      "artifactBasePath": "api/preprocessor"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/sampler.ts",
+      "artifactBasePath": "api/sampler"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/charRenderer.ts",
+      "artifactBasePath": "api/char-renderer"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/matcher.ts",
+      "artifactBasePath": "api/matcher"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/assembler.ts",
+      "artifactBasePath": "api/assembler"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/utils/wideCharDetector.ts",
+      "artifactBasePath": "api/utils/wide-char-detector"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/platform/types.ts",
+      "artifactBasePath": "api/platform/types"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/platform/node/nodePlatformAdapter.ts",
+      "artifactBasePath": "api/platform/node"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/platform/node/imageBackend.ts",
+      "artifactBasePath": "api/platform/node/image-backend"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/platform/node/sharpImageBackend.ts",
+      "artifactBasePath": "api/platform/node/sharp-image-backend"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/platform/node/napiRsImageBackend.ts",
+      "artifactBasePath": "api/platform/node/napi-rs-image-backend"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/glyph/width.ts",
+      "artifactBasePath": "api/glyph/width"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/box/box.ts",
+      "artifactBasePath": "api/box"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/platform/browser/browserPlatformAdapter.ts",
+      "artifactBasePath": "api/platform/browser"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/box/types.ts",
+      "artifactBasePath": "api/box/types"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/box/styles.ts",
+      "artifactBasePath": "api/box/styles"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/box/spacing.ts",
+      "artifactBasePath": "api/box/spacing"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/box/width.ts",
+      "artifactBasePath": "api/box/width"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/semantic/document.ts",
+      "artifactBasePath": "api/semantic/document"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/semantic/render.ts",
+      "artifactBasePath": "api/semantic/render"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/artFont/document.ts",
+      "artifactBasePath": "api/art-font/document"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/artFont/metrics.ts",
+      "artifactBasePath": "api/art-font/metrics"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/artFont/render.ts",
+      "artifactBasePath": "api/art-font/render"
+    },
+    {
+      "kind": "typescript-entry",
+      "path": "packages/core/src/extensions/document.ts",
+      "artifactBasePath": "api/extensions/document"
+    }
+  ],
+  "options": {
+    "emitDocSourceMap": true,
+    "ignoreConfig": true,
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "sourcesContentPolicy": "none",
+    "target": "ES2020",
+    "types": ["node"],
+    "writeResultManifest": true
+  }
+}

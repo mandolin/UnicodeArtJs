@@ -50,7 +50,7 @@
  * @performance
  * - 时间复杂度: O(1)
  * - 使用二分查找或范围检查
- * - 典型耗时: < 1μs
+ * - 典型耗时: 通常低于一微秒
  * 
  * @see {@link https://www.unicode.org/reports/tr11/} Unicode East Asian Width
  */
@@ -174,6 +174,19 @@ function isReferenceWideCodePoint(codePoint: number): boolean {
   return false;
 }
 
+/**
+ * 🟢 判断 Unicode 代码点是否属于东亚宽字符范围
+ *
+ * 🔹 面向已经解析出 code point 的调用方，避免重复拆分字符串。
+ * 🔹 范围集合覆盖 CJK、假名、韩文、全角形式和常见 emoji 区段。
+ *
+ * @param codePoint - Unicode code point。
+ * @returns `true` 表示该代码点在当前规则下按宽字符处理。
+ *
+ * @remarks
+ * This helper is range-based and intentionally independent from font rendering.
+ * 字体特定宽度差异应通过 `glyphWidthProfile` 或 `wideCharRegex` 处理。
+ */
 export function isUnicodeEastAsianWide(codePoint: number): boolean {
   // 🔹 定义宽字符的代码点范围
   // 格式: [start, end] 包含边界

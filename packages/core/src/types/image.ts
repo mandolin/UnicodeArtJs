@@ -32,11 +32,8 @@
  * 🔹 表示一个灰度图像的完整数据，包含尺寸信息和像素值数组。
  * 🔹 像素值采用行优先（row-major）顺序存储，便于快速访问。
  * 
- * @interface ImageData
- * 
- * @property {number} width - 图像宽度（像素数），必须 > 0
- * @property {number} height - 图像高度（像素数），必须 > 0
- * @property {Uint8Array} data - 灰度值数组，范围 [0, 255]
+ * **字段：** `width` 与 `height` 必须大于零；`data` 是长度为 `width * height` 的
+ * 行优先 `Uint8Array`，每项位于 0 到 255。
  * 
  * @example
  * ```typescript
@@ -56,9 +53,9 @@
  * - 值域说明: 0=纯黑, 255=纯白, 128=中灰
  * - 内存占用: width × height 字节
  * 
- * @performance
- * - 空间复杂度: O(W × H)
- * - 访问复杂度: O(1) 随机访问
+ * 存储复杂度为 O(W x H)，随机访问复杂度为 O(1)。
+ *
+ * @public
  */
 export interface ImageData {
   /** 图像宽度（像素数） */
@@ -95,11 +92,8 @@ export type CoreImageData = ImageData;
  * 🔹 表示从源图像中提取并处理后的单个采样块。
  * 🔹 每个采样块对应输出字符画中的一个字符位置。
  * 
- * @interface SamplingBlock
- * 
- * @property {Float32Array} matrix - 归一化的灰度矩阵，shape: [matrixSize × matrixSize]
- * @property {number} sourceX - 块在源图像中的起始X坐标（像素）
- * @property {number} sourceY - 块在源图像中的起始Y坐标（像素）
+ * **字段：** `matrix` 是归一化 `Float32Array`；`sourceX` 和 `sourceY` 是源图像中的
+ * 块起点像素坐标。
  * 
  * @example
  * ```typescript
@@ -118,9 +112,10 @@ export type CoreImageData = ImageData;
  * - matrixSize由配置项决定（默认6）
  * - sourceX/Y用于调试和可视化
  * 
- * @performance
- * - 空间复杂度: O(M²)，M = matrixSize
- * - 典型值: M=6 → 36个Float32 = 144字节
+ * 空间复杂度为 O(M squared)，其中 M 为 `matrixSize`；典型 M=6 时占用 36 个
+ * `Float32` 值。
+ *
+ * @public
  */
 export interface SamplingBlock {
   /** 
@@ -144,8 +139,6 @@ export interface SamplingBlock {
  * 🔹 表示完整的采样数组，维度为 [outputHeight × outputWidth]。
  * 🔹 每个元素是一个SamplingBlock，对应输出字符画的一个字符位置。
  * 
- * @type SamplingArray
- * 
  * @example
  * ```typescript
  * // 访问第3行第5列的采样块
@@ -165,11 +158,9 @@ export interface SamplingBlock {
  * - 内层数组长度 = outputWidth（输出列数）
  * - 总块数 = outputHeight × outputWidth
  * 
- * @performance
- * - 空间复杂度: O(R × C × M²)
- *   - R = outputHeight
- *   - C = outputWidth
- *   - M = matrixSize
+ * 空间复杂度为 O(R x C x M squared)，其中 R 为输出行数、C 为输出列数、M 为矩阵大小。
+ *
+ * @public
  */
 export type SamplingArray = SamplingBlock[][];
 
@@ -182,7 +173,8 @@ export type SamplingArray = SamplingBlock[][];
  * 
  * 🔹 表示图像中的一个二维坐标点。
  * 
- * @interface PixelCoord
+ *
+ * @public
  */
 export interface PixelCoord {
   /** X坐标（列索引） */
@@ -197,7 +189,8 @@ export interface PixelCoord {
  * 
  * 🔹 表示图像中的一个矩形区域。
  * 
- * @interface Rect
+ *
+ * @public
  */
 export interface Rect {
   /** 左上角X坐标 */

@@ -301,14 +301,31 @@ export const BOX_STYLE_METADATA: Record<BoxStyleName, BoxStyleMetadata> = {
 
 //#region Style helpers
 
+/**
+ * 🟢 判断输入值是否为内置裱框样式名
+ *
+ * @param value - 待检测的任意值。
+ * @returns `true` 表示该值是 `BoxStyleName`。
+ */
 export function isBoxStyleName(value: unknown): value is BoxStyleName {
   return typeof value === 'string' && Object.prototype.hasOwnProperty.call(BOX_STYLES, value);
 }
 
+/**
+ * 🟢 获取所有内置裱框样式名
+ *
+ * @returns 内置样式名数组，顺序与样式表定义保持一致。
+ */
 export function getBoxStyleNames(): BoxStyleName[] {
   return Object.keys(BOX_STYLES) as BoxStyleName[];
 }
 
+/**
+ * 🟢 获取裱框样式元数据
+ *
+ * @param style - 可选样式名；未传入时返回全部样式元数据。
+ * @returns 单个样式元数据或全部样式元数据数组。
+ */
 export function getBoxStyleMetadata(style?: BoxStyleName): BoxStyleMetadata | BoxStyleMetadata[] {
   if (style !== undefined) {
     return BOX_STYLE_METADATA[style];
@@ -317,6 +334,14 @@ export function getBoxStyleMetadata(style?: BoxStyleName): BoxStyleMetadata | Bo
   return getBoxStyleNames().map((name) => BOX_STYLE_METADATA[name]);
 }
 
+/**
+ * 🟢 解析裱框字符表
+ *
+ * 🔹 支持内置样式名、自定义字符表和空值默认样式。
+ *
+ * @param style - 内置样式名、自定义样式定义或空值。
+ * @returns 归一化字符表；若使用内置样式则附带样式名。
+ */
 export function resolveBoxChars(style: BoxStyleName | BoxStyleDefinition | undefined): {
   chars: BoxChars;
   styleName?: BoxStyleName;

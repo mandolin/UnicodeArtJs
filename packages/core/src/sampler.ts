@@ -5,6 +5,8 @@
  * 
  * 🔶 模块职责
  * 负责将源图像分割为多个采样块，并对每个块进行缩放和归一化处理。
+ * Splits a normalized source image into sampling blocks, then resizes and
+ * normalizes each block for glyph-matrix matching.
  * 
  * 🔶 核心流程
  * 1. calculateOutputSize() - 根据配置计算输出尺寸
@@ -23,6 +25,7 @@
  * - 块尺寸计算公式: blockH = ceil(sourceHeight / outputHeight)
  * - 不足部分用白色(255)填充，保持块尺寸一致
  * - 归一化公式: normalizedValue = pixelValue / 255.0
+ * - Edge blocks use white padding so all matching matrices keep the same shape.
  * 
  * @module sampler
  * @since 0.1.0
@@ -42,7 +45,7 @@ import { UnicodeArtError, ErrorCode } from './types/output';
  * 
  * @param image - 源图像数据
  * @param config - 艺术生成配置
- * @returns {{height: number, width: number}} 输出的行数和列数
+ * @returns 输出的行数和列数。
  * 
  * @example
  * ```typescript
@@ -54,7 +57,7 @@ import { UnicodeArtError, ErrorCode } from './types/output';
  * - 配置的height/width用于计算块尺寸，不强制等于最终输出尺寸
  * - 边界块通过白色填充补齐
  * 
- * @throws {UnicodeArtError} 当未指定任何维度时抛出
+ * @throws 当未指定任何维度时抛出 `UnicodeArtError`。
  */
 export function calculateOutputSize(
   image: ImageData,
@@ -93,7 +96,7 @@ export function calculateOutputSize(
  * @param outputHeight - 输出行数
  * @param outputWidth - 输出列数
  * @param ratio - 垂直水平比例
- * @returns {{blockH: number, blockW: number}} 块的高度和宽度
+ * @returns 块的高度和宽度。
  * 
  * @example
  * ```typescript
@@ -488,11 +491,11 @@ function getPixelReplicate(
  * console.log(samplingArray[0][0].matrix.length); // 36 (6×6)
  * ```
  * 
- * @throws {UnicodeArtError} 当配置参数无效时抛出
+ * @throws 当配置参数无效时抛出 `UnicodeArtError`。
  * 
  * @remarks
  * - 返回二维数组: samplingArray[row][col]
- * - 每个元素包含: { matrix: Float32Array, sourceX, sourceY }
+ * - 每个元素包含归一化矩阵、源图像 X 坐标和源图像 Y 坐标
  * - matrix已归一化到[0, 1]范围
  * - sourceX/sourceY记录块在源图像中的位置（用于调试）
  * 

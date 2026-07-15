@@ -3,9 +3,9 @@
  * UnicodeArtJs box renderer
  * ============================================================================
  *
- * Renders an outer text box around unicode art content. This first box phase is
+ * Renders an outer text box around Unicode art content. This first box phase is
  * intentionally a pure post-processing step and does not affect image/text
- * sampling or matching.
+ * sampling or matching. 对已完成的字符画执行外层文字裱框，不改变图像/文本采样或匹配。
  *
  * @module box/box
  * @since 1.0.0
@@ -32,6 +32,20 @@ import type { GlyphWidthCalculator } from '../glyph/width';
 
 //#region Public API
 
+/**
+ * Applies a text box around completed Unicode art.
+ *
+ * 围绕已完成的 Unicode 字符画施加文字裱框。此公开函数只处理 `post/outer` 模式；行、单元格
+ * 和网格布局属于 `textToArt` 的 experimental layout-stage 路径，不能在这里直接渲染。
+ *
+ * @public
+ * @param content - Multi-line Unicode-art content. 多行字符画内容。
+ * @param options - Box options, or `false` to bypass framing. 裱框选项；传入 `false` 时跳过裱框。
+ * @param calculator - Optional configured glyph-width calculator. 可选的已配置字素宽度计算器。
+ * @returns Framed text, including margin and optional shadow. 包含外边距和可选阴影的裱框文本。
+ * @throws - Throws when layout-stage options are passed to this post-processing API.
+ * 向此后处理 API 传入 layout-stage 选项时抛出。
+ */
 export function boxText(
   content: string,
   options: false | BoxOptions = {},
@@ -73,6 +87,13 @@ export function boxText(
   return withMargin.join('\n');
 }
 
+/**
+ * Produces a short post-stage preview for a built-in or custom box style.
+ *
+ * 为内置或自定义裱框样式生成简短的 post-stage 预览，不代表 layout-stage 单元格布局。
+ *
+ * @public
+ */
 export function previewBoxStyle(
   style: BoxOptions['style'],
   sample: string = 'Aa',
@@ -84,6 +105,16 @@ export function previewBoxStyle(
   }, calculator);
 }
 
+/**
+ * Normalizes public box options without rendering content.
+ *
+ * 规范化公开裱框选项而不渲染内容。调用方可用于预览或保存配置；不支持的阶段/模式组合会在此处
+ * 明确失败，避免静默回退成外框。
+ *
+ * @public
+ * @param options - Raw box options or `false`. 原始裱框选项或 `false`。
+ * @returns Complete normalized box options. 完整的规范化裱框选项。
+ */
 export function normalizeBoxOptions(options: false | BoxOptions = {}): NormalizedBoxOptions {
   if (options === false || options.enabled === false) {
     return {

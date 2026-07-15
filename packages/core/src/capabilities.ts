@@ -21,10 +21,10 @@ import { VERSION } from './version';
 
 //#region 🟦 Capability Types
 
-/** Core 能力稳定性标签。 */
+/** Core capability stability label. Core 能力稳定性标签。 */
 export type CoreCapabilityStability = 'stable' | 'experimental' | 'reserved' | 'legacy';
 
-/** 单项 Core 能力描述。 */
+/** Machine-readable descriptor for one Core capability. 单项 Core 能力的机器可读描述。 */
 export interface CoreCapabilityDescriptor {
   /** 稳定的机器可读能力标识。 */
   id: string;
@@ -34,7 +34,7 @@ export interface CoreCapabilityDescriptor {
   description: string;
 }
 
-/** Node 图像后端能力边界。 */
+/** Node image-backend capability boundary. Node 图像后端能力边界。 */
 export interface NodeImageBackendCapabilities {
   /** 当前默认后端。 */
   defaultBackend: 'napi-rs';
@@ -46,7 +46,7 @@ export interface NodeImageBackendCapabilities {
   napiRsFirstBatchFormats: readonly ('png' | 'jpeg' | 'jpg' | 'webp' | 'bmp')[];
 }
 
-/** Node 文本渲染后端能力边界。 */
+/** Node text-renderer capability boundary. Node 文本渲染后端能力边界。 */
 export interface NodeTextRendererCapabilities {
   /** 当前默认的文字栅格化后端。 */
   defaultBackend: 'napi-rs-canvas';
@@ -56,7 +56,7 @@ export interface NodeTextRendererCapabilities {
   compatibilityEntry: '@napi-rs/canvas/node-canvas';
 }
 
-/** 浏览器入口能力边界。 */
+/** Browser-entry capability boundary. 浏览器入口能力边界。 */
 export interface BrowserEntryCapabilities {
   /** 当前浏览器适配基线。 */
   baseline: string;
@@ -68,7 +68,7 @@ export interface BrowserEntryCapabilities {
   supportsProgress: boolean;
 }
 
-/** 裱框能力边界。 */
+/** Box-frame capability boundary. 裱框能力边界。 */
 export interface BoxCapabilities {
   /** 已稳定的裱框模式。 */
   stableModes: readonly string[];
@@ -76,7 +76,7 @@ export interface BoxCapabilities {
   experimentalModes: readonly string[];
 }
 
-/** Core 总能力快照。 */
+/** Immutable-shape Core capability snapshot. Core 总能力快照。 */
 export interface CoreCapabilities {
   /** Core 包版本。 */
   version: string;
@@ -130,7 +130,7 @@ const STABLE_FEATURES: CoreCapabilityDescriptor[] = [
   {
     id: 'output.assembly',
     stability: 'stable',
-    description: 'plain / html / ansi / json / svg 输出组装。'
+    description: 'plain / html / ansi 输出组装。'
   },
   {
     id: 'box.post.outer',
@@ -258,9 +258,13 @@ const LEGACY_ALIASES: CoreCapabilityDescriptor[] = [
 //#region 🟦 Public API
 
 /**
- * 🟢 获取 Core 当前能力快照
+ * Gets a snapshot of the current public Core capability boundary.
  *
- * 🔹 返回值是浅层副本，调用方可以安全读取，不应把它当成运行时配置对象修改。
+ * 获取当前公开 Core 能力边界快照。返回值包含浅层副本，调用方可以安全读取；它不是运行时
+ * 配置对象，修改返回值不会改变 Core 行为。
+ *
+ * @public
+ * @returns The current Core capability snapshot. 当前 Core 能力快照。
  */
 export function getCoreCapabilities(): CoreCapabilities {
   return {

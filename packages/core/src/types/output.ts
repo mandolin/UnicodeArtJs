@@ -30,12 +30,9 @@ import type { MessageKey, MessageParams, SupportedLocale } from '../i18n';
 //#region 🟦 输出格式枚举
 
 /**
- * 🟢 输出格式枚举
- * 
- * 🔹 定义字符画的输出格式类型。
- * 🔹 不同格式适用于不同的使用场景。
- * 
- * @enum {string} OutputFormat
+ * Output formats supported by the Core assembler.
+ *
+ * 定义字符画的输出格式类型；不同格式适用于不同的使用场景。
  * 
  * @example
  * ```typescript
@@ -91,19 +88,10 @@ export enum OutputFormat {
 //#region 🟦 生成结果接口
 
 /**
- * 🟢 艺术生成结果接口
- * 
- * 🔹 包含字符画生成的完整结果和元数据。
- * 🔹 提供性能统计和调试信息。
- * 
- * @interface ArtResult
- * 
- * @property {string} content - 字符画内容字符串
- * @property {OutputFormat} format - 输出格式
- * @property {number} rows - 实际输出行数
- * @property {number} cols - 实际输出列数（最长行的字符数）
- * @property {number} duration - 生成耗时（毫秒）
- * @property {ArtMetadata} metadata - 元数据信息
+ * Result returned by a completed Unicode-art conversion.
+ *
+ * 包含字符画内容、输出尺寸、耗时和元数据。`content` 是可直接输出或保存的多行字符串，
+ * `cols` 是最长输出行的显示列数，可能因尾部空格裁剪而小于请求宽度。
  * 
  * @example
  * ```typescript
@@ -119,13 +107,9 @@ export enum OutputFormat {
  * ```
  * 
  * @remarks
- * - duration包含所有处理阶段的总时间
- * - cols是最长行的长度，可能不等于配置中的width
- * - metadata用于调试和性能分析
- * 
- * @performance
- * - 典型duration: 100-2000ms（取决于图像大小和配置）
- * - content大小: rows × cols 字节（UTF-8编码）
+ * - `duration` 包含全部处理阶段；`metadata` 用于调试和性能分析。
+ * - 典型耗时为 100 至 2000 ms，取决于图像大小与配置。
+ * - UTF-8 文本大小并不必然等于 `rows x cols`，因为宽字素和非 ASCII 字符可占多个字节。
  */
 export interface ArtResult {
   /** 
@@ -165,11 +149,9 @@ export interface ArtResult {
 }
 
 /**
- * 🟢 元数据接口
- * 
- * 🔹 包含生成过程的详细信息，用于调试和分析。
- * 
- * @interface ArtMetadata
+ * Metadata collected while generating an art result.
+ *
+ * 包含生成过程的详细信息，用于调试、性能分析和宿主展示。
  */
 export interface ArtMetadata {
   /** 源图像宽度（像素），文本模式为0 */
@@ -199,12 +181,9 @@ export interface ArtMetadata {
 //#region 🟦 错误处理
 
 /**
- * 🟢 错误码枚举
- * 
- * 🔹 定义所有可能的错误类型。
- * 🔹 便于程序化判断和处理。
- * 
- * @enum {string} ErrorCode
+ * Machine-readable error codes exposed by the public API.
+ *
+ * 定义所有可由公开 API 抛出的错误类型，供调用方进行程序化判断和处理。
  * 
  * @example
  * ```typescript
@@ -312,16 +291,11 @@ export enum ErrorCode {
 }
 
 /**
- * 🟢 UnicodeArt自定义错误类
- * 
- * 🔹 扩展标准Error类，添加错误码和详细信息。
- * 🔹 便于统一错误处理和日志记录。
- * 
- * @class UnicodeArtError
- * @extends Error
- * 
- * @property {string} code - 错误码
- * @property {any} [details] - 错误详细信息（可选）
+ * Error object emitted by UnicodeArtJs public APIs.
+ *
+ * 继承标准 `Error`，并提供机器可读的 `code`、可选 `details`，以及可用于多语言重渲染的
+ * `messageKey`、`messageParams` 与 `locale`。调用方应优先使用 `code` 分支，不应解析
+ * 面向用户的 `message` 文本。
  * 
  * @example
  * ```typescript

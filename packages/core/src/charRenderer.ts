@@ -5,6 +5,7 @@
  * 
  * 🔶 模块职责
  * 负责将字符渲染为像素矩阵，用于后续的SAD匹配。
+ * Rasterizes glyphs into normalized pixel matrices used by later SAD matching.
  * 
  * 🔶 核心流程
  * 1. renderCharToMatrix() - 渲染单个字符为灰度矩阵
@@ -22,6 +23,8 @@
  * - 提取像素数据并转换为灰度
  * - 归一化到[0, 1]范围
  * - 支持宽字符检测（中文、日文等）
+ * - Glyph templates use the glyph font; they are distinct from the visual font
+ *   used to rasterize input text banners.
  * 
  * @module charRenderer
  * @since 0.1.0
@@ -64,7 +67,7 @@ import { getNodeTextCanvas, isNodeTextCanvasUnavailable } from './platform/node/
  * console.log(matrix[0]); // 0.0-1.0之间的值
  * ```
  * 
- * @throws {UnicodeArtError} 当 Canvas 运行时未安装或渲染失败时抛出
+ * @throws 当 Canvas 运行时未安装或渲染失败时抛出 `UnicodeArtError`。
  * 
  * @remarks
  * - 背景为白色(1.0)，文字为黑色(0.0)
@@ -184,7 +187,7 @@ function resizeGrayscaleToNormalized(
  * @param font - 字体名称或路径
  * @param fontSize - 字体大小（像素）
  * @param fontReduce - 渲染内边距/字号收缩量（像素）；高层字符模板预计算通常保持0以稳定匹配基准
- * @returns Promise<Map<string, CharMatrix>> 字符到矩阵的映射
+ * @returns Promise，解析后得到字符到矩阵的映射。
  * 
  * @example
  * ```typescript
@@ -199,11 +202,11 @@ function resizeGrayscaleToNormalized(
  * console.log(charData.has('A')); // true
  * ```
  * 
- * @throws {UnicodeArtError} 当字符集为空或渲染失败时抛出
+ * @throws 当字符集为空或渲染失败时抛出 `UnicodeArtError`。
  * 
  * @remarks
  * - 返回Map结构，键为字符，值为CharMatrix对象
- * - CharMatrix包含: { matrix, isWideChar, char }
+ * - `CharMatrix` 包含矩阵数据、字素类型、宽高和原字符
  * - 预计算后匹配速度提升10-50倍
  * - 建议在应用启动时执行
  * 
@@ -310,7 +313,7 @@ export async function precomputeCharData(
  * 🔹 支持.ttf、.otf格式。
  * 
  * @param fontPath - 字体文件路径或字体名称
- * @returns Promise<string> 可用于默认 Canvas 运行时的字体标识符
+ * @returns Promise，解析后得到可用于默认 Canvas 运行时的字体标识符。
  * 
  * @example
  * ```typescript
@@ -318,15 +321,15 @@ export async function precomputeCharData(
  * console.log(fontId); // 'custom'
  * ```
  * 
- * @throws {UnicodeArtError} 当字体文件不存在或格式不支持时抛出
+ * @throws 当字体文件不存在或格式不支持时抛出 `UnicodeArtError`。
  * 
  * @remarks
  * - 如果是系统字体名称，直接返回
  * - 如果是文件路径，注册到默认 Canvas 字体管理器
  * - 支持相对路径和绝对路径
  * 
- * @todo 实现字体缓存机制
- * @todo 支持字体样式（粗体、斜体）
+ * @remarks
+ * 当前会按需注册字体文件。字体缓存和更多字体样式策略会在后续字体系统阶段统一设计。
  */
 export async function loadFont(fontPath: string, fontStyle: string = 'regular'): Promise<string> {
   try {

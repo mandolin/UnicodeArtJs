@@ -1,17 +1,14 @@
 /**
  * ============================================================================
- * 🟦 字素宽度计算器
- * ============================================================================
+ * Glyph display-width calculation for layout and box rendering.
  *
- * 🔶 模块职责
- * 为裱框、语义布局、导出尺寸和宿主预览提供唯一的字素显示宽度事实来源。
- * 当前按严格混合等宽字体的 1/2 单元假设工作，不尝试修复非等宽字体的实际排版。
+ * 为裱框、语义布局、导出尺寸和宿主预览提供唯一的字素显示宽度事实来源。当前遵循严格
+ * 混合等宽字体的 1/2 单元假设，不尝试修复非等宽字体的实际排版。
  *
- * 🔶 兼容策略
- * - `default` 保持历史 Unicode 参考宽度规则，避免改变既有默认输出。
- * - 已知字素字体 profile 仍标记为 experimental，可由用户用自定义规则覆盖。
- * - 自定义规则是完整的“宽字素集合”，而不是对默认规则的增量补丁。
- * ============================================================================
+ * `default` 保持历史 Unicode 参考宽度规则；已知字素字体 profile 是 experimental，用户
+ * 可通过完整的自定义宽字素集合覆盖它，而不是对默认规则作增量补丁。
+ *
+ * @packageDocumentation
  */
 
 import { normalizeLocale, t as translateCoreMessage, type SupportedLocale } from '../i18n';
@@ -20,7 +17,7 @@ import { isWideChar } from '../utils/wideCharDetector';
 
 //#region 🟦 公共类型与 profile 目录
 
-/** 内置字素宽度 profile 标识。 */
+/** Built-in glyph-width profile identifiers. 内置字素宽度 profile 标识。 */
 export const BUILT_IN_GLYPH_WIDTH_PROFILES = [
   'default',
   'reference',
@@ -29,13 +26,13 @@ export const BUILT_IN_GLYPH_WIDTH_PROFILES = [
   'lxgw-wenkai-mono'
 ] as const;
 
-/** 内置 profile 的联合类型。 */
+/** Union of built-in profile identifiers. 内置 profile 的联合类型。 */
 export type BuiltInGlyphWidthProfile = (typeof BUILT_IN_GLYPH_WIDTH_PROFILES)[number];
 
-/** 允许宿主传递 profile 名称；未知名称会在运行时被显式拒绝。 */
+/** Profile name accepted from a host; unknown names are rejected at runtime. 允许宿主传递的 profile 名称；未知名称会在运行时被显式拒绝。 */
 export type GlyphWidthProfile = string;
 
-/** 创建字素宽度计算器时可使用的配置。 */
+/** Options accepted while creating a glyph-width calculator. 创建字素宽度计算器时可使用的配置。 */
 export interface GlyphWidthCalculatorOptions {
   /** 内置字素字体宽度 profile，缺省时保持 `default`。 */
   profile?: GlyphWidthProfile;
@@ -45,7 +42,7 @@ export interface GlyphWidthCalculatorOptions {
   locale?: string;
 }
 
-/** 供 UI、CLI 和文档展示的 profile 元数据。 */
+/** Profile metadata suitable for UI, CLI, and documentation. 供 UI、CLI 和文档展示的 profile 元数据。 */
 export interface GlyphWidthProfileDefinition {
   id: BuiltInGlyphWidthProfile;
   label: string;
@@ -91,10 +88,12 @@ const PROFILE_DEFINITIONS: readonly GlyphWidthProfileDefinition[] = [
 //#region 🟦 计算器实现
 
 /**
- * 🟢 字素宽度计算器
+ * Reusable glyph display-width calculator.
  *
- * 🔹 缓存单个 Unicode code point 的宽度，避免布局阶段重复执行正则和范围判断。
- * 🔹 当前输入以 `for...of` 迭代，覆盖 Unicode code point；复杂 emoji cluster 仍属于后续能力。
+ * 可复用的字素显示宽度计算器。它缓存单个 Unicode code point 的宽度，避免布局阶段重复
+ * 执行正则和范围判断；当前 `for...of` 迭代覆盖 code point，复杂 emoji cluster 仍属后续能力。
+ *
+ * @public
  */
 export class GlyphWidthCalculator {
   private readonly cache = new Map<string, 1 | 2>();
@@ -171,7 +170,18 @@ export class GlyphWidthCalculator {
   }
 }
 
-/** 创建并校验一个可复用的字素宽度计算器。 */
+/**
+ * Creates and validates a reusable glyph-width calculator.
+ *
+ * 创建并校验可复用字素宽度计算器。自定义规则必须是单个 Unicode 字符类，且会完全覆盖
+ * profile 的宽字素判定。
+ *
+ * @public
+ * @param options - Profile, custom-rule, and locale options. profile、自定义规则与语言选项。
+ * @returns A validated glyph-width calculator. 已校验的字素宽度计算器。
+ * @throws - Throws `UnicodeArtError` for an unknown profile or invalid rule.
+ * profile 未知或规则无效时抛出 `UnicodeArtError`。
+ */
 export function createGlyphWidthCalculator(options: GlyphWidthCalculatorOptions = {}): GlyphWidthCalculator {
   const locale = normalizeLocale(options.locale);
   const profile = normalizeGlyphWidthProfile(options.profile, locale);
@@ -179,18 +189,28 @@ export function createGlyphWidthCalculator(options: GlyphWidthCalculatorOptions 
   return new GlyphWidthCalculator(profile, wideCharRegex);
 }
 
-/** 返回内置 profile 的元数据副本。 */
+/**
+ * Returns copies of built-in profile metadata.
+ *
+ * 返回内置 profile 的元数据副本；调用方修改返回值不会影响 Core。
+ *
+ * @public
+ */
 export function getGlyphWidthProfiles(): GlyphWidthProfileDefinition[] {
   return PROFILE_DEFINITIONS.map((definition) => ({ ...definition }));
 }
 
-/** 判断一个 profile 名称是否可由当前 Core 识别。 */
+/** Determines whether the current Core recognizes a profile name. 判断当前 Core 是否识别一个 profile 名称。 */
 export function isKnownGlyphWidthProfile(profile: string | undefined): profile is BuiltInGlyphWidthProfile {
   return profile !== undefined && (BUILT_IN_GLYPH_WIDTH_PROFILES as readonly string[]).includes(profile);
 }
 
 /**
+ * Normalizes a glyph-width profile without silently falling back.
+ *
  * 规范化 profile。未知 profile 不静默回退，避免用户误以为布局已按指定字体计算。
+ *
+ * @public
  */
 export function normalizeGlyphWidthProfile(
   profile: GlyphWidthProfile | undefined,
@@ -214,10 +234,12 @@ export function normalizeGlyphWidthProfile(
 }
 
 /**
- * 规范化用户宽字素字符类。
+ * Normalizes a user-supplied wide-glyph character class.
  *
  * 只接受单个 Unicode 字符类，例如 `[\\u4e00-\\u9fff]`。这避免将任意高复杂度正则放入
  * 字素布局热路径，也让 CLI / JSON / Web 的行为保持一致。
+ *
+ * @public
  */
 export function normalizeWideCharRegex(
   source: string | undefined,

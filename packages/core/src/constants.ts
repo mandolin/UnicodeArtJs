@@ -223,7 +223,7 @@ import { PresetCharset } from './types/charset';
  * console.log(chars); // ' .:-=+*#%@'
  * ```
  * 
- * @throws {UnicodeArtError} 当类型不支持时抛出
+ * @throws 当类型不支持时抛出 `Error`。
  */
 export function getPresetChars(type: PresetCharset): string {
   switch (type) {

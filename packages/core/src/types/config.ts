@@ -37,12 +37,9 @@ import type { BoxOptions } from '../box/types';
 import { normalizeLocale, type SupportedLocale } from '../i18n';
 
 /**
- * 🟢 插值算法枚举
- * 
- * 🔹 图像缩放时使用的插值算法。
- * 🔹 不同算法在速度和质量之间有不同的权衡。
- * 
- * @enum {string} Interpolation
+ * Image interpolation modes used while resizing sampling blocks.
+ *
+ * 图像缩放时使用的插值算法。不同算法在速度和质量之间有不同权衡。
  * 
  * @example
  * ```typescript
@@ -57,10 +54,8 @@ import { normalizeLocale, type SupportedLocale } from '../i18n';
  * - BICUBIC: 速度中等，质量高（推荐）
  * - LANCZOS: 速度最慢，质量最高
  * 
- * @performance
- * - 速度排序: NEAREST > BILINEAR > BICUBIC > LANCZOS
- * - 质量排序: LANCZOS > BICUBIC > BILINEAR > NEAREST
- * - 默认选择BICUBIC是速度和质量的平衡点
+ * **Performance / 性能：**速度从快到慢依次为 NEAREST、BILINEAR、BICUBIC、
+ * LANCZOS；质量趋势相反。默认 BICUBIC 是速度与质量的平衡点。
  */
 export enum Interpolation {
   /** 最近邻插值（最快，质量最低） */
@@ -77,11 +72,9 @@ export enum Interpolation {
 }
 
 /**
- * 🟢 字体样式枚举
- * 
- * 🔹 指定字体的样式变体。
- * 
- * @enum {string} FontStyle
+ * Font style variants for visual-font rendering.
+ *
+ * 指定视觉字体渲染时使用的样式变体。
  * 
  * @example
  * ```typescript
@@ -114,10 +107,10 @@ export enum FontStyle {
 //#region 🟦 统一配置模型类型
 
 /**
- * 🟢 输出目标环境
+ * Output target environment.
  *
- * 🔹 用于描述字符画最终展示或消费的位置。
- * 🔹 该字段不直接改变核心采样算法，主要供多端配置、导出、提示和后续环境差异处理使用。
+ * 用于描述字符画最终展示或消费的位置。该字段当前不直接改变核心采样算法，主要供多端
+ * 配置、导出、提示和后续环境差异处理使用。
  */
 export type OutputTarget =
   | 'plain'
@@ -129,10 +122,10 @@ export type OutputTarget =
   | 'ansi';
 
 /**
- * 🟢 视觉字体配置
+ * Visual-font configuration for text-banner rasterization.
  *
- * 🔹 视觉字体指输入文字渲染成中间图像时使用的字体。
- * 🔹 旧字段 `font` / `fontStyle` / `fontReduce` 会继续保留，并映射到这里。
+ * 视觉字体指输入文字渲染成中间图像时使用的字体。旧字段 `font` / `fontStyle` /
+ * `fontReduce` 会继续保留，并映射到这里。
  */
 export interface VisualFontConfig {
   /** 字体名称或字体文件路径。 */
@@ -152,11 +145,11 @@ export interface VisualFontConfig {
 }
 
 /**
- * 🟢 字素字体配置
+ * Glyph-font configuration for rendered Unicode art.
  *
- * 🔹 字素字体指字符画生成后，输出字素在终端、Web、VSCode、Electron 中实际显示的字体。
- * 🔹 `widthProfile` / `wideCharRegex` 会参与裱框、语义布局和输出列数计算。
- * 🔹 profile 仍为 experimental；`wideCharRegex` 是完整宽字素集合，优先级更高。
+ * 字素字体指字符画生成后，输出字素在终端、Web、VS Code、桌面应用中实际显示的字体。
+ * `widthProfile` / `wideCharRegex` 会参与裱框、语义布局和输出列数计算。profile 仍为
+ * experimental；`wideCharRegex` 是完整宽字素集合，优先级更高。
  */
 export interface GlyphFontConfig {
   /** 输出字素展示字体，例如 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro 等开源等宽字体。 */
@@ -168,11 +161,9 @@ export interface GlyphFontConfig {
 }
 
 /**
- * 🟢 文本对齐方式枚举
- * 
- * 🔹 多行文本的对齐方式。
- * 
- * @enum {string} TextAlign
+ * Alignment modes for multi-line visual-text rendering.
+ *
+ * 多行视觉文本渲染时的对齐方式。
  */
 export enum TextAlign {
   /** 左对齐 */
@@ -186,11 +177,9 @@ export enum TextAlign {
 }
 
 /**
- * 🟢 高度模式枚举
- * 
- * 🔹 指定height参数的含义。
- * 
- * @enum {string} HeightMode
+ * Defines how the `height` configuration value is interpreted.
+ *
+ * 指定 `height` 配置值的含义。
  * 
  * @example
  * ```typescript
@@ -225,12 +214,10 @@ export enum HeightMode {
 //#region 🟦 核心配置接口
 
 /**
- * 🟢 艺术生成配置接口
- * 
- * 🔹 包含字符画生成的所有配置选项。
- * 🔹 所有字段都是可选的，未指定的字段使用默认值。
- * 
- * @interface ArtConfig
+ * Complete conversion configuration.
+ *
+ * 包含字符画生成的所有配置选项；未指定字段使用默认值。公开调用可传入
+ * `Partial<ArtConfig>`，再交由 `validateConfig` 归一化。
  * 
  * @example
  * ```typescript
@@ -262,18 +249,12 @@ export enum HeightMode {
  * ```
  * 
  * @remarks
- * - height和width至少指定一个
- * - 同时指定时，以height为准，width作为参考
- * - matrixSize越大，细节越丰富，但速度越慢
- * - ratio影响字符的宽高比，大多数字体为2.0
- * 
- * @validation
- * - height: 必须 > 0（如果指定）
- * - width: 必须 > 0（如果指定）
- * - matrixSize: 范围 [2, 20]，推荐 [4, 8]
- * - ratio: 范围 [1.0, 3.0]，推荐 2.0
- * - fontReduce: 范围 [0, 10]，推荐 0
- * - charSpace: 当前为保留字段，暂不改变主路径输出
+ * - 至少提供 `height` 或 `width` 之一；同时提供时以 `height` 为准，`width` 作为参考。
+ * - `matrixSize` 越大，细节越丰富，但速度越慢；`ratio` 影响字素宽高比，常见值为 2。
+ *
+ * **Validation / 校验：**`height` 和 `width`（如提供）必须大于零；`matrixSize` 的范围
+ * 为 2 至 20（推荐 4 至 8）；`ratio` 的范围为 1 至 3（推荐 2）；`fontReduce` 的范围为
+ * 0 至 10。`charSpace` 是当前不改变主路径输出的 reserved 字段。
  */
 export interface ArtConfig {
   //#region 🔶 尺寸配置
@@ -575,10 +556,8 @@ export interface ArtConfig {
    * - 加速比: 通常2-5倍
    * - 强烈建议保持启用
    * 
-   * @performance
-   * - 启用: O(N × M²) 平均情况
-   * - 禁用: O(N × M²) 最坏情况
-   * - N = 字符集大小, M = matrixSize
+   * **性能：**启用后可在累计 SAD 超过当前最优值时提前结束，典型可提升 2 至 5 倍；
+   * `N` 为字符集大小，`M` 为 `matrixSize`。
    */
   enableEarlyTermination?: boolean;
   

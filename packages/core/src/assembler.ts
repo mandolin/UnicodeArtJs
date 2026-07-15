@@ -8,6 +8,8 @@
  * - 纯文本格式（.txt）
  * - HTML格式（.html）
  * - ANSI转义码格式（终端彩色输出）
+ * Assembles matched glyph cells into plain text, HTML, or ANSI output while
+ * preserving configured glyph-width rules for output metrics and box frames.
  * 
  * 🔶 核心流程
  * 1. assemblePlainText() - 组装纯文本输出
@@ -21,8 +23,8 @@
  * - 预计算输出尺寸
  * 
  * 🔶 格式说明
- * - 纯文本: 每行以\n结尾，适合保存到文件
- * - HTML: 包含完整HTML结构，使用<pre>标签保持格式
+ * - 纯文本: 每行以 LF 换行，适合保存到文件
+ * - HTML: 包含完整 HTML 结构，使用 preformatted block 保持格式
  * - ANSI: 使用转义码实现颜色和高亮，仅适用于终端
  * 
  * @module assembler
@@ -54,12 +56,12 @@ import { createGlyphWidthCalculator } from './glyph/width';
  * @example
  * ```typescript
  * const text = assemblePlainText(charMatrix, { trimTrailingSpaces: true });
- * console.log(text);
- * // "  @@  \n @@@@ \n@@@@@@"
+ * console.log(text.split(String.fromCharCode(10)));
+ * // ['  @@  ', ' @@@@ ', '@@@@@@']
  * ```
  * 
  * @remarks
- * - 每行以\n（Unix）或\r\n（Windows）结尾
+ * - 每行使用 LF 或 CRLF 换行符
  * - trimTrailingSpaces可减少文件大小
  * - 宽字符已正确处理显示宽度
  * 
@@ -130,7 +132,7 @@ export function trimTrailingSpaces(line: string): string {
 /**
  * 🟢 将字符矩阵组装为HTML文档
  * 
- * 🔹 生成完整的HTML页面，使用<pre>标签保持字符画格式。
+ * 🔹 生成完整的HTML页面，使用 preformatted block 保持字符画格式。
  * 🔹 支持自定义字体、颜色和样式。
  * 
  * @param charMatrix - 字符矩阵
@@ -148,7 +150,7 @@ export function trimTrailingSpaces(line: string): string {
  * ```
  * 
  * @remarks
- * - 使用<pre>标签保持等宽字体和对齐
+ * - 使用 preformatted block 保持等宽字体和对齐
  * - 默认使用开源等宽字体优先的 fallback 字体栈
  * - 支持深色模式（invert配置）
  * - 可添加元数据和版权信息
@@ -157,8 +159,8 @@ export function trimTrailingSpaces(line: string): string {
  * - 时间复杂度: O(R × C)
  * - 生成的HTML大小约为文本的1.5-2倍
  * 
- * @todo 支持语法高亮
- * @todo 支持响应式布局
+ * Planned follow-up: syntax highlighting and responsive layout can be layered
+ * on the generated HTML template without changing the plain text pipeline.
  */
 export function assembleHTML(
   charMatrix: string[][],
@@ -221,7 +223,7 @@ export function assembleHTML(
 /**
  * 🟢 转义HTML特殊字符
  * 
- * 🔹 将<、>、&等字符转义为HTML实体。
+ * 🔹 将 angle brackets、ampersand 等字符转义为HTML实体。
  * 🔹 防止XSS攻击和显示错误。
  * 
  * @param text - 原始文本
@@ -234,8 +236,8 @@ export function assembleHTML(
  * ```
  * 
  * @remarks
- * - 必须转义的字符: < > & " '
- * - 在<pre>标签内也需要转义
+ * - 必须转义的字符包括 angle brackets、ampersand、double quote 和 single quote
+ * - 在 preformatted block 内也需要转义
  * - 使用替换链确保所有特殊字符都被处理
  */
 export function escapeHTML(text: string): string {
@@ -312,8 +314,8 @@ function generateMetadataHTML(metadata: ArtMetadata): string {
  * - ANSI码会增加输出大小约30-50%
  * 
  * @see {@link https://en.wikipedia.org/wiki/ANSI_escape_code}
- * @todo 支持256色模式
- * @todo 支持背景色
+ * Planned follow-up: 256-color mode and background color can be added as
+ * terminal-specific output options.
  */
 export function assembleANSI(
   charMatrix: string[][],
@@ -352,20 +354,20 @@ export function assembleANSI(
  * 
  * @example
  * ```typescript
- * const result = assembleOutput(charMatrix, config, OutputFormat.TEXT, {
+ * const result = assembleOutput(charMatrix, config, OutputFormat.PLAIN_TEXT, {
  *   sourceImage: 'photo.jpg',
  *   generatedAt: new Date().toISOString()
  * });
  * console.log(result.content); // 字符画内容
- * console.log(result.format); // 'text'
+ * console.log(result.format); // 'plain'
  * ```
  * 
  * @remarks
- * - 支持的格式: TEXT, HTML, ANSI
+ * - 支持的格式: PLAIN_TEXT, HTML, ANSI
  * - 自动添加元数据到输出
  * - 返回标准化的ArtResult对象
  * 
- * @throws {UnicodeArtError} 当格式不支持时抛出
+ * @throws 当格式不支持时抛出 `UnicodeArtError`。
  */
 export function assembleOutput(
   charMatrix: string[][],
@@ -424,6 +426,22 @@ export function assembleOutput(
 
 //#region 🔶 输出尺寸计算
 
+/**
+ * 🟢 将已有字符画文本组装为标准输出结果
+ *
+ * 🔹 适用于语义文档、艺术字字体或外部扩展已经生成纯文本字符画的场景。
+ * 🔹 该函数只负责格式包装、HTML/ANSI 转换和输出尺寸统计，不重新执行采样或匹配。
+ *
+ * @param text - 已生成的字符画纯文本。
+ * @param config - 输出配置，包含裱框和字素宽度规则。
+ * @param format - 目标输出格式。
+ * @param metadata - 可选元数据。
+ * @returns 标准 `ArtResult` 输出结果。
+ *
+ * @remarks
+ * Plain text format preserves the input text as-is. HTML and ANSI formats reuse
+ * the same escaping and terminal-color helpers as matrix-based output.
+ */
 export function assembleTextOutput(
   text: string,
   config: ArtConfig,

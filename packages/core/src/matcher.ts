@@ -6,6 +6,8 @@
  * 🔶 模块职责
  * 使用绝对差值之和（Sum of Absolute Differences, SAD）算法，
  * 将采样矩阵与预计算的字符矩阵进行匹配，找到最佳匹配字符。
+ * Uses Sum of Absolute Differences (SAD) to compare sampling matrices with
+ * precomputed glyph matrices and choose the closest glyph.
  * 
  * 🔶 核心算法
  * - calculateSAD() - 计算两个矩阵的SAD得分
@@ -14,9 +16,8 @@
  * 
  * 🔶 性能优化
  * - 早期终止：当累计SAD超过当前最优值时提前退出
- * - 并行处理：支持多核CPU并行匹配
  * - 缓存优化：预计算字符数据避免重复渲染
- * - SIMD加速：利用TypedArray的向量化操作
+ * - 当前主路径是单线程同步匹配；`batchMatchParallel` 仍为显式抛出 NOT_IMPLEMENTED 的预留接口
  * 
  * 🔶 宽字符处理
  * - 普通字符：直接匹配单个采样块
@@ -28,6 +29,7 @@
  * - SAD越小表示相似度越高
  * - 范围: [0, N]，其中N = matrixSize²
  * - 完美匹配时SAD = 0
+ * - The stable path is serial and deterministic for a fixed input and glyph map.
  * 
  * @module matcher
  * @since 0.1.0
@@ -126,7 +128,7 @@ export function calculateSAD(
  * @param sample - 采样矩阵
  * @param charDataMap - 预计算的字符数据映射
  * @param enableEarlyTermination - 是否启用早期终止
- * @returns {{char: string, sad: number, isWideChar: boolean}} 最佳匹配结果
+ * @returns 最佳匹配结果，包含字符、SAD 得分和宽字符标记。
  * 
  * @example
  * ```typescript
@@ -265,7 +267,7 @@ function mergeBlocksForWideChar(
  * 🔹 根据CharType枚举分离字符，便于分别匹配。
  * 
  * @param charDataMap - 预计算的字符数据映射
- * @returns {{normalChars: CharMatrix[], wideChars: CharMatrix[]}} 分组结果
+ * @returns 分组结果，包含普通字素列表和宽字素列表。
  * 
  * @internal
  */
@@ -314,10 +316,10 @@ function splitCharsByType(
  * - 返回二维数组: charMatrix[row][col]
  * - 宽字符占用2列，但只在第一列存储字符，第二列为空字符串
  * - wideCharRatio控制宽字符优先级：
- *   - ratio < 1.0: 倾向使用宽字符
+ *   - ratio below 1.0: 倾向使用宽字符
  *   - ratio = 1.5: 默认值，平衡选择
- *   - ratio > 2.0: 倾向使用普通字符
- * - 大图像建议使用并行处理
+ *   - ratio above 2.0: 倾向使用普通字符
+ * - 当前稳定实现为单线程确定性匹配，并行接口仍保留为未来扩展点
  * 
  * @performance
  * - 时间复杂度: O(R × C × K × N)
@@ -326,13 +328,13 @@ function splitCharsByType(
  *   - K = 字符集大小
  *   - N = matrixSize²
  * - 典型耗时: 100-2000ms（取决于图像大小和字符集）
- * - 并行处理可提升2-8倍速度
+ * - 后续并行实现可能改善大图像耗时，但当前版本不承诺并行加速
  * 
  * @see {@link mergeBlocksForWideChar} 合并采样块
  * @see {@link splitCharsByType} 字符分组
  * 
- * @todo 实现并行处理（Web Workers / worker_threads）
- * @todo 添加进度回调支持
+ * Planned follow-up: progress callbacks and worker-based matching are reserved
+ * for a later performance phase.
  */
 export async function batchMatch(
   samplingArray: SamplingArray,
@@ -461,7 +463,7 @@ export async function batchMatch(
 
 //#endregion
 
-//#region 🟩 并行匹配（TODO）
+//#region 🟩 并行匹配（预留接口）
 
 /**
  * 🟢 并行批量匹配（实验性功能）
@@ -475,11 +477,11 @@ export async function batchMatch(
  * @param charDataMap - 预计算的字符数据映射
  * @param config - 配置选项
  * @param maxWorkers - 最大worker数量
- * @returns Promise<string[][]> 字符矩阵
+ * @returns Promise，解析后得到字符矩阵。
  * 
- * @todo 实现并行匹配逻辑
- * @todo 添加worker池管理
- * @todo 实现任务分片和结果合并
+ * @remarks
+ * This reserved API currently throws `NOT_IMPLEMENTED`. 后续实现需要补齐 worker
+ * pool、任务分片和结果合并，并重新建立跨运行时一致性测试。
  */
 export async function batchMatchParallel(
   _samplingArray: SamplingArray,

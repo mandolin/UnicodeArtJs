@@ -1,13 +1,12 @@
 /**
  * ============================================================================
- * 🟦 UnicodeArtJs browser entry
- * ============================================================================
+ * Browser-oriented UnicodeArtJs Core entry.
  *
- * 🔶 模块职责 / Module responsibility
- * 浏览器入口组合纯算法与 Chrome 120+ 平台适配器，并导出浏览器高层 API。
- * Combines the pure algorithms with the Chrome 120+ platform adapter and
- * exports the browser-oriented high-level APIs.
- * ============================================================================
+ * 浏览器入口组合纯算法与 Chrome 120+ 平台适配器，导出浏览器高层 API。它不依赖 Node
+ * 内置模块；高层转换当前属于 experimental 能力，调用方应通过
+ * {@link getCoreCapabilities} 读取实际能力边界。
+ *
+ * @packageDocumentation
  */
 
 export * from './pure';
@@ -45,6 +44,7 @@ export {
 export type {
   BrowserAdapterCacheClearOptions,
   BrowserAdapterCacheStats,
+  BrowserBinaryFontSource,
   BrowserFontLoadOptions,
   BrowserFontSource,
   BrowserRuntimeCapabilities
@@ -52,6 +52,13 @@ export type {
 
 //#region 🟦 Browser High-Level APIs
 
+/**
+ * Progress stages emitted by browser high-level conversions.
+ *
+ * 浏览器高层转换发出的进度阶段。阶段用于展示进度，不是可持久化的工作流协议。
+ *
+ * @public
+ */
 export type BrowserProgressStage =
   | 'start'
   | 'loadImage'
@@ -60,17 +67,39 @@ export type BrowserProgressStage =
   | 'convert'
   | 'done';
 
+/**
+ * A progress callback payload for browser conversion.
+ *
+ * 浏览器转换进度回调的负载；`progress` 位于 0 到 1 之间。
+ *
+ * @public
+ */
 export interface BrowserProgressEvent {
   stage: BrowserProgressStage;
   progress: number;
   message?: string;
 }
 
+/**
+ * Minimal cancellation contract accepted by browser conversions.
+ *
+ * 浏览器转换接受的最小取消契约。取消是协作式的，无法中断已经进入的同步像素计算。
+ *
+ * @public
+ */
 export interface BrowserAbortSignalLike {
   readonly aborted?: boolean;
   throwIfAborted?: () => void;
 }
 
+/**
+ * Browser-only execution options for high-level conversion.
+ *
+ * 浏览器高层转换的专用执行选项。输入和输出上限用于保护主线程，不会改变正常输入的
+ * 转换结果。
+ *
+ * @public
+ */
 export interface BrowserArtOptions {
   charDataMap?: Map<string, CharMatrix>;
   progress?: (event: BrowserProgressEvent) => void;
@@ -82,6 +111,25 @@ export interface BrowserArtOptions {
 const DEFAULT_BROWSER_MAX_INPUT_PIXELS = 16_000_000;
 const DEFAULT_BROWSER_MAX_OUTPUT_CELLS = 300_000;
 
+/**
+ * Converts browser image input to Unicode art.
+ *
+ * 将浏览器图像输入转换为 Unicode 字符画。支持 Core `ImageData`、浏览器 `ImageData`、
+ * `Blob`/`File`、URL 字符串和可绘制的 Canvas 图像源；URL 输入受浏览器网络与 CORS
+ * 策略约束。
+ *
+ * @public
+ * @remarks
+ * **Stability / 稳定性：**此浏览器高层入口目前为 experimental，Chrome 120+ 是已验证
+ * 基线。可通过 `progress` 获取阶段通知，并通过兼容 `AbortSignal` 的 `signal` 协作取消。
+ *
+ * @param input - Browser-supported image input. 浏览器支持的图像输入。
+ * @param config - Partial conversion configuration. 部分转换配置。
+ * @param options - Browser execution options. 浏览器执行选项。
+ * @returns The generated Unicode-art result. 生成后的字符画结果。
+ * @throws - Throws `UnicodeArtError` for unsupported input, configured limits,
+ * cancellation, or conversion failure. 不支持的输入、超出限制、取消或转换失败时抛出。
+ */
 export async function imageToArt(
   input: unknown,
   config: Partial<ArtConfig>,
@@ -107,6 +155,24 @@ export async function imageToArt(
   return result;
 }
 
+/**
+ * Renders text with the visual font and converts it to Unicode art in a browser.
+ *
+ * 在浏览器中先使用视觉字体将文本栅格化，再转换为 Unicode 字符画。字素模板使用
+ * `glyphFont`（或兼容字段）生成；视觉字体和字素字体承担不同职责。
+ *
+ * @public
+ * @remarks
+ * **Stability / 稳定性：**此入口为 experimental，遵循与 {@link imageToArt} 相同的
+ * Chrome 120+、进度和协作式取消边界。
+ *
+ * @param text - Text to rasterize. 要栅格化的输入文本。
+ * @param config - Partial conversion configuration. 部分转换配置。
+ * @param options - Browser execution options. 浏览器执行选项。
+ * @returns The generated Unicode-art result. 生成后的字符画结果。
+ * @throws - Throws `UnicodeArtError` when text is empty, execution is cancelled,
+ * configured limits are exceeded, or conversion fails. 空文本、取消、超出限制或转换失败时抛出。
+ */
 export async function textToArt(
   text: string,
   config: Partial<ArtConfig>,
@@ -195,10 +261,21 @@ export async function textToArt(
 }
 
 /**
- * 🟢 浏览器语义文档转字符画
+ * Renders a versioned semantic document through browser text conversion.
  *
- * 🔹 复用 Core 的 AST、跨度和字素宽度算法，仅将艺术文本块委托给浏览器 textToArt。
- * 🔹 仍属于 Chrome 120+ experimental 浏览器能力。
+ * 复用 Core 的语义 AST、跨度和字素宽度算法，仅将艺术文本块委托给浏览器 `textToArt`。
+ *
+ * @public
+ * @remarks
+ * **Stability / 稳定性：**该能力及其浏览器入口均为 experimental，已验证基线为 Chrome
+ * 120+。输入必须是版本化语义文档或可由受限解析器接受的值，不执行任意 HTML 或脚本。
+ *
+ * @param document - Semantic document value or parseable input. 语义文档值或可解析输入。
+ * @param config - Complete normalized configuration. 已归一化的完整配置。
+ * @param options - Semantic-layout render options. 语义布局渲染选项。
+ * @returns The assembled Unicode-art result. 组装后的字符画结果。
+ * @throws - Throws `UnicodeArtError` when semantic validation or rendering fails.
+ * 语义文档校验或渲染失败时抛出。
  */
 export async function semanticDocumentToArt(
   document: SemanticDocument | unknown,

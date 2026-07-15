@@ -1,15 +1,11 @@
 /**
  * ============================================================================
- * 🟦 UnicodeArtJs pure core entry
- * ============================================================================
+ * Platform-independent UnicodeArtJs Core entry.
  *
- * 🔶 Module responsibility
- * Exposes platform-independent APIs for browser adaptation and other hosts that
- * want to provide their own image/font adapters.
+ * 导出浏览器适配及其他自定义宿主可复用的纯算法、类型和格式工具。此入口不得导入 Node
+ * 专用模块，也不自行加载图像或字体；宿主需要自行提供像素数据或平台 adapter。
  *
- * 🔶 Import boundary
- * This entry must not import Node-only modules or modules that import them.
- * ============================================================================
+ * @packageDocumentation
  */
 
 //#region 🟦 Types

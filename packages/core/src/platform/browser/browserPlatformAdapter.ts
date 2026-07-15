@@ -6,11 +6,14 @@
  * 🔶 Module responsibility
  * Provides Chrome 120+ image, text, glyph, and font rendering implementations
  * without importing Node-only modules.
+ * 在不导入 Node 专用模块的前提下，提供 Chrome 120+ 的图像、文本、字素与字体渲染实现。
  *
  * 🔶 Type strategy
  * The core package currently compiles without the DOM lib. This adapter uses
  * lightweight structural types and runtime feature checks so Node typecheck
  * remains stable while browser runtimes can use native Canvas APIs.
+ * Core 包不依赖 DOM lib；本 adapter 使用轻量结构类型与运行时特性检测，使 Node typecheck
+ * 保持稳定，同时允许浏览器使用原生 Canvas API。
  * ============================================================================
  */
 
@@ -73,18 +76,39 @@ type BrowserImageSourceLike = {
 
 //#region 🟦 Adapter
 
+/**
+ * Current browser-adapter cache sizes.
+ *
+ * 当前浏览器 adapter 缓存条目数。数字仅用于诊断和 UI 展示，不是内存字节数。
+ *
+ * @public
+ */
 export interface BrowserAdapterCacheStats {
   fonts: number;
   glyphs: number;
   charData: number;
 }
 
+/**
+ * Selects browser-adapter caches to clear.
+ *
+ * 选择要清理的浏览器 adapter 缓存；不提供任何字段时会清理全部缓存。
+ *
+ * @public
+ */
 export interface BrowserAdapterCacheClearOptions {
   fonts?: boolean;
   glyphs?: boolean;
   charData?: boolean;
 }
 
+/**
+ * Browser features observed through non-invasive runtime checks.
+ *
+ * 通过非侵入式运行时检测得到的浏览器特性。结果不保证字体、网络或跨域资源一定可用。
+ *
+ * @public
+ */
 export interface BrowserRuntimeCapabilities {
   offscreenCanvas: boolean;
   canvas2d: boolean;
@@ -97,6 +121,15 @@ const fontLoadCache = new Map<string, Promise<string>>();
 const glyphMatrixCache = new Map<string, Float32Array>();
 const charDataMapCache = new Map<string, Promise<Map<string, CharMatrix>>>();
 
+/**
+ * Clears selected browser-adapter caches.
+ *
+ * 清理选定的浏览器 adapter 缓存。它不会撤销已注册到 `document.fonts` 的 FontFace，也不会
+ * 中断进行中的转换。
+ *
+ * @public
+ * @param options - Caches to clear; omitted means all. 要清理的缓存；省略时全部清理。
+ */
 export function clearBrowserAdapterCache(options: BrowserAdapterCacheClearOptions = {}): void {
   const clearAll = options.fonts === undefined && options.glyphs === undefined && options.charData === undefined;
 
@@ -113,6 +146,13 @@ export function clearBrowserAdapterCache(options: BrowserAdapterCacheClearOption
   }
 }
 
+/**
+ * Gets current browser-adapter cache statistics.
+ *
+ * 获取当前浏览器 adapter 缓存统计。
+ *
+ * @public
+ */
 export function getBrowserAdapterCacheStats(): BrowserAdapterCacheStats {
   return {
     fonts: fontLoadCache.size,
@@ -121,6 +161,13 @@ export function getBrowserAdapterCacheStats(): BrowserAdapterCacheStats {
   };
 }
 
+/**
+ * Detects browser APIs relevant to the experimental browser adapter.
+ *
+ * 检测 experimental 浏览器 adapter 相关的浏览器 API。该函数不加载字体、图片或 worker。
+ *
+ * @public
+ */
 export function getBrowserRuntimeCapabilities(): BrowserRuntimeCapabilities {
   const scope = globalThis as any;
 
@@ -813,14 +860,58 @@ function darkenTextBand(data: Uint8Array, width: number, startY: number, endY: n
 
 //#region 🟦 Font Helpers
 
-export type BrowserFontSource = string | ArrayBuffer | ArrayBufferView | unknown;
+/**
+ * Binary browser-font source accepted by `loadBrowserFont`.
+ *
+ * `Blob` 等只要提供异步 `arrayBuffer()` 的对象均可作为二进制字体源。
+ *
+ * @public
+ */
+export interface BrowserBinaryFontSource {
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
 
+/**
+ * Browser font source accepted by `loadBrowserFont`.
+ *
+ * 可由 `loadBrowserFont` 接受的浏览器字体来源：网络/数据 URL、本地 family 名、二进制数据，
+ * 或具备 `arrayBuffer()` 的 Blob 类对象。
+ *
+ * @public
+ */
+export type BrowserFontSource = string | ArrayBuffer | ArrayBufferView | BrowserBinaryFontSource;
+
+/**
+ * Optional family and style metadata for a browser-loaded font.
+ *
+ * 浏览器加载字体时可选的 family 与样式元数据。
+ *
+ * @public
+ */
 export interface BrowserFontLoadOptions {
   family?: string;
   style?: string;
   fallbackFamily?: string;
 }
 
+/**
+ * Loads or resolves a browser font family for visual-font or glyph-font rendering.
+ *
+ * 为视觉字体或字素字体渲染加载或解析浏览器字体 family。普通 family 名会直接返回；字体 URL、
+ * 二进制数据和 Blob 类来源会在支持 `FontFace` 时加载并登记到 `document.fonts`。URL 仍受网络
+ * 与 CORS 策略约束。
+ *
+ * @public
+ * @remarks
+ * 缓存键包含字符串来源、family、style 与 fallback。二进制来源未提供 `family` 时不会缓存，
+ * 避免将不同字体误合并。
+ *
+ * @param source - Font family, URL, binary data, or Blob-like source. 字体 family、URL、二进制数据或 Blob 类来源。
+ * @param options - Optional family, style, and fallback metadata. 可选 family、样式和回退元数据。
+ * @returns The family name to use in Canvas. 可用于 Canvas 的字体 family 名。
+ * @throws - Throws `UnicodeArtError` when FontFace is required but unavailable,
+ * or the source is unsupported. 必须使用 FontFace 但不可用，或来源不受支持时抛出。
+ */
 export async function loadBrowserFont(
   source: BrowserFontSource,
   options: BrowserFontLoadOptions = {}
@@ -970,4 +1061,11 @@ async function toFontFaceSource(source: BrowserFontSource): Promise<string | Arr
 
 //#endregion
 
+/**
+ * Browser adapter's normalized grayscale image-data shape.
+ *
+ * 浏览器 adapter 使用的规范化灰度图像数据形状，与平台无关的 `CoreImageData` 相同。
+ *
+ * @public
+ */
 export type BrowserPlatformImageData = CoreImageData;

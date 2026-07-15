@@ -7,6 +7,8 @@
  * Centralizes Node-only image, font, and text rendering capabilities used by
  * the default Node entry. This keeps the pure core free from concrete Node image
  * backends, Skia Canvas compatibility runtime, filesystem, and process assumptions.
+ * 集中管理默认 Node 入口使用的图像、字体与文字渲染能力，使 pure core 不依赖具体图像后端、
+ * Skia Canvas 兼容运行时、文件系统或 `process`。
  * ============================================================================
  */
 
@@ -172,4 +174,11 @@ function parseCanvasFontSize(font: string): number {
 
 //#endregion
 
+/**
+ * 🟢 Node 平台图像数据类型
+ *
+ * 🔹 当前与 Core 灰度图像数据结构一致，用于在 Node adapter API 中表达宿主侧返回值。
+ *
+ * @public
+ */
 export type NodePlatformImageData = CoreImageData;

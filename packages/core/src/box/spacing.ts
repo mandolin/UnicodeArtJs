@@ -21,6 +21,17 @@ export const ZERO_SPACING: BoxSpacing = {
   left: 0
 };
 
+/**
+ * 🟢 归一化裱框间距
+ *
+ * 🔹 支持单个数字或四边局部对象，最终返回完整的 top/right/bottom/left 结构。
+ *
+ * @param value - 用户传入的间距值。
+ * @param fallback - 未指定边时使用的默认值。
+ * @returns 完整四边距对象。
+ *
+ * @throws 当任意边不是非负整数时抛出 `Error`。
+ */
 export function normalizeSpacing(value: SpacingValue | undefined, fallback: number = 0): BoxSpacing {
   if (value === undefined) {
     return spacingFromNumber(fallback);
@@ -57,6 +68,12 @@ function normalizeSpacingSide(value: number | undefined, fallback: number, name:
   return candidate;
 }
 
+/**
+ * 🟢 判断四边距中是否存在非零值
+ *
+ * @param spacing - 已归一化的四边距对象。
+ * @returns `true` 表示至少一边大于零。
+ */
 export function hasSpacing(spacing: BoxSpacing): boolean {
   return spacing.top > 0 || spacing.right > 0 || spacing.bottom > 0 || spacing.left > 0;
 }
