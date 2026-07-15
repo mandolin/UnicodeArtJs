@@ -142,7 +142,7 @@ async function main() {
 
     await test('mode buttons exist', async () => {
       const buttons = await page.$$('.mode-btn');
-      if (buttons.length < 4) throw new Error('Gallery mode button is missing');
+      if (buttons.length < 5) throw new Error('A mode button is missing');
     });
 
     await test('theme selector exists', async () => {
@@ -347,6 +347,36 @@ async function main() {
       } finally {
         await isolatedContext.close();
       }
+    });
+
+    await test('loads public developer documentation entries', async () => {
+      await page.click('.mode-btn[data-mode="docs"]');
+      await page.waitForSelector('#docsWorkbench:not([hidden])', { timeout: 5000 });
+      await page.waitForFunction(
+        () => document.querySelectorAll('#docsGrid [data-docs-entry-id]').length === 4,
+        undefined,
+        { timeout: 10_000 },
+      );
+      const docsState = await page.evaluate(() => ({
+        count: document.querySelector('#docsEntryCount')?.textContent,
+        title: document.querySelector('#docsTitle')?.textContent,
+        guideHref: document.querySelector('#docsGuideLink')?.getAttribute('href'),
+        pageText: document.querySelector('#docsWorkbench')?.textContent || '',
+      }));
+      if (docsState.count !== '4') throw new Error('Public docs entry count changed');
+      if (!docsState.title?.includes('Core')) throw new Error('Default docs entry was not selected');
+      if (!docsState.guideHref?.startsWith('https://github.com/mandolin/UnicodeArtJs/')) {
+        throw new Error('Docs guide link does not point to the public repository');
+      }
+      if (/work-zone|\.generated-docs|ai\/codex/i.test(docsState.pageText)) {
+        throw new Error('Docs page leaked an internal path fragment');
+      }
+
+      await page.selectOption('#languageSelect', 'en-US');
+      await page.waitForFunction(() => document.querySelector('.mode-btn[data-mode="docs"] .mode-text')?.textContent === 'Developer Docs');
+      await page.selectOption('#languageSelect', 'zh-CN');
+      await page.click('.mode-btn[data-mode="text"]');
+      await page.waitForSelector('#converterWorkbench:not([hidden])', { timeout: 3000 });
     });
 
     await test('box panel toggle works', async () => {

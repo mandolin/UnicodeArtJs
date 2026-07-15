@@ -1,0 +1,95 @@
+{
+  "contract": "unicodeartjs-public-docs-site-manifest",
+  "contractVersion": "0.1.0",
+  "generatedAt": "2026-07-15T13:52:08.879Z",
+  "homepage": "https://mandolin.github.io/UnicodeArtJs/",
+  "repository": "https://github.com/mandolin/UnicodeArtJs",
+  "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
+  "sourceManifest": {
+    "contract": "unicodeartjs-documentation-manifest",
+    "contractVersion": "0.1.0"
+  },
+  "policy": {
+    "generatedArtifactsCommitted": false,
+    "sourcesContentPolicy": "none",
+    "publicDataOnly": true
+  },
+  "entries": [
+    {
+      "id": "core-tsdoc",
+      "title": "Core TypeScript API",
+      "packageName": "unicode-art-js",
+      "packageVersion": "1.2.1",
+      "surface": "core",
+      "documentationKind": "hia-tsdoc",
+      "stability": "intermediate",
+      "guideUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/code-documentation.md#core-tsdoc-中间文档",
+      "checkCommand": "npm run docs:tsdoc:core:check",
+      "metrics": {
+        "artifactCount": 240,
+        "inputCount": 40
+      }
+    },
+    {
+      "id": "cli-jsdoc",
+      "title": "CLI JavaScript API",
+      "packageName": "unicode-art-cli",
+      "packageVersion": "1.0.2",
+      "surface": "cli",
+      "documentationKind": "hia-jsdoc",
+      "stability": "pilot",
+      "guideUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/code-documentation.md#双语-jsdoc-约定",
+      "checkCommand": "npm run docs:cli:check",
+      "metrics": {
+        "nodeCount": 30,
+        "requiredFiles": [
+          "index.html",
+          "index.zh-CN.html",
+          "index.en.html",
+          "search-index.json",
+          "i18n-index.json",
+          "hia-metadata.json",
+          "hia-integration.json"
+        ]
+      }
+    },
+    {
+      "id": "web-jsdoc",
+      "title": "Web Gallery JavaScript API",
+      "packageName": "@unicode-art/web",
+      "packageVersion": "0.1.0-alpha",
+      "surface": "web",
+      "documentationKind": "hia-jsdoc",
+      "stability": "pilot",
+      "guideUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/web-integration.md",
+      "checkCommand": "npm run docs:web:check",
+      "metrics": {
+        "nodeCount": 8,
+        "requiredFiles": [
+          "index.html",
+          "index.zh-CN.html",
+          "index.en.html",
+          "search-index.json",
+          "i18n-index.json",
+          "hia-metadata.json",
+          "hia-integration.json"
+        ]
+      }
+    },
+    {
+      "id": "vscode-tsdoc",
+      "title": "VS Code Extension TypeScript API",
+      "packageName": "unicode-art-js-vscode",
+      "packageVersion": "0.3.0",
+      "surface": "vscode-extension",
+      "documentationKind": "hia-tsdoc",
+      "stability": "intermediate",
+      "guideUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/vscode-extension-integration.md",
+      "checkCommand": "npm run docs:tsdoc:vscode:check",
+      "metrics": {
+        "artifactCount": 96,
+        "inputCount": 16
+      }
+    }
+  ]
+}

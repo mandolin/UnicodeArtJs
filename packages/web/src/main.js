@@ -80,6 +80,7 @@ const UI_MESSAGES = {
     'mode.text': '文字Banner',
     'mode.editor': '编辑器',
     'mode.gallery': '作品画廊',
+    'mode.docs': '开发文档',
     'editor.sourceRegion': '编辑器源文件与模板',
     'editor.previewRegion': '编辑器预览',
     'editor.title': '艺术字与布局编辑器',
@@ -171,6 +172,38 @@ const UI_MESSAGES = {
     'gallery.tag.text': '文本',
     'gallery.tag.bilingual': '双语',
     'gallery.tag.width': '宽度',
+    'docs.region': 'UnicodeArtJs 开发文档',
+    'docs.previewRegion': '文档详情',
+    'docs.title': 'UnicodeArtJs 开发文档',
+    'docs.intro': '查看 Core、CLI、Web 与 VS Code 插件的公开 API 文档入口和生成状态。',
+    'docs.status.ready': '正在准备文档索引',
+    'docs.status.loading': '正在载入文档索引',
+    'docs.status.loaded': '已载入 {count} 个文档入口',
+    'docs.status.error': '文档索引载入失败：{message}',
+    'docs.entryCount': '文档入口',
+    'docs.generatedAt': '生成时间',
+    'docs.contract': '清单契约',
+    'docs.noSelection': '选择一个文档入口',
+    'docs.previewPlaceholder': '从左侧选择一个文档入口以查看详情。',
+    'docs.package': '包',
+    'docs.surface': '接口面',
+    'docs.kind': '文档类型',
+    'docs.check': '检查命令',
+    'docs.metrics': '指标',
+    'docs.openGuide': '打开文档',
+    'docs.openRepo': '打开仓库',
+    'docs.kind.hia-tsdoc': 'TSDoc 中间文档',
+    'docs.kind.hia-jsdoc': 'JSDoc API 文档',
+    'docs.stability.intermediate': '中间文档',
+    'docs.stability.pilot': '试点',
+    'docs.surface.core': 'Core 核心库',
+    'docs.surface.cli': 'CLI 命令行',
+    'docs.surface.web': 'Web 应用',
+    'docs.surface.vscode-extension': 'VS Code 插件',
+    'docs.metric.artifactCount': '产物',
+    'docs.metric.inputCount': '输入',
+    'docs.metric.nodeCount': '节点',
+    'docs.metric.requiredFiles': '文件',
     'input.imageTitle': '上传图片',
     'input.uploadText': '拖拽图片到此处',
     'input.uploadHint': '或点击选择文件',
@@ -280,6 +313,7 @@ const UI_MESSAGES = {
     'mode.text': 'Text Banner',
     'mode.editor': 'Editor',
     'mode.gallery': 'Gallery',
+    'mode.docs': 'Developer Docs',
     'editor.sourceRegion': 'Editor source and templates',
     'editor.previewRegion': 'Editor preview',
     'editor.title': 'Art Font and Layout Editor',
@@ -371,6 +405,38 @@ const UI_MESSAGES = {
     'gallery.tag.text': 'Text',
     'gallery.tag.bilingual': 'Bilingual',
     'gallery.tag.width': 'Width',
+    'docs.region': 'UnicodeArtJs developer documentation',
+    'docs.previewRegion': 'Documentation detail',
+    'docs.title': 'UnicodeArtJs Developer Docs',
+    'docs.intro': 'Browse public API documentation entry points and generation status for Core, CLI, Web, and the VS Code extension.',
+    'docs.status.ready': 'Preparing the documentation index',
+    'docs.status.loading': 'Loading the documentation index',
+    'docs.status.loaded': '{count} documentation entries loaded',
+    'docs.status.error': 'Documentation index failed to load: {message}',
+    'docs.entryCount': 'Entries',
+    'docs.generatedAt': 'Generated',
+    'docs.contract': 'Manifest',
+    'docs.noSelection': 'Select a documentation entry',
+    'docs.previewPlaceholder': 'Choose a documentation entry from the left to view details.',
+    'docs.package': 'Package',
+    'docs.surface': 'Surface',
+    'docs.kind': 'Documentation kind',
+    'docs.check': 'Check command',
+    'docs.metrics': 'Metrics',
+    'docs.openGuide': 'Open docs',
+    'docs.openRepo': 'Open repository',
+    'docs.kind.hia-tsdoc': 'TSDoc intermediate docs',
+    'docs.kind.hia-jsdoc': 'JSDoc API docs',
+    'docs.stability.intermediate': 'Intermediate',
+    'docs.stability.pilot': 'Pilot',
+    'docs.surface.core': 'Core library',
+    'docs.surface.cli': 'CLI',
+    'docs.surface.web': 'Web app',
+    'docs.surface.vscode-extension': 'VS Code extension',
+    'docs.metric.artifactCount': 'Artifacts',
+    'docs.metric.inputCount': 'Inputs',
+    'docs.metric.nodeCount': 'Nodes',
+    'docs.metric.requiredFiles': 'Files',
     'input.imageTitle': 'Upload Image',
     'input.uploadText': 'Drop an image here',
     'input.uploadHint': 'or click to choose a file',
@@ -520,6 +586,7 @@ const DOM = {
   converterWorkbench: '#converterWorkbench',
   editorWorkbench: '#editorWorkbench',
   galleryWorkbench: '#galleryWorkbench',
+  docsWorkbench: '#docsWorkbench',
   imageInputPanel: '#imageInputPanel',
   textInputPanel: '#textInputPanel',
   uploadZone: '#uploadZone',
@@ -619,6 +686,23 @@ const DOM = {
   galleryCopy: '#galleryCopy',
   galleryDownload: '#galleryDownload',
   galleryOpenEditor: '#galleryOpenEditor',
+
+  docsStatus: '#docsStatus',
+  docsEntryCount: '#docsEntryCount',
+  docsGeneratedAt: '#docsGeneratedAt',
+  docsManifestVersion: '#docsManifestVersion',
+  docsGrid: '#docsGrid',
+  docsKind: '#docsKind',
+  docsTitle: '#docsTitle',
+  docsStability: '#docsStability',
+  docsMetadata: '#docsMetadata',
+  docsPackage: '#docsPackage',
+  docsSurface: '#docsSurface',
+  docsCheckCommand: '#docsCheckCommand',
+  docsDescription: '#docsDescription',
+  docsMetrics: '#docsMetrics',
+  docsGuideLink: '#docsGuideLink',
+  docsRepoLink: '#docsRepoLink',
 };
 
 //#endregion
@@ -1787,6 +1871,229 @@ class GalleryController {
 
 //#endregion
 
+//#region 🟩 公开开发文档入口
+
+/**
+ * 🟢 公开文档入口控制器
+ *
+ * 🔹 数据来自构建期生成的 `public/docs/manifest.json`，只包含公开展示字段。
+ * 🔹 本控制器不读取本地生成目录，也不暴露 WorkZone 或 AI 协作文档。
+ * 🔹 详情链接统一指向 GitHub 仓库中的公开文档，便于 Pages 与源码同步浏览。
+ */
+class DocsController {
+  constructor(appController) {
+    this.appController = appController;
+    this.manifest = null;
+    this.selectedEntry = null;
+  }
+
+  bindEvents($doc) {
+    $doc.on('click', '[data-docs-entry-id]', (event) => {
+      const id = String($(event.currentTarget).attr('data-docs-entry-id') || '');
+      this.selectEntry(id);
+    });
+  }
+
+  async activate() {
+    await this.ensureLoaded();
+  }
+
+  refreshLocale() {
+    if (!this.manifest) {
+      this.setStatus('docs.status.ready');
+      return;
+    }
+    this.renderSummary();
+    this.renderGrid();
+    this.renderSelectedEntry();
+  }
+
+  t(key, params = {}) {
+    return this.appController.i18nManager.t(key, params);
+  }
+
+  async ensureLoaded() {
+    if (this.manifest) {
+      this.renderSummary();
+      this.renderGrid();
+      if (!this.selectedEntry && this.manifest.entries.length > 0) {
+        this.selectEntry(this.manifest.entries[0].id);
+      }
+      return;
+    }
+
+    this.setStatus('docs.status.loading');
+    try {
+      const response = await fetch(new URL('./docs/manifest.json', window.location.href), { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      this.manifest = this.parseManifest(await response.json());
+      this.renderSummary();
+      this.renderGrid();
+      this.setStatus('docs.status.loaded', { count: this.manifest.entries.length }, 'success');
+      if (this.manifest.entries.length > 0) this.selectEntry(this.manifest.entries[0].id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.setStatus('docs.status.error', { message }, 'error');
+      this.setInspectorPlaceholder('docs.previewPlaceholder');
+    }
+  }
+
+  parseManifest(raw) {
+    if (!raw || raw.contract !== 'unicodeartjs-public-docs-site-manifest') {
+      throw new Error('Invalid public docs manifest');
+    }
+    if (!Array.isArray(raw.entries)) {
+      throw new Error('Public docs manifest entries must be an array');
+    }
+    return {
+      ...raw,
+      entries: raw.entries.map((entry) => ({
+        ...entry,
+        id: String(entry.id || ''),
+        title: String(entry.title || entry.id || ''),
+        packageName: String(entry.packageName || ''),
+        packageVersion: String(entry.packageVersion || ''),
+        surface: String(entry.surface || ''),
+        documentationKind: String(entry.documentationKind || ''),
+        stability: String(entry.stability || ''),
+        guideUrl: String(entry.guideUrl || raw.docsHomeUrl || raw.repository || ''),
+        checkCommand: String(entry.checkCommand || ''),
+        metrics: entry.metrics && typeof entry.metrics === 'object' ? entry.metrics : {},
+      })),
+    };
+  }
+
+  renderSummary() {
+    if (!this.manifest) return;
+    $(DOM.docsEntryCount).text(String(this.manifest.entries.length));
+    $(DOM.docsGeneratedAt).text(this.formatDate(this.manifest.generatedAt));
+    $(DOM.docsManifestVersion).text(`${this.manifest.contractVersion || '--'}`);
+    $(DOM.docsRepoLink).attr('href', this.manifest.repository || 'https://github.com/mandolin/UnicodeArtJs');
+  }
+
+  renderGrid() {
+    const $grid = $(DOM.docsGrid);
+    $grid.empty();
+    if (!this.manifest) return;
+
+    this.manifest.entries.forEach((entry) => {
+      const isSelected = entry.id === this.selectedEntry?.id;
+      const $button = $('<button>')
+        .attr({
+          type: 'button',
+          'data-docs-entry-id': entry.id,
+          'aria-pressed': String(isSelected),
+        })
+        .addClass('docs-entry-card')
+        .toggleClass('selected', isSelected);
+
+      $('<span>')
+        .addClass('docs-entry-kind')
+        .text(this.formatDocumentationKind(entry.documentationKind))
+        .appendTo($button);
+      $('<strong>')
+        .addClass('docs-entry-title')
+        .text(entry.title)
+        .appendTo($button);
+      $('<span>')
+        .addClass('docs-entry-description')
+        .text(`${entry.packageName}@${entry.packageVersion}`)
+        .appendTo($button);
+      $('<span>')
+        .addClass('docs-entry-surface')
+        .text(this.formatSurface(entry.surface))
+        .appendTo($button);
+
+      $('<article>').attr('role', 'listitem').append($button).appendTo($grid);
+    });
+  }
+
+  selectEntry(id) {
+    const entry = this.manifest?.entries.find((item) => item.id === id);
+    if (!entry) return;
+    this.selectedEntry = entry;
+    this.renderGrid();
+    this.renderSelectedEntry();
+  }
+
+  renderSelectedEntry() {
+    const entry = this.selectedEntry;
+    if (!entry) {
+      this.setInspectorPlaceholder('docs.previewPlaceholder');
+      return;
+    }
+
+    $(DOM.docsKind).text(this.formatDocumentationKind(entry.documentationKind));
+    $(DOM.docsTitle).text(entry.title);
+    $(DOM.docsStability).text(this.formatStability(entry.stability));
+    $(DOM.docsPackage).text(`${entry.packageName}@${entry.packageVersion}`);
+    $(DOM.docsSurface).text(this.formatSurface(entry.surface));
+    $(DOM.docsCheckCommand).text(entry.checkCommand || '--');
+    $(DOM.docsMetadata).prop('hidden', false);
+    $(DOM.docsDescription).text(this.buildDescription(entry));
+    $(DOM.docsMetrics).text(this.formatMetrics(entry.metrics));
+    $(DOM.docsGuideLink).attr('href', entry.guideUrl || this.manifest?.docsHomeUrl || '#');
+  }
+
+  setInspectorPlaceholder(key) {
+    $(DOM.docsKind).text('');
+    $(DOM.docsTitle).text(this.t('docs.noSelection'));
+    $(DOM.docsStability).text('');
+    $(DOM.docsMetadata).prop('hidden', true);
+    $(DOM.docsDescription).text(this.t(key));
+    $(DOM.docsMetrics).text('');
+  }
+
+  setStatus(key, params = {}, state = 'info') {
+    $(DOM.docsStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
+  buildDescription(entry) {
+    return [
+      this.formatSurface(entry.surface),
+      this.formatDocumentationKind(entry.documentationKind),
+      this.formatStability(entry.stability),
+    ].filter(Boolean).join(' · ');
+  }
+
+  formatDocumentationKind(kind) {
+    const label = this.t(`docs.kind.${kind}`);
+    return label === `docs.kind.${kind}` ? kind : label;
+  }
+
+  formatSurface(surface) {
+    const label = this.t(`docs.surface.${surface}`);
+    return label === `docs.surface.${surface}` ? surface : label;
+  }
+
+  formatStability(stability) {
+    const label = this.t(`docs.stability.${stability}`);
+    return label === `docs.stability.${stability}` ? stability : label;
+  }
+
+  formatDate(value) {
+    if (!value) return '--';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString(AppState.config.locale);
+  }
+
+  formatMetrics(metrics = {}) {
+    const lines = Object.entries(metrics)
+      .filter(([, value]) => value !== undefined && value !== null)
+      .map(([key, value]) => {
+        const label = this.t(`docs.metric.${key}`);
+        const text = Array.isArray(value) ? value.join(', ') : String(value);
+        return `${label === `docs.metric.${key}` ? key : label}: ${text}`;
+      });
+    return lines.length > 0 ? `${this.t('docs.metrics')}\n${lines.join('\n')}` : '';
+  }
+}
+
+//#endregion
+
 //#region 🟩 应用控制器
 
 class AppController {
@@ -1797,6 +2104,7 @@ class AppController {
     this.artGenerator = new ArtGenerator();
     this.editorController = new EditorController(this);
     this.galleryController = new GalleryController(this);
+    this.docsController = new DocsController(this);
 
     //#region 🟩 防抖
 
@@ -1942,6 +2250,9 @@ class AppController {
     // 静态画廊
     this.galleryController.bindEvents($doc);
 
+    // 公开开发文档
+    this.docsController.bindEvents($doc);
+
     // 主题
     $doc.on('change', DOM.themeSelect, (e) => { this.themeManager.switchTheme($(e.target).val()); });
     $doc.on('change', DOM.languageSelect, (e) => { this.handleLanguageChange(e); });
@@ -1956,18 +2267,19 @@ class AppController {
   }
 
   /**
-   * 切换三个独立工作台。
+   * 切换多个独立工作台。
    *
-   * 转换器、编辑器和画廊都使用 HTML `hidden` 语义，避免仅靠视觉样式隐藏
-   * 后仍被键盘焦点访问。画廊首次激活时才读取同源静态索引。
+   * 转换器、编辑器、画廊和文档页都使用 HTML `hidden` 语义，避免仅靠视觉样式隐藏
+   * 后仍被键盘焦点访问。静态数据页首次激活时才读取同源索引。
    */
   async switchMode(mode) {
-    if (!['image', 'text', 'editor', 'gallery'].includes(mode)) return;
+    if (!['image', 'text', 'editor', 'gallery', 'docs'].includes(mode)) return;
     $(DOM.modeButtons).removeClass('active');
     $(`${DOM.modeButtons}[data-mode="${mode}"]`).addClass('active');
     if (mode === 'editor') {
       $(DOM.converterWorkbench).prop('hidden', true);
       $(DOM.galleryWorkbench).prop('hidden', true);
+      $(DOM.docsWorkbench).prop('hidden', true);
       $(DOM.editorWorkbench).prop('hidden', false);
       AppState.mode = mode;
       this.editorController.activate();
@@ -1977,14 +2289,26 @@ class AppController {
     if (mode === 'gallery') {
       $(DOM.converterWorkbench).prop('hidden', true);
       $(DOM.editorWorkbench).prop('hidden', true);
+      $(DOM.docsWorkbench).prop('hidden', true);
       $(DOM.galleryWorkbench).prop('hidden', false);
       AppState.mode = mode;
       await this.galleryController.activate();
       return;
     }
 
+    if (mode === 'docs') {
+      $(DOM.converterWorkbench).prop('hidden', true);
+      $(DOM.editorWorkbench).prop('hidden', true);
+      $(DOM.galleryWorkbench).prop('hidden', true);
+      $(DOM.docsWorkbench).prop('hidden', false);
+      AppState.mode = mode;
+      await this.docsController.activate();
+      return;
+    }
+
     $(DOM.editorWorkbench).prop('hidden', true);
     $(DOM.galleryWorkbench).prop('hidden', true);
+    $(DOM.docsWorkbench).prop('hidden', true);
     $(DOM.converterWorkbench).prop('hidden', false);
     if (mode === 'image') { $(DOM.imageInputPanel).show(); $(DOM.textInputPanel).hide(); }
     else { $(DOM.imageInputPanel).hide(); $(DOM.textInputPanel).show(); }
@@ -2018,6 +2342,7 @@ class AppController {
     this.initBoxStylePreview();
     this.editorController.refreshLocale();
     this.galleryController.refreshLocale();
+    this.docsController.refreshLocale();
     this.saveConfig();
     if (!AppState.result) {
       this.setPlaceholder(this.getIdlePlaceholder());
@@ -2212,6 +2537,7 @@ class AppController {
       return;
     }
     if (AppState.mode === 'gallery') return;
+    if (AppState.mode === 'docs') return;
     if (AppState.mode === 'image' && !AppState.imageFile) { this.setPlaceholder(this.i18nManager.t('preview.uploadImage')); return; }
     if (AppState.mode === 'text' && !AppState.textContent.trim()) { this.setPlaceholder(this.i18nManager.t('preview.enterText')); return; }
 

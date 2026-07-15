@@ -39,6 +39,14 @@ npm run docs:all:check
 
 清单包含每条文档线的入口、输出目录、生成器版本、产物数量、公开说明页和检查命令。它不包含源码正文，也不引用私有规划资料。
 
+`docs:all` 还会从统一清单投影出 Web 站点可读取的公开快照：
+
+```text
+packages/web/public/docs/manifest.json
+```
+
+该快照只保留包名、版本、接口面、文档类型、公开文档链接、检查命令和指标摘要；不会包含 `.generated-docs/`、`work-zone/`、本机绝对路径或会话记录。GitHub Pages 的“开发文档”页直接读取这份 JSON。
+
 ## CI 与发布门禁
 
 GitHub Actions 的 `CI / Full Check` 会分步骤运行与 `npm run docs:all:check` 等价的文档检查。文档、脚本、TSDoc 配置或包源码变化都会触发该检查；分步骤执行是为了让远端失败时能直接定位到 CLI、Web、Core TSDoc、VS Code TSDoc、术语契约或 manifest。
@@ -56,6 +64,7 @@ npm run docs:tsdoc:core:check
 npm run docs:tsdoc:vscode:check
 npm run docs:contract:check
 npm run docs:manifest:check
+npm run docs:public-site:check
 ```
 
 进入发布前或合并前，仍建议运行 `npm run docs:all:check`。
@@ -64,7 +73,7 @@ npm run docs:manifest:check
 
 - `.generated-docs/` 是本地和 CI 生成目录，不提交到公开仓库。
 - source map 必须保持 `sourcesContentPolicy: none`，不得嵌入 TypeScript 源文。
-- 公开站点后续应读取统一清单，再决定导航、版本号、源码链接和 HTML 输出位置。
+- 公开站点读取 `packages/web/public/docs/manifest.json`；它是统一清单的公开字段投影，不是完整生成产物。
 - 公开文档只描述 API、配置、格式、兼容性和安全边界，不记录内部计划、会话过程或临时审计结论。
 
 ## 更新规则
@@ -73,7 +82,8 @@ npm run docs:manifest:check
 
 1. 对应的生成配置和检查脚本。
 2. `scripts/generate-docs-manifest.cjs` 与 `scripts/check-docs-manifest.cjs`。
-3. 本页的覆盖范围和命令说明。
-4. [代码注释与 API 文档约定](code-documentation.md)中的复核清单。
+3. `scripts/generate-public-docs-site-data.cjs` 与 `packages/web/public/docs/manifest.json`。
+4. 本页的覆盖范围和命令说明。
+5. [代码注释与 API 文档约定](code-documentation.md)中的复核清单。
 
 如果产物数量变化是有意的，应在对应阶段记录原因，并显式更新清单校验中的期望值。

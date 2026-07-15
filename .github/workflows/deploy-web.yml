@@ -18,8 +18,14 @@ on:
       - '.github/workflows/deploy-web.yml'
       - 'package.json'
       - 'package-lock.json'
+      - 'docs/**'
       - 'packages/core/**'
       - 'packages/web/**'
+      - 'scripts/check-*-docs.cjs'
+      - 'scripts/generate-*-docs.cjs'
+      - 'scripts/generate-public-docs-site-data.cjs'
+      - 'tools/docs/**'
+      - 'tsdoc.*.json'
   workflow_dispatch:
 
 permissions:
@@ -54,6 +60,9 @@ jobs:
 
       - name: Build Core library
         run: npm run build:core
+
+      - name: Check documentation site data
+        run: npm run docs:all:check
 
       - name: Install Playwright browser
         # 使用 Web/Core 工作区已锁定的 Playwright，避免根目录 npx 隐式下载或解析版本。

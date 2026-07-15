@@ -16,6 +16,7 @@ UnicodeArtJs Web 是一个浏览器端字符画工具站，可以把图片或文
 - 编辑器支持本地模板、JSON 导入导出，以及将 UAF 艺术字嵌入语义文档。
 - 编辑器可检查用户显式选择的 UAEM 声明式扩展清单，并显示当前 Web 兼容性。
 - 静态作品画廊收录项目审核通过的原创 UAF 与语义布局 JSON，可预览、复制、下载或送入编辑器继续修改。
+- 开发文档页汇总 Core、CLI、Web 和 VS Code Extension 的公开 API 文档入口、包版本和检查命令。
 - 亮色、暗色、高对比度、Solarized Light、Nord 主题。
 
 ## 艺术字与布局编辑器
@@ -40,6 +41,22 @@ UnicodeArtJs Web 是一个浏览器端字符画工具站，可以把图片或文
 实际资源仍由 Core 的 UAF 或语义文档校验器解析。画廊不提供上传、账号、远程 URL 或可执行扩展加载。
 作品的作者、MIT 许可证、来源状态和审核日期会显示在预览旁；详细格式与添加要求见
 [../../docs/gallery.md](../../docs/gallery.md)。
+
+## 开发文档页
+
+“开发文档”读取同源 `public/docs/manifest.json`，展示公开文档入口、包版本、接口面、稳定性和检查命令。该页面只链接仓库中的公开文档，不展示本地生成目录、内部规划资料或一次性调试记录。
+
+更新文档入口数据时，在仓库根目录运行：
+
+```bash
+npm run docs:all
+```
+
+提交前可运行：
+
+```bash
+npm run docs:all:check
+```
 
 ## 本地运行
 
@@ -91,6 +108,7 @@ Web 包使用 Vite 5、Vanilla JavaScript、jQuery 3 和自写 CSS。Core 通过
 | `index.html` | 页面结构、SEO 元信息和无障碍标记。 |
 | `src/main.js` | UI 状态、Core 调用、语言切换、导出逻辑。 |
 | `src/styles/main.css` | 主题、布局、响应式和可访问性样式。 |
+| `public/docs/manifest.json` | GitHub Pages 开发文档页使用的公开数据快照。 |
 | `tests/unit.test.js` | 轻量单元测试。 |
 | `tests/e2e-smoke.mjs` | Playwright 冒烟测试，可测本地或远端页面。 |
 

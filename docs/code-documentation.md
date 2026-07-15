@@ -102,9 +102,9 @@ npm run docs:all
 npm run docs:all:check
 ```
 
-`docs:all` 会生成 CLI、Web、Core TSDoc 和 VS Code TSDoc 的本地中间产物，并写出 `.generated-docs/documentation-manifest.json`。该清单记录每条文档线的生成器版本、产物数量、公开说明页和检查命令，供后续公开文档站聚合使用。
+`docs:all` 会生成 CLI、Web、Core TSDoc 和 VS Code TSDoc 的本地中间产物，并写出 `.generated-docs/documentation-manifest.json`。该清单记录每条文档线的生成器版本、产物数量、公开说明页和检查命令。随后脚本会生成 `packages/web/public/docs/manifest.json`，作为 GitHub Pages“开发文档”页可读取的公开字段快照。
 
-`docs:all:check` 会重新生成所有文档产物，运行各单项检查、术语契约检查和清单检查。清单不会提交到仓库，也不能引用私有规划资料、会话日志或内部审计文件。详细说明见[文档生成流水线](documentation-pipeline.md)。
+`docs:all:check` 会重新生成所有文档产物，运行各单项检查、术语契约检查、统一清单检查和公开快照检查。内部清单不会提交到仓库；公开快照会提交给 Web 站点使用，但不能引用私有规划资料、会话日志或内部审计文件。详细说明见[文档生成流水线](documentation-pipeline.md)。
 
 ## 稳定性、兼容性与可见性
 

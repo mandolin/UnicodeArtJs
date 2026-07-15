@@ -68,6 +68,10 @@
         <span class="mode-icon">🗂️</span>
         <span class="mode-text" data-i18n="mode.gallery">作品画廊</span>
       </button>
+      <button class="mode-btn" data-mode="docs" type="button">
+        <span class="mode-icon">📚</span>
+        <span class="mode-text" data-i18n="mode.docs">开发文档</span>
+      </button>
     </nav>
     <!--#endregion-->
 
@@ -476,6 +480,69 @@
           <button class="btn" id="galleryCopy" type="button" disabled data-i18n="gallery.copy">复制字符画</button>
           <button class="btn" id="galleryDownload" type="button" disabled data-i18n="gallery.download">下载源文件</button>
           <button class="btn primary" id="galleryOpenEditor" type="button" disabled data-i18n="gallery.openEditor">在编辑器中打开</button>
+        </div>
+      </section>
+    </main>
+    <!--#endregion-->
+
+    <!--#region 🟩 公开开发文档入口 -->
+    <main class="docs-workbench" id="docsWorkbench" hidden>
+      <section class="docs-catalog" aria-label="UnicodeArtJs 开发文档" data-i18n-aria-label="docs.region">
+        <header class="docs-header">
+          <div>
+            <h2 data-i18n="docs.title">UnicodeArtJs 开发文档</h2>
+            <p data-i18n="docs.intro">查看 Core、CLI、Web 与 VS Code 插件的公开 API 文档入口和生成状态。</p>
+          </div>
+          <p class="docs-status" id="docsStatus" aria-live="polite" data-i18n="docs.status.ready">正在准备文档索引</p>
+        </header>
+
+        <dl class="docs-summary">
+          <div>
+            <dt data-i18n="docs.entryCount">文档入口</dt>
+            <dd id="docsEntryCount">--</dd>
+          </div>
+          <div>
+            <dt data-i18n="docs.generatedAt">生成时间</dt>
+            <dd id="docsGeneratedAt">--</dd>
+          </div>
+          <div>
+            <dt data-i18n="docs.contract">清单契约</dt>
+            <dd id="docsManifestVersion">--</dd>
+          </div>
+        </dl>
+
+        <div class="docs-grid" id="docsGrid" role="list" aria-live="polite"></div>
+      </section>
+
+      <section class="docs-inspector" aria-label="文档详情" data-i18n-aria-label="docs.previewRegion">
+        <header class="docs-inspector-header">
+          <div>
+            <p class="docs-eyebrow" id="docsKind"></p>
+            <h2 id="docsTitle" data-i18n="docs.noSelection">选择一个文档入口</h2>
+          </div>
+          <span class="docs-stability" id="docsStability"></span>
+        </header>
+
+        <dl class="docs-metadata" id="docsMetadata" hidden>
+          <div>
+            <dt data-i18n="docs.package">包</dt>
+            <dd id="docsPackage"></dd>
+          </div>
+          <div>
+            <dt data-i18n="docs.surface">接口面</dt>
+            <dd id="docsSurface"></dd>
+          </div>
+          <div>
+            <dt data-i18n="docs.check">检查命令</dt>
+            <dd id="docsCheckCommand"></dd>
+          </div>
+        </dl>
+
+        <p class="docs-description" id="docsDescription" data-i18n="docs.previewPlaceholder">从左侧选择一个文档入口以查看详情。</p>
+        <pre class="docs-metrics" id="docsMetrics" aria-live="polite"></pre>
+        <div class="docs-actions">
+          <a class="btn primary docs-link" id="docsGuideLink" target="_blank" rel="noopener noreferrer" href="https://github.com/mandolin/UnicodeArtJs/tree/main/docs" data-i18n="docs.openGuide">打开文档</a>
+          <a class="btn docs-link" id="docsRepoLink" target="_blank" rel="noopener noreferrer" href="https://github.com/mandolin/UnicodeArtJs" data-i18n="docs.openRepo">打开仓库</a>
         </div>
       </section>
     </main>
