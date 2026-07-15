@@ -36,6 +36,7 @@ const paths = {
   releaseDoc: path.join(repoRoot, 'docs', 'release-gate.md'),
   runtimeSbomDoc: path.join(repoRoot, 'docs', 'runtime-sbom.md'),
   vscodeReleaseChecklist: path.join(repoRoot, 'docs', 'vscode-extension-release-checklist.md'),
+  publicDocsManifest: path.join(repoRoot, 'packages', 'web', 'public', 'docs', 'manifest.json'),
   fixtures: path.join(repoRoot, 'fixtures', 'release', 'fixtures.json'),
   corePackage: path.join(repoRoot, 'packages', 'core', 'package.json'),
   coreVersionSource: path.join(repoRoot, 'packages', 'core', 'src', 'version.ts'),
@@ -380,6 +381,8 @@ function checkPublicDocs() {
   const releaseDoc = readText(paths.releaseDoc);
   const runtimeSbomDoc = readText(paths.runtimeSbomDoc);
   const vscodeChecklist = readText(paths.vscodeReleaseChecklist);
+  const publicDocsManifest = readJson(paths.publicDocsManifest);
+  const publicDocsManifestText = readText(paths.publicDocsManifest);
   const corePackage = readJson(paths.corePackage);
   const cliPackage = readJson(paths.cliPackage);
   const vscodePackage = readJson(paths.vscodePackage);
@@ -389,6 +392,12 @@ function checkPublicDocs() {
   assertGate(developmentDoc.includes('npm run docs:all:check'), 'Development doc must mention npm run docs:all:check.');
   assertGate(documentationPipelineDoc.includes('npm run docs:all:check'), 'Documentation pipeline doc must describe docs:all:check.');
   assertGate(documentationPipelineDoc.includes('.generated-docs/documentation-manifest.json'), 'Documentation pipeline doc must describe the manifest path.');
+  assertGate(documentationPipelineDoc.includes('packages/web/public/docs/manifest.json'), 'Documentation pipeline doc must describe the public docs site manifest.');
+  assertGate(publicDocsManifest.contract === 'unicodeartjs-public-docs-site-manifest', 'Public docs site manifest contract changed.');
+  assertGate(publicDocsManifest.entries?.length === 4, 'Public docs site manifest must include four documentation entries.');
+  for (const fragment of ['.generated-docs', 'work-zone', 'ai/codex', 'K:\\', 'C:\\']) {
+    assertGate(!publicDocsManifestText.includes(fragment), `Public docs site manifest leaks ${fragment}.`);
+  }
   assertGate(releaseDoc.includes(`unicode-art-js\` | \`${corePackage.version}`), 'Release gate doc must list the current Core version.');
   assertGate(releaseDoc.includes(`unicode-art-cli\` | \`${cliPackage.version}`), 'Release gate doc must list the current CLI version.');
   assertGate(releaseDoc.includes(`unicode-art-js-vscode\` | \`${vscodePackage.version}`), 'Release gate doc must list the current VSCode extension version.');
@@ -402,7 +411,7 @@ function checkPublicDocs() {
     'Ecosystem compatibility doc must explain the Compatible distribution boundary.'
   );
   assertGate(releaseDoc.includes('release:gate'), 'Release gate doc must describe release:gate.');
-  assertGate(releaseDoc.includes('W-art-P1.7'), 'Release gate doc must identify W-art-P1.7.');
+  assertGate(!/\bW-art-P\d+(?:\.\d+)?\b/.test(releaseDoc), 'Release gate doc must not expose internal planning stage identifiers.');
   assertGate(releaseDoc.includes('napi-rs/canvas'), 'Release gate doc must identify the default Node text renderer.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/canvas@1.0.2'), 'Runtime inventory must pin @napi-rs/canvas@1.0.2.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/image@1.14.0'), 'Runtime inventory must pin @napi-rs/image@1.14.0.');
