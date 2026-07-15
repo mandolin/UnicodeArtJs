@@ -142,6 +142,8 @@ npm run check
 
 生成文字 Banner 时，`font` / `visualFont` 影响输入文字被渲染成图像的形状；`glyphFont` 影响字符画结果在页面或编辑器中的显示方式。二者不是同一个概念。
 
+Web 工具站不会打包字体文件；浏览器会使用访问者本机字体，缺失时按字体栈回退。字体检测、Brave 隐私保护差异和自建站网络字体建议见 [docs/font-behavior.md](docs/font-behavior.md)。
+
 ## 许可证与来源说明
 
 本项目采用 [MIT License](LICENSE)。

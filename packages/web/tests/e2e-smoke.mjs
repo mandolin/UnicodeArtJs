@@ -261,6 +261,24 @@ async function main() {
       if (padding !== 0) throw new Error('Box padding 0 was not passed to Core');
     });
 
+    await test('font availability status is shown and refreshes', async () => {
+      await page.waitForSelector('#fontStatus[data-state]', { timeout: 5000 });
+      await page.waitForSelector('#glyphFontStatus[data-state]', { timeout: 5000 });
+      const initial = await page.evaluate(() => ({
+        visual: document.querySelector('#fontStatus')?.textContent?.trim(),
+        visualState: document.querySelector('#fontStatus')?.dataset.state,
+        glyph: document.querySelector('#glyphFontStatus')?.textContent?.trim(),
+        glyphState: document.querySelector('#glyphFontStatus')?.dataset.state,
+      }));
+      if (!initial.visual || !initial.visualState) throw new Error('Visual font status is empty');
+      if (!initial.glyph || !initial.glyphState) throw new Error('Glyph font status is empty');
+
+      await page.selectOption('#glyphFont', 'monospace');
+      await page.waitForFunction(() => document.querySelector('#glyphFontStatus')?.dataset.state === 'info');
+      const genericText = await page.textContent('#glyphFontStatus');
+      if (!/fallback|通用/.test(genericText || '')) throw new Error('Generic glyph font status was not shown');
+    });
+
     await test('switches back to image mode', async () => {
       const imageButton = await page.$('.mode-btn[data-mode="image"]');
       if (!imageButton) throw new Error('Image mode button not found');

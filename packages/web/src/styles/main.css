@@ -535,6 +535,28 @@ details.config-details summary:hover {
   color: var(--text-muted);
 }
 
+.font-status {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.font-status[data-state='available'] {
+  color: var(--color-success);
+}
+
+.font-status[data-state='warning'] {
+  padding: 4px 6px;
+  border-left: 3px solid var(--color-warning);
+  background: rgba(255, 193, 7, 0.08);
+  color: var(--text-secondary);
+}
+
+.font-status[data-state='info'] {
+  color: var(--text-muted);
+}
+
 .experimental-field {
   padding: var(--spacing-xs);
   border-left: 3px solid var(--color-warning);

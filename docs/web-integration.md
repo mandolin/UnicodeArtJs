@@ -46,10 +46,12 @@ preview.textContent = result.content;
 - **视觉字体**只影响文字 Banner 输入被栅格化为中间图像时的形状。
 - **字素字体**影响字符模板匹配、预览、HTML/PNG 导出和最终字符画的显示对齐。
 - 页面不打包字体文件。浏览器仅使用访问者本机可用字体，缺失时会按 font-family 回退；不同浏览器或系统的栅格化和回退结果可能不同。
+- 官方工具站的字体可用性提示只用于诊断回退风险。Brave 或字体指纹保护可能让检测结果偏保守；需要稳定复现时，建议固定浏览器、系统和字体版本。
+- 自建页面可以自行用 `@font-face` 加载有权分发的网络字体，再把对应 family 传入 Core。官方工具站暂不加载用户输入的任意字体 URL。
 - `glyphWidthProfile` 与 `wideCharRegex` 目前仍是 experimental 配置。自定义正则描述完整宽字素集合，不是对内置规则的增量补丁。
 - `charSpace`、四向视觉字体纠偏和 `outputTarget` 是 reserved 配置入口；在当前能力状态下可能不改变输出。
 
-宿主在显示设置时应通过 `getCoreCapabilities()` 读取 stable、experimental、reserved 与 legacy 边界，不要把页面中的某个控件存在误说成全部行为已稳定。
+更多字体回退、Brave 差异和自建站网络字体建议见[字体行为与浏览器回退](font-behavior.md)。宿主在显示设置时应通过 `getCoreCapabilities()` 读取 stable、experimental、reserved 与 legacy 边界，不要把页面中的某个控件存在误说成全部行为已稳定。
 
 ## 本地数据与安全边界
 

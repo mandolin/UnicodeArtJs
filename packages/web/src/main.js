@@ -14,6 +14,10 @@ import {
   parseUnicodeArtGalleryIndex,
   resolveUnicodeArtGalleryArtworkUrl,
 } from './gallery-index.js';
+import {
+  createCanvasFontAvailabilityChecker,
+  getFontAvailabilitySummary,
+} from './font-availability.js';
 
 //#region 🟩 应用状态
 
@@ -228,6 +232,11 @@ const UI_MESSAGES = {
     'config.visualFontHelp': '仅在文字 Banner 模式影响输入文字的采样图像，不改变预览区的字素显示。',
     'config.glyphFont': '字素字体（显示用）',
     'config.glyphFontHelp': '影响字符画预览、导出，以及字符模板的匹配形状。字体由浏览器使用本机已安装版本，缺失时会回退。',
+    'config.fontStatus.available': '已检测到字体：{font}',
+    'config.fontStatus.unavailable': '浏览器未确认字体“{font}”可用，结果可能已回退。',
+    'config.fontStatus.generic': '当前使用通用 fallback，由浏览器决定实际字体。',
+    'config.fontStatus.empty': '尚未选择字体。',
+    'config.fontStatus.brave': 'Brave 或隐私保护设置可能限制字体检测；若预览不变，请确认站点字体指纹保护。',
     'config.advanced': '高级设置',
     'config.matrixSize': '矩阵大小',
     'config.ratio': '宽高比',
@@ -461,6 +470,11 @@ const UI_MESSAGES = {
     'config.visualFontHelp': 'Only affects the sampled input image in Text Banner mode; it does not change the preview glyph display.',
     'config.glyphFont': 'Glyph font (display)',
     'config.glyphFontHelp': 'Affects preview/export display and character-template matching. Fonts use locally installed browser fonts and fall back when unavailable.',
+    'config.fontStatus.available': 'Detected font: {font}',
+    'config.fontStatus.unavailable': 'The browser could not confirm “{font}”; output may have fallen back.',
+    'config.fontStatus.generic': 'This uses a generic fallback; the browser decides the actual font.',
+    'config.fontStatus.empty': 'No font selected.',
+    'config.fontStatus.brave': 'Brave or privacy settings may restrict font detection. If the preview does not change, check site font fingerprinting settings.',
     'config.advanced': 'Advanced',
     'config.matrixSize': 'Matrix size',
     'config.ratio': 'Aspect ratio',
@@ -602,7 +616,9 @@ const DOM = {
   customCharsGroup: '#customCharsGroup',
   customChars: '#customChars',
   fontSelect: '#font',
+  fontStatus: '#fontStatus',
   glyphFont: '#glyphFont',
+  glyphFontStatus: '#glyphFontStatus',
   matrixSizeInput: '#matrixSize',
   ratioInput: '#ratio',
   interpolation: '#interpolation',
@@ -2105,6 +2121,8 @@ class AppController {
     this.editorController = new EditorController(this);
     this.galleryController = new GalleryController(this);
     this.docsController = new DocsController(this);
+    this.fontAvailabilityChecker = createCanvasFontAvailabilityChecker(document);
+    this.isBraveBrowser = false;
 
     //#region 🟩 防抖
 
@@ -2133,6 +2151,9 @@ class AppController {
     this.loadConfig();
     this.themeManager.applyTheme(AppState.config.themeName);
     this.i18nManager.apply(AppState.config.locale);
+    this.refreshFontAvailability();
+    this.detectBraveBrowser();
+    this.waitForBrowserFonts();
     this.editorController.initialize();
     this.detectTouchDevice();
     this.initBoxStylePreview();
@@ -2207,7 +2228,7 @@ class AppController {
     $doc.on('input', DOM.widthInput, (e) => { this.setConfigQuiet('width', $(e.target).val()); this.debouncedRefresh(); });
     $doc.on('change', DOM.charsetSelect, (e) => { this.handleCharsetChange(e); });
     $doc.on('input', DOM.customChars, (e) => { this.setConfigQuiet('customChars', $(e.target).val()); this.debouncedRefresh(); });
-    $doc.on('change', DOM.fontSelect, (e) => { this.setConfigQuiet('font', $(e.target).val()); this.debouncedRefresh(); });
+    $doc.on('change', DOM.fontSelect, (e) => { this.handleVisualFontChange(e); });
     $doc.on('change', DOM.glyphFont, (e) => { this.handleGlyphFontChange(e); });
 
     // 高级配置（防抖）
@@ -2327,7 +2348,14 @@ class AppController {
   handleGlyphFontChange(e) {
     this.setConfigQuiet('glyphFont', $(e.target).val());
     this.applyGlyphFont();
+    this.refreshFontAvailability();
     // 字素字体既影响预览 CSS，也影响 Core 的字符模板，必须重新生成。
+    this.debouncedRefresh();
+  }
+
+  handleVisualFontChange(e) {
+    this.setConfigQuiet('font', $(e.target).val());
+    this.refreshFontAvailability();
     this.debouncedRefresh();
   }
 
@@ -2343,6 +2371,7 @@ class AppController {
     this.editorController.refreshLocale();
     this.galleryController.refreshLocale();
     this.docsController.refreshLocale();
+    this.refreshFontAvailability();
     this.saveConfig();
     if (!AppState.result) {
       this.setPlaceholder(this.getIdlePlaceholder());
@@ -2364,6 +2393,59 @@ class AppController {
     }
     this.editorController?.applyGlyphFont();
     this.galleryController?.applyGlyphFont();
+  }
+
+  /**
+   * 刷新视觉字体与字素字体的可用性提示。
+   *
+   * 中文说明：检测只作为 UX 提示，不改变 Core 配置；浏览器隐私保护可能让结果偏保守。
+   */
+  refreshFontAvailability() {
+    this.updateFontStatus(DOM.fontStatus, AppState.config.font);
+    this.updateFontStatus(DOM.glyphFontStatus, AppState.config.glyphFont);
+  }
+
+  updateFontStatus(selector, fontFamily) {
+    const summary = getFontAvailabilitySummary(fontFamily, this.fontAvailabilityChecker);
+    let key = 'config.fontStatus.empty';
+    let state = 'info';
+    let params = {};
+
+    if (summary.state === 'available') {
+      key = 'config.fontStatus.available';
+      state = 'available';
+      params = { font: summary.availableFont };
+    } else if (summary.state === 'unavailable') {
+      key = 'config.fontStatus.unavailable';
+      state = 'warning';
+      params = { font: summary.primaryFont };
+    } else if (summary.state === 'generic') {
+      key = 'config.fontStatus.generic';
+      state = 'info';
+    }
+
+    const suffix = state === 'warning' && this.isBraveBrowser
+      ? ` ${this.i18nManager.t('config.fontStatus.brave')}`
+      : '';
+    $(selector)
+      .text(`${this.i18nManager.t(key, params)}${suffix}`)
+      .attr('data-state', state);
+  }
+
+  detectBraveBrowser() {
+    const brave = navigator.brave;
+    if (!brave || typeof brave.isBrave !== 'function') return;
+    Promise.resolve(brave.isBrave())
+      .then((isBrave) => {
+        this.isBraveBrowser = Boolean(isBrave);
+        this.refreshFontAvailability();
+      })
+      .catch(() => {});
+  }
+
+  waitForBrowserFonts() {
+    if (!document.fonts?.ready) return;
+    void document.fonts.ready.then(() => this.refreshFontAvailability());
   }
 
   /** 将已加载的同源审核画廊资源显式交给 source-first 编辑器。 */

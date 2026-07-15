@@ -5,6 +5,12 @@
  * 测试核心逻辑：主题管理、配置持久化、参数校验、导出工具
  */
 
+import {
+  getFontAvailabilitySummary,
+  isGenericFontFamily,
+  parseFontFamilyList,
+} from '../src/font-availability.js';
+
 //#region 🟩 测试框架
 
 function describe(name, fn) {
@@ -30,6 +36,44 @@ function assert(condition, msg) {
 function assertEqual(a, b) {
   if (a !== b) throw new Error(`Expected ${JSON.stringify(a)}, got ${JSON.stringify(b)}`);
 }
+
+//#endregion
+
+//#region 🟩 测试: 字体可用性提示
+
+describe('字体可用性提示', () => {
+
+  it('解析带引号和逗号的字体栈', () => {
+    const families = parseFontFamilyList("'Sarasa Mono SC', \"LXGW WenKai Mono\", monospace");
+    assertEqual(families.length, 3);
+    assertEqual(families[0], 'Sarasa Mono SC');
+    assertEqual(families[1], 'LXGW WenKai Mono');
+    assertEqual(families[2], 'monospace');
+  });
+
+  it('识别CSS通用字体族', () => {
+    assert(isGenericFontFamily('monospace'), 'monospace应为通用字体族');
+    assert(isGenericFontFamily('sans-serif'), 'sans-serif应为通用字体族');
+    assert(!isGenericFontFamily('Sarasa Mono SC'), '具体字体不应被视为通用字体族');
+  });
+
+  it('汇总第一个可用具体字体', () => {
+    const summary = getFontAvailabilitySummary(
+      "'Missing Font', 'Sarasa Mono SC', monospace",
+      (font) => font === 'Sarasa Mono SC',
+    );
+    assertEqual(summary.state, 'available');
+    assertEqual(summary.primaryFont, 'Missing Font');
+    assertEqual(summary.availableFont, 'Sarasa Mono SC');
+  });
+
+  it('仅通用fallback时返回generic状态', () => {
+    const summary = getFontAvailabilitySummary('monospace', () => false);
+    assertEqual(summary.state, 'generic');
+    assertEqual(summary.primaryFont, 'monospace');
+  });
+
+});
 
 //#endregion
 

@@ -112,7 +112,7 @@ unicode-art text "Recipe" --box '{"style":"ascii","padding":1,"title":"CLI"}'
 4. 使用“TXT / HTML / PNG / 复制”导出结果。
 5. 使用“开发文档”查看 Core、CLI、Web 和 VS Code Extension 的公开文档入口。
 
-浏览器端二次开发请使用 `unicode-art-js/browser`。更小的 adapter 示例见 [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)。
+如果切换字体后预览没有变化，先看页面上的字体可用性提示，再确认本机字体安装和浏览器隐私设置。浏览器端二次开发请使用 `unicode-art-js/browser`；字体回退说明见 [字体行为与浏览器回退](font-behavior.md)，更小的 adapter 示例见 [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)。
 
 ## VS Code：选中文本生成 Banner
 
