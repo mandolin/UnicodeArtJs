@@ -1,0 +1,71 @@
+# 文档生成流水线
+
+UnicodeArtJs 使用一套受控的本地文档流水线生成开发者文档中间产物。该流水线目前服务于本地开发、CI 检查和后续公开文档站聚合；生成目录不提交到仓库。
+
+## 覆盖范围
+
+当前统一清单包含四条文档线：
+
+| 文档线 | 入口 | 产物 | 用途 |
+| --- | --- | --- | --- |
+| Core TSDoc | `tsdoc.core.json` | `.generated-docs/tsdoc/core/` | Core TypeScript 公共导出、配置、能力、平台 adapter 和核心格式。 |
+| CLI JSDoc | `tools/docs/jsdoc.cli.json` | `.generated-docs/cli/` | CLI 维护者 API、参数归一化、错误处理和双语页面试点。 |
+| Web JSDoc | `tools/docs/jsdoc.web.json` | `.generated-docs/web/` | 可独立导入的 Web 公开模块，目前聚焦静态画廊索引。 |
+| VS Code TSDoc | `tsdoc.vscode-extension.json` | `.generated-docs/tsdoc/vscode-extension/` | VS Code 命令、配置、模板、WebView 协议和宿主边界。 |
+
+页面主入口、DOM 控制器、内部脚本、WorkZone、AI 日志和一次性调试文件都不属于公开文档扫描范围。
+
+## 本地命令
+
+生成全部文档中间产物和统一清单：
+
+```bash
+npm run docs:all
+```
+
+执行完整文档门禁：
+
+```bash
+npm run docs:all:check
+```
+
+该命令会依次运行 CLI、Web、Core TSDoc、VS Code TSDoc、术语契约和统一清单检查。清单写入：
+
+```text
+.generated-docs/documentation-manifest.json
+```
+
+清单包含每条文档线的入口、输出目录、生成器版本、产物数量、公开说明页和检查命令。它不包含源码正文，也不引用 WorkZone 内部资料。
+
+## 单项检查
+
+修改范围较小时，可以先运行对应单项命令：
+
+```bash
+npm run docs:cli:check
+npm run docs:web:check
+npm run docs:tsdoc:core:check
+npm run docs:tsdoc:vscode:check
+npm run docs:contract:check
+npm run docs:manifest:check
+```
+
+进入发布前或合并前，仍建议运行 `npm run docs:all:check`。
+
+## 产物边界
+
+- `.generated-docs/` 是本地和 CI 生成目录，不提交到公开仓库。
+- source map 必须保持 `sourcesContentPolicy: none`，不得嵌入 TypeScript 源文。
+- 公开站点后续应读取统一清单，再决定导航、版本号、源码链接和 HTML 输出位置。
+- 公开文档只描述 API、配置、格式、兼容性和安全边界，不记录内部计划、AI 协作过程或临时审计结论。
+
+## 更新规则
+
+新增或移除公开文档线时，应同步更新：
+
+1. 对应的生成配置和检查脚本。
+2. `scripts/generate-docs-manifest.cjs` 与 `scripts/check-docs-manifest.cjs`。
+3. 本页的覆盖范围和命令说明。
+4. [代码注释与 API 文档约定](code-documentation.md)中的复核清单。
+
+如果产物数量变化是有意的，应在对应阶段记录原因，并显式更新清单校验中的期望值。

@@ -132,6 +132,7 @@ dist
 /work-zone
 /.serena/
 /.generated-docs/
+/tools/docs/.generated-docs/
 
 # Local package artifacts
 *.vsix
