@@ -98,3 +98,13 @@ Web 的 `gallery-index` 是当前可独立导入的 JavaScript 模块，其 API 
 ## 改动提示
 
 修改 Core 行为时，需要同时关注 CLI、Web 和 VSCode Extension 是否共享同一契约。Node 图像解码后端单独规划，因为它影响 Core、CLI 和 VSCode，但不直接影响浏览器运行时。
+
+## 静态画廊投稿
+
+修改 `packages/web/public/gallery/`、画廊投稿模板或画廊文档时，运行：
+
+```bash
+npm run gallery:check
+```
+
+该命令会重新构建 Core，并检查画廊索引、作品文件、投稿文档、Issue/PR 模板、许可证来源和 UAF / 语义文档解析。投稿流程见 [静态画廊投稿指南](gallery-submission.md)。

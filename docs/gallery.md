@@ -38,13 +38,17 @@
 
 每件作品必须具备小写稳定 ID、双语标题和说明、标签、作者、`original` 来源状态、许可证与审核日期。资源只能放在同目录的 `artworks/` 中，且仅允许 `.uadoc.json` 或 `.uafont.json`。浏览器加载前会拒绝越出资源根目录的路径，载入后仍会调用 Core 校验对应文档或字体格式。
 
-## 添加审核作品
+## 投稿与添加审核作品
+
+画廊现在接受可审查的候选投稿。建议先提交 Gallery artwork proposal Issue 说明作品类型、来源和许可证；准备好 JSON 资产后，再通过 PR 修改 `packages/web/public/gallery/artworks/` 与 `packages/web/public/gallery/index.json`。
+
+详细步骤、索引示例、许可确认和审核清单见 [静态画廊投稿指南](gallery-submission.md)。
 
 新增画廊作品前，请确认：
 
 - 资产为原创，或具备可公开再分发的明确许可与完整归属信息；首版默认只收录原创资产。
 - UAF 或语义文档能够通过 Core 校验，且不依赖本机路径、远程 URL 或脚本。
 - 索引中的标题、说明、标签与许可信息准确，中文和英文都可读。
-- 运行 `npm --workspace packages/web test` 与 `npm --workspace packages/web run test:e2e`。
+- 运行 `npm run gallery:check`、`npm --workspace packages/web test`，必要时运行 `npm --workspace packages/web run test:e2e`。
 
-作品画廊目前不是开放投稿平台。用户提交、远程分发、作者页、搜索服务与内容审核流程会在需要时以独立设计进入后续版本。
+作品画廊仍然是受控静态画廊，不是开放上传平台。远程分发、作者页、搜索服务与内容审核后台会在需要时以独立设计进入后续版本。

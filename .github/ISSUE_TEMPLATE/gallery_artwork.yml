@@ -1,0 +1,68 @@
+name: Gallery artwork proposal
+description: Propose an artwork for the UnicodeArtJs static gallery
+title: "[Gallery] "
+labels: ["gallery", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a gallery artwork. Please read `docs/gallery-submission.md` first.
+        The default gallery only accepts reviewed declarative JSON assets, not scripts, remote URLs, or unverified third-party artwork.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Artwork kind
+      options:
+        - semantic-document
+        - unicode-art-font
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe what the artwork shows and why it belongs in the default gallery.
+    validations:
+      required: true
+  - type: input
+    id: author
+    attributes:
+      label: Author / credit
+      placeholder: Your name or project name
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+      placeholder: MIT, CC0-1.0, BSD-3-Clause, Apache-2.0, etc.
+    validations:
+      required: true
+  - type: dropdown
+    id: origin
+    attributes:
+      label: Origin
+      options:
+        - Original work by me / my project
+        - Permissively licensed third-party work with provenance
+        - Unsure
+    validations:
+      required: true
+  - type: textarea
+    id: provenance
+    attributes:
+      label: Provenance notes
+      description: Explain sources, references, or why this is original. Include links only when they are part of the provenance.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I can provide the artwork as `.uadoc.json` or `.uafont.json`.
+          required: true
+        - label: The artwork does not require scripts, remote URLs, private local paths, accounts, or bundled third-party fonts.
+          required: true
+        - label: I understand the maintainers may reject artwork with unclear licensing or provenance.
+          required: true

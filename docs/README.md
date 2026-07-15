@@ -16,6 +16,7 @@
 - [VS Code Extension 集成与数据边界](vscode-extension-integration.md)
 - [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)
 - [静态作品画廊](gallery.md)
+- [静态画廊投稿指南](gallery-submission.md)
 - [声明式扩展清单（UAEM v1）](extension-manifest.md)
 - [声明式扩展作者指南](extension-authoring.md)
 - [VS Code Extension 发布检查](vscode-extension-release-checklist.md)

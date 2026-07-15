@@ -81,6 +81,9 @@ jobs:
       - name: Check Recipes
         run: npm run recipes:check
 
+      - name: Check Gallery
+        run: npm run gallery:check
+
       # 保持与本地 release:gate 相同的覆盖范围，但拆分步骤以便远端直接显示失败边界。
       - name: Check Core
         run: npm run check:core

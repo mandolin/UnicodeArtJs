@@ -10,7 +10,7 @@ From the repository root:
 npm run release:gate
 ```
 
-The command runs package checks, documentation checks, recipe/example checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
+The command runs package checks, documentation checks, recipe/example checks, static gallery checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
 
 For npm/Marketplace publish preparation after switching all publish-time dependencies to npm versions:
 
@@ -44,6 +44,7 @@ npm run release:verify:publish
 - Public docs keep the GitHub Pages URL and release-gate instructions visible.
 - `docs:all:check` can regenerate CLI/Web JSDoc, Core/VS Code TSDoc, the terminology contract, and the documentation manifest.
 - `recipes:check` can run the public Node examples and representative CLI recipes.
+- `gallery:check` can validate the static gallery index, reviewed artwork files, submission templates, licenses, and Core parsing of UAF / semantic-document assets.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).
