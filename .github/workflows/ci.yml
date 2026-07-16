@@ -111,6 +111,9 @@ jobs:
       - name: Check Optional Input Adapters
         run: npm run optional-adapters:check
 
+      - name: Check Performance Release Plan
+        run: npm run performance-release:check
+
       # 保持与本地 release:gate 相同的覆盖范围，但拆分步骤以便远端直接显示失败边界。
       - name: Check Core
         run: npm run check:core

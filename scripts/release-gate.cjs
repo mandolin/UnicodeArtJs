@@ -34,6 +34,8 @@ const paths = {
   documentationPipelineDoc: path.join(repoRoot, 'docs', 'documentation-pipeline.md'),
   ecosystemCompatibilityDoc: path.join(repoRoot, 'docs', 'ecosystem-compatibility.md'),
   optionalInputAdaptersDoc: path.join(repoRoot, 'docs', 'optional-input-adapters.md'),
+  performanceReleaseDoc: path.join(repoRoot, 'docs', 'performance-and-release-plan.md'),
+  performanceReleasePlan: path.join(repoRoot, 'fixtures', 'performance-release', 'performance-release-plan.json'),
   releaseDoc: path.join(repoRoot, 'docs', 'release-gate.md'),
   runtimeSbomDoc: path.join(repoRoot, 'docs', 'runtime-sbom.md'),
   vscodeReleaseChecklist: path.join(repoRoot, 'docs', 'vscode-extension-release-checklist.md'),
@@ -380,6 +382,8 @@ function checkPublicDocs() {
   const documentationPipelineDoc = readText(paths.documentationPipelineDoc);
   const ecosystemCompatibilityDoc = readText(paths.ecosystemCompatibilityDoc);
   const optionalInputAdaptersDoc = readText(paths.optionalInputAdaptersDoc);
+  const performanceReleaseDoc = readText(paths.performanceReleaseDoc);
+  const performanceReleasePlan = readJson(paths.performanceReleasePlan);
   const releaseDoc = readText(paths.releaseDoc);
   const runtimeSbomDoc = readText(paths.runtimeSbomDoc);
   const vscodeChecklist = readText(paths.vscodeReleaseChecklist);
@@ -414,6 +418,8 @@ function checkPublicDocs() {
   );
   assertGate(releaseDoc.includes('release:gate'), 'Release gate doc must describe release:gate.');
   assertGate(releaseDoc.includes('optional-adapters:check'), 'Release gate doc must describe optional-adapters:check.');
+  assertGate(releaseDoc.includes('performance-release:check'), 'Release gate doc must describe performance-release:check.');
+  assertGate(releaseDoc.includes('benchmark:core'), 'Release gate doc must describe benchmark:core.');
   assertGate(!/\bW-art-P\d+(?:\.\d+)?\b/.test(releaseDoc), 'Release gate doc must not expose internal planning stage identifiers.');
   assertGate(releaseDoc.includes('napi-rs/canvas'), 'Release gate doc must identify the default Node text renderer.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/canvas@1.0.2'), 'Runtime inventory must pin @napi-rs/canvas@1.0.2.');
@@ -421,6 +427,12 @@ function checkPublicDocs() {
   assertGate(optionalInputAdaptersDoc.includes('PNG / JPEG / JPG / WebP / BMP'), 'Optional input adapter doc must list default Clean formats.');
   assertGate(optionalInputAdaptersDoc.includes('UNSUPPORTED_FORMAT'), 'Optional input adapter doc must describe unsupported-format behavior.');
   assertGate(optionalInputAdaptersDoc.includes('Compatible Adapter'), 'Optional input adapter doc must describe Compatible adapter route.');
+  assertGate(performanceReleasePlan.contract === 'unicodeartjs-performance-release-plan', 'Performance release plan fixture contract changed.');
+  assertGate(performanceReleaseDoc.includes('npm run benchmark:core'), 'Performance release doc must describe benchmark:core.');
+  assertGate(performanceReleaseDoc.includes('npm run performance-release:check'), 'Performance release doc must describe performance-release:check.');
+  assertGate(performanceReleaseDoc.includes('unicode-art-js'), 'Performance release doc must describe release surfaces.');
+  assertGate(performanceReleaseDoc.includes('@napi-rs/canvas@1.0.2'), 'Performance release doc must identify @napi-rs/canvas baseline.');
+  assertGate(performanceReleaseDoc.includes('@napi-rs/image@1.14.0'), 'Performance release doc must identify @napi-rs/image baseline.');
   assertGate(vscodeChecklist.includes('inspect:vsix'), 'VSCode release checklist must include inspect:vsix.');
 }
 

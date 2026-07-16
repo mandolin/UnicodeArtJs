@@ -1,0 +1,42 @@
+{
+  "contract": "unicodeartjs-performance-release-plan",
+  "version": 1,
+  "nodeBaseline": {
+    "node": "22.x",
+    "npm": "10.x",
+    "coreTextRenderer": "@napi-rs/canvas@1.0.2",
+    "coreImageBackend": "@napi-rs/image@1.14.0"
+  },
+  "benchmarkCommands": [
+    "npm run benchmark:core",
+    "npm --workspace packages/core run benchmark"
+  ],
+  "requiredLocalChecks": [
+    "npm run release:gate",
+    "npm run performance-release:check",
+    "npm run public-entry:check",
+    "npm run docs:all:check",
+    "npm run optional-adapters:check",
+    "npm run package:vscode"
+  ],
+  "remoteChecks": [
+    "CI / Full Check",
+    "CI / Native Install (ubuntu-latest)",
+    "CI / Native Install (windows-latest)",
+    "CI / Native Install (macos-latest)",
+    "Deploy Web to GitHub Pages"
+  ],
+  "releaseSurfaces": [
+    "unicode-art-js",
+    "unicode-art-cli",
+    "GitHub Pages web app",
+    "VS Code Marketplace extension",
+    "Compatible desktop hosts"
+  ],
+  "releaseDecision": {
+    "patch": "bug fix, documentation correction, packaging metadata correction, or non-breaking fixture/check update",
+    "minor": "new public capability, new stable configuration field, new default adapter capability, or non-breaking visible workflow improvement",
+    "major": "breaking Core API, output semantics, package export, project file, or command-line compatibility change"
+  },
+  "nonCiPerformancePolicy": "Benchmarks are trend signals and release notes input. CI checks the benchmark wiring and contracts, not machine-specific duration thresholds."
+}

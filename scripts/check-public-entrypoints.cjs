@@ -85,6 +85,7 @@ for (const relativePath of [
   'docs/extension-sdk.md',
   'docs/desktop-host-baseline.md',
   'docs/optional-input-adapters.md',
+  'docs/performance-and-release-plan.md',
   'docs/release-gate.md',
   'docs/vscode-extension-integration.md',
   'docs/vscode-extension-release-checklist.md',
@@ -124,6 +125,7 @@ for (const expected of [
   'extension-sdk.md',
   'desktop-host-baseline.md',
   'optional-input-adapters.md',
+  'performance-and-release-plan.md',
   'release-gate.md',
   'ecosystem-compatibility.md',
   'vscode-extension-release-checklist.md'

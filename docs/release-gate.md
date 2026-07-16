@@ -54,6 +54,7 @@ npm run release:verify:publish
 - `extension-sdk:check` can validate the declarative extension SDK, the official Line Banner package, Core manifest parsing, CLI side-load preflight, and Web manifest-only inspection coverage.
 - `desktop-host:check` can validate the desktop host baseline, canonical `*.uaproj` v1 fixtures, Compatible documentation links, and release-gate integration.
 - `optional-adapters:check` can validate 可选输入格式 (optional input format) and adapter policy, Core default image formats, VS Code image entrypoints, Compatible documentation links, and release-gate integration.
+- `performance-release:check` can validate the public performance baseline, `benchmark:core` command wiring, CI step, release surfaces, and version decision rules.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).

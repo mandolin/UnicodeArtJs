@@ -47,6 +47,22 @@ npm run check:vscode
 
 `release:gate` 是当前推荐的发布前总入口，会额外执行 Core/CLI pack dry-run、VSIX 隔离打包、VSIX 内容扫描、版本/依赖图检查和共享 fixture 校验。更多说明见 [发布门禁与版本图](release-gate.md)。
 
+## 性能与发布计划
+
+Core benchmark 用于观察关键匹配流程的耗时趋势：
+
+```bash
+npm run benchmark:core
+```
+
+发布计划、性能基线、发布面和版本决策说明由以下脚本保护：
+
+```bash
+npm run performance-release:check
+```
+
+该脚本不以具体毫秒阈值卡 CI，只检查公开文档、JSON 契约、根脚本、CI 和 release gate 是否保持一致。发布窗口和版本决策见 [性能基线与发布计划](performance-and-release-plan.md)。
+
 ## Lockfile 策略
 
 现阶段由根目录维护唯一 `package-lock.json`。旧的原型 lockfile 不再作为公开仓库状态的一部分；当前根 lockfile 是开发、CI 和发布门禁的唯一依赖基线。
