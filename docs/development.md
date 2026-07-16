@@ -99,6 +99,16 @@ Web 的 `gallery-index` 是当前可独立导入的 JavaScript 模块，其 API 
 
 修改 Core 行为时，需要同时关注 CLI、Web 和 VSCode Extension 是否共享同一契约。Node 图像解码后端单独规划，因为它影响 Core、CLI 和 VSCode，但不直接影响浏览器运行时。
 
+## 配置模型一致性
+
+Core、CLI、Web 和 VS Code Extension 共享同一套视觉字体、字素字体、宽字素规则、语言和输出目标语义。修改这些字段、配置默认值或公开说明时，运行：
+
+```bash
+npm run config-model:check
+```
+
+该命令会检查 [配置模型 vNext](config-model-vnext.md)、Core 类型、CLI 参数、Web 表单配置和 VS Code 设置是否仍使用一致命名。
+
 ## 静态画廊投稿
 
 修改 `packages/web/public/gallery/`、画廊投稿模板或画廊文档时，运行：

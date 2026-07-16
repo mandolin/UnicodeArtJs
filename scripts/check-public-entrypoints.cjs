@@ -79,6 +79,7 @@ for (const relativePath of [
   'docs/support.md',
   'docs/known-limitations.md',
   'docs/experimental-stability.md',
+  'docs/config-model-vnext.md',
   'docs/release-gate.md',
   'packages/core/README.md',
   'packages/cli/README.md',
@@ -110,6 +111,7 @@ for (const expected of [
   'support.md',
   'known-limitations.md',
   'experimental-stability.md',
+  'config-model-vnext.md',
   'release-gate.md',
   'ecosystem-compatibility.md',
   'vscode-extension-release-checklist.md'

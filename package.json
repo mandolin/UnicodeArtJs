@@ -56,6 +56,7 @@
     "support:check": "node scripts/check-support-governance.cjs",
     "public-entry:check": "node scripts/check-public-entrypoints.cjs",
     "stability:check": "npm run build:core && node scripts/check-experimental-stability.cjs",
+    "config-model:check": "node scripts/check-config-model.cjs",
     "check": "npm run check:core && npm run check:cli && npm run check:web && npm run check:vscode",
     "check:core": "npm run typecheck:core && npm run build:core && npm run test:core && npm --workspace packages/core run test:node-runtime && npm run test:core:browser",
     "check:cli": "npm run test:cli",
@@ -66,7 +67,7 @@
     "pack:cli": "npm --workspace packages/cli pack --dry-run",
     "release:verify": "node scripts/release-gate.cjs",
     "release:verify:publish": "node scripts/release-gate.cjs --strict-publish",
-    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
+    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run config-model:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
   },
   "optionalDependencies": {
     "@rollup/rollup-darwin-arm64": "4.62.2",

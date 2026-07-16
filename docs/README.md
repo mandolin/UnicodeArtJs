@@ -7,6 +7,7 @@
 - [支持与反馈](support.md)
 - [已知限制](known-limitations.md)
 - [实验能力稳定性矩阵](experimental-stability.md)
+- [配置模型 vNext](config-model-vnext.md)
 - [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
 - [生态兼容性与升级说明](ecosystem-compatibility.md)
 - [宿主接入指南](host-integration.md)

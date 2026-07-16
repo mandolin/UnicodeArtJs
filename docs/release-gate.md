@@ -48,6 +48,7 @@ npm run release:verify:publish
 - `support:check` can validate the support guide, known limitations page, Issue Forms, and public label catalog.
 - `public-entry:check` can validate public README links, package metadata, package README support links, and repository entrypoints.
 - `stability:check` can validate the experimental stability matrix against `getCoreCapabilities()`.
+- `config-model:check` can validate the shared configuration model across Core, CLI, Web, and the VSCode extension.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).
