@@ -13,6 +13,7 @@
 - [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
 - [生态兼容性与升级说明](ecosystem-compatibility.md)
 - [宿主接入指南](host-integration.md)
+- [桌面宿主基线](desktop-host-baseline.md)
 - [发布门禁与版本图](release-gate.md)
 - [代码注释与 API 文档约定](code-documentation.md)
 - [文档生成流水线](documentation-pipeline.md)

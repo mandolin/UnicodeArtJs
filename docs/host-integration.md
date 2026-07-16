@@ -102,3 +102,6 @@ const result = imageDataToArt(pixels, config, { charDataMap });
 每个独立宿主应记录 Core 版本、宿主 runtime 和已知字体/渲染差异，并使用固定 fixture 覆盖文本、图片、Box、
 宽字符、错误和取消路径。若应用属于 Compatible 档位，另须遵守
 [Compatible 应用与 Adapter 指南](compatible-project-guide.md) 中的 SBOM、NOTICE、产物扫描和许可证材料要求。
+
+桌面应用还应遵循 [桌面宿主基线](desktop-host-baseline.md)：使用 `*.uaproj` v1 项目文件、读取
+`getCoreCapabilities()`、复用 UAEM 声明式扩展边界，并将 Tauri/Electron 的文件、窗口、更新和安装器能力留在独立宿主仓库内。

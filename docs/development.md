@@ -139,6 +139,16 @@ npm run extension-sdk:check
 
 该命令会检查 [声明式扩展 SDK](extension-sdk.md)、[UAEM v1 清单规范](extension-manifest.md)、官方 Line Banner 示例、Core 解析结果、CLI 本地侧载预检和 Web 只读清单测试入口。UAEM v1 仍保持纯声明式边界，不允许通过资源包执行第三方代码。
 
+## 桌面宿主基线
+
+修改桌面宿主公开契约、`*.uaproj` fixture、Compatible 文档、Core capability 接入说明或错误模型说明时，运行：
+
+```bash
+npm run desktop-host:check
+```
+
+该命令会检查 [桌面宿主基线](desktop-host-baseline.md)、canonical `*.uaproj` v1 fixture、Compatible 文档链接和 release gate 集成。它不安装 Tauri/Electron，也不读取独立桌面仓库；桌面 runtime 的实际构建和安装器验证由对应独立仓库负责。
+
 ## 静态画廊投稿
 
 修改 `packages/web/public/gallery/`、画廊投稿模板或画廊文档时，运行：

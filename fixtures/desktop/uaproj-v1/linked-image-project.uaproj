@@ -1,0 +1,23 @@
+{
+  "application": {
+    "id": "unicodeart-app",
+    "version": "0.1.0-beta.1"
+  },
+  "schemaVersion": 1,
+  "mode": "image",
+  "config": {
+    "charset": "ASCII",
+    "visualFont": "Noto Sans SC",
+    "glyphFont": "Sarasa Mono SC, LXGW WenKai Mono, monospace",
+    "height": 24,
+    "matrixSize": 6,
+    "ratio": 2
+  },
+  "source": {
+    "kind": "image",
+    "storage": "linked",
+    "mime": "image/png",
+    "name": "sample.png",
+    "path": "sample.png"
+  }
+}

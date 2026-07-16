@@ -60,6 +60,7 @@
     "glyph-width:check": "node scripts/check-glyph-width-layout.cjs",
     "semantic-uaf-beta:check": "npm run build:core && node scripts/check-semantic-uaf-beta.cjs",
     "extension-sdk:check": "npm run build:core && node scripts/check-extension-sdk.cjs",
+    "desktop-host:check": "node scripts/check-desktop-host-baseline.cjs",
     "check": "npm run check:core && npm run check:cli && npm run check:web && npm run check:vscode",
     "check:core": "npm run typecheck:core && npm run build:core && npm run test:core && npm --workspace packages/core run test:node-runtime && npm run test:core:browser",
     "check:cli": "npm run test:cli",
@@ -70,7 +71,7 @@
     "pack:cli": "npm --workspace packages/cli pack --dry-run",
     "release:verify": "node scripts/release-gate.cjs",
     "release:verify:publish": "node scripts/release-gate.cjs --strict-publish",
-    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run config-model:check && npm run glyph-width:check && npm run semantic-uaf-beta:check && npm run extension-sdk:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
+    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run config-model:check && npm run glyph-width:check && npm run semantic-uaf-beta:check && npm run extension-sdk:check && npm run desktop-host:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
   },
   "optionalDependencies": {
     "@rollup/rollup-darwin-arm64": "4.62.2",

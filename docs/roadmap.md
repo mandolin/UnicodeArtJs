@@ -26,6 +26,7 @@ UnicodeArtJs 的目标是围绕同一套核心转换能力，提供 JavaScript/T
 桌面客户端采用独立仓库与独立发布材料维护，不并入 Core/CLI/Web/VS Code 的默认依赖链。当前候选显示名为 `UnicodeArt App · 字素绘`，优先验证 Windows 版项目文件、导入导出、安装器、第三方通知和回退流程。
 
 桌面项目会继续复用 `unicode-art-js` 的公开 npm 包和宿主接入契约。Tauri 与 Electron 方向都保留独立仓库，以便按各自运行时和许可证义务处理打包、更新和平台差异。
+共同的项目文件、能力协商、错误模型和扩展侧载边界见 [桌面宿主基线](desktop-host-baseline.md)。
 
 ### 创作能力
 

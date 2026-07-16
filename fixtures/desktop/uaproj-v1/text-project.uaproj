@@ -1,0 +1,20 @@
+{
+  "application": {
+    "id": "unicodeart-app",
+    "version": "0.1.0-beta.1"
+  },
+  "schemaVersion": 1,
+  "mode": "text",
+  "config": {
+    "charset": "ASCII",
+    "visualFont": "Noto Sans SC",
+    "glyphFont": "Sarasa Mono SC, LXGW WenKai Mono, monospace",
+    "height": 20,
+    "matrixSize": 6,
+    "ratio": 2
+  },
+  "source": {
+    "kind": "text",
+    "text": "UnicodeArtJs"
+  }
+}

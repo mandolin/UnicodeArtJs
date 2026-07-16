@@ -52,6 +52,7 @@ npm run release:verify:publish
 - `glyph-width:check` can validate glyph-width layout documentation, the shared calculator helper, critical call sites, and regression test coverage.
 - `semantic-uaf-beta:check` can validate the UAF / semantic-document beta contract, canonical fixtures, Core rendering, CLI consumption, and Web fixture coverage.
 - `extension-sdk:check` can validate the declarative extension SDK, the official Line Banner package, Core manifest parsing, CLI side-load preflight, and Web manifest-only inspection coverage.
+- `desktop-host:check` can validate the desktop host baseline, canonical `*.uaproj` v1 fixtures, Compatible documentation links, and release-gate integration.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).

@@ -105,6 +105,9 @@ jobs:
       - name: Check Extension SDK
         run: npm run extension-sdk:check
 
+      - name: Check Desktop Host Baseline
+        run: npm run desktop-host:check
+
       # 保持与本地 release:gate 相同的覆盖范围，但拆分步骤以便远端直接显示失败边界。
       - name: Check Core
         run: npm run check:core
