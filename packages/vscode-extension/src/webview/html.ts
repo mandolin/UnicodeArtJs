@@ -60,7 +60,7 @@ export function getConverterHtml(webview: vscode.Webview, extensionUri: vscode.U
 
         <div class="field" id="imageInputWrap" hidden>
           <label for="imageInput" data-i18n="web.imageFile">Image File</label>
-          <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
+          <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/bmp">
           <span id="imageName" class="hint" data-i18n="web.noImageSelected">No image selected</span>
           <span id="imageMeta" class="hint"></span>
           <button id="clearImage" type="button" data-i18n="web.clearImage" disabled>Clear Image</button>

@@ -6,7 +6,7 @@ import { writeResult } from '../output/resultWriter';
 import type { ExtensionLogger } from '../utils/logger';
 
 const IMAGE_FILTERS = {
-  Images: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'],
+  Images: ['png', 'jpg', 'jpeg', 'webp', 'bmp'],
 };
 
 /**

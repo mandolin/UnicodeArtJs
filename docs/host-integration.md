@@ -89,6 +89,8 @@ const result = imageDataToArt(pixels, config, { charDataMap });
 
 `CoreImageData.data` 是一维灰度字节数组，长度必须为 `width * height`。RGBA 数据应先由宿主转换；浏览器宿主可直接使用
 `browserPlatformAdapter.loadImage()` 取得规范化数据。宿主负责图像解码、方向、透明背景、文件大小限制与权限校验。
+GIF、SVG、TIFF、PDF 等默认 Core 不承诺的输入格式，应遵循
+[可选输入格式与 Adapter 策略](optional-input-adapters.md)，先由宿主 adapter 或外部转换器归一化为 `CoreImageData`。
 
 ## 配置、结果与错误
 

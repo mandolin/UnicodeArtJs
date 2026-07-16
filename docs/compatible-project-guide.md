@@ -47,6 +47,7 @@ Core 负责字符画算法、配置、错误码、进度、取消、输出 metad
 - 确认 NOTICE、SBOM、源码链接和许可证文本能随产物获得。
 - 以 Core 的固定 fixture 验证文本、图片、Box、宽字符、错误和取消路径。
 - 桌面应用还应运行 `npm run desktop-host:check`，并对照 [桌面宿主基线](desktop-host-baseline.md) 验证 `*.uaproj`、Core capability、错误模型和 UAEM 侧载边界。
+- 图片格式 adapter 还应对照 [可选输入格式与 Adapter 策略](optional-input-adapters.md)，明确默认格式、额外格式、错误码、转换器边界和许可证材料。
 - 记录支持的操作系统、外部 runtime、已知渲染差异和回退方式。
 
 该指南是工程合规清单，不构成法律意见。涉及静态链接、修改 copyleft 源文件、应用商店、嵌入式设备或跨国商业发行时，应基于实际产物取得专业意见。

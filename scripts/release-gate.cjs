@@ -33,6 +33,7 @@ const paths = {
   developmentDoc: path.join(repoRoot, 'docs', 'development.md'),
   documentationPipelineDoc: path.join(repoRoot, 'docs', 'documentation-pipeline.md'),
   ecosystemCompatibilityDoc: path.join(repoRoot, 'docs', 'ecosystem-compatibility.md'),
+  optionalInputAdaptersDoc: path.join(repoRoot, 'docs', 'optional-input-adapters.md'),
   releaseDoc: path.join(repoRoot, 'docs', 'release-gate.md'),
   runtimeSbomDoc: path.join(repoRoot, 'docs', 'runtime-sbom.md'),
   vscodeReleaseChecklist: path.join(repoRoot, 'docs', 'vscode-extension-release-checklist.md'),
@@ -378,6 +379,7 @@ function checkPublicDocs() {
   const developmentDoc = readText(paths.developmentDoc);
   const documentationPipelineDoc = readText(paths.documentationPipelineDoc);
   const ecosystemCompatibilityDoc = readText(paths.ecosystemCompatibilityDoc);
+  const optionalInputAdaptersDoc = readText(paths.optionalInputAdaptersDoc);
   const releaseDoc = readText(paths.releaseDoc);
   const runtimeSbomDoc = readText(paths.runtimeSbomDoc);
   const vscodeChecklist = readText(paths.vscodeReleaseChecklist);
@@ -411,10 +413,14 @@ function checkPublicDocs() {
     'Ecosystem compatibility doc must explain the Compatible distribution boundary.'
   );
   assertGate(releaseDoc.includes('release:gate'), 'Release gate doc must describe release:gate.');
+  assertGate(releaseDoc.includes('optional-adapters:check'), 'Release gate doc must describe optional-adapters:check.');
   assertGate(!/\bW-art-P\d+(?:\.\d+)?\b/.test(releaseDoc), 'Release gate doc must not expose internal planning stage identifiers.');
   assertGate(releaseDoc.includes('napi-rs/canvas'), 'Release gate doc must identify the default Node text renderer.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/canvas@1.0.2'), 'Runtime inventory must pin @napi-rs/canvas@1.0.2.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/image@1.14.0'), 'Runtime inventory must pin @napi-rs/image@1.14.0.');
+  assertGate(optionalInputAdaptersDoc.includes('PNG / JPEG / JPG / WebP / BMP'), 'Optional input adapter doc must list default Clean formats.');
+  assertGate(optionalInputAdaptersDoc.includes('UNSUPPORTED_FORMAT'), 'Optional input adapter doc must describe unsupported-format behavior.');
+  assertGate(optionalInputAdaptersDoc.includes('Compatible Adapter'), 'Optional input adapter doc must describe Compatible adapter route.');
   assertGate(vscodeChecklist.includes('inspect:vsix'), 'VSCode release checklist must include inspect:vsix.');
 }
 

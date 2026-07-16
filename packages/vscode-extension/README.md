@@ -39,7 +39,7 @@ Context menus:
   - `UnicodeArtJs: Generate Unicode Art: Default Template`
   - `UnicodeArtJs: Generate Unicode Art: Custom Template > Template 1 / 2 / 3`
   - `UnicodeArtJs: Open Converter`
-- Right-click a `png`, `jpg`, `jpeg`, `webp`, `gif`, or `bmp` file in Explorer to convert it.
+- Right-click a `png`, `jpg`, `jpeg`, `webp`, or `bmp` file in Explorer to convert it.
 
 ## Quick Start
 
@@ -141,7 +141,7 @@ Manual verification before publishing is tracked in [`docs/manual-test-checklist
 ## Notes
 
 - The WebView uses local bundled assets only. It does not load CDN scripts.
-- Image conversion currently supports local files.
+- Image conversion currently supports local PNG, JPEG, WebP, and BMP files. GIF, SVG, and TIFF require a future optional adapter or an external conversion step.
 - For best output display, use a strict mixed-width monospace font when viewing generated art.
 
 ## Support

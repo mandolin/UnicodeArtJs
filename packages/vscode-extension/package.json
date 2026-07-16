@@ -306,7 +306,7 @@
       "explorer/context": [
         {
           "command": "unicodeArtJs.convertImageFile",
-          "when": "resourceExtname =~ /\\.(png|jpg|jpeg|webp|gif|bmp)$/i",
+          "when": "resourceExtname =~ /\\.(png|jpg|jpeg|webp|bmp)$/i",
           "group": "navigation@50"
         }
       ]

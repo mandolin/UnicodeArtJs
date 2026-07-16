@@ -350,7 +350,7 @@ function parseDataUrl(dataUrl: string): { mimeType: string; base64: string } {
 
 function getImageExtension(fileName: string | undefined, mimeType: string): string {
   const fromName = fileName?.match(/\.([a-z0-9]+)$/iu)?.[1]?.toLowerCase();
-  if (fromName && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'].includes(fromName)) {
+  if (fromName && ['png', 'jpg', 'jpeg', 'webp', 'bmp'].includes(fromName)) {
     return fromName;
   }
 
@@ -359,8 +359,6 @@ function getImageExtension(fileName: string | undefined, mimeType: string): stri
       return 'jpg';
     case 'image/webp':
       return 'webp';
-    case 'image/gif':
-      return 'gif';
     case 'image/bmp':
       return 'bmp';
     case 'image/png':

@@ -1,0 +1,35 @@
+{
+  "contract": "unicodeartjs-optional-input-adapters-policy",
+  "version": 1,
+  "defaultCleanNodeFormats": [
+    "png",
+    "jpeg",
+    "jpg",
+    "webp",
+    "bmp"
+  ],
+  "notDefaultFormats": [
+    "gif",
+    "svg",
+    "tiff",
+    "tif",
+    "pdf",
+    "heif",
+    "heic",
+    "avif",
+    "video"
+  ],
+  "routes": [
+    "core-default-clean",
+    "pure-host-adapter",
+    "compatible-adapter",
+    "external-converter"
+  ],
+  "forbiddenDefaultDependencyMarkers": [
+    "sharp",
+    "libvips",
+    "canvas",
+    "cairo",
+    "pango"
+  ]
+}

@@ -149,6 +149,16 @@ npm run desktop-host:check
 
 该命令会检查 [桌面宿主基线](desktop-host-baseline.md)、canonical `*.uaproj` v1 fixture、Compatible 文档链接和 release gate 集成。它不安装 Tauri/Electron，也不读取独立桌面仓库；桌面 runtime 的实际构建和安装器验证由对应独立仓库负责。
 
+## 可选输入格式与 Adapter
+
+修改 Node 图片默认格式、独立 adapter 策略、VS Code 图片入口、Compatible 图片后端或外部转换器说明时，运行：
+
+```bash
+npm run optional-adapters:check
+```
+
+该命令会检查 [可选输入格式与 Adapter 策略](optional-input-adapters.md)、`getCoreCapabilities()` 的默认格式清单、VS Code 暴露入口、Compatible 文档链接和 release gate 集成。GIF、SVG、TIFF 等格式应先走宿主 adapter、Compatible adapter 或外部转换器，不得在未经审计时进入默认 Clean 路径。
+
 ## 静态画廊投稿
 
 修改 `packages/web/public/gallery/`、画廊投稿模板或画廊文档时，运行：

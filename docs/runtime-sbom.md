@@ -21,6 +21,8 @@ The project locks the two direct native npm packages to exact versions. The
 root `package-lock.json` supplies the resolved platform packages and integrity
 hashes. Core's `THIRD_PARTY_NOTICES.md` is included in the Core npm tarball;
 the VSIX includes notices both at its root and inside the staged Core package.
+The default image-format boundary and future adapter routes are tracked in
+[`optional-input-adapters.md`](optional-input-adapters.md).
 
 ## Explicitly Excluded From The Default Path
 

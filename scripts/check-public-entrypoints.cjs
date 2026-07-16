@@ -84,7 +84,10 @@ for (const relativePath of [
   'docs/semantic-uaf-beta.md',
   'docs/extension-sdk.md',
   'docs/desktop-host-baseline.md',
+  'docs/optional-input-adapters.md',
   'docs/release-gate.md',
+  'docs/vscode-extension-integration.md',
+  'docs/vscode-extension-release-checklist.md',
   'packages/core/README.md',
   'packages/cli/README.md',
   'packages/web/README.md',
@@ -120,6 +123,7 @@ for (const expected of [
   'semantic-uaf-beta.md',
   'extension-sdk.md',
   'desktop-host-baseline.md',
+  'optional-input-adapters.md',
   'release-gate.md',
   'ecosystem-compatibility.md',
   'vscode-extension-release-checklist.md'

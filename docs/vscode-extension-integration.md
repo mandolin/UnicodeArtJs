@@ -23,7 +23,7 @@ VS Code Extension 位于 `packages/vscode-extension`，运行时入口为 `src/e
 - `unicodeArtJs.generateWithTemplate1/2/3`：使用自定义模板槽转换选中文本。
 - `unicodeArtJs.convertImageFile`：转换本地图片文件。
 
-右键菜单只在编辑器有选中文本时显示文本转换入口。Explorer 图片入口当前只处理本地 `file` URI。
+右键菜单只在编辑器有选中文本时显示文本转换入口。Explorer 图片入口当前只处理本地 `file` URI，并仅暴露默认 Core 路径支持的 PNG、JPEG/JPG、WebP 和 BMP。GIF、SVG、TIFF 等格式需要后续可选 adapter 或外部转换器，相关边界见 [可选输入格式与 Adapter 策略](optional-input-adapters.md)。
 
 ## WebView 协议
 
@@ -34,7 +34,7 @@ Converter WebView 通过 `src/webview/protocol.ts` 定义消息类型：
 
 宿主收到 WebView 消息后先调用 `isWebviewMessage()` 做结构校验。该校验只确认消息类型和必要字段，配置值仍交给扩展配置合并和 Core 校验处理。
 
-图片模式会把 WebView 传来的 data URL 写入扩展 `globalStorageUri/webview-images` 下的临时文件，再把本地路径交给 Core Node 图像后端。转换结束后临时文件会被删除。
+图片模式会把 WebView 传来的 data URL 写入扩展 `globalStorageUri/webview-images` 下的临时文件，再把本地路径交给 Core Node 图像后端。转换结束后临时文件会被删除。WebView 文件选择器同样只暴露 PNG、JPEG/JPG、WebP 和 BMP，避免 UI 暗示默认 Core 已支持额外格式。
 
 ## 安全边界
 

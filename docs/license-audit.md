@@ -42,6 +42,10 @@ Core 当前默认使用两个固定版本的 NAPI 原生运行时：
 [`runtime-sbom.md`](runtime-sbom.md)。这里的结论仅覆盖当前默认路径和已声明
 的稳定格式，不替代未来平台包、原生包升级或扩展格式的审计。
 
+更多图片格式不得绕过该边界直接进入默认 Core。GIF、SVG、TIFF、PDF、HEIF 等输入应先按
+[`可选输入格式与 Adapter 策略`](optional-input-adapters.md) 选择 Pure Host Adapter、
+Compatible Adapter 或外部转换器路线，并在发布物中补齐相应许可证材料。
+
 ### sharp 与 libvips
 
 `sharp` 源码采用 Apache-2.0，但 npm 在常见平台上会安装预构建的 sharp/libvips 二进制。例如 Windows x64 包 `@img/sharp-win32-x64` 曾声明为 `Apache-2.0 AND LGPL-3.0-or-later`。

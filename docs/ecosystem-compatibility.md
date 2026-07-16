@@ -14,6 +14,9 @@ UnicodeArtJs 的 Core、命令行、网页、VS Code 插件和桌面应用并不
 
 `Clean` 入口遵循主仓库的严格宽松许可证依赖政策。`Compatible` 应用保持独立仓库、独立锁文件和独立发布材料；它们不会改变 Core npm 包的 MIT 许可或默认安装内容。两种档位都可以免费或商业使用，区别在于发布者需要履行的第三方组件义务不同。详细边界见 [Compatible 应用与 Adapter 指南](compatible-project-guide.md)。
 
+图片输入格式也遵循同一档位策略。PNG、JPEG、WebP 和 BMP 属于当前 Node 默认路径；GIF、SVG、TIFF、PDF 等格式应按
+[可选输入格式与 Adapter 策略](optional-input-adapters.md) 通过宿主 adapter、Compatible adapter 或外部转换器接入。
+
 桌面宿主的项目文件、错误模型、Core capability 和扩展侧载边界见 [桌面宿主基线](desktop-host-baseline.md)。独立应用应使用 `*.uaproj` v1 或提供显式转换流程，不应静默改写用户项目。
 
 ## 当前兼容基线

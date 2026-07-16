@@ -11,7 +11,7 @@
 - Install the VSIX locally with `code --install-extension`.
 - Open the converter from the command palette.
 - Convert selected text.
-- Convert an image file.
+- Convert a supported PNG/JPEG/WebP/BMP image file.
 - Test Box title/shadow.
 - Save TXT and HTML output.
 
@@ -22,10 +22,9 @@ Set `VSCE_PAT` or login with `vsce login mandolin`.
 For a Marketplace pre-release package:
 
 ```powershell
-cd K:\Project\Github_mandolin\UnicodeArtJs\packages\vscode-extension
-cd K:\Project\Github_mandolin\UnicodeArtJs
+# From the repository root:
 mise exec -- npm run release:gate
-cd K:\Project\Github_mandolin\UnicodeArtJs\packages\vscode-extension
+cd packages\vscode-extension
 $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
 vsce publish --pre-release --packagePath ".\unicode-art-js-vscode-$version.vsix"
 ```
@@ -41,6 +40,7 @@ For the stable channel, run `mise exec -- npm run package`, then publish without
 - Verify Explorer image context menu.
 - Verify WebView opens and converts text.
 - Verify WebView image mode.
+- Confirm GIF/SVG/TIFF files are not exposed as default supported image inputs.
 
 ## Known Follow-Ups
 
