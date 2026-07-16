@@ -5,7 +5,8 @@ UAEM v1（UnicodeArtJs Extension Manifest）用于交付可验证的本地字符
 安装依赖、执行代码、请求网络或修改宿主配置。
 
 本文面向希望制作、侧载或提交资源包的作者。具体字段约束以
-[UAEM v1 清单规范](extension-manifest.md)和 Core 校验结果为准。
+[UAEM v1 清单规范](extension-manifest.md)和 Core 校验结果为准；宿主接入、权限边界和官方
+示例包要求见[声明式扩展 SDK](extension-sdk.md)。
 
 ## 先确认适用范围
 

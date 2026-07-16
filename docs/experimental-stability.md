@@ -25,8 +25,8 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 | `semantic.document` | 版本化语义文档 JSON AST 与受限 DSL。 | Beta 候选 | 已建立 JSON AST v1 主路径 beta 契约与 golden fixture；DSL 保持解析便利层，不作为长期交换格式。 |
 | `artFont.document` | UAF v1 JSON 文档、许可证/provenance 校验与字形度量。 | Beta 候选 | 已建立 UAF JSON v1 主路径 beta 契约；继续明确错误码、fallback glyph 和许可证字段约束。 |
 | `artFont.render` | UAF 多行艺术字渲染，并可嵌入语义文档。 | Beta 候选 | 已建立 LTR 主路径 fixture；RTL、组合字形和复杂排版仍不承诺。 |
-| `extension.manifest` | UAEM v1 声明式扩展清单与兼容性协商。 | Beta 候选 | 冻结 manifest v1 schema、host target、版本范围和兼容性结果结构。 |
-| `extension.declarativeResources` | 只声明本地 semantic-document 与 unicode-art-font 资源，不执行代码。 | Beta 候选 | 明确 CLI、Web、VS Code 和桌面宿主的资源读取与信任边界。 |
+| `extension.manifest` | UAEM v1 声明式扩展清单与兼容性协商。 | Beta 候选 | 已建立 [声明式扩展 SDK](extension-sdk.md)、官方示例包和检查脚本；继续观察宿主接入反馈。 |
+| `extension.declarativeResources` | 只声明本地 semantic-document 与 unicode-art-font 资源，不执行代码。 | Beta 候选 | 已明确 CLI、Web、VS Code 和桌面宿主的资源读取与信任边界；动态能力仍需新格式版本。 |
 
 ## Web 层公开试点
 
@@ -55,4 +55,4 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 - reserved 配置可以保存和迁移，但不要向用户承诺它已经影响输出。
 - legacy 字段可继续读取旧配置；新文档、示例和 UI 应使用新的分组配置。
 
-相关边界也可参考 [已知限制](known-limitations.md)、[宿主接入指南](host-integration.md)、[UAF 与语义布局 Beta 契约](semantic-uaf-beta.md) 和 [声明式扩展清单](extension-manifest.md)。
+相关边界也可参考 [已知限制](known-limitations.md)、[宿主接入指南](host-integration.md)、[UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)、[声明式扩展清单](extension-manifest.md) 和 [声明式扩展 SDK](extension-sdk.md)。

@@ -102,6 +102,9 @@ jobs:
       - name: Check Semantic UAF Beta
         run: npm run semantic-uaf-beta:check
 
+      - name: Check Extension SDK
+        run: npm run extension-sdk:check
+
       # 保持与本地 release:gate 相同的覆盖范围，但拆分步骤以便远端直接显示失败边界。
       - name: Check Core
         run: npm run check:core

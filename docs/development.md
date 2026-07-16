@@ -129,6 +129,16 @@ npm run semantic-uaf-beta:check
 
 该命令会检查 [UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)、canonical fixture、Core golden 输出、CLI 子命令消费和 Web 测试入口。受限 DSL 仍可用于导入，但长期交换格式应以 JSON AST 为准。
 
+## 声明式扩展 SDK
+
+修改 UAEM v1 清单、官方扩展示例、扩展作者文档、CLI `extension` 子命令或 Web 清单检查入口时，运行：
+
+```bash
+npm run extension-sdk:check
+```
+
+该命令会检查 [声明式扩展 SDK](extension-sdk.md)、[UAEM v1 清单规范](extension-manifest.md)、官方 Line Banner 示例、Core 解析结果、CLI 本地侧载预检和 Web 只读清单测试入口。UAEM v1 仍保持纯声明式边界，不允许通过资源包执行第三方代码。
+
 ## 静态画廊投稿
 
 修改 `packages/web/public/gallery/`、画廊投稿模板或画廊文档时，运行：

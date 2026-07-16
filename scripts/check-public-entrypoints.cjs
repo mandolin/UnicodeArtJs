@@ -82,6 +82,7 @@ for (const relativePath of [
   'docs/config-model-vnext.md',
   'docs/glyph-width-layout.md',
   'docs/semantic-uaf-beta.md',
+  'docs/extension-sdk.md',
   'docs/release-gate.md',
   'packages/core/README.md',
   'packages/cli/README.md',
@@ -116,6 +117,7 @@ for (const expected of [
   'config-model-vnext.md',
   'glyph-width-layout.md',
   'semantic-uaf-beta.md',
+  'extension-sdk.md',
   'release-gate.md',
   'ecosystem-compatibility.md',
   'vscode-extension-release-checklist.md'

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   evaluateUnicodeArtExtensionCompatibility,
   isPermissiveUnicodeArtExtensionLicense,
@@ -83,6 +85,26 @@ describe('UnicodeArtJs declarative extension manifests', () => {
   test('keeps official bundle policy separate from manifest syntax', () => {
     expect(isPermissiveUnicodeArtExtensionLicense('MIT OR Apache-2.0')).toBe(true);
     expect(isPermissiveUnicodeArtExtensionLicense('GPL-3.0-only')).toBe(false);
+  });
+
+  test('keeps the official Line Banner manifest as a declaration-only compatible package', () => {
+    const manifestPath = resolve(__dirname, '..', '..', 'extension-line-banner', 'unicode-art-extension.json');
+    const manifest = parseUnicodeArtExtensionManifestJson(readFileSync(manifestPath, 'utf8'));
+
+    expect(manifest.meta.id).toBe('org.unicodeartjs.line-banner');
+    expect(manifest.meta.license).toMatchObject({ expression: 'MIT', origin: 'original' });
+    expect(manifest.resources.map((resource) => resource.kind).sort()).toEqual([
+      'semantic-document',
+      'unicode-art-font'
+    ]);
+
+    for (const target of ['cli', 'web', 'vscode', 'desktop'] as const) {
+      expect(evaluateUnicodeArtExtensionCompatibility(manifest, {
+        target,
+        coreVersion: '1.2.1',
+        capabilities: ['unicode-art-font', 'semantic-document']
+      })).toEqual({ compatible: true, reasons: [] });
+    }
   });
 });
 

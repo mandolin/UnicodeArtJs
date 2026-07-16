@@ -25,6 +25,7 @@
 - [静态画廊投稿指南](gallery-submission.md)
 - [声明式扩展清单（UAEM v1）](extension-manifest.md)
 - [声明式扩展作者指南](extension-authoring.md)
+- [声明式扩展 SDK](extension-sdk.md)
 - [VS Code Extension 发布检查](vscode-extension-release-checklist.md)
 
 各子项目还有独立文档：
