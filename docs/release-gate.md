@@ -50,6 +50,7 @@ npm run release:verify:publish
 - `stability:check` can validate the experimental stability matrix against `getCoreCapabilities()`.
 - `config-model:check` can validate the shared configuration model across Core, CLI, Web, and the VSCode extension.
 - `glyph-width:check` can validate glyph-width layout documentation, the shared calculator helper, critical call sites, and regression test coverage.
+- `semantic-uaf-beta:check` can validate the UAF / semantic-document beta contract, canonical fixtures, Core rendering, CLI consumption, and Web fixture coverage.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).

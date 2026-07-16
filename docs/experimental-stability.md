@@ -22,9 +22,9 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 | `browser.abortSignal` | 浏览器入口的协作式取消。 | 继续 experimental | 明确每个阶段的取消检查点，并增加取消路径 fixtures。 |
 | `box.layoutStage` | layout 阶段 `lines` / `cells` / `grid` 裱框。 | Beta 候选 | 冻结布局阶段命名、分隔规则、溢出行为和语义文档组合输出。 |
 | `glyph.widthCalculation` | `glyphFont.widthProfile` 与 `wideCharRegex`，影响列数、裱框和布局。 | Beta 候选 | 建立 profile 规则表、字体回退说明、Box/表格/HTML/PNG 导出 fixtures。 |
-| `semantic.document` | 版本化语义文档 JSON AST 与受限 DSL。 | Beta 候选 | 冻结 JSON AST v1 主路径；DSL 保持解析便利层，不作为长期交换格式。 |
-| `artFont.document` | UAF v1 JSON 文档、许可证/provenance 校验与字形度量。 | Beta 候选 | 冻结 UAF JSON schema、错误码、fallback glyph 和许可证字段约束。 |
-| `artFont.render` | UAF 多行艺术字渲染，并可嵌入语义文档。 | Beta 候选 | 建立 LTR 主路径 fixtures；明确 RTL、组合字形和复杂排版仍不承诺。 |
+| `semantic.document` | 版本化语义文档 JSON AST 与受限 DSL。 | Beta 候选 | 已建立 JSON AST v1 主路径 beta 契约与 golden fixture；DSL 保持解析便利层，不作为长期交换格式。 |
+| `artFont.document` | UAF v1 JSON 文档、许可证/provenance 校验与字形度量。 | Beta 候选 | 已建立 UAF JSON v1 主路径 beta 契约；继续明确错误码、fallback glyph 和许可证字段约束。 |
+| `artFont.render` | UAF 多行艺术字渲染，并可嵌入语义文档。 | Beta 候选 | 已建立 LTR 主路径 fixture；RTL、组合字形和复杂排版仍不承诺。 |
 | `extension.manifest` | UAEM v1 声明式扩展清单与兼容性协商。 | Beta 候选 | 冻结 manifest v1 schema、host target、版本范围和兼容性结果结构。 |
 | `extension.declarativeResources` | 只声明本地 semantic-document 与 unicode-art-font 资源，不执行代码。 | Beta 候选 | 明确 CLI、Web、VS Code 和桌面宿主的资源读取与信任边界。 |
 
@@ -55,4 +55,4 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 - reserved 配置可以保存和迁移，但不要向用户承诺它已经影响输出。
 - legacy 字段可继续读取旧配置；新文档、示例和 UI 应使用新的分组配置。
 
-相关边界也可参考 [已知限制](known-limitations.md)、[宿主接入指南](host-integration.md) 和 [声明式扩展清单](extension-manifest.md)。
+相关边界也可参考 [已知限制](known-limitations.md)、[宿主接入指南](host-integration.md)、[UAF 与语义布局 Beta 契约](semantic-uaf-beta.md) 和 [声明式扩展清单](extension-manifest.md)。

@@ -119,6 +119,16 @@ npm run glyph-width:check
 
 该命令会检查 [字素宽度与布局一致性](glyph-width-layout.md)、统一宽度计算 helper、关键调用点和回归测试是否仍然齐全。行为细节仍由 Core 单元测试和 `release:gate` 覆盖。
 
+## UAF 与语义布局 Beta
+
+修改 UAF JSON、语义文档 JSON AST、语义布局渲染、嵌入艺术字字体或相关 fixture 时，运行：
+
+```bash
+npm run semantic-uaf-beta:check
+```
+
+该命令会检查 [UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)、canonical fixture、Core golden 输出、CLI 子命令消费和 Web 测试入口。受限 DSL 仍可用于导入，但长期交换格式应以 JSON AST 为准。
+
 ## 静态画廊投稿
 
 修改 `packages/web/public/gallery/`、画廊投稿模板或画廊文档时，运行：

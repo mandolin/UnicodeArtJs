@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "options": {
+    "glyphWidthProfile": "default"
+  },
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "role": "corner",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Key"
+            }
+          ]
+        },
+        {
+          "role": "column-header",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Value"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "role": "row-header",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Logo"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "kind": "art-font-text",
+              "text": "UAJ",
+              "font": {
+                "format": "unicode-art-font",
+                "version": 1,
+                "meta": {
+                  "id": "org.unicodeartjs.beta-fixture.embedded",
+                  "name": "UnicodeArtJs Beta Fixture Embedded",
+                  "authors": [
+                    "UnicodeArtJs"
+                  ],
+                  "license": {
+                    "expression": "MIT",
+                    "origin": "original"
+                  }
+                },
+                "metrics": {
+                  "height": 2,
+                  "defaultAdvance": 2,
+                  "letterSpacing": 1,
+                  "fallbackGlyph": "?"
+                },
+                "glyphs": {
+                  "U": {
+                    "lines": [
+                      "UU",
+                      "UU"
+                    ]
+                  },
+                  "A": {
+                    "lines": [
+                      "AA",
+                      "AA"
+                    ]
+                  },
+                  "J": {
+                    "lines": [
+                      "JJ",
+                      "JJ"
+                    ]
+                  },
+                  "?": {
+                    "lines": [
+                      "??",
+                      "??"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "footer",
+      "cells": [
+        {
+          "colSpan": 2,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "MIT"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

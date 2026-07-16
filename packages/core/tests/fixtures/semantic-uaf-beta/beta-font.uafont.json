@@ -1,0 +1,52 @@
+{
+  "format": "unicode-art-font",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.beta-fixture",
+    "name": "UnicodeArtJs Beta Fixture",
+    "authors": [
+      "UnicodeArtJs"
+    ],
+    "description": "Original compact fixture font for UAF and semantic layout beta tests.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "human",
+      "tool": "unicodeartjs-fixture"
+    }
+  },
+  "metrics": {
+    "height": 2,
+    "defaultAdvance": 2,
+    "letterSpacing": 1,
+    "fallbackGlyph": "?"
+  },
+  "glyphs": {
+    "U": {
+      "lines": [
+        "UU",
+        "UU"
+      ]
+    },
+    "A": {
+      "lines": [
+        "AA",
+        "AA"
+      ]
+    },
+    "J": {
+      "lines": [
+        "JJ",
+        "JJ"
+      ]
+    },
+    "?": {
+      "lines": [
+        "??",
+        "??"
+      ]
+    }
+  }
+}

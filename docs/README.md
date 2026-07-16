@@ -9,6 +9,7 @@
 - [实验能力稳定性矩阵](experimental-stability.md)
 - [配置模型 vNext](config-model-vnext.md)
 - [字素宽度与布局一致性](glyph-width-layout.md)
+- [UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)
 - [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
 - [生态兼容性与升级说明](ecosystem-compatibility.md)
 - [宿主接入指南](host-integration.md)
