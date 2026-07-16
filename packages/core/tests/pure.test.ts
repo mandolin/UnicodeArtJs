@@ -110,6 +110,24 @@ describe('pure core entry', () => {
     });
   });
 
+  test('rejects invalid glyph-width config before pure conversion', async () => {
+    await expect(
+      imageDataToArt(
+        {
+          width: 2,
+          height: 2,
+          data: new Uint8Array([255, 255, 255, 255])
+        },
+        { height: 1, matrixSize: 2, glyphWidthProfile: 'unknown-profile' },
+        {
+          charDataMap: new Map<string, CharMatrix>([['.', makeCharMatrix('.', 1)]])
+        }
+      )
+    ).rejects.toMatchObject({
+      code: ErrorCode.GLYPH_WIDTH_PROFILE_INVALID
+    });
+  });
+
   test('pure source entry does not import Node-only or platform rendering modules', () => {
     const root = join(__dirname, '..', 'src');
     const files = [

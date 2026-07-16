@@ -80,6 +80,7 @@ for (const relativePath of [
   'docs/known-limitations.md',
   'docs/experimental-stability.md',
   'docs/config-model-vnext.md',
+  'docs/glyph-width-layout.md',
   'docs/release-gate.md',
   'packages/core/README.md',
   'packages/cli/README.md',
@@ -112,6 +113,7 @@ for (const expected of [
   'known-limitations.md',
   'experimental-stability.md',
   'config-model-vnext.md',
+  'glyph-width-layout.md',
   'release-gate.md',
   'ecosystem-compatibility.md',
   'vscode-extension-release-checklist.md'

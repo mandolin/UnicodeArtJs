@@ -103,6 +103,7 @@ const config = {
 ## 相关文档
 
 - [实验能力稳定性矩阵](experimental-stability.md)
+- [字素宽度与布局一致性](glyph-width-layout.md)
 - [字体行为与浏览器回退](font-behavior.md)
 - [宿主接入指南](host-integration.md)
 - [Web 集成与数据边界](web-integration.md)

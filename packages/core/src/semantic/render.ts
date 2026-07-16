@@ -14,7 +14,7 @@ import { boxText, normalizeBoxOptions } from '../box/box';
 import { normalizeSpacing, ZERO_SPACING } from '../box/spacing';
 import type { BoxChars, BoxOptions, BoxSpacing } from '../box/types';
 import { getGlyphWidth, padToWidth, repeatToWidth } from '../box/width';
-import { createGlyphWidthCalculator, type GlyphWidthCalculator } from '../glyph/width';
+import { createGlyphWidthCalculatorFromConfig, type GlyphWidthCalculator } from '../glyph/width';
 import { normalizeLocale, t as translateCoreMessage, type SupportedLocale } from '../i18n';
 import type { ArtConfig } from '../types/config';
 import { ErrorCode, OutputFormat, UnicodeArtError, type ArtResult } from '../types/output';
@@ -48,11 +48,7 @@ export async function renderSemanticDocumentWithAdapter(
   try {
     const document = validateSemanticDocument(input, { locale });
     const documentConfig = mergeDocumentConfig(config, document);
-    const calculator = createGlyphWidthCalculator({
-      profile: documentConfig.glyphWidthProfile,
-      wideCharRegex: documentConfig.wideCharRegex,
-      locale
-    });
+    const calculator = createGlyphWidthCalculatorFromConfig(documentConfig);
     const grid = placeDocumentCells(document, locale);
     const renderedCells = await renderCells(grid.cells, documentConfig, renderArtText, calculator, locale);
     const layoutOptions = resolveLayoutOptions(documentConfig.box, options, calculator);

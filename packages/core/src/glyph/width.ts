@@ -42,6 +42,21 @@ export interface GlyphWidthCalculatorOptions {
   locale?: string;
 }
 
+/** Minimal config shape that can carry glyph-width settings. 可携带字素宽度设置的最小配置形状。 */
+export interface GlyphWidthConfigInput {
+  /** 推荐对象字段；优先级高于平铺兼容字段。 */
+  glyphFont?: {
+    widthProfile?: GlyphWidthProfile;
+    wideCharRegex?: string;
+  };
+  /** 兼容平铺字段，语义等同于 `glyphFont.widthProfile`。 */
+  glyphWidthProfile?: GlyphWidthProfile;
+  /** 兼容平铺字段，语义等同于 `glyphFont.wideCharRegex`。 */
+  wideCharRegex?: string;
+  /** 错误文本使用的 Core locale。 */
+  locale?: string;
+}
+
 /** Profile metadata suitable for UI, CLI, and documentation. 供 UI、CLI 和文档展示的 profile 元数据。 */
 export interface GlyphWidthProfileDefinition {
   id: BuiltInGlyphWidthProfile;
@@ -187,6 +202,24 @@ export function createGlyphWidthCalculator(options: GlyphWidthCalculatorOptions 
   const profile = normalizeGlyphWidthProfile(options.profile, locale);
   const wideCharRegex = normalizeWideCharRegex(options.wideCharRegex, locale);
   return new GlyphWidthCalculator(profile, wideCharRegex);
+}
+
+/**
+ * Creates a glyph-width calculator from the shared ArtConfig shape.
+ *
+ * 从统一配置模型创建字素宽度计算器。对象化 `glyphFont` 字段优先于旧的平铺兼容字段，
+ * 这样各入口无需重复实现别名优先级。
+ *
+ * @public
+ */
+export function createGlyphWidthCalculatorFromConfig(
+  config: GlyphWidthConfigInput = {}
+): GlyphWidthCalculator {
+  return createGlyphWidthCalculator({
+    profile: config.glyphFont?.widthProfile ?? config.glyphWidthProfile,
+    wideCharRegex: config.glyphFont?.wideCharRegex ?? config.wideCharRegex,
+    locale: config.locale
+  });
 }
 
 /**

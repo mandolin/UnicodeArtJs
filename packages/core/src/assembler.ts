@@ -39,7 +39,7 @@ import { OutputFormat, UnicodeArtError, ErrorCode } from './types/output';
 import { boxText } from './box/box';
 import { getGlyphWidth } from './box/width';
 import type { BoxOptions } from './box/types';
-import { createGlyphWidthCalculator } from './glyph/width';
+import { createGlyphWidthCalculatorFromConfig, type GlyphWidthCalculator } from './glyph/width';
 
 //#region 🟩 纯文本组装
 
@@ -89,11 +89,7 @@ export function assemblePlainText(
   
   // 🔹 使用\n作为换行符（跨平台兼容）
   const text = lines.join('\n');
-  const calculator = createGlyphWidthCalculator({
-    profile: config.glyphWidthProfile,
-    wideCharRegex: config.wideCharRegex,
-    locale: config.locale
-  });
+  const calculator = createGlyphWidthCalculatorFromConfig(config);
   return isBoxEnabled(config.box) ? boxText(text, config.box, calculator) : text;
 }
 
@@ -400,11 +396,7 @@ export function assembleOutput(
   
   const metrics = calculateBoxedTextMetrics(
     assemblePlainText(charMatrix, config),
-    createGlyphWidthCalculator({
-      profile: config.glyphWidthProfile,
-      wideCharRegex: config.wideCharRegex,
-      locale: config.locale
-    })
+    createGlyphWidthCalculatorFromConfig(config)
   );
 
   return {
@@ -478,11 +470,7 @@ export function assembleTextOutput(
 
   const metrics = calculateBoxedTextMetrics(
     text,
-    createGlyphWidthCalculator({
-      profile: config.glyphWidthProfile,
-      wideCharRegex: config.wideCharRegex,
-      locale: config.locale
-    })
+    createGlyphWidthCalculatorFromConfig(config)
   );
   return {
     content,
@@ -509,7 +497,7 @@ function isBoxEnabled(box: ArtConfig['box']): box is BoxOptions {
 
 function calculateBoxedTextMetrics(
   text: string,
-  calculator: ReturnType<typeof createGlyphWidthCalculator>
+  calculator: GlyphWidthCalculator
 ): { rows: number; cols: number } {
   const lines = text.length === 0 ? [''] : text.split('\n');
   return {

@@ -249,6 +249,7 @@ export {
 
 export type {
   BuiltInGlyphWidthProfile,
+  GlyphWidthConfigInput,
   GlyphWidthCalculatorOptions,
   GlyphWidthProfile,
   GlyphWidthProfileDefinition
@@ -257,6 +258,7 @@ export type {
 export {
   BUILT_IN_GLYPH_WIDTH_PROFILES,
   createGlyphWidthCalculator,
+  createGlyphWidthCalculatorFromConfig,
   getGlyphWidthProfiles,
   isKnownGlyphWidthProfile,
   normalizeGlyphWidthProfile,

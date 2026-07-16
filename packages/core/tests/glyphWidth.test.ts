@@ -1,5 +1,6 @@
 import {
   createGlyphWidthCalculator,
+  createGlyphWidthCalculatorFromConfig,
   getGlyphWidthProfiles,
   validateConfig
 } from '../src';
@@ -28,6 +29,20 @@ describe('glyph width calculator', () => {
 
     expect(calculator.getTextWidth('A中B')).toBe(5);
     expect(calculator.getGlyphWidth('中')).toBe(1);
+  });
+
+  test('creates calculators from the shared config shape with object fields first', () => {
+    const profileCalculator = createGlyphWidthCalculatorFromConfig({
+      glyphFont: { widthProfile: 'sarasa-mono-sc' },
+      glyphWidthProfile: 'default'
+    });
+    const regexCalculator = createGlyphWidthCalculatorFromConfig({
+      glyphFont: { wideCharRegex: '[A-Z]' },
+      wideCharRegex: '[\\u4e00-\\u9fff]'
+    });
+
+    expect(profileCalculator.getGlyphWidth('┌')).toBe(1);
+    expect(regexCalculator.getTextWidth('A中')).toBe(3);
   });
 
   test('rejects unknown profiles and unsafe regex forms with structured errors', () => {

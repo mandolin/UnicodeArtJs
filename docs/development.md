@@ -109,6 +109,16 @@ npm run config-model:check
 
 该命令会检查 [配置模型 vNext](config-model-vnext.md)、Core 类型、CLI 参数、Web 表单配置和 VS Code 设置是否仍使用一致命名。
 
+## 字素宽度与布局
+
+修改 `glyphWidthProfile`、`wideCharRegex`、Box、语义布局、UAF 艺术字或输出尺寸统计时，运行：
+
+```bash
+npm run glyph-width:check
+```
+
+该命令会检查 [字素宽度与布局一致性](glyph-width-layout.md)、统一宽度计算 helper、关键调用点和回归测试是否仍然齐全。行为细节仍由 Core 单元测试和 `release:gate` 覆盖。
+
 ## 静态画廊投稿
 
 修改 `packages/web/public/gallery/`、画廊投稿模板或画廊文档时，运行：

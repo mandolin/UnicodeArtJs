@@ -130,6 +130,30 @@ describe('semantic document layout renderer', () => {
     expect(result.cols).toBe(1);
   });
 
+  test('uses nested glyphFont width profile for semantic table and outer Box layout', async () => {
+    const document: SemanticDocumentV1 = {
+      version: 1,
+      rows: [{ cells: [{ blocks: [{ kind: 'raw-text', text: '┌' }] }] }]
+    };
+    const result = await renderSemanticDocumentWithAdapter(
+      document,
+      config({
+        box: {
+          style: 'round',
+          renderStage: 'layout',
+          mode: 'grid',
+          separators: { rows: true, columns: true }
+        },
+        glyphFont: { widthProfile: 'sarasa-mono-sc' },
+        glyphWidthProfile: 'default'
+      }),
+      renderArtText
+    );
+
+    expect(result.content).toBe(['╭─╮', '│┌│', '╰─╯'].join('\n'));
+    expect(result.cols).toBe(3);
+  });
+
   test('mixes embedded art-font and raw blocks through the shared table and Box layout', async () => {
     const document: SemanticDocumentV1 = {
       version: 1,

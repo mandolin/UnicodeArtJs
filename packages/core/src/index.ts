@@ -272,7 +272,10 @@ import { assembleOutput, assembleTextOutput } from './assembler';
 import { isWideChar as detectWideChar, calculateDisplayWidth } from './utils/wideCharDetector';
 import { boxText, normalizeBoxOptions as normalizeBoxConfig } from './box/box';
 import { getGlyphWidth, padToWidth, repeatToWidth } from './box/width';
-import { createGlyphWidthCalculator, type GlyphWidthCalculator } from './glyph/width';
+import {
+  createGlyphWidthCalculatorFromConfig,
+  type GlyphWidthCalculator
+} from './glyph/width';
 import { renderSemanticDocumentWithAdapter } from './semantic/render';
 import type { SemanticDocument, SemanticRenderOptions } from './types/semantic';
 import { nodePlatformAdapter } from './platform/node/nodePlatformAdapter';
@@ -389,6 +392,7 @@ export {
 
 export type {
   BuiltInGlyphWidthProfile,
+  GlyphWidthConfigInput,
   GlyphWidthCalculatorOptions,
   GlyphWidthProfile,
   GlyphWidthProfileDefinition
@@ -397,6 +401,7 @@ export type {
 export {
   BUILT_IN_GLYPH_WIDTH_PROFILES,
   createGlyphWidthCalculator,
+  createGlyphWidthCalculatorFromConfig,
   getGlyphWidthProfiles,
   isKnownGlyphWidthProfile,
   normalizeGlyphWidthProfile,
@@ -701,11 +706,7 @@ async function textToLayoutArt(
   startTime: number
 ): Promise<ArtResult> {
   const normalized = normalizeBoxConfig(config.box);
-  const calculator = createGlyphWidthCalculator({
-    profile: config.glyphWidthProfile,
-    wideCharRegex: config.wideCharRegex,
-    locale: config.locale
-  });
+  const calculator = createGlyphWidthCalculatorFromConfig(config);
   const plainConfig: ArtConfig = {
     ...config,
     box: false,
@@ -1213,11 +1214,7 @@ export function validateConfig(
 
   try {
     normalizeBoxConfig(fullConfig.box);
-    createGlyphWidthCalculator({
-      profile: fullConfig.glyphWidthProfile,
-      wideCharRegex: fullConfig.wideCharRegex,
-      locale
-    });
+    createGlyphWidthCalculatorFromConfig(fullConfig);
   } catch (error) {
     if (error instanceof UnicodeArtError && (
       error.code === ErrorCode.GLYPH_WIDTH_PROFILE_INVALID ||

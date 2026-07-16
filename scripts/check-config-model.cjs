@@ -84,6 +84,7 @@ requireTexts(configDoc, [
   '--output-target',
   '--lang',
   'experimental-stability.md',
+  'glyph-width-layout.md',
   'font-behavior.md',
   'host-integration.md',
   'web-integration.md',

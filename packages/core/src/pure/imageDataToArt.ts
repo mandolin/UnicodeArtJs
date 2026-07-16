@@ -20,6 +20,7 @@ import { batchMatch } from '../matcher';
 import { generateSamplingArray } from '../sampler';
 import { assembleOutput } from '../assembler';
 import { normalizeBoxOptions } from '../box/box';
+import { createGlyphWidthCalculatorFromConfig } from '../glyph/width';
 import { normalizeLocale, t as translateCoreMessage } from '../i18n';
 
 //#region 🟦 Public Types
@@ -321,7 +322,14 @@ function validatePureConfig(config: Partial<ArtConfig>): ArtConfig {
 
   try {
     normalizeBoxOptions(fullConfig.box);
+    createGlyphWidthCalculatorFromConfig(fullConfig);
   } catch (error) {
+    if (error instanceof UnicodeArtError && (
+      error.code === ErrorCode.GLYPH_WIDTH_PROFILE_INVALID ||
+      error.code === ErrorCode.GLYPH_WIDTH_REGEX_INVALID
+    )) {
+      throw error;
+    }
     const message = error instanceof Error ? error.message : String(error);
     throw new UnicodeArtError(
       translateCoreMessage('config.box.invalid', { message }, locale),

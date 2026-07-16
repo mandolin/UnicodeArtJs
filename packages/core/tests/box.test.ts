@@ -1,6 +1,7 @@
 import {
   BOX_STYLES,
   boxText,
+  createGlyphWidthCalculatorFromConfig,
   getBoxStyleMetadata,
   getBoxStyleNames,
   getGlyphWidth,
@@ -146,6 +147,18 @@ describe('box feature', () => {
     const widths = result.split('\n').map((line) => getGlyphWidth(line));
 
     expect(widths).toEqual([6, 6, 6]);
+  });
+
+  test('boxText accepts a configured glyph-width calculator from nested glyphFont fields', () => {
+    const calculator = createGlyphWidthCalculatorFromConfig({
+      glyphFont: { widthProfile: 'sarasa-mono-sc' },
+      glyphWidthProfile: 'default'
+    });
+    const result = boxText('┌', { style: 'round' }, calculator);
+    const widths = result.split('\n').map((line) => getGlyphWidth(line, calculator));
+
+    expect(result).toBe(['╭─╮', '│┌│', '╰─╯'].join('\n'));
+    expect(widths).toEqual([3, 3, 3]);
   });
 
   test('normalize helpers reject invalid values', () => {
