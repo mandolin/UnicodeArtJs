@@ -108,3 +108,13 @@ npm run gallery:check
 ```
 
 该命令会重新构建 Core，并检查画廊索引、作品文件、投稿文档、Issue/PR 模板、许可证来源和 UAF / 语义文档解析。投稿流程见 [静态画廊投稿指南](gallery-submission.md)。
+
+## 支持与反馈入口
+
+Issue 模板、反馈路由、已知限制页和标签目录由轻量脚本保护：
+
+```bash
+npm run support:check
+```
+
+该命令会检查 [支持与反馈](support.md)、[已知限制](known-limitations.md)、Issue Forms、Gallery 表单和 `.github/labels.yml` 是否齐全，并避免公开文档出现内部路径或阶段代号。

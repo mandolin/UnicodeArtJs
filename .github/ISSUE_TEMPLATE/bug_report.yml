@@ -1,0 +1,98 @@
+name: Bug report
+description: Report a reproducible UnicodeArtJs bug.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please first check the support guide and known limitations:
+
+        - Support guide: https://github.com/mandolin/UnicodeArtJs/blob/main/docs/support.md
+        - Known limitations: https://github.com/mandolin/UnicodeArtJs/blob/main/docs/known-limitations.md
+
+        If the issue only affects UnicodeArt App, Electron UniArt, or another standalone Compatible application, please file it in that application's repository so installer and runtime logs stay with the right project.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Choose the surface where the bug is visible.
+      options:
+        - Core library (unicode-art-js)
+        - CLI (unicode-art-cli)
+        - Web / GitHub Pages
+        - VS Code Extension
+        - Browser entry (unicode-art-js/browser)
+        - Documentation
+        - Gallery / examples
+        - Extension manifest / UAEM
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Paste the package, website commit, CLI, or extension version if available.
+      placeholder: "unicode-art-js@1.2.1, unicode-art-cli@1.0.2, VS Code extension 0.2.0..."
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the OS, Node.js, browser, VS Code, terminal, and font names that matter.
+      placeholder: |
+        OS:
+        Node.js:
+        Browser:
+        VS Code:
+        Terminal:
+        Visual font:
+        Glyph font:
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest repeatable steps.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: input-config
+    attributes:
+      label: Minimal input and config
+      description: Paste the text, image details, CLI command, JSON config, or source document that reproduces the issue.
+      render: text
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmation
+      options:
+        - label: I checked the known limitations page.
+          required: true
+        - label: I removed private paths, tokens, project files, and personal data from the report.
+          required: true
+        - label: I can reproduce this with the minimal input or command above.
+          required: true

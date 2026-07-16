@@ -1,0 +1,76 @@
+# UnicodeArtJs 建议标签目录。
+#
+# GitHub 不会自动读取该文件创建标签；它是维护者同步标签、Issue 路由和
+# 后续自动化脚本的公开来源。颜色只作建议，可按 GitHub 仓库实际标签调整。
+
+- name: bug
+  color: "d73a4a"
+  description: 可复现的缺陷或行为回归。
+
+- name: enhancement
+  color: "a2eeef"
+  description: 新功能、能力增强或用户体验改进。
+
+- name: documentation
+  color: "0075ca"
+  description: README、docs、示例或公开说明改进。
+
+- name: question
+  color: "d876e3"
+  description: 需要澄清的使用问题或设计问题。
+
+- name: gallery
+  color: "5319e7"
+  description: 静态作品画廊、投稿或作品元数据。
+
+- name: proposal
+  color: "cfd3d7"
+  description: 需要先讨论范围和准入条件的提案。
+
+- name: area:core
+  color: "0e8a16"
+  description: Core 库、纯转换、配置、错误和能力查询。
+
+- name: area:cli
+  color: "0e8a16"
+  description: unicode-art-cli 命令、参数、配置文件和终端输出。
+
+- name: area:web
+  color: "0e8a16"
+  description: GitHub Pages 工具站、浏览器入口、导入导出和页面交互。
+
+- name: area:vscode
+  color: "0e8a16"
+  description: VS Code Extension、Converter 面板、模板和插入流程。
+
+- name: area:docs
+  color: "0e8a16"
+  description: 公开文档、API 文档、Recipes 和发布说明。
+
+- name: area:fonts
+  color: "fbca04"
+  description: 视觉字体、字素字体、宽字素、浏览器字体回退和显示差异。
+
+- name: area:box
+  color: "fbca04"
+  description: 裱框、标题、留白、阴影、表格和布局阶段边框。
+
+- name: area:semantic
+  color: "fbca04"
+  description: 语义文档、表格、原字输出、跨行跨列和 UAF 组合布局。
+
+- name: area:extensions
+  color: "fbca04"
+  description: UAEM 扩展清单、本地资源声明和扩展作者体验。
+
+- name: stability:experimental
+  color: "f9d0c4"
+  description: 涉及 experimental 能力或尚未冻结的行为。
+
+- name: needs:repro
+  color: "bfdadc"
+  description: 需要最小复现输入、命令、配置或环境信息。
+
+- name: needs:decision
+  color: "fbca04"
+  description: 需要维护者确认方向、范围或兼容边界。

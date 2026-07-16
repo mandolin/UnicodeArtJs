@@ -136,6 +136,10 @@ npm run check
 更多命令和 lockfile 说明见 [docs/development.md](docs/development.md)。跨入口的版本、升级和回退方式见
 [生态兼容性与升级说明](docs/ecosystem-compatibility.md)。
 
+## 支持与反馈
+
+遇到问题时，建议先查看 [已知限制](docs/known-limitations.md)，再按 [支持与反馈](docs/support.md) 选择正确入口。Core、CLI、Web 和 VS Code 插件问题通常提交到本仓库；UnicodeArt App、Electron UniArt 等独立桌面应用问题应提交到对应仓库，以便保留安装器和运行时信息。
+
 ## 字体说明
 
 字符画的最终效果与显示字体有关。为了获得稳定的对齐效果，建议在终端、网页或编辑器中使用混合等宽字体，例如 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro、Liberation Mono 等。
@@ -163,4 +167,5 @@ Core、CLI、Web 和 VS Code 默认路径采用“清洁分发”策略，依赖
 - 声明式扩展清单说明：[docs/extension-manifest.md](docs/extension-manifest.md)
 - 声明式扩展作者指南：[docs/extension-authoring.md](docs/extension-authoring.md)
 - 静态作品画廊说明：[docs/gallery.md](docs/gallery.md)
-- 问题反馈：<https://github.com/mandolin/UnicodeArtJs/issues>
+- 支持与反馈：[docs/support.md](docs/support.md)
+- 已知限制：[docs/known-limitations.md](docs/known-limitations.md)

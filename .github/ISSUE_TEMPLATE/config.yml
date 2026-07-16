@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support guide / 反馈入口
+    url: https://github.com/mandolin/UnicodeArtJs/blob/main/docs/support.md
+    about: Choose the correct repository, component, and report shape.
+  - name: Known limitations / 已知限制
+    url: https://github.com/mandolin/UnicodeArtJs/blob/main/docs/known-limitations.md
+    about: Check fonts, browser behavior, image formats, and experimental boundaries before filing.
+  - name: UnicodeArt App issues
+    url: https://github.com/mandolin/tauri-uniart/issues
+    about: Report standalone Tauri desktop application issues here.
+  - name: Electron UniArt issues
+    url: https://github.com/mandolin/electron-uniart/issues
+    about: Report standalone Electron host integration issues here.

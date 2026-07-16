@@ -49,4 +49,4 @@ UnicodeArtJs 的目标是围绕同一套核心转换能力，提供 JavaScript/T
 - 不以跨操作系统、Canvas 实现和字体栅格器的像素级完全一致为硬性目标，但配置语义与输出规则应保持可解释。
 - 新依赖和平台二进制需要单独审查许可证与再分发条件。
 
-欢迎通过 [GitHub Issues](https://github.com/mandolin/UnicodeArtJs/issues) 报告问题或提出具体使用场景。
+欢迎按 [支持与反馈](support.md) 选择正确入口，报告问题或提出具体使用场景。提交前也可以先查看 [已知限制](known-limitations.md)。

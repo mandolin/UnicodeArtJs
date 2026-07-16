@@ -1,0 +1,80 @@
+name: Feature request
+description: Suggest an improvement or new workflow for UnicodeArtJs.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening a request, please check the roadmap and known limitations:
+
+        - Roadmap: https://github.com/mandolin/UnicodeArtJs/blob/main/docs/roadmap.md
+        - Support guide: https://github.com/mandolin/UnicodeArtJs/blob/main/docs/support.md
+        - Known limitations: https://github.com/mandolin/UnicodeArtJs/blob/main/docs/known-limitations.md
+  - type: dropdown
+    id: target
+    attributes:
+      label: Target
+      description: Choose the area that would use this feature.
+      options:
+        - Core API
+        - CLI
+        - Web / GitHub Pages
+        - VS Code Extension
+        - Browser entry
+        - Documentation
+        - Gallery
+        - Extension manifest / UAEM
+        - Compatible desktop app
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: stability
+    attributes:
+      label: Expected stability
+      description: Pick the level you expect. It is fine to choose "Not sure".
+      options:
+        - Stable public API
+        - Experimental opt-in feature
+        - Documentation or example only
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow, limitation, or confusion should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the behavior, API, command option, UI, or document you would like.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Describe workarounds, existing tools, or alternate designs you considered.
+    validations:
+      required: false
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or references
+      description: Add screenshots, CLI samples, JSON snippets, links, or related projects if useful.
+    validations:
+      required: false
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmation
+      options:
+        - label: I checked whether this belongs in a standalone desktop repository instead of this main repository.
+          required: true
+        - label: I understand experimental features may change before becoming stable.
+          required: true
