@@ -128,3 +128,13 @@ npm run public-entry:check
 ```
 
 修改根 README、包 README、`package.json`、发布说明或公开入口 URL 后，应运行该命令。它只检查仓库内的稳定入口契约；npm registry、VS Code Marketplace 和 GitHub Actions 的实时状态仍需在发布收尾时单独复核。
+
+## 实验能力稳定性矩阵
+
+Core 能力边界由 `getCoreCapabilities()` 输出，公开稳定性矩阵由以下命令校验：
+
+```bash
+npm run stability:check
+```
+
+该命令会先构建 Core，再检查 [实验能力稳定性矩阵](experimental-stability.md) 是否覆盖所有 experimental、reserved 和 legacy 能力 ID。新增或调整 `packages/core/src/capabilities.ts` 时，应同步更新该矩阵。

@@ -78,6 +78,7 @@ for (const relativePath of [
   'docs/README.md',
   'docs/support.md',
   'docs/known-limitations.md',
+  'docs/experimental-stability.md',
   'docs/release-gate.md',
   'packages/core/README.md',
   'packages/cli/README.md',
@@ -108,6 +109,7 @@ const docsIndex = readUtf8('docs/README.md');
 for (const expected of [
   'support.md',
   'known-limitations.md',
+  'experimental-stability.md',
   'release-gate.md',
   'ecosystem-compatibility.md',
   'vscode-extension-release-checklist.md'

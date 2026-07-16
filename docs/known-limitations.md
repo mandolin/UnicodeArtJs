@@ -38,6 +38,7 @@
 - glyph width profile 与自定义宽字素正则。
 
 宿主界面应优先通过 `getCoreCapabilities()` 读取稳定性边界，不要把 experimental 控件展示成稳定承诺。
+各 experimental 能力的下一步稳定化去向见 [实验能力稳定性矩阵](experimental-stability.md)。
 
 ## 桌面应用
 
