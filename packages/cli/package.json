@@ -25,6 +25,15 @@
   ],
   "author": "mandolin",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mandolin/UnicodeArtJs.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/mandolin/UnicodeArtJs/issues"
+  },
+  "homepage": "https://github.com/mandolin/UnicodeArtJs/tree/main/packages/cli#readme",
   "dependencies": {
     "unicode-art-js": "file:../core",
     "commander": "^12.0.0",

@@ -4,6 +4,8 @@ Convert selected text or image files to Unicode character art inside VSCode.
 
 This extension is built on the MIT-licensed `unicode-art-js` core package. UnicodeArtJs is an independent TypeScript / JavaScript implementation whose feature goals reference the public behavior and user experience of UnicodeArt without copying GPL source code or line-by-line implementation structure.
 
+Marketplace: <https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode>
+
 ## Features
 
 - Convert selected editor text to Unicode art.
@@ -141,6 +143,11 @@ Manual verification before publishing is tracked in [`docs/manual-test-checklist
 - The WebView uses local bundled assets only. It does not load CDN scripts.
 - Image conversion currently supports local files.
 - For best output display, use a strict mixed-width monospace font when viewing generated art.
+
+## Support
+
+For issue routing, known font/editor behavior, and safe report details, see the repository
+[support guide](../../docs/support.md) and [known limitations](../../docs/known-limitations.md).
 
 ## Local Install
 

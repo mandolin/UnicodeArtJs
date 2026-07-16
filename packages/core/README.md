@@ -287,6 +287,12 @@ const locale = normalizeLocale('en-US');
 console.log(t('config.height.positive', {}, locale));
 ```
 
+## Support
+
+For issue routing, supported surfaces, and safe bug-report details, see the repository
+[support guide](../../docs/support.md). Current font, browser, image-format, and experimental
+feature boundaries are listed in [known limitations](../../docs/known-limitations.md).
+
 ## License
 
 MIT

@@ -390,7 +390,8 @@ unicode-art image photo.jpg --no-config
 
 ## 🤝 贡献
 
-欢迎提交Issue和Pull Request！
+欢迎提交 Issue 和 Pull Request。提交前建议先查看仓库的 [支持与反馈](../../docs/support.md)
+和 [已知限制](../../docs/known-limitations.md)，以便选择正确组件并提供最小复现命令。
 
 ## 📄 许可证
 

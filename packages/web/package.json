@@ -33,12 +33,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mandolin/UnicodeArtJs.git"
+    "url": "git+https://github.com/mandolin/UnicodeArtJs.git",
+    "directory": "packages/web"
   },
   "bugs": {
     "url": "https://github.com/mandolin/UnicodeArtJs/issues"
   },
-  "homepage": "https://github.com/mandolin/UnicodeArtJs#readme",
+  "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "dependencies": {
     "jquery": "^3.7.1",
     "unicode-art-js": "file:../core"

@@ -46,6 +46,7 @@ npm run release:verify:publish
 - `recipes:check` can run the public Node examples and representative CLI recipes.
 - `gallery:check` can validate the static gallery index, reviewed artwork files, submission templates, licenses, and Core parsing of UAF / semantic-document assets.
 - `support:check` can validate the support guide, known limitations page, Issue Forms, and public label catalog.
+- `public-entry:check` can validate public README links, package metadata, package README support links, and repository entrypoints.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).

@@ -118,3 +118,13 @@ npm run support:check
 ```
 
 该命令会检查 [支持与反馈](support.md)、[已知限制](known-limitations.md)、Issue Forms、Gallery 表单和 `.github/labels.yml` 是否齐全，并避免公开文档出现内部路径或阶段代号。
+
+## 公开入口一致性
+
+README、各包 README、package metadata、Marketplace / npm / GitHub Pages 入口和支持文档链接由以下命令保护：
+
+```bash
+npm run public-entry:check
+```
+
+修改根 README、包 README、`package.json`、发布说明或公开入口 URL 后，应运行该命令。它只检查仓库内的稳定入口契约；npm registry、VS Code Marketplace 和 GitHub Actions 的实时状态仍需在发布收尾时单独复核。

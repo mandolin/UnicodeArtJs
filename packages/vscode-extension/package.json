@@ -15,6 +15,10 @@
     "url": "https://github.com/mandolin/UnicodeArtJs.git",
     "directory": "packages/vscode-extension"
   },
+  "bugs": {
+    "url": "https://github.com/mandolin/UnicodeArtJs/issues"
+  },
+  "homepage": "https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode",
   "engines": {
     "vscode": "^1.90.0"
   },
