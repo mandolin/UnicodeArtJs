@@ -78,6 +78,9 @@ jobs:
       - name: Check Documentation Manifest
         run: npm run docs:manifest:check
 
+      - name: Check Developer Docs Architecture
+        run: npm run docs:architecture:check
+
       - name: Check Recipes
         run: npm run recipes:check
 

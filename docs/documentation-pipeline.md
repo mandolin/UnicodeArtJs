@@ -65,9 +65,10 @@ npm run docs:tsdoc:vscode:check
 npm run docs:contract:check
 npm run docs:manifest:check
 npm run docs:public-site:check
+npm run docs:architecture:check
 ```
 
-进入发布前或合并前，仍建议运行 `npm run docs:all:check`。
+`docs:architecture:check` 会校验 [开发者文档站信息架构](developer-documentation-architecture.md)、公开 docs 索引、Web 文档站 manifest 和文档站分区契约。进入发布前或合并前，仍建议运行 `npm run docs:all:check`。
 
 ## 产物边界
 
@@ -84,6 +85,7 @@ npm run docs:public-site:check
 2. `scripts/generate-docs-manifest.cjs` 与 `scripts/check-docs-manifest.cjs`。
 3. `scripts/generate-public-docs-site-data.cjs` 与 `packages/web/public/docs/manifest.json`。
 4. 本页的覆盖范围和命令说明。
-5. [代码注释与 API 文档约定](code-documentation.md)中的复核清单。
+5. [开发者文档站信息架构](developer-documentation-architecture.md)中的分区与导航说明。
+6. [代码注释与 API 文档约定](code-documentation.md)中的复核清单。
 
 如果产物数量变化是有意的，应在对应阶段记录原因，并显式更新清单校验中的期望值。

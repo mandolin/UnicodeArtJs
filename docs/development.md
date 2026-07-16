@@ -89,9 +89,10 @@ npm run docs:tsdoc:core:check
 npm run docs:tsdoc:vscode
 npm run docs:tsdoc:vscode:check
 npm run docs:contract:check
+npm run docs:architecture:check
 ```
 
-`docs:all` 会重建 CLI、Web、Core TSDoc 和 VS Code TSDoc 的本地产物，并生成 `.generated-docs/documentation-manifest.json`。`docs:all:check` 是当前推荐的文档总门禁，会运行全部单项生成、术语契约和统一清单检查。更多说明见[文档生成流水线](documentation-pipeline.md)。
+`docs:all` 会重建 CLI、Web、Core TSDoc 和 VS Code TSDoc 的本地产物，并生成 `.generated-docs/documentation-manifest.json`。`docs:all:check` 是当前推荐的文档总门禁，会运行全部单项生成、术语契约、统一清单、公开站点数据和文档站信息架构检查。更多说明见[文档生成流水线](documentation-pipeline.md)。
 
 生成结果位于被 Git 忽略的 `.generated-docs/`。CLI 文档包括本地 HTML、双语索引、搜索索引、源码链接元数据和 HIA integration JSON。`docs:cli:check` 会从干净目录重新生成，并检查双语输出、关键 doclet 与 GitHub 源码链接。
 
@@ -110,6 +111,14 @@ npm run docs:core:probe
 Web 的 `gallery-index` 是当前可独立导入的 JavaScript 模块，其 API 文档可通过 `docs:web` 生成。页面主入口 `packages/web/src/main.js` 是 DOM 工作台实现，不承诺为第三方库 API；其浏览器接入、存储和安全边界见[Web 集成与数据边界](web-integration.md)。
 
 贡献代码时还应遵循[代码注释与 API 文档约定](code-documentation.md)。修改公开 Core TypeScript 契约时，须运行 `npm run docs:tsdoc:core:check`；修改 VS Code Extension 命令、配置、WebView 协议或宿主边界时，须运行 `npm run docs:tsdoc:vscode:check`；修改 CLI 或 Web JavaScript 文档时，须运行对应的 `docs:*:check`。修改 README、recipes 或 `examples/` 时，须运行 `npm run recipes:check`。进入合并或发布前建议运行 `npm run docs:all:check`。`docs:contract:check` 检查当前已冻结的术语、CLI 双语试点标记和常见 JSDoc 类型写法；它是质量下限，不替代对行为、术语和示例的人工复核。
+
+修改开发者文档站分区、读者路径、公开 docs 索引或 Web 文档入口时，须运行：
+
+```bash
+npm run docs:architecture:check
+```
+
+文档站分区和数据边界见[开发者文档站信息架构](developer-documentation-architecture.md)。
 
 ## 改动提示
 

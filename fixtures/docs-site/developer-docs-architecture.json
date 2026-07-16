@@ -1,0 +1,86 @@
+{
+  "contract": "unicodeartjs-developer-docs-architecture",
+  "version": 1,
+  "audiences": [
+    "user",
+    "integrator",
+    "extension-author",
+    "release-maintainer",
+    "contributor"
+  ],
+  "sections": [
+    {
+      "id": "quickstart",
+      "title": "Quickstart",
+      "requiredDocs": [
+        "README.md",
+        "docs/recipes.md"
+      ]
+    },
+    {
+      "id": "api-reference",
+      "title": "API Reference",
+      "requiredDocs": [
+        "docs/code-documentation.md",
+        "docs/documentation-pipeline.md"
+      ]
+    },
+    {
+      "id": "integration",
+      "title": "Integration",
+      "requiredDocs": [
+        "docs/host-integration.md",
+        "docs/web-integration.md",
+        "docs/vscode-extension-integration.md"
+      ]
+    },
+    {
+      "id": "configuration",
+      "title": "Configuration",
+      "requiredDocs": [
+        "docs/config-model-vnext.md",
+        "docs/glyph-width-layout.md",
+        "docs/font-behavior.md"
+      ]
+    },
+    {
+      "id": "extension",
+      "title": "Extension",
+      "requiredDocs": [
+        "docs/extension-sdk.md",
+        "docs/extension-manifest.md",
+        "docs/semantic-uaf-beta.md"
+      ]
+    },
+    {
+      "id": "compatibility",
+      "title": "Compatibility",
+      "requiredDocs": [
+        "docs/known-limitations.md",
+        "docs/optional-input-adapters.md",
+        "docs/ecosystem-compatibility.md"
+      ]
+    },
+    {
+      "id": "release",
+      "title": "Release",
+      "requiredDocs": [
+        "docs/release-gate.md",
+        "docs/performance-and-release-plan.md",
+        "docs/runtime-sbom.md"
+      ]
+    },
+    {
+      "id": "contribute",
+      "title": "Contribute",
+      "requiredDocs": [
+        "docs/support.md",
+        "docs/gallery-submission.md",
+        "docs/roadmap.md"
+      ]
+    }
+  ],
+  "publicManifest": "packages/web/public/docs/manifest.json",
+  "architectureDoc": "docs/developer-documentation-architecture.md",
+  "checkCommand": "npm run docs:architecture:check"
+}
