@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-15T13:52:08.879Z",
+  "generatedAt": "2026-07-16T19:01:45.203Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -13,6 +13,169 @@
     "generatedArtifactsCommitted": false,
     "sourcesContentPolicy": "none",
     "publicDataOnly": true
+  },
+  "architecture": {
+    "contract": "unicodeartjs-developer-docs-architecture",
+    "version": 1,
+    "checkCommand": "npm run docs:architecture:check",
+    "guideUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/developer-documentation-architecture.md",
+    "audiences": [
+      "user",
+      "integrator",
+      "extension-author",
+      "release-maintainer",
+      "contributor"
+    ],
+    "sections": [
+      {
+        "id": "quickstart",
+        "title": "Quickstart",
+        "docCount": 2,
+        "docs": [
+          {
+            "path": "README.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/README.md"
+          },
+          {
+            "path": "docs/recipes.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/recipes.md"
+          }
+        ]
+      },
+      {
+        "id": "api-reference",
+        "title": "API Reference",
+        "docCount": 2,
+        "docs": [
+          {
+            "path": "docs/code-documentation.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/code-documentation.md"
+          },
+          {
+            "path": "docs/documentation-pipeline.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/documentation-pipeline.md"
+          }
+        ]
+      },
+      {
+        "id": "integration",
+        "title": "Integration",
+        "docCount": 3,
+        "docs": [
+          {
+            "path": "docs/host-integration.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/host-integration.md"
+          },
+          {
+            "path": "docs/web-integration.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/web-integration.md"
+          },
+          {
+            "path": "docs/vscode-extension-integration.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/vscode-extension-integration.md"
+          }
+        ]
+      },
+      {
+        "id": "configuration",
+        "title": "Configuration",
+        "docCount": 3,
+        "docs": [
+          {
+            "path": "docs/config-model-vnext.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/config-model-vnext.md"
+          },
+          {
+            "path": "docs/glyph-width-layout.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/glyph-width-layout.md"
+          },
+          {
+            "path": "docs/font-behavior.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/font-behavior.md"
+          }
+        ]
+      },
+      {
+        "id": "extension",
+        "title": "Extension",
+        "docCount": 3,
+        "docs": [
+          {
+            "path": "docs/extension-sdk.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/extension-sdk.md"
+          },
+          {
+            "path": "docs/extension-manifest.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/extension-manifest.md"
+          },
+          {
+            "path": "docs/semantic-uaf-beta.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/semantic-uaf-beta.md"
+          }
+        ]
+      },
+      {
+        "id": "compatibility",
+        "title": "Compatibility",
+        "docCount": 3,
+        "docs": [
+          {
+            "path": "docs/known-limitations.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/known-limitations.md"
+          },
+          {
+            "path": "docs/optional-input-adapters.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/optional-input-adapters.md"
+          },
+          {
+            "path": "docs/ecosystem-compatibility.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/ecosystem-compatibility.md"
+          }
+        ]
+      },
+      {
+        "id": "release",
+        "title": "Release",
+        "docCount": 3,
+        "docs": [
+          {
+            "path": "docs/release-gate.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/release-gate.md"
+          },
+          {
+            "path": "docs/performance-and-release-plan.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/performance-and-release-plan.md"
+          },
+          {
+            "path": "docs/runtime-sbom.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/runtime-sbom.md"
+          }
+        ]
+      },
+      {
+        "id": "contribute",
+        "title": "Contribute",
+        "docCount": 3,
+        "docs": [
+          {
+            "path": "docs/support.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/support.md"
+          },
+          {
+            "path": "docs/gallery-submission.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/gallery-submission.md"
+          },
+          {
+            "path": "docs/roadmap.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/roadmap.md"
+          }
+        ]
+      }
+    ],
+    "generatedFrom": {
+      "sourceContract": "unicodeartjs-documentation-manifest",
+      "sourceContractVersion": "0.1.0"
+    }
   },
   "entries": [
     {

@@ -185,6 +185,7 @@ const UI_MESSAGES = {
     'docs.status.loaded': '已载入 {count} 个文档入口',
     'docs.status.error': '文档索引载入失败：{message}',
     'docs.entryCount': '文档入口',
+    'docs.sectionCount': '文档路径',
     'docs.generatedAt': '生成时间',
     'docs.contract': '清单契约',
     'docs.noSelection': '选择一个文档入口',
@@ -196,18 +197,41 @@ const UI_MESSAGES = {
     'docs.metrics': '指标',
     'docs.openGuide': '打开文档',
     'docs.openRepo': '打开仓库',
+    'docs.sections.aria': '开发者文档路径',
+    'docs.sections.title': '文档路径',
+    'docs.section.docCount': '{count} 个页面',
+    'docs.section.docs': '包含页面',
     'docs.kind.hia-tsdoc': 'TSDoc 中间文档',
     'docs.kind.hia-jsdoc': 'JSDoc API 文档',
+    'docs.kind.section': '文档路径',
     'docs.stability.intermediate': '中间文档',
     'docs.stability.pilot': '试点',
+    'docs.stability.public': '公开',
     'docs.surface.core': 'Core 核心库',
     'docs.surface.cli': 'CLI 命令行',
     'docs.surface.web': 'Web 应用',
     'docs.surface.vscode-extension': 'VS Code 插件',
+    'docs.surface.docs': '公开文档',
     'docs.metric.artifactCount': '产物',
     'docs.metric.inputCount': '输入',
     'docs.metric.nodeCount': '节点',
     'docs.metric.requiredFiles': '文件',
+    'docs.section.quickstart': 'Quickstart',
+    'docs.section.quickstart.description': '安装、运行和预览的最短路径。',
+    'docs.section.api-reference': 'API Reference',
+    'docs.section.api-reference.description': 'Core、CLI、Web 与 VS Code 的 API 文档入口。',
+    'docs.section.integration': 'Integration',
+    'docs.section.integration.description': '宿主、浏览器、Web 和编辑器集成边界。',
+    'docs.section.configuration': 'Configuration',
+    'docs.section.configuration.description': '字体、宽字素、语言和输出环境配置。',
+    'docs.section.extension': 'Extension',
+    'docs.section.extension.description': 'UAEM、语义布局、UAF 和扩展作者入口。',
+    'docs.section.compatibility': 'Compatibility',
+    'docs.section.compatibility.description': '运行时、字体、adapter 和已知限制。',
+    'docs.section.release': 'Release',
+    'docs.section.release.description': '发布门禁、性能基线和运行时依赖。',
+    'docs.section.contribute': 'Contribute',
+    'docs.section.contribute.description': '反馈、画廊投稿和公开路线。',
     'input.imageTitle': '上传图片',
     'input.uploadText': '拖拽图片到此处',
     'input.uploadHint': '或点击选择文件',
@@ -423,6 +447,7 @@ const UI_MESSAGES = {
     'docs.status.loaded': '{count} documentation entries loaded',
     'docs.status.error': 'Documentation index failed to load: {message}',
     'docs.entryCount': 'Entries',
+    'docs.sectionCount': 'Paths',
     'docs.generatedAt': 'Generated',
     'docs.contract': 'Manifest',
     'docs.noSelection': 'Select a documentation entry',
@@ -434,18 +459,41 @@ const UI_MESSAGES = {
     'docs.metrics': 'Metrics',
     'docs.openGuide': 'Open docs',
     'docs.openRepo': 'Open repository',
+    'docs.sections.aria': 'Developer documentation paths',
+    'docs.sections.title': 'Documentation paths',
+    'docs.section.docCount': '{count} pages',
+    'docs.section.docs': 'Included pages',
     'docs.kind.hia-tsdoc': 'TSDoc intermediate docs',
     'docs.kind.hia-jsdoc': 'JSDoc API docs',
+    'docs.kind.section': 'Documentation path',
     'docs.stability.intermediate': 'Intermediate',
     'docs.stability.pilot': 'Pilot',
+    'docs.stability.public': 'Public',
     'docs.surface.core': 'Core library',
     'docs.surface.cli': 'CLI',
     'docs.surface.web': 'Web app',
     'docs.surface.vscode-extension': 'VS Code extension',
+    'docs.surface.docs': 'Public docs',
     'docs.metric.artifactCount': 'Artifacts',
     'docs.metric.inputCount': 'Inputs',
     'docs.metric.nodeCount': 'Nodes',
     'docs.metric.requiredFiles': 'Files',
+    'docs.section.quickstart': 'Quickstart',
+    'docs.section.quickstart.description': 'Shortest install, run, and preview path.',
+    'docs.section.api-reference': 'API Reference',
+    'docs.section.api-reference.description': 'API documentation entry points for Core, CLI, Web, and VS Code.',
+    'docs.section.integration': 'Integration',
+    'docs.section.integration.description': 'Host, browser, Web, and editor integration boundaries.',
+    'docs.section.configuration': 'Configuration',
+    'docs.section.configuration.description': 'Fonts, glyph width, language, and output target settings.',
+    'docs.section.extension': 'Extension',
+    'docs.section.extension.description': 'UAEM, semantic layout, UAF, and extension authoring entry points.',
+    'docs.section.compatibility': 'Compatibility',
+    'docs.section.compatibility.description': 'Runtime, font, adapter, and known limitation boundaries.',
+    'docs.section.release': 'Release',
+    'docs.section.release.description': 'Release gate, performance baseline, and runtime inventory.',
+    'docs.section.contribute': 'Contribute',
+    'docs.section.contribute.description': 'Support, gallery submission, and public roadmap paths.',
     'input.imageTitle': 'Upload Image',
     'input.uploadText': 'Drop an image here',
     'input.uploadHint': 'or click to choose a file',
@@ -705,8 +753,10 @@ const DOM = {
 
   docsStatus: '#docsStatus',
   docsEntryCount: '#docsEntryCount',
+  docsSectionCount: '#docsSectionCount',
   docsGeneratedAt: '#docsGeneratedAt',
   docsManifestVersion: '#docsManifestVersion',
+  docsSections: '#docsSections',
   docsGrid: '#docsGrid',
   docsKind: '#docsKind',
   docsTitle: '#docsTitle',
@@ -1901,12 +1951,17 @@ class DocsController {
     this.appController = appController;
     this.manifest = null;
     this.selectedEntry = null;
+    this.selectedSection = null;
   }
 
   bindEvents($doc) {
     $doc.on('click', '[data-docs-entry-id]', (event) => {
       const id = String($(event.currentTarget).attr('data-docs-entry-id') || '');
       this.selectEntry(id);
+    });
+    $doc.on('click', '[data-docs-section-id]', (event) => {
+      const id = String($(event.currentTarget).attr('data-docs-section-id') || '');
+      this.selectSection(id);
     });
   }
 
@@ -1920,8 +1975,9 @@ class DocsController {
       return;
     }
     this.renderSummary();
+    this.renderSections();
     this.renderGrid();
-    this.renderSelectedEntry();
+    this.renderSelection();
   }
 
   t(key, params = {}) {
@@ -1931,8 +1987,9 @@ class DocsController {
   async ensureLoaded() {
     if (this.manifest) {
       this.renderSummary();
+      this.renderSections();
       this.renderGrid();
-      if (!this.selectedEntry && this.manifest.entries.length > 0) {
+      if (!this.selectedEntry && !this.selectedSection && this.manifest.entries.length > 0) {
         this.selectEntry(this.manifest.entries[0].id);
       }
       return;
@@ -1944,6 +2001,7 @@ class DocsController {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       this.manifest = this.parseManifest(await response.json());
       this.renderSummary();
+      this.renderSections();
       this.renderGrid();
       this.setStatus('docs.status.loaded', { count: this.manifest.entries.length }, 'success');
       if (this.manifest.entries.length > 0) this.selectEntry(this.manifest.entries[0].id);
@@ -1961,8 +2019,26 @@ class DocsController {
     if (!Array.isArray(raw.entries)) {
       throw new Error('Public docs manifest entries must be an array');
     }
+    const rawArchitecture = raw.architecture && typeof raw.architecture === 'object' ? raw.architecture : {};
+    const rawSections = Array.isArray(rawArchitecture.sections) ? rawArchitecture.sections : [];
     return {
       ...raw,
+      architecture: {
+        ...rawArchitecture,
+        checkCommand: String(rawArchitecture.checkCommand || ''),
+        sections: rawSections.map((section) => ({
+          ...section,
+          id: String(section.id || ''),
+          title: String(section.title || section.id || ''),
+          docCount: Number.isFinite(Number(section.docCount)) ? Number(section.docCount) : 0,
+          docs: Array.isArray(section.docs)
+            ? section.docs.map((doc) => ({
+              path: String(doc.path || ''),
+              url: String(doc.url || raw.docsHomeUrl || raw.repository || ''),
+            }))
+            : [],
+        })).filter((section) => section.id),
+      },
       entries: raw.entries.map((entry) => ({
         ...entry,
         id: String(entry.id || ''),
@@ -1982,9 +2058,44 @@ class DocsController {
   renderSummary() {
     if (!this.manifest) return;
     $(DOM.docsEntryCount).text(String(this.manifest.entries.length));
+    $(DOM.docsSectionCount).text(String(this.manifest.architecture?.sections?.length ?? 0));
     $(DOM.docsGeneratedAt).text(this.formatDate(this.manifest.generatedAt));
     $(DOM.docsManifestVersion).text(`${this.manifest.contractVersion || '--'}`);
     $(DOM.docsRepoLink).attr('href', this.manifest.repository || 'https://github.com/mandolin/UnicodeArtJs');
+  }
+
+  renderSections() {
+    const $sections = $(DOM.docsSections);
+    $sections.empty();
+    if (!this.manifest) return;
+
+    (this.manifest.architecture?.sections || []).forEach((section) => {
+      const isSelected = section.id === this.selectedSection?.id;
+      const docCount = section.docs.length || section.docCount || 0;
+      const $button = $('<button>')
+        .attr({
+          type: 'button',
+          'data-docs-section-id': section.id,
+          'aria-pressed': String(isSelected),
+        })
+        .addClass('docs-section-card')
+        .toggleClass('selected', isSelected);
+
+      $('<strong>')
+        .addClass('docs-section-title')
+        .text(this.formatSectionTitle(section))
+        .appendTo($button);
+      $('<span>')
+        .addClass('docs-section-meta')
+        .text(this.t('docs.section.docCount', { count: docCount }))
+        .appendTo($button);
+      $('<span>')
+        .addClass('docs-section-description')
+        .text(this.formatSectionDescription(section))
+        .appendTo($button);
+
+      $('<article>').attr('role', 'listitem').append($button).appendTo($sections);
+    });
   }
 
   renderGrid() {
@@ -1993,7 +2104,7 @@ class DocsController {
     if (!this.manifest) return;
 
     this.manifest.entries.forEach((entry) => {
-      const isSelected = entry.id === this.selectedEntry?.id;
+      const isSelected = !this.selectedSection && entry.id === this.selectedEntry?.id;
       const $button = $('<button>')
         .attr({
           type: 'button',
@@ -2028,7 +2139,27 @@ class DocsController {
     const entry = this.manifest?.entries.find((item) => item.id === id);
     if (!entry) return;
     this.selectedEntry = entry;
+    this.selectedSection = null;
+    this.renderSections();
     this.renderGrid();
+    this.renderSelectedEntry();
+  }
+
+  selectSection(id) {
+    const section = this.manifest?.architecture?.sections?.find((item) => item.id === id);
+    if (!section) return;
+    this.selectedSection = section;
+    this.selectedEntry = null;
+    this.renderSections();
+    this.renderGrid();
+    this.renderSelectedSection();
+  }
+
+  renderSelection() {
+    if (this.selectedSection) {
+      this.renderSelectedSection();
+      return;
+    }
     this.renderSelectedEntry();
   }
 
@@ -2049,6 +2180,26 @@ class DocsController {
     $(DOM.docsDescription).text(this.buildDescription(entry));
     $(DOM.docsMetrics).text(this.formatMetrics(entry.metrics));
     $(DOM.docsGuideLink).attr('href', entry.guideUrl || this.manifest?.docsHomeUrl || '#');
+  }
+
+  renderSelectedSection() {
+    const section = this.selectedSection;
+    if (!section) {
+      this.setInspectorPlaceholder('docs.previewPlaceholder');
+      return;
+    }
+
+    const firstDocUrl = section.docs[0]?.url || this.manifest?.docsHomeUrl || '#';
+    $(DOM.docsKind).text(this.t('docs.kind.section'));
+    $(DOM.docsTitle).text(this.formatSectionTitle(section));
+    $(DOM.docsStability).text(this.t('docs.stability.public'));
+    $(DOM.docsPackage).text('UnicodeArtJs');
+    $(DOM.docsSurface).text(this.t('docs.surface.docs'));
+    $(DOM.docsCheckCommand).text(this.manifest?.architecture?.checkCommand || '--');
+    $(DOM.docsMetadata).prop('hidden', false);
+    $(DOM.docsDescription).text(this.formatSectionDescription(section));
+    $(DOM.docsMetrics).text(this.formatSectionDocs(section));
+    $(DOM.docsGuideLink).attr('href', firstDocUrl);
   }
 
   setInspectorPlaceholder(key) {
@@ -2087,6 +2238,25 @@ class DocsController {
   formatStability(stability) {
     const label = this.t(`docs.stability.${stability}`);
     return label === `docs.stability.${stability}` ? stability : label;
+  }
+
+  formatSectionTitle(section) {
+    const key = `docs.section.${section.id}`;
+    const label = this.t(key);
+    return label === key ? section.title : label;
+  }
+
+  formatSectionDescription(section) {
+    const key = `docs.section.${section.id}.description`;
+    const label = this.t(key);
+    return label === key ? '' : label;
+  }
+
+  formatSectionDocs(section) {
+    const lines = (section.docs || [])
+      .filter((doc) => doc.path)
+      .map((doc) => `- ${doc.path}`);
+    return lines.length > 0 ? `${this.t('docs.section.docs')}\n${lines.join('\n')}` : '';
   }
 
   formatDate(value) {

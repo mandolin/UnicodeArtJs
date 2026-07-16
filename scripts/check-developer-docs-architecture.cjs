@@ -93,6 +93,21 @@ for (const section of fixture.sections) {
 
 assertCondition(publicManifest.contract === 'unicodeartjs-public-docs-site-manifest', 'Web public docs manifest contract 不正确。');
 assertCondition(Array.isArray(publicManifest.entries) && publicManifest.entries.length === 4, '当前 Web 文档站 API 入口数量应为 4。');
+assertCondition(publicManifest.architecture?.contract === fixture.contract, 'Web public docs manifest 必须包含文档站架构契约。');
+assertCondition(publicManifest.architecture?.version === fixture.version, 'Web public docs manifest 的文档站架构版本不一致。');
+assertCondition(publicManifest.architecture?.checkCommand === fixture.checkCommand, 'Web public docs manifest 的架构检查命令不一致。');
+assertCondition(publicManifest.architecture?.sections?.length === fixture.sections.length, 'Web public docs manifest 的文档分区数量不一致。');
+
+for (const section of publicManifest.architecture.sections) {
+  const expected = fixture.sections.find((item) => item.id === section.id);
+  assertCondition(expected, `Web public docs manifest 包含未知分区: ${section.id}`);
+  assertCondition(section.docCount === expected.requiredDocs.length, `${section.id} 的文档数量不一致。`);
+  assertCondition(section.docs?.length === expected.requiredDocs.length, `${section.id} 的 docs 列表长度不一致。`);
+  for (const doc of section.docs || []) {
+    assertCondition(expected.requiredDocs.includes(doc.path), `${section.id} 引用了未知文档: ${doc.path}`);
+    assertCondition(doc.url?.startsWith('https://github.com/mandolin/UnicodeArtJs/'), `${section.id} 文档 URL 必须指向公开仓库。`);
+  }
+}
 for (const entry of publicManifest.entries) {
   assertCondition(entry.guideUrl?.startsWith('https://github.com/mandolin/UnicodeArtJs/'), `文档入口 ${entry.id} guideUrl 必须指向公开仓库。`);
 }

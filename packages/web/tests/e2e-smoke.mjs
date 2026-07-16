@@ -375,19 +375,37 @@ async function main() {
         undefined,
         { timeout: 10_000 },
       );
+      await page.waitForFunction(
+        () => document.querySelectorAll('#docsSections [data-docs-section-id]').length === 8,
+        undefined,
+        { timeout: 10_000 },
+      );
       const docsState = await page.evaluate(() => ({
         count: document.querySelector('#docsEntryCount')?.textContent,
+        sectionCount: document.querySelector('#docsSectionCount')?.textContent,
         title: document.querySelector('#docsTitle')?.textContent,
         guideHref: document.querySelector('#docsGuideLink')?.getAttribute('href'),
         pageText: document.querySelector('#docsWorkbench')?.textContent || '',
       }));
       if (docsState.count !== '4') throw new Error('Public docs entry count changed');
+      if (docsState.sectionCount !== '8') throw new Error('Public docs section count changed');
       if (!docsState.title?.includes('Core')) throw new Error('Default docs entry was not selected');
       if (!docsState.guideHref?.startsWith('https://github.com/mandolin/UnicodeArtJs/')) {
         throw new Error('Docs guide link does not point to the public repository');
       }
       if (/work-zone|\.generated-docs|ai\/codex/i.test(docsState.pageText)) {
         throw new Error('Docs page leaked an internal path fragment');
+      }
+      await page.click('[data-docs-section-id="quickstart"]');
+      const sectionState = await page.evaluate(() => ({
+        title: document.querySelector('#docsTitle')?.textContent,
+        metrics: document.querySelector('#docsMetrics')?.textContent || '',
+        guideHref: document.querySelector('#docsGuideLink')?.getAttribute('href'),
+      }));
+      if (!sectionState.title?.includes('Quickstart')) throw new Error('Docs section selection did not render Quickstart');
+      if (!sectionState.metrics.includes('README.md')) throw new Error('Docs section did not list public docs');
+      if (!sectionState.guideHref?.startsWith('https://github.com/mandolin/UnicodeArtJs/')) {
+        throw new Error('Docs section guide link does not point to the public repository');
       }
 
       await page.selectOption('#languageSelect', 'en-US');

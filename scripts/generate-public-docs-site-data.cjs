@@ -13,6 +13,7 @@ const path = require('node:path');
 
 const repositoryRoot = path.resolve(__dirname, '..');
 const sourceManifestPath = path.join(repositoryRoot, '.generated-docs', 'documentation-manifest.json');
+const docsArchitecturePath = path.join(repositoryRoot, 'fixtures', 'docs-site', 'developer-docs-architecture.json');
 const publicManifestPath = path.join(repositoryRoot, 'packages', 'web', 'public', 'docs', 'manifest.json');
 const repositoryUrl = 'https://github.com/mandolin/UnicodeArtJs';
 const pagesUrl = 'https://mandolin.github.io/UnicodeArtJs/';
@@ -36,6 +37,11 @@ function toRepositoryGuideUrl(publicGuide) {
   return `${repositoryUrl}/blob/main/${normalizedPath}${suffix}`;
 }
 
+function toRepositoryTreeUrl(publicPath) {
+  const normalizedPath = String(publicPath || '').replace(/\\/g, '/').replace(/^\/+/, '');
+  return `${repositoryUrl}/blob/main/${normalizedPath}`;
+}
+
 function toPublicEntry(entry) {
   return {
     id: entry.id,
@@ -52,6 +58,34 @@ function toPublicEntry(entry) {
       inputCount: entry.metrics?.inputCount ?? undefined,
       nodeCount: entry.metrics?.nodeCount ?? undefined,
       requiredFiles: entry.metrics?.requiredFiles ?? undefined,
+    },
+  };
+}
+
+function toPublicArchitecture(source) {
+  if (!fs.existsSync(docsArchitecturePath)) {
+    throw new Error('Missing developer docs architecture fixture. Run npm run docs:architecture:check.');
+  }
+
+  const architecture = readJson(docsArchitecturePath);
+  return {
+    contract: architecture.contract,
+    version: architecture.version,
+    checkCommand: architecture.checkCommand,
+    guideUrl: toRepositoryTreeUrl(architecture.architectureDoc),
+    audiences: architecture.audiences,
+    sections: (architecture.sections || []).map((section) => ({
+      id: section.id,
+      title: section.title,
+      docCount: section.requiredDocs?.length ?? 0,
+      docs: (section.requiredDocs || []).map((docPath) => ({
+        path: docPath,
+        url: toRepositoryTreeUrl(docPath),
+      })),
+    })),
+    generatedFrom: {
+      sourceContract: source.contract,
+      sourceContractVersion: source.contractVersion,
     },
   };
 }
@@ -93,6 +127,7 @@ function buildPublicManifest() {
       sourcesContentPolicy: source.policy?.sourcesContentPolicy ?? 'none',
       publicDataOnly: true,
     },
+    architecture: toPublicArchitecture(source),
     entries: entries.map(toPublicEntry),
   });
 }

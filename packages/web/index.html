@@ -504,6 +504,10 @@
             <dd id="docsEntryCount">--</dd>
           </div>
           <div>
+            <dt data-i18n="docs.sectionCount">文档路径</dt>
+            <dd id="docsSectionCount">--</dd>
+          </div>
+          <div>
             <dt data-i18n="docs.generatedAt">生成时间</dt>
             <dd id="docsGeneratedAt">--</dd>
           </div>
@@ -512,6 +516,13 @@
             <dd id="docsManifestVersion">--</dd>
           </div>
         </dl>
+
+        <section class="docs-section-panel" aria-label="文档路径" data-i18n-aria-label="docs.sections.aria">
+          <header class="docs-section-panel-header">
+            <h3 data-i18n="docs.sections.title">文档路径</h3>
+          </header>
+          <div class="docs-sections" id="docsSections" role="list" aria-live="polite"></div>
+        </section>
 
         <div class="docs-grid" id="docsGrid" role="list" aria-live="polite"></div>
       </section>

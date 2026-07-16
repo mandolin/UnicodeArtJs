@@ -1064,7 +1064,7 @@ details.config-details summary:hover {
 
 .docs-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
@@ -1082,6 +1082,63 @@ details.config-details summary:hover {
   overflow-wrap: anywhere;
   color: var(--text-primary);
   font-size: 0.8rem;
+}
+
+.docs-section-panel {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.docs-section-panel-header {
+  padding: var(--spacing-sm) var(--spacing-md) 0;
+}
+
+.docs-section-panel-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.docs-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+}
+
+.docs-section-card {
+  display: grid;
+  gap: 4px;
+  min-height: 92px;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.docs-section-card:hover,
+.docs-section-card:focus-visible,
+.docs-section-card.selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.14);
+  outline: none;
+}
+
+.docs-section-title {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.docs-section-meta,
+.docs-section-description {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
 }
 
 .docs-grid {
@@ -1485,6 +1542,12 @@ details.config-details summary:hover {
 
   .docs-summary,
   .docs-metadata {
+    grid-template-columns: 1fr;
+    padding: var(--spacing-sm);
+  }
+
+  .docs-sections,
+  .docs-grid {
     grid-template-columns: 1fr;
     padding: var(--spacing-sm);
   }

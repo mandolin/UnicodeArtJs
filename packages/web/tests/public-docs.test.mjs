@@ -15,7 +15,15 @@ test('public docs manifest is available and does not leak internal paths', () =>
 
   assert.equal(manifest.contract, 'unicodeartjs-public-docs-site-manifest');
   assert.equal(manifest.entries.length, 4);
+  assert.equal(manifest.architecture.contract, 'unicodeartjs-developer-docs-architecture');
+  assert.equal(manifest.architecture.sections.length, 8);
   assert.ok(manifest.entries.every((entry) => entry.guideUrl.startsWith('https://github.com/mandolin/UnicodeArtJs/')));
+  assert.ok(manifest.architecture.sections.every((section) => section.docs.length > 0));
+  assert.ok(
+    manifest.architecture.sections
+      .flatMap((section) => section.docs)
+      .every((doc) => doc.url.startsWith('https://github.com/mandolin/UnicodeArtJs/')),
+  );
 
   for (const fragment of ['.generated-docs', 'work-zone', 'ai/codex', 'K:\\', 'C:\\']) {
     assert.equal(text.includes(fragment), false, `public docs manifest leaks ${fragment}`);
