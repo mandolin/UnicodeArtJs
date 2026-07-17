@@ -34,6 +34,16 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 | --- | --- | --- | --- |
 | `web.gallery.staticIndex` | GitHub Pages 静态画廊索引、审核作品和投稿流程。 | Stable 候选 | 冻结索引字段、审核 checklist、作品类型扩展策略和内容政策边界。 |
 
+## 创作生态收口快照
+
+UAF、语义文档、UAEM 资源包和静态画廊已经形成同一条作者路径：官方示例、公开指南、canonical fixture、Core / CLI / Web 消费路径和自动检查都能互相印证。这意味着它们适合继续面向高级用户和宿主开发者试用，但仍不等于格式已经进入长期 stable 承诺。
+
+当前不建议只因为文档和门禁完善就提升格式稳定级别。下一次稳定化评审应重点看三类证据：
+
+- 是否已经冻结公开 schema、错误码和迁移策略。
+- 是否有更多真实作品或宿主接入反馈覆盖边界情况。
+- 是否能在 `creative-ecosystem:check`、`host-sideload:check`、`docs:hia:target:check` 和 `release:gate` 中持续保持同一套事实来源。
+
 ## Reserved 与 Legacy 边界
 
 | 能力 ID | 当前范围 | 稳定化去向 | 说明 |

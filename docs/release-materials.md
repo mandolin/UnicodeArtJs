@@ -162,6 +162,22 @@ npm run test:web:e2e
 - 视觉字体和字素字体选择在 Chrome / Edge 120+ 中可见并能影响对应行为。
 - 文档页能读取公开 manifest，且不暴露内部路径。
 
+## Creative Ecosystem / Docs-only Update
+
+如果一次更新只涉及 UAF、语义文档、UAEM、静态画廊、HIA 文档化门禁或公开文档站信息，不一定需要同步发布 npm Core、CLI 或 VS Code Marketplace 新版本。发版判断应以用户是否需要安装新包获得能力为准。
+
+这类更新至少核验：
+
+```bash
+npm run docs:all:check
+npm run creative-ecosystem:check
+npm run host-sideload:check
+npm run docs:hia:target:check
+npm run release:gate
+```
+
+发布后确认 GitHub Pages 与 CI 成功，并在 release notes 中明确 “No runtime package bump” 或列出实际发布的包级 tag。
+
 ## GitHub Release
 
 GitHub Release 用于汇总跨渠道发布结果。建议使用包级 tag：
