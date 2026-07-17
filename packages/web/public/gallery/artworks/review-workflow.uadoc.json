@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "colSpan": 3,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Gallery Review Workflow"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "role": "column-header",
+          "align": "center",
+          "blocks": [{ "kind": "raw-text", "text": "Step" }]
+        },
+        {
+          "role": "column-header",
+          "align": "center",
+          "blocks": [{ "kind": "raw-text", "text": "Gate" }]
+        },
+        {
+          "role": "column-header",
+          "align": "center",
+          "blocks": [{ "kind": "raw-text", "text": "Outcome" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "01 Proposal" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Scope + source" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Ready for review" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "02 License" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Original / MIT" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Safe to publish" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "03 Verify" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Core + Web tests" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Previewable asset" }]
+        }
+      ]
+    },
+    {
+      "role": "footer",
+      "cells": [
+        {
+          "colSpan": 3,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Static JSON only · no scripts · no remote payloads"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

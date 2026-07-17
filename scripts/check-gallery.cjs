@@ -15,22 +15,31 @@ const repoRoot = path.resolve(__dirname, '..');
 const galleryRoot = path.join(repoRoot, 'packages', 'web', 'public', 'gallery');
 const galleryIndexPath = path.join(galleryRoot, 'index.json');
 const galleryIndexModulePath = path.join(repoRoot, 'packages', 'web', 'src', 'gallery-index.js');
+const webMainPath = path.join(repoRoot, 'packages', 'web', 'src', 'main.js');
 const coreEntryPath = path.join(repoRoot, 'packages', 'core', 'dist', 'index.cjs.js');
 
 const publicFilesToScan = [
   'docs/gallery.md',
   'docs/gallery-submission.md',
+  'docs/gallery-review.md',
   '.github/ISSUE_TEMPLATE/gallery_artwork.yml',
   '.github/PULL_REQUEST_TEMPLATE/gallery_artwork.md',
 ];
 
 const requiredPublicText = [
   ['docs/gallery.md', 'gallery-submission.md'],
+  ['docs/gallery.md', 'gallery-review.md'],
   ['docs/gallery-submission.md', 'npm run gallery:check'],
   ['docs/gallery-submission.md', 'packages/web/public/gallery/artworks/'],
   ['docs/gallery-submission.md', '许可确认'],
+  ['docs/gallery-submission.md', 'gallery-review.md'],
+  ['docs/gallery-review.md', '回退流程'],
+  ['docs/gallery-review.md', 'npm run gallery:check'],
+  ['docs/gallery-review.md', 'scripts/check-gallery.cjs'],
   ['.github/ISSUE_TEMPLATE/gallery_artwork.yml', 'Gallery artwork proposal'],
+  ['.github/ISSUE_TEMPLATE/gallery_artwork.yml', 'docs/gallery-review.md'],
   ['.github/PULL_REQUEST_TEMPLATE/gallery_artwork.md', 'npm run gallery:check'],
+  ['.github/PULL_REQUEST_TEMPLATE/gallery_artwork.md', 'Rollback notes'],
 ];
 
 const permissiveGalleryLicenses = new Set([
@@ -83,6 +92,10 @@ function assertDate(value, label) {
   }
 }
 
+function compareIsoDate(left, right) {
+  return left.localeCompare(right);
+}
+
 function assertPermissiveLicense(license, label) {
   if (license.origin !== 'original') {
     fail(`${label}.origin must be original for the default static gallery.`);
@@ -106,14 +119,32 @@ async function checkGalleryAssets() {
   } = await import(pathToFileURL(galleryIndexModulePath).href);
   const core = require(coreEntryPath);
   const index = parseUnicodeArtGalleryIndex(fs.readFileSync(galleryIndexPath, 'utf8'));
+  const webMain = fs.readFileSync(webMainPath, 'utf8');
 
   assertDate(index.meta.reviewedAt, 'gallery index.meta.reviewedAt');
   assertPermissiveLicense(index.meta.license, 'gallery index.meta.license');
 
   const seenSources = new Set();
+  const seenIds = new Set();
+  if (index.artworks.length < 5) {
+    fail('The default static gallery should keep at least 5 reviewed examples.');
+  }
   for (const artwork of index.artworks) {
+    if (seenIds.has(artwork.id)) {
+      fail(`Duplicate gallery artwork id: ${artwork.id}`);
+    }
+    seenIds.add(artwork.id);
+
     assertDate(artwork.reviewedAt, `artwork ${artwork.id}.reviewedAt`);
+    if (compareIsoDate(index.meta.reviewedAt, artwork.reviewedAt) < 0) {
+      fail(`gallery index.meta.reviewedAt is older than artwork ${artwork.id}.reviewedAt.`);
+    }
     assertPermissiveLicense(artwork.license, `artwork ${artwork.id}.license`);
+    for (const tag of artwork.tags) {
+      if (!webMain.includes(`'gallery.tag.${tag}'`)) {
+        fail(`Artwork ${artwork.id} uses untranslated gallery tag: ${tag}`);
+      }
+    }
 
     if (seenSources.has(artwork.source)) {
       fail(`Duplicate gallery artwork source: ${artwork.source}`);

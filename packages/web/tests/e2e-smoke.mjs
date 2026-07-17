@@ -593,7 +593,7 @@ async function main() {
       await page.click('.mode-btn[data-mode="gallery"]');
       await page.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
       await page.waitForFunction(
-        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 4,
+        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length >= 5,
         undefined,
         { timeout: 10_000 },
       );
@@ -611,10 +611,18 @@ async function main() {
       );
       await page.click('#galleryClearFilters');
       await page.waitForFunction(
-        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 4,
+        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length >= 5,
         undefined,
         { timeout: 5000 },
       );
+
+      await page.fill('#gallerySearch', '审核');
+      await page.waitForFunction(
+        () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 1,
+        undefined,
+        { timeout: 5000 },
+      );
+      await page.click('#galleryClearFilters');
 
       await page.click('#galleryOpenEditor');
       await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
@@ -632,7 +640,7 @@ async function main() {
         await mobilePage.click('.mode-btn[data-mode="gallery"]');
         await mobilePage.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
         await mobilePage.waitForFunction(
-          () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length === 4,
+          () => document.querySelectorAll('#galleryGrid [data-gallery-artwork-id]').length >= 5,
           undefined,
           { timeout: 10_000 },
         );

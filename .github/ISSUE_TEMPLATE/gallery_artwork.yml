@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for proposing a gallery artwork. Please read `docs/gallery-submission.md` first.
+        Thanks for proposing a gallery artwork. Please read `docs/gallery-submission.md` first. Maintainers review accepted assets with `docs/gallery-review.md`.
         The default gallery only accepts reviewed declarative JSON assets, not scripts, remote URLs, or unverified third-party artwork.
   - type: dropdown
     id: kind

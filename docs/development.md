@@ -233,7 +233,7 @@ npm run optional-adapters:check
 npm run gallery:check
 ```
 
-该命令会重新构建 Core，并检查画廊索引、作品文件、投稿文档、Issue/PR 模板、许可证来源和 UAF / 语义文档解析。投稿流程见 [静态画廊投稿指南](gallery-submission.md)。
+该命令会重新构建 Core，并检查画廊索引、作品文件、投稿与审核文档、Issue/PR 模板、许可证来源、标签翻译和 UAF / 语义文档解析。投稿流程见 [静态画廊投稿指南](gallery-submission.md)，维护者审核与回退流程见 [静态画廊审核指南](gallery-review.md)。
 
 ## 支持与反馈入口
 

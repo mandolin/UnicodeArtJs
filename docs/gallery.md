@@ -42,13 +42,14 @@
 
 画廊现在接受可审查的候选投稿。建议先提交 Gallery artwork proposal Issue 说明作品类型、来源和许可证；准备好 JSON 资产后，再通过 PR 修改 `packages/web/public/gallery/artworks/` 与 `packages/web/public/gallery/index.json`。
 
-详细步骤、索引示例、许可确认和审核清单见 [静态画廊投稿指南](gallery-submission.md)。
+详细步骤、索引示例、许可确认和审核清单见 [静态画廊投稿指南](gallery-submission.md)。维护者审核与回退流程见 [静态画廊审核指南](gallery-review.md)。
 
 新增画廊作品前，请确认：
 
 - 资产为原创，或具备可公开再分发的明确许可与完整归属信息；首版默认只收录原创资产。
 - UAF 或语义文档能够通过 Core 校验，且不依赖本机路径、远程 URL 或脚本。
 - 索引中的标题、说明、标签与许可信息准确，中文和英文都可读。
+- 对照审核指南完成人工预览；上线后如发现来源、许可证或渲染问题，应按回退流程移除索引条目。
 - 运行 `npm run gallery:check`、`npm --workspace packages/web test`，必要时运行 `npm --workspace packages/web run test:e2e`。
 
 作品画廊仍然是受控静态画廊，不是开放上传平台。远程分发、作者页、搜索服务与内容审核后台会在需要时以独立设计进入后续版本。

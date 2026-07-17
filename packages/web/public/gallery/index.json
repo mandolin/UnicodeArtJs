@@ -10,7 +10,7 @@
       "expression": "MIT",
       "origin": "original"
     },
-    "reviewedAt": "2026-07-14"
+    "reviewedAt": "2026-07-18"
   },
   "artworks": [
     {
@@ -93,6 +93,26 @@
         "origin": "original"
       },
       "reviewedAt": "2026-07-14"
+    },
+    {
+      "id": "review-workflow",
+      "kind": "semantic-document",
+      "source": "artworks/review-workflow.uadoc.json",
+      "title": {
+        "zh-CN": "画廊审核流程",
+        "en-US": "Gallery Review Workflow"
+      },
+      "description": {
+        "zh-CN": "用语义表格呈现投稿、许可证确认和自动验证的原创流程卡。",
+        "en-US": "An original semantic table card showing proposal, license, and validation gates."
+      },
+      "tags": ["layout", "document", "review", "original"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-18"
     }
   ]
 }

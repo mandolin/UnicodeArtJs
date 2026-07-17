@@ -22,6 +22,7 @@ const requiredFiles = [
   'docs/extension-sdk.md',
   'docs/gallery.md',
   'docs/gallery-submission.md',
+  'docs/gallery-review.md',
   'docs/recipes.md',
   'docs/README.md',
   'docs/development.md',
@@ -88,6 +89,7 @@ const overview = readUtf8('docs/creative-ecosystem.md');
 const semanticDoc = readUtf8('docs/semantic-uaf-beta.md');
 const extensionSdk = readUtf8('docs/extension-sdk.md');
 const galleryDoc = readUtf8('docs/gallery.md');
+const galleryReviewDoc = readUtf8('docs/gallery-review.md');
 const extensionReadme = readUtf8('packages/extension-line-banner/README.md');
 const extensionManifest = readJson('packages/extension-line-banner/unicode-art-extension.json');
 const galleryIndex = readJson('packages/web/public/gallery/index.json');
@@ -118,6 +120,7 @@ for (const expected of [
   'semantic-uaf-beta.md',
   'extension-authoring.md',
   'gallery-submission.md',
+  'gallery-review.md',
   'packages/extension-line-banner/assets/line-font.uafont.json',
   'npm run uaf-authoring:check',
   'npm run semantic-document-authoring:check',
@@ -148,9 +151,18 @@ for (const expected of [
 for (const expected of [
   'unicode-art-gallery-index',
   'gallery-submission.md',
+  'gallery-review.md',
   'npm run gallery:check'
 ]) {
   requireText(galleryDoc, expected, 'docs/gallery.md');
+}
+
+for (const expected of [
+  '回退流程',
+  'scripts/check-gallery.cjs',
+  'npm run gallery:check'
+]) {
+  requireText(galleryReviewDoc, expected, 'docs/gallery-review.md');
 }
 
 assertCondition(extensionManifest.format === 'unicode-art-extension', '官方扩展示例必须保持 UAEM 格式。');
@@ -165,6 +177,10 @@ assertCondition(galleryIndex.version === 1, '画廊索引版本必须为 1。');
 const galleryKinds = new Set(galleryIndex.artworks?.map((artwork) => artwork.kind));
 assertCondition(galleryKinds.has('unicode-art-font'), '静态画廊必须包含至少一个 UAF 作品。');
 assertCondition(galleryKinds.has('semantic-document'), '静态画廊必须包含至少一个语义文档作品。');
-assertCondition((galleryIndex.artworks || []).length >= 4, '静态画廊至少保留 4 个审核示例。');
+assertCondition((galleryIndex.artworks || []).length >= 5, '静态画廊至少保留 5 个审核示例。');
+assertCondition(
+  (galleryIndex.artworks || []).some((artwork) => artwork.id === 'review-workflow'),
+  '静态画廊必须包含审核流程示例。'
+);
 
 process.stdout.write('Creative ecosystem checks passed.\n');

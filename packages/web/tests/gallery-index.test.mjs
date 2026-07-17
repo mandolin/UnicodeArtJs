@@ -25,10 +25,12 @@ test('parses the reviewed static gallery index', async () => {
   const index = parseUnicodeArtGalleryIndex(source);
 
   assert.equal(index.version, 1);
-  assert.equal(index.artworks.length, 4);
+  assert.ok(index.artworks.length >= 5);
   assert.equal(index.meta.license.expression, 'MIT');
+  assert.equal(index.meta.reviewedAt, '2026-07-18');
   assert.equal(getGalleryLocalizedText(index.artworks[0].title, 'zh-CN'), '线条 Banner');
   assert.equal(getGalleryLocalizedText(index.artworks[0].title, 'en-US'), 'Line Banner');
+  assert.ok(index.artworks.some((artwork) => artwork.id === 'review-workflow'));
   assert.ok(index.artworks.every((artwork) => artwork.license.origin === 'original'));
   assert.ok(index.artworks.every((artwork) => artwork.source.startsWith('artworks/')));
 });

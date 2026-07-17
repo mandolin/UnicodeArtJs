@@ -13,6 +13,7 @@ Describe the artwork and the user-facing value it adds to the static gallery.
 - [ ] The license expression and origin in the gallery index are accurate.
 - [ ] The artwork does not depend on scripts, remote URLs, private paths, accounts, or bundled third-party fonts.
 - [ ] Chinese and English title/description are both readable.
+- [ ] I checked `docs/gallery-review.md` for preview and rollback expectations.
 - [ ] I ran `npm run gallery:check`.
 - [ ] I ran `npm --workspace packages/web test`.
 
@@ -23,3 +24,7 @@ Explain the source of the artwork. If it is original, say so directly. If it use
 ## Preview
 
 Paste a small text preview or screenshot if useful.
+
+## Rollback notes
+
+Explain whether the artwork can be removed by deleting only its gallery index entry, or whether source files and related documentation should also be removed.
