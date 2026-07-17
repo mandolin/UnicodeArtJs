@@ -90,6 +90,7 @@ for (const relativePath of [
   'docs/performance-and-release-plan.md',
   'docs/developer-documentation-architecture.md',
   'docs/release-gate.md',
+  'docs/release-materials.md',
   'docs/vscode-extension-integration.md',
   'docs/vscode-extension-release-checklist.md',
   'packages/core/README.md',
@@ -112,6 +113,7 @@ for (const expected of [
   'docs/support.md',
   'docs/known-limitations.md',
   'docs/migration-guide.md',
+  'docs/release-materials.md',
   'docs/gallery.md',
   'docs/quickstart.md',
   'docs/recipes.md'
@@ -135,6 +137,7 @@ for (const expected of [
   'performance-and-release-plan.md',
   'developer-documentation-architecture.md',
   'release-gate.md',
+  'release-materials.md',
   'ecosystem-compatibility.md',
   'vscode-extension-release-checklist.md'
 ]) {

@@ -18,6 +18,7 @@ const paths = {
   docsIndex: path.join(repoRoot, 'docs', 'README.md'),
   developmentDoc: path.join(repoRoot, 'docs', 'development.md'),
   releaseGateDoc: path.join(repoRoot, 'docs', 'release-gate.md'),
+  releaseMaterialsDoc: path.join(repoRoot, 'docs', 'release-materials.md'),
   roadmapDoc: path.join(repoRoot, 'docs', 'roadmap.md'),
   releaseGateScript: path.join(repoRoot, 'scripts', 'release-gate.cjs'),
   publicEntrypointsScript: path.join(repoRoot, 'scripts', 'check-public-entrypoints.cjs'),
@@ -66,6 +67,7 @@ const planDoc = readText(paths.planDoc);
 const docsIndex = readText(paths.docsIndex);
 const developmentDoc = readText(paths.developmentDoc);
 const releaseGateDoc = readText(paths.releaseGateDoc);
+const releaseMaterialsDoc = readText(paths.releaseMaterialsDoc);
 const roadmapDoc = readText(paths.roadmapDoc);
 const releaseGateScript = readText(paths.releaseGateScript);
 const publicEntrypointsScript = readText(paths.publicEntrypointsScript);
@@ -102,6 +104,7 @@ for (const surface of fixture.releaseSurfaces || []) {
 
 for (const required of [
   'performance-release:check',
+  'release-materials:check',
   'benchmark:core',
   'release:gate'
 ]) {
@@ -109,21 +112,32 @@ for (const required of [
 }
 
 requireText(rootPackage.scripts['release:gate'], 'performance-release:check', 'package.json release:gate');
+requireText(rootPackage.scripts['release:gate'], 'release-materials:check', 'package.json release:gate');
 requireText(ciWorkflow, 'Check Performance Release Plan', '.github/workflows/ci.yml');
 requireText(ciWorkflow, 'npm run performance-release:check', '.github/workflows/ci.yml');
+requireText(ciWorkflow, 'Check Release Materials', '.github/workflows/ci.yml');
+requireText(ciWorkflow, 'npm run release-materials:check', '.github/workflows/ci.yml');
 requireText(docsIndex, 'performance-and-release-plan.md', 'docs/README.md');
+requireText(docsIndex, 'release-materials.md', 'docs/README.md');
 requireText(developmentDoc, 'npm run benchmark:core', 'docs/development.md');
 requireText(developmentDoc, 'npm run performance-release:check', 'docs/development.md');
+requireText(developmentDoc, 'npm run release-materials:check', 'docs/development.md');
 requireText(releaseGateDoc, 'performance-release:check', 'docs/release-gate.md');
+requireText(releaseGateDoc, 'release-materials:check', 'docs/release-gate.md');
 requireText(releaseGateDoc, 'benchmark:core', 'docs/release-gate.md');
+requireText(releaseMaterialsDoc, 'GitHub Release', 'docs/release-materials.md');
+requireText(releaseMaterialsDoc, 'post-release', 'docs/release-materials.md');
 requireText(roadmapDoc, '性能基线与发布计划', 'docs/roadmap.md');
 requireText(releaseGateScript, 'performanceReleaseDoc', 'scripts/release-gate.cjs');
 requireText(releaseGateScript, 'performanceReleasePlan', 'scripts/release-gate.cjs');
+requireText(releaseGateScript, 'releaseMaterialsDoc', 'scripts/release-gate.cjs');
 requireText(publicEntrypointsScript, 'docs/performance-and-release-plan.md', 'scripts/check-public-entrypoints.cjs');
+requireText(publicEntrypointsScript, 'docs/release-materials.md', 'scripts/check-public-entrypoints.cjs');
 
 for (const [relativePath, content] of Object.entries({
   'docs/performance-and-release-plan.md': planDoc,
-  'fixtures/performance-release/performance-release-plan.json': JSON.stringify(fixture, null, 2)
+  'fixtures/performance-release/performance-release-plan.json': JSON.stringify(fixture, null, 2),
+  'docs/release-materials.md': releaseMaterialsDoc
 })) {
   assertNoPrivateFragments(relativePath, content);
 }

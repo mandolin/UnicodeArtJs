@@ -214,6 +214,16 @@ npm run public-entry:check
 
 修改根 README、包 README、`package.json`、发布说明或公开入口 URL 后，应运行该命令。它只检查仓库内的稳定入口契约；npm registry、VS Code Marketplace 和 GitHub Actions 的实时状态仍需在发布收尾时单独复核。
 
+## 发布材料
+
+发布说明模板、npm / Marketplace / GitHub Pages 的发布后核验清单，以及包级 tag 约定集中在 [发布材料与发布后核验](release-materials.md)。文件路径为 `docs/release-materials.md`。
+
+```bash
+npm run release-materials:check
+```
+
+修改发布说明模板、发布后检查清单、`release:gate` 描述或版本发布入口时，应同时运行 `npm run public-entry:check` 和 `npm run docs:all:check`。
+
 ## 实验能力稳定性矩阵
 
 Core 能力边界由 `getCoreCapabilities()` 输出，公开稳定性矩阵由以下命令校验：

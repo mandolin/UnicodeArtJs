@@ -68,6 +68,7 @@
       "title": "Release",
       "requiredDocs": [
         "docs/release-gate.md",
+        "docs/release-materials.md",
         "docs/performance-and-release-plan.md",
         "docs/runtime-sbom.md"
       ]

@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-17T04:10:15.479Z",
+  "generatedAt": "2026-07-17T05:08:00.277Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -144,11 +144,15 @@
       {
         "id": "release",
         "title": "Release",
-        "docCount": 3,
+        "docCount": 4,
         "docs": [
           {
             "path": "docs/release-gate.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/release-gate.md"
+          },
+          {
+            "path": "docs/release-materials.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/release-materials.md"
           },
           {
             "path": "docs/performance-and-release-plan.md",

@@ -45,8 +45,9 @@
     "docs:architecture:check": "node scripts/check-developer-docs-architecture.cjs",
     "docs:api-reference:check": "node scripts/check-public-api-reference.cjs",
     "compatibility-docs:check": "node scripts/check-compatibility-docs.cjs",
+    "release-materials:check": "node scripts/check-release-materials.cjs",
     "docs:all": "npm run docs:cli && npm run docs:web && npm run docs:tsdoc:core && npm run docs:tsdoc:vscode && npm run docs:manifest && npm run docs:public-site",
-    "docs:all:check": "npm run docs:cli:check && npm run docs:web:check && npm run docs:tsdoc:core:check && npm run docs:tsdoc:vscode:check && npm run docs:contract:check && npm run docs:manifest:check && npm run docs:public-site:check && npm run docs:api-reference:check && npm run docs:architecture:check && npm run compatibility-docs:check",
+    "docs:all:check": "npm run docs:cli:check && npm run docs:web:check && npm run docs:tsdoc:core:check && npm run docs:tsdoc:vscode:check && npm run docs:contract:check && npm run docs:manifest:check && npm run docs:public-site:check && npm run docs:api-reference:check && npm run docs:architecture:check && npm run compatibility-docs:check && npm run release-materials:check",
     "docs:web": "node scripts/generate-web-docs.cjs",
     "docs:web:check": "npm run docs:web && node scripts/check-web-docs.cjs",
     "docs:core:probe": "node scripts/probe-core-ts-docs.cjs",
@@ -77,7 +78,7 @@
     "pack:cli": "npm --workspace packages/cli pack --dry-run",
     "release:verify": "node scripts/release-gate.cjs",
     "release:verify:publish": "node scripts/release-gate.cjs --strict-publish",
-    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run config-model:check && npm run glyph-width:check && npm run semantic-uaf-beta:check && npm run extension-sdk:check && npm run desktop-host:check && npm run optional-adapters:check && npm run performance-release:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
+    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run config-model:check && npm run glyph-width:check && npm run semantic-uaf-beta:check && npm run extension-sdk:check && npm run desktop-host:check && npm run optional-adapters:check && npm run performance-release:check && npm run release-materials:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
   },
   "optionalDependencies": {
     "@rollup/rollup-darwin-arm64": "4.62.2",

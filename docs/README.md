@@ -19,6 +19,7 @@
 - [可选输入格式与 Adapter 策略](optional-input-adapters.md)
 - [性能基线与发布计划](performance-and-release-plan.md)
 - [发布门禁与版本图](release-gate.md)
+- [发布材料与发布后核验](release-materials.md)
 - [代码注释与 API 文档约定](code-documentation.md)
 - [文档生成流水线](documentation-pipeline.md)
 - [开发者文档站信息架构](developer-documentation-architecture.md)

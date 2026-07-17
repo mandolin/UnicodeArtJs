@@ -37,6 +37,7 @@ const paths = {
   performanceReleaseDoc: path.join(repoRoot, 'docs', 'performance-and-release-plan.md'),
   performanceReleasePlan: path.join(repoRoot, 'fixtures', 'performance-release', 'performance-release-plan.json'),
   releaseDoc: path.join(repoRoot, 'docs', 'release-gate.md'),
+  releaseMaterialsDoc: path.join(repoRoot, 'docs', 'release-materials.md'),
   runtimeSbomDoc: path.join(repoRoot, 'docs', 'runtime-sbom.md'),
   vscodeReleaseChecklist: path.join(repoRoot, 'docs', 'vscode-extension-release-checklist.md'),
   publicDocsManifest: path.join(repoRoot, 'packages', 'web', 'public', 'docs', 'manifest.json'),
@@ -385,6 +386,7 @@ function checkPublicDocs() {
   const performanceReleaseDoc = readText(paths.performanceReleaseDoc);
   const performanceReleasePlan = readJson(paths.performanceReleasePlan);
   const releaseDoc = readText(paths.releaseDoc);
+  const releaseMaterialsDoc = readText(paths.releaseMaterialsDoc);
   const runtimeSbomDoc = readText(paths.runtimeSbomDoc);
   const vscodeChecklist = readText(paths.vscodeReleaseChecklist);
   const publicDocsManifest = readJson(paths.publicDocsManifest);
@@ -419,9 +421,17 @@ function checkPublicDocs() {
   assertGate(releaseDoc.includes('release:gate'), 'Release gate doc must describe release:gate.');
   assertGate(releaseDoc.includes('optional-adapters:check'), 'Release gate doc must describe optional-adapters:check.');
   assertGate(releaseDoc.includes('performance-release:check'), 'Release gate doc must describe performance-release:check.');
+  assertGate(releaseDoc.includes('release-materials:check'), 'Release gate doc must describe release-materials:check.');
   assertGate(releaseDoc.includes('benchmark:core'), 'Release gate doc must describe benchmark:core.');
   assertGate(!/\bW-art-P\d+(?:\.\d+)?\b/.test(releaseDoc), 'Release gate doc must not expose internal planning stage identifiers.');
   assertGate(releaseDoc.includes('napi-rs/canvas'), 'Release gate doc must identify the default Node text renderer.');
+  assertGate(releaseMaterialsDoc.includes('GitHub Release'), 'Release materials doc must describe GitHub Release.');
+  assertGate(releaseMaterialsDoc.includes('VS Code Marketplace'), 'Release materials doc must describe VS Code Marketplace.');
+  assertGate(releaseMaterialsDoc.includes('GitHub Pages'), 'Release materials doc must describe GitHub Pages.');
+  assertGate(releaseMaterialsDoc.includes('npm view unicode-art-js version'), 'Release materials doc must include Core npm verification.');
+  assertGate(releaseMaterialsDoc.includes('npm view unicode-art-cli version'), 'Release materials doc must include CLI npm verification.');
+  assertGate(releaseMaterialsDoc.includes('post-release'), 'Release materials doc must include post-release verification.');
+  assertGate(!/\bW-art-P\d+(?:\.\d+)?\b/.test(releaseMaterialsDoc), 'Release materials doc must not expose internal planning stage identifiers.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/canvas@1.0.2'), 'Runtime inventory must pin @napi-rs/canvas@1.0.2.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/image@1.14.0'), 'Runtime inventory must pin @napi-rs/image@1.14.0.');
   assertGate(optionalInputAdaptersDoc.includes('PNG / JPEG / JPG / WebP / BMP'), 'Optional input adapter doc must list default Clean formats.');

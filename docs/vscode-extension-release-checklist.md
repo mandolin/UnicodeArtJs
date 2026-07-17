@@ -7,6 +7,7 @@
 - Confirm `unicode-art-js` dependency version.
 - Confirm Node 22 is active through `mise exec -- node -v`.
 - Run `mise exec -- npm run release:gate` from the repository root.
+- Review `docs/release-materials.md` for the release note template and post-release checks.
 - Confirm `mise exec -- npm --workspace packages/vscode-extension run inspect:vsix` passes for the generated VSIX.
 - Install the VSIX locally with `code --install-extension`.
 - Open the converter from the command palette.
@@ -41,6 +42,7 @@ For the stable channel, run `mise exec -- npm run package`, then publish without
 - Verify WebView opens and converts text.
 - Verify WebView image mode.
 - Confirm GIF/SVG/TIFF files are not exposed as default supported image inputs.
+- Record Marketplace status, VSIX version, and any post-release follow-up using `docs/release-materials.md`.
 
 ## Known Follow-Ups
 

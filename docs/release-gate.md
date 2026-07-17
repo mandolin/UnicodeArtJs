@@ -10,7 +10,7 @@ From the repository root:
 npm run release:gate
 ```
 
-The command runs package checks, documentation checks, recipe/example checks, static gallery checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
+The command runs package checks, documentation checks, recipe/example checks, static gallery checks, release-material checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
 
 For npm/Marketplace publish preparation after switching all publish-time dependencies to npm versions:
 
@@ -55,6 +55,7 @@ npm run release:verify:publish
 - `desktop-host:check` can validate the desktop host baseline, canonical `*.uaproj` v1 fixtures, Compatible documentation links, and release-gate integration.
 - `optional-adapters:check` can validate 可选输入格式 (optional input format) and adapter policy, Core default image formats, VS Code image entrypoints, Compatible documentation links, and release-gate integration.
 - `performance-release:check` can validate the public performance baseline, `benchmark:core` command wiring, CI step, release surfaces, and version decision rules.
+- `release-materials:check` can validate [`docs/release-materials.md`](release-materials.md), release note templates, npm / Marketplace / GitHub Pages post-release checks, and package-level tag reminders.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).
@@ -76,3 +77,6 @@ npm install
 ```
 
 The VSCode extension uses npm Core by default because VSIX packaging is more stable without workspace symlinks. Its package command still stages a local Core tarball internally so an unpublished Core candidate can be verified before release.
+
+Release notes, package-level tag naming, and post-release verification steps are standardized in
+[`docs/release-materials.md`](release-materials.md). Its static guard is `release-materials:check`.
