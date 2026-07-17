@@ -31,6 +31,7 @@ const paths = {
   lockfile: path.join(repoRoot, 'package-lock.json'),
   rootReadme: path.join(repoRoot, 'README.md'),
   developmentDoc: path.join(repoRoot, 'docs', 'development.md'),
+  documentationQualityDoc: path.join(repoRoot, 'docs', 'documentation-quality.md'),
   documentationPipelineDoc: path.join(repoRoot, 'docs', 'documentation-pipeline.md'),
   ecosystemCompatibilityDoc: path.join(repoRoot, 'docs', 'ecosystem-compatibility.md'),
   optionalInputAdaptersDoc: path.join(repoRoot, 'docs', 'optional-input-adapters.md'),
@@ -380,6 +381,7 @@ function checkPublicDocs() {
   const rootPackage = readJson(paths.rootPackage);
   const rootReadme = readText(paths.rootReadme);
   const developmentDoc = readText(paths.developmentDoc);
+  const documentationQualityDoc = readText(paths.documentationQualityDoc);
   const documentationPipelineDoc = readText(paths.documentationPipelineDoc);
   const ecosystemCompatibilityDoc = readText(paths.ecosystemCompatibilityDoc);
   const optionalInputAdaptersDoc = readText(paths.optionalInputAdaptersDoc);
@@ -398,7 +400,13 @@ function checkPublicDocs() {
   assertGate(rootReadme.includes(rootPackage.homepage), 'Root README must include the GitHub Pages homepage.');
   assertGate(developmentDoc.includes('npm run release:gate'), 'Development doc must mention npm run release:gate.');
   assertGate(developmentDoc.includes('npm run docs:all:check'), 'Development doc must mention npm run docs:all:check.');
+  assertGate(developmentDoc.includes('npm run docs:quality:check'), 'Development doc must mention npm run docs:quality:check.');
+  assertGate(documentationQualityDoc.includes('术语抽查'), 'Documentation quality doc must describe terminology sampling.');
+  assertGate(documentationQualityDoc.includes('注释抽样'), 'Documentation quality doc must describe comment sampling.');
+  assertGate(documentationQualityDoc.includes('manual review'), 'Documentation quality doc must describe manual review.');
+  assertGate(documentationQualityDoc.includes('npm run docs:quality:check'), 'Documentation quality doc must describe docs:quality:check.');
   assertGate(documentationPipelineDoc.includes('npm run docs:all:check'), 'Documentation pipeline doc must describe docs:all:check.');
+  assertGate(documentationPipelineDoc.includes('docs:quality:check'), 'Documentation pipeline doc must describe docs:quality:check.');
   assertGate(documentationPipelineDoc.includes('.generated-docs/documentation-manifest.json'), 'Documentation pipeline doc must describe the manifest path.');
   assertGate(documentationPipelineDoc.includes('packages/web/public/docs/manifest.json'), 'Documentation pipeline doc must describe the public docs site manifest.');
   assertGate(publicDocsManifest.contract === 'unicodeartjs-public-docs-site-manifest', 'Public docs site manifest contract changed.');

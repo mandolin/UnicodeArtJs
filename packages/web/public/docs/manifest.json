@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-17T05:08:00.277Z",
+  "generatedAt": "2026-07-17T07:11:54.370Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -49,11 +49,15 @@
       {
         "id": "api-reference",
         "title": "API Reference",
-        "docCount": 2,
+        "docCount": 3,
         "docs": [
           {
             "path": "docs/code-documentation.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/code-documentation.md"
+          },
+          {
+            "path": "docs/documentation-quality.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/documentation-quality.md"
           },
           {
             "path": "docs/documentation-pipeline.md",
@@ -1972,11 +1976,11 @@
             "name": "convertImageFile",
             "kind": "function",
             "signature": "convertImageFile(context: vscode.ExtensionContext, logger: ExtensionLogger, resource?: vscode.Uri)",
-            "summary": "🟢 转换本地图片文件为字符画 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。 🔹 当前阶段只接受本地 `file` URI，远程工作区资源需要后续独立适配。",
+            "summary": "🟢 转换本地图片文件为字符画 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。 🔹 当前版本只接受本地 `file` URI，远程工作区资源需要后续独立适配。",
             "source": {
               "path": "packages/vscode-extension/src/commands/convertImageFile.ts",
-              "line": 22,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertImageFile.ts#L22"
+              "line": 23,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertImageFile.ts#L23"
             }
           },
           {
@@ -2179,8 +2183,8 @@
             "summary": "🟢 获取 VS Code 扩展当前语言 🔹 根据 `vscode.env.language` 在中文和英文之间选择。",
             "source": {
               "path": "packages/vscode-extension/src/i18n.ts",
-              "line": 259,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L259"
+              "line": 261,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L261"
             }
           },
           {
@@ -2191,8 +2195,8 @@
             "summary": "🟢 获取本地化消息 🔹 用于命令、通知和 WebView 宿主消息；Core 错误信息仍由 Core locale 处理。",
             "source": {
               "path": "packages/vscode-extension/src/i18n.ts",
-              "line": 272,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L272"
+              "line": 274,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L274"
             }
           },
           {
@@ -2203,8 +2207,8 @@
             "summary": "🟢 获取 WebView 消息表 🔹 初始化 Converter 面板时发送给前端脚本，避免 WebView 自行推断 VS Code 语言。",
             "source": {
               "path": "packages/vscode-extension/src/i18n.ts",
-              "line": 285,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L285"
+              "line": 287,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L287"
             }
           },
           {

@@ -1645,7 +1645,7 @@ class EditorController {
  *
  * 🔹 画廊索引和资源始终来自当前站点的 `public/gallery` 静态目录。
  * 🔹 每份资源都会先经画廊索引路径校验，再经 Core 的 UAF/语义文档校验。
- * 🔹 本阶段不支持上传、远程 URL、账户、评论或任何可执行扩展。
+ * 🔹 当前版本不支持上传、远程 URL、账户、评论或任何可执行扩展。
  */
 class GalleryController {
   constructor(appController) {

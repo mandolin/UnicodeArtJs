@@ -75,6 +75,9 @@ jobs:
       - name: Check Documentation Contract
         run: npm run docs:contract:check
 
+      - name: Check Documentation Quality
+        run: npm run docs:quality:check
+
       - name: Check Documentation Manifest
         run: npm run docs:manifest:check
 

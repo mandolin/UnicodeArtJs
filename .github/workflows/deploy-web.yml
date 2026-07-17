@@ -22,6 +22,7 @@ on:
       - 'packages/core/**'
       - 'packages/web/**'
       - 'scripts/check-*-docs.cjs'
+      - 'scripts/check-documentation-quality.cjs'
       - 'scripts/check-release-materials.cjs'
       - 'scripts/generate-*-docs.cjs'
       - 'scripts/generate-public-docs-site-data.cjs'

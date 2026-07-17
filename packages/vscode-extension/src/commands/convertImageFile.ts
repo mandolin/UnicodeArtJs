@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { resolveArtConfig } from '../config/configResolver';
 import { saveRecentConfig } from '../config/presetStore';
 import { createCoreAdapter } from '../core/coreAdapter';
+import { t } from '../i18n';
 import { writeResult } from '../output/resultWriter';
 import type { ExtensionLogger } from '../utils/logger';
 
@@ -13,7 +14,7 @@ const IMAGE_FILTERS = {
  * 🟢 转换本地图片文件为字符画
  *
  * 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。
- * 🔹 当前阶段只接受本地 `file` URI，远程工作区资源需要后续独立适配。
+ * 🔹 当前版本只接受本地 `file` URI，远程工作区资源需要后续独立适配。
  *
  * @param context - VS Code 扩展上下文。
  * @param logger - 扩展输出日志器。
@@ -31,7 +32,7 @@ export async function convertImageFile(
   logger.info(`Image conversion requested. path=${imageUri.fsPath}, preset=${config.preset}`);
 
   if (imageUri.scheme !== 'file') {
-    await vscode.window.showErrorMessage('UnicodeArtJs can only convert local image files in this phase.');
+    await vscode.window.showErrorMessage(t('message.localImageOnly'));
     return;
   }
 

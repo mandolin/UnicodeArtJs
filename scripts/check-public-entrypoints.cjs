@@ -88,6 +88,7 @@ for (const relativePath of [
   'docs/desktop-host-baseline.md',
   'docs/optional-input-adapters.md',
   'docs/performance-and-release-plan.md',
+  'docs/documentation-quality.md',
   'docs/developer-documentation-architecture.md',
   'docs/release-gate.md',
   'docs/release-materials.md',
@@ -114,6 +115,7 @@ for (const expected of [
   'docs/known-limitations.md',
   'docs/migration-guide.md',
   'docs/release-materials.md',
+  'docs/documentation-quality.md',
   'docs/gallery.md',
   'docs/quickstart.md',
   'docs/recipes.md'
@@ -135,6 +137,7 @@ for (const expected of [
   'desktop-host-baseline.md',
   'optional-input-adapters.md',
   'performance-and-release-plan.md',
+  'documentation-quality.md',
   'developer-documentation-architecture.md',
   'release-gate.md',
   'release-materials.md',

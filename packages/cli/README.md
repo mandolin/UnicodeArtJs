@@ -108,7 +108,7 @@ unicode-art image <input> [options]
 - `--visual-font <name>` - 视觉字体名称或路径
 - `--glyph-font <name>` - 字素显示字体
 - `--glyph-width-profile <name>` - 字素宽度 profile 名称（实验性，影响裱框、布局与输出列数）
-- `--wide-char-regex <regex>` - 完整宽字素字符类（实验性，优先于 profile）
+- `--wide-char-regex <regex>` - 完整宽字素集合正则（实验性，优先于 profile）
 - `--font-style <style>` - 字体样式 (regular\|bold\|italic\|bold-italic)
 - `--font-reduce <number>` - 视觉字体渲染内边距/字号收缩量
 - `-m, --matrix <size>` - 矩阵大小（默认6）

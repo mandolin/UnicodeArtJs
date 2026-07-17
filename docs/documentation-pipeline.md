@@ -31,7 +31,7 @@ npm run docs:all
 npm run docs:all:check
 ```
 
-该命令会依次运行 CLI、Web、Core TSDoc、VS Code TSDoc、术语契约和统一清单检查。清单写入：
+该命令会依次运行 CLI、Web、Core TSDoc、VS Code TSDoc、术语契约、文档质量和统一清单检查。清单写入：
 
 ```text
 .generated-docs/documentation-manifest.json
@@ -45,11 +45,11 @@ npm run docs:all:check
 packages/web/public/docs/manifest.json
 ```
 
-该快照只保留包名、版本、接口面、文档类型、公开文档链接、检查命令和指标摘要；不会包含 `.generated-docs/`、`work-zone/`、本机绝对路径或会话记录。GitHub Pages 的“开发文档”页直接读取这份 JSON。
+该快照只保留包名、版本、接口面、文档类型、公开文档链接、检查命令和指标摘要；不会包含 `.generated-docs/`、内部工作区、本机绝对路径或会话记录。GitHub Pages 的“开发文档”页直接读取这份 JSON。
 
 ## CI 与发布门禁
 
-GitHub Actions 的 `CI / Full Check` 会分步骤运行与 `npm run docs:all:check` 等价的文档检查。文档、脚本、TSDoc 配置或包源码变化都会触发该检查；分步骤执行是为了让远端失败时能直接定位到 CLI、Web、Core TSDoc、VS Code TSDoc、术语契约或 manifest。
+GitHub Actions 的 `CI / Full Check` 会分步骤运行与 `npm run docs:all:check` 等价的文档检查。文档、脚本、TSDoc 配置或包源码变化都会触发该检查；分步骤执行是为了让远端失败时能直接定位到 CLI、Web、Core TSDoc、VS Code TSDoc、术语契约、文档质量或 manifest。
 
 发布前总入口 `npm run release:gate` 也会运行 `docs:all:check`，确保发布包、VSIX 检查和开发者文档使用同一套质量底线。
 
@@ -63,10 +63,13 @@ npm run docs:web:check
 npm run docs:tsdoc:core:check
 npm run docs:tsdoc:vscode:check
 npm run docs:contract:check
+npm run docs:quality:check
 npm run docs:manifest:check
 npm run docs:public-site:check
 npm run docs:architecture:check
 ```
+
+`docs:quality:check` 会校验 [文档质量与注释抽查](documentation-quality.md)、抽样源码注释、公开文案禁区和 CI / 文档站接线。
 
 `docs:architecture:check` 会校验 [开发者文档站信息架构](developer-documentation-architecture.md)、公开 docs 索引、Web 文档站 manifest 和文档站分区契约。进入发布前或合并前，仍建议运行 `npm run docs:all:check`。
 
