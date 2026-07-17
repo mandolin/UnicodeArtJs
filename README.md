@@ -174,6 +174,7 @@ Core、CLI、Web 和 VS Code 默认路径采用“清洁分发”策略，依赖
 - CLI npm 包：<https://www.npmjs.com/package/unicode-art-cli>
 - VS Code 插件：<https://marketplace.visualstudio.com/items?itemName=mandolin.unicode-art-js-vscode>
 - 生态兼容性与升级说明：[docs/ecosystem-compatibility.md](docs/ecosystem-compatibility.md)
+- 迁移指南：[docs/migration-guide.md](docs/migration-guide.md)
 - 常见使用 Recipes：[docs/recipes.md](docs/recipes.md)
 - 声明式扩展清单说明：[docs/extension-manifest.md](docs/extension-manifest.md)
 - 声明式扩展作者指南：[docs/extension-authoring.md](docs/extension-authoring.md)

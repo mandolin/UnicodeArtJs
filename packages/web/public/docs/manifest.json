@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-17T03:34:19.182Z",
+  "generatedAt": "2026-07-17T04:10:15.479Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -121,8 +121,12 @@
       {
         "id": "compatibility",
         "title": "Compatibility",
-        "docCount": 3,
+        "docCount": 4,
         "docs": [
+          {
+            "path": "docs/migration-guide.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/migration-guide.md"
+          },
           {
             "path": "docs/known-limitations.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/known-limitations.md"

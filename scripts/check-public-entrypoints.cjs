@@ -79,6 +79,7 @@ for (const relativePath of [
   'docs/quickstart.md',
   'docs/support.md',
   'docs/known-limitations.md',
+  'docs/migration-guide.md',
   'docs/experimental-stability.md',
   'docs/config-model-vnext.md',
   'docs/glyph-width-layout.md',
@@ -110,6 +111,7 @@ for (const expected of [
   marketplaceUrl,
   'docs/support.md',
   'docs/known-limitations.md',
+  'docs/migration-guide.md',
   'docs/gallery.md',
   'docs/quickstart.md',
   'docs/recipes.md'
@@ -122,6 +124,7 @@ for (const expected of [
   'quickstart.md',
   'support.md',
   'known-limitations.md',
+  'migration-guide.md',
   'experimental-stability.md',
   'config-model-vnext.md',
   'glyph-width-layout.md',

@@ -57,6 +57,7 @@
       "id": "compatibility",
       "title": "Compatibility",
       "requiredDocs": [
+        "docs/migration-guide.md",
         "docs/known-limitations.md",
         "docs/optional-input-adapters.md",
         "docs/ecosystem-compatibility.md"

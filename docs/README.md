@@ -7,6 +7,7 @@
 - [依赖与许可证政策](license-audit.md)
 - [支持与反馈](support.md)
 - [已知限制](known-limitations.md)
+- [迁移指南](migration-guide.md)
 - [实验能力稳定性矩阵](experimental-stability.md)
 - [配置模型 vNext](config-model-vnext.md)
 - [字素宽度与布局一致性](glyph-width-layout.md)
