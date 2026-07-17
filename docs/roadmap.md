@@ -38,8 +38,9 @@ UnicodeArtJs 的目标是围绕同一套核心转换能力，提供 JavaScript/T
 
 ### 开发者文档
 
-项目将逐步为公共 API、配置、协议和核心算法补充准确的中英双语注释，并计划使用 HIA Documentation Sys 的 JSDoc 工具链生成可浏览、可版本化的开发者文档。
-当前公开文档站将按 [开发者文档站信息架构](developer-documentation-architecture.md) 组织 Quickstart、API Reference、Integration、Configuration、Extension、Compatibility、Release 和 Contribute 等入口。
+项目已经建立公开文档站信息架构、文档质量门禁和 API Reference 数据投影入口。公共 API、配置、协议和核心算法会继续补充准确的中英双语注释，并使用 HIA Documentation Sys 的 JSDoc / TSDoc 工具链生成可检查的开发者文档数据。
+
+当前公开文档站按 [开发者文档站信息架构](developer-documentation-architecture.md) 组织 Quickstart、API Reference、Integration、Configuration、Extension、Compatibility、Release 和 Contribute 等入口。后续重点是版本化 API 页面、搜索体验、示例联动和更清晰的稳定性标识。
 
 ## 长期探索
 
