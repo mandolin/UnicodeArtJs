@@ -72,6 +72,9 @@ jobs:
       - name: Check VS Code TSDoc
         run: npm run docs:tsdoc:vscode:check
 
+      - name: Check HIA Target Docs Adoption
+        run: npm run docs:hia:target:check
+
       - name: Check Documentation Contract
         run: npm run docs:contract:check
 

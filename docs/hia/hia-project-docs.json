@@ -1,0 +1,37 @@
+{
+  "$schema": "https://mandolin.github.io/HIA-Documentation/schemas/project-docs-integration-0.1.0-draft.schema.json",
+  "schemaVersion": "0.1.0-draft",
+  "projectId": "unicodeartjs",
+  "projectKind": "typescript-workspace",
+  "packageBaseline": {
+    "@hia-doc/tsdoc-runner": "0.1.2",
+    "source": "npm-registry"
+  },
+  "producerOutputs": [
+    {
+      "id": "unicodeartjs-core-tsdoc",
+      "producer": "tsdoc",
+      "command": "npm run docs:tsdoc:core:check",
+      "config": "tsdoc.core.json",
+      "outputDirectory": ".generated-docs/tsdoc/core",
+      "resultManifest": ".generated-docs/tsdoc/core/tsdoc.producer-result.json"
+    },
+    {
+      "id": "unicodeartjs-vscode-tsdoc",
+      "producer": "tsdoc",
+      "command": "npm run docs:tsdoc:vscode:check",
+      "config": "tsdoc.vscode-extension.json",
+      "outputDirectory": ".generated-docs/tsdoc/vscode-extension",
+      "resultManifest": ".generated-docs/tsdoc/vscode-extension/tsdoc.producer-result.json"
+    }
+  ],
+  "privacy": {
+    "sourcesContentPolicy": "none",
+    "sourcePreviewPolicy": "none",
+    "absolutePathPolicy": "forbidden-in-published-artifacts"
+  },
+  "nextIntegrationLayer": {
+    "unifiedHtml": "consume existing TSDoc producer result manifests once the project opts in to HIA unified docs rendering",
+    "sourceLinkageRuntime": "reuse HIA host relation graph after manual visual confirmation"
+  }
+}

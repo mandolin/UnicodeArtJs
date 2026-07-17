@@ -43,6 +43,7 @@ npm run release:verify:publish
 - Shared text/image/box fixtures from `fixtures/release/fixtures.json` produce matching Core and CLI output.
 - Public docs keep the GitHub Pages URL and release-gate instructions visible.
 - `docs:all:check` can regenerate CLI/Web JSDoc, Core/VS Code TSDoc, the terminology contract, and the documentation manifest.
+- `docs:hia:target:check` can validate the project-level HIA target docs adoption config, Core / VS Code TSDoc producer results, CI wiring, release-gate wiring, and source-content privacy.
 - `recipes:check` can run the public Node examples and representative CLI recipes.
 - `gallery:check` can validate the static gallery index, reviewed artwork files, submission/review templates, rollback guidance, licenses, localized tags, and Core parsing of UAF / semantic-document assets.
 - `support:check` can validate the support guide, known limitations page, Issue Forms, and public label catalog.
