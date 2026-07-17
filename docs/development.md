@@ -175,6 +175,16 @@ npm run extension-sdk:check
 
 该命令会检查 [声明式扩展 SDK](extension-sdk.md)、[UAEM v1 清单规范](extension-manifest.md)、官方 Line Banner 示例、Core 解析结果、CLI 本地侧载预检和 Web 只读清单测试入口。UAEM v1 仍保持纯声明式边界，不允许通过资源包执行第三方代码。
 
+## 官方扩展示例包
+
+修改 `packages/extension-line-banner`、官方扩展模板、资源包 README、LICENSE 或官方示例资源时，运行：
+
+```bash
+npm run extension-example:check
+```
+
+该命令会检查官方 Line Banner 包是否仍可复制、可验证、可侧载；同时覆盖 Core 资源解析、CLI 本地预检、复制后目录校验和资源渲染。
+
 ## 创作生态
 
 修改 UAF、语义布局、UAEM、官方扩展示例、静态画廊或创作作者路径时，运行：
@@ -183,7 +193,7 @@ npm run extension-sdk:check
 npm run creative-ecosystem:check
 ```
 
-该命令会检查 [创作生态总览](creative-ecosystem.md)、UAF / 语义布局契约、声明式扩展 SDK、官方 Line Banner 示例、静态画廊索引和 release gate 接线。它是一个轻量总览门禁，不替代 `semantic-uaf-beta:check`、`uaf-authoring:check`、`semantic-document-authoring:check`、`extension-sdk:check` 和 `gallery:check` 对具体格式与资源的校验。
+该命令会检查 [创作生态总览](creative-ecosystem.md)、UAF / 语义布局契约、声明式扩展 SDK、官方 Line Banner 示例、静态画廊索引和 release gate 接线。它是一个轻量总览门禁，不替代 `semantic-uaf-beta:check`、`uaf-authoring:check`、`semantic-document-authoring:check`、`extension-sdk:check`、`extension-example:check` 和 `gallery:check` 对具体格式与资源的校验。
 
 ## UAF 字体作者路径
 

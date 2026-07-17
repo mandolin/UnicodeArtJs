@@ -55,6 +55,7 @@ npm run uaf-authoring:check
 npm run semantic-document-authoring:check
 npm run semantic-uaf-beta:check
 npm run extension-sdk:check
+npm run extension-example:check
 npm run gallery:check
 ```
 

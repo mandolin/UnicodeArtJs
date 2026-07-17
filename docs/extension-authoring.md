@@ -118,8 +118,9 @@ node packages/cli/src/console.js document .\my-banner-pack\assets\welcome-templa
 6. 提供简短 README，说明资源用途、授权方式、兼容版本和验证命令。
 
 项目内的[Line Banner 示例](../packages/extension-line-banner/README.md)是原创 MIT 资源，展示
-一份 UAF 字体与一份语义模板如何共用同一份 UAEM 清单。它是开发与回归基线，不是扩展市场或
-自动安装器。
+一份 UAF 字体与一份语义模板如何共用同一份 UAEM 清单。复制这个目录前，先阅读它的
+[TEMPLATE.md](../packages/extension-line-banner/TEMPLATE.md)，并替换官方 ID、作者、许可证和资源
+路径。它是开发与回归基线，不是扩展市场或自动安装器。
 
 ## 兼容性与治理承诺
 

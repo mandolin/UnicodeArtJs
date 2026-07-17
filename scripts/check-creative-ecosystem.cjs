@@ -106,6 +106,7 @@ assertCondition(
   requireText(releaseGate, 'creative-ecosystem:check', 'docs/release-gate.md');
   requireText(releaseGate, 'uaf-authoring:check', 'docs/release-gate.md');
   requireText(releaseGate, 'semantic-document-authoring:check', 'docs/release-gate.md');
+  requireText(releaseGate, 'extension-example:check', 'docs/release-gate.md');
 
 for (const expected of [
   'unicode-art-font@1',
@@ -121,6 +122,7 @@ for (const expected of [
   'npm run uaf-authoring:check',
   'npm run semantic-document-authoring:check',
   'npm run creative-ecosystem:check',
+  'npm run extension-example:check',
   'npm run release:gate'
 ]) {
   requireText(overview, expected, 'docs/creative-ecosystem.md');

@@ -7,6 +7,8 @@
   "files": [
     "unicode-art-extension.json",
     "assets/",
-    "README.md"
+    "README.md",
+    "TEMPLATE.md",
+    "LICENSE"
   ]
 }

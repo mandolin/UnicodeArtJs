@@ -126,6 +126,9 @@ jobs:
       - name: Check Extension SDK
         run: npm run extension-sdk:check
 
+      - name: Check Official Extension Example
+        run: npm run extension-example:check
+
       - name: Check Creative Ecosystem
         run: npm run creative-ecosystem:check
 

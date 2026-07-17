@@ -141,7 +141,7 @@ function checkOfficialPackage() {
   assertCondition(packageJson.name === '@unicode-art/extension-line-banner', 'Official extension package name changed.');
   assertCondition(packageJson.private === true, 'Official extension sample must remain private for now.');
   assertCondition(packageJson.license === 'MIT', 'Official extension sample must remain MIT.');
-  for (const expectedFile of ['unicode-art-extension.json', 'assets/', 'README.md']) {
+  for (const expectedFile of ['unicode-art-extension.json', 'assets/', 'README.md', 'TEMPLATE.md', 'LICENSE']) {
     assertCondition(packageJson.files.includes(expectedFile), `Official extension package files must include ${expectedFile}.`);
   }
 
