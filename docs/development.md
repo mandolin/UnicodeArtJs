@@ -155,6 +155,16 @@ npm run semantic-uaf-beta:check
 
 该命令会检查 [UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)、canonical fixture、Core golden 输出、CLI 子命令消费和 Web 测试入口。受限 DSL 仍可用于导入，但长期交换格式应以 JSON AST 为准。
 
+## 语义布局作者路径
+
+修改语义文档作者指南、语义布局作者 fixture、DSL 导入示例、Core 语义布局或 CLI `document` 入口时，运行：
+
+```bash
+npm run semantic-document-authoring:check
+```
+
+该命令会检查 [语义布局作者指南](semantic-document-authoring.md)、作者 fixture、DSL 导入、Core 渲染和 CLI `document` 渲染路径。它保护作者可照着执行的布局模板路径，不能替代完整 Core 测试。
+
 ## 声明式扩展 SDK
 
 修改 UAEM v1 清单、官方扩展示例、扩展作者文档、CLI `extension` 子命令或 Web 清单检查入口时，运行：
@@ -173,7 +183,7 @@ npm run extension-sdk:check
 npm run creative-ecosystem:check
 ```
 
-该命令会检查 [创作生态总览](creative-ecosystem.md)、UAF / 语义布局契约、声明式扩展 SDK、官方 Line Banner 示例、静态画廊索引和 release gate 接线。它是一个轻量总览门禁，不替代 `semantic-uaf-beta:check`、`extension-sdk:check` 和 `gallery:check` 对具体格式与资源的校验。
+该命令会检查 [创作生态总览](creative-ecosystem.md)、UAF / 语义布局契约、声明式扩展 SDK、官方 Line Banner 示例、静态画廊索引和 release gate 接线。它是一个轻量总览门禁，不替代 `semantic-uaf-beta:check`、`uaf-authoring:check`、`semantic-document-authoring:check`、`extension-sdk:check` 和 `gallery:check` 对具体格式与资源的校验。
 
 ## UAF 字体作者路径
 

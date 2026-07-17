@@ -13,6 +13,7 @@
 - [字素宽度与布局一致性](glyph-width-layout.md)
 - [UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)
 - [UAF 字体作者指南](uaf-authoring.md)
+- [语义布局作者指南](semantic-document-authoring.md)
 - [创作生态总览](creative-ecosystem.md)
 - [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
 - [生态兼容性与升级说明](ecosystem-compatibility.md)

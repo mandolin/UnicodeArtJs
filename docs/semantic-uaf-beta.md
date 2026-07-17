@@ -62,14 +62,18 @@ UAF v1 必须使用：
 
 - `packages/core/tests/fixtures/semantic-uaf-beta/beta-font.uafont.json`
 - `packages/core/tests/fixtures/semantic-uaf-beta/beta-document.uadoc.json`
+- `packages/core/tests/fixtures/semantic-uaf-beta/author-document.uadoc.json`
+- `packages/core/tests/fixtures/semantic-uaf-beta/author-dsl.txt`
 - `packages/core/tests/fixtures/semantic-uaf-beta/expected-font.txt`
 - `packages/core/tests/fixtures/semantic-uaf-beta/expected-document.txt`
+- `packages/core/tests/fixtures/semantic-uaf-beta/expected-author-document.txt`
 
 这些 fixture 覆盖：
 
 - UAF v1 字体解析、许可证字段、fallback 字形和 LTR 渲染。
 - 语义文档中的 header、footer、row-header、column-header、raw-text 与 art-font-text。
 - layout 阶段 ASCII grid Box 的主路径输出。
+- 语义布局作者示例中的 rowSpan、colSpan、align、verticalAlign、DSL 导入和 escaped separator。
 - Core、CLI 和 Web 测试入口对同一份 JSON 的一致消费。
 
 运行检查：
@@ -88,4 +92,4 @@ npm run semantic-uaf-beta:check
 - 自动修复非严格等宽字素字体的实际像素偏差。
 - 第三方扩展执行代码或远程下载资产。
 
-作者制作 `.uafont.json` 时可先阅读 [UAF 字体作者指南](uaf-authoring.md)，再按本文的 beta 契约确认字段和 fixture 兼容性。相关说明见 [实验能力稳定性矩阵](experimental-stability.md)、[字素宽度与布局一致性](glyph-width-layout.md) 和 [声明式扩展清单](extension-manifest.md)。
+作者制作 `.uafont.json` 时可先阅读 [UAF 字体作者指南](uaf-authoring.md)，再按本文的 beta 契约确认字段和 fixture 兼容性。作者制作 `.uadoc.json` 时可先阅读 [语义布局作者指南](semantic-document-authoring.md)，再按本文确认 JSON AST、DSL 导入和渲染边界。相关说明见 [实验能力稳定性矩阵](experimental-stability.md)、[字素宽度与布局一致性](glyph-width-layout.md) 和 [声明式扩展清单](extension-manifest.md)。

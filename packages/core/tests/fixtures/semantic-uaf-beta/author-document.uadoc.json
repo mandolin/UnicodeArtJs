@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "options": {
+    "glyphWidthProfile": "default"
+  },
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "role": "corner",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Area"
+            }
+          ]
+        },
+        {
+          "role": "column-header",
+          "colSpan": 2,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Status"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "role": "row-header",
+          "rowSpan": 2,
+          "verticalAlign": "middle",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Core"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "UAF"
+            }
+          ]
+        },
+        {
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "art-font-text",
+              "text": "UA",
+              "font": {
+                "format": "unicode-art-font",
+                "version": 1,
+                "meta": {
+                  "id": "org.unicodeartjs.author-guide.embedded",
+                  "name": "UnicodeArtJs Author Guide Embedded",
+                  "authors": [
+                    "UnicodeArtJs"
+                  ],
+                  "license": {
+                    "expression": "MIT",
+                    "origin": "original"
+                  }
+                },
+                "metrics": {
+                  "height": 2,
+                  "defaultAdvance": 2,
+                  "letterSpacing": 1,
+                  "fallbackGlyph": "?"
+                },
+                "glyphs": {
+                  "U": {
+                    "lines": [
+                      "UU",
+                      "UU"
+                    ]
+                  },
+                  "A": {
+                    "lines": [
+                      "AA",
+                      "AA"
+                    ]
+                  },
+                  "?": {
+                    "lines": [
+                      "??",
+                      "??"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "DSL"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Raw\nText"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "footer",
+      "cells": [
+        {
+          "role": "footer",
+          "colSpan": 3,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "MIT"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

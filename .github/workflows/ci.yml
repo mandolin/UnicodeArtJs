@@ -120,6 +120,9 @@ jobs:
       - name: Check UAF Authoring
         run: npm run uaf-authoring:check
 
+      - name: Check Semantic Document Authoring
+        run: npm run semantic-document-authoring:check
+
       - name: Check Extension SDK
         run: npm run extension-sdk:check
 

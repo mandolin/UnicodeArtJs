@@ -82,6 +82,8 @@ async function checkCoreGolden() {
   const document = core.parseSemanticDocumentJson(readUtf8(path.join(fixtureRoot, 'beta-document.uadoc.json')), { locale: 'zh-CN' });
   const expectedFont = readUtf8(path.join(fixtureRoot, 'expected-font.txt'));
   const expectedDocument = readUtf8(path.join(fixtureRoot, 'expected-document.txt'));
+  const authorDocument = core.parseSemanticDocumentJson(readUtf8(path.join(fixtureRoot, 'author-document.uadoc.json')), { locale: 'zh-CN' });
+  const expectedAuthorDocument = readUtf8(path.join(fixtureRoot, 'expected-author-document.txt'));
 
   const renderedFont = core.renderUnicodeArtFontText(font, 'UAJ', { locale: 'zh-CN' });
   assertCondition(renderedFont.content === expectedFont, 'Core UAF beta fixture output changed.');
@@ -102,6 +104,33 @@ async function checkCoreGolden() {
 
   assertCondition(renderedDocument.content === expectedDocument, 'Core semantic beta fixture output changed.');
   assertCondition(renderedDocument.rows === 8 && renderedDocument.cols === 19, 'Core semantic beta fixture metrics changed.');
+
+  const renderedAuthorDocument = await core.renderSemanticDocumentWithAdapter(authorDocument, {
+    height: 4,
+    outputFormat: core.OutputFormat.PLAIN_TEXT,
+    box: {
+      style: 'ascii',
+      renderStage: 'layout',
+      mode: 'grid',
+      separators: { rows: true, columns: true },
+      cell: { padding: { left: 1, right: 1 } }
+    },
+    locale: 'zh-CN'
+  }, async () => {
+    throw new Error('Semantic author beta fixture should not require art-text rendering.');
+  }, { grid: true });
+
+  assertCondition(renderedAuthorDocument.content === expectedAuthorDocument, 'Core semantic author beta fixture output changed.');
+  assertCondition(renderedAuthorDocument.rows === 11 && renderedAuthorDocument.cols === 22, 'Core semantic author beta fixture metrics changed.');
+
+  const dslDocument = core.parseSemanticDsl(readUtf8(path.join(fixtureRoot, 'author-dsl.txt')), {
+    rowSeparator: 'semantic',
+    columnSeparator: '|',
+    locale: 'zh-CN'
+  });
+  assertCondition(dslDocument.rows.length === 4, 'Semantic author DSL fixture row count changed.');
+  assertCondition(dslDocument.rows[1].cells[0].rowSpan === 2, 'Semantic author DSL fixture rowSpan changed.');
+  assertCondition(dslDocument.rows[3].cells[0].colSpan === 2, 'Semantic author DSL fixture colSpan changed.');
 }
 
 function checkCliGolden() {
@@ -145,8 +174,11 @@ function checkDocsAndFixtures() {
     docPath,
     path.join(fixtureRoot, 'beta-font.uafont.json'),
     path.join(fixtureRoot, 'beta-document.uadoc.json'),
+    path.join(fixtureRoot, 'author-document.uadoc.json'),
+    path.join(fixtureRoot, 'author-dsl.txt'),
     path.join(fixtureRoot, 'expected-font.txt'),
     path.join(fixtureRoot, 'expected-document.txt'),
+    path.join(fixtureRoot, 'expected-author-document.txt'),
     webTestPath
   ]) {
     assertCondition(fs.existsSync(filePath), `Missing semantic/UAF beta file: ${path.relative(repositoryRoot, filePath)}`);
@@ -162,6 +194,8 @@ function checkDocsAndFixtures() {
     'art-text',
     'art-font-text',
     'packages/core/tests/fixtures/semantic-uaf-beta',
+    'author-document.uadoc.json',
+    'author-dsl.txt',
     'npm run semantic-uaf-beta:check'
   ]) {
     requireText(doc, expected, 'docs/semantic-uaf-beta.md');
@@ -182,6 +216,22 @@ function checkDocsAndFixtures() {
   for (const expected of ['"role":"header"', '"role":"footer"', '"role":"row-header"', '"kind":"raw-text"', '"kind":"art-font-text"']) {
     requireText(serializedDocument, expected, 'beta-document.uadoc.json');
   }
+
+  const authorDocument = readJson(path.join(fixtureRoot, 'author-document.uadoc.json'));
+  assertCondition(authorDocument.version === 1 && authorDocument.rows.length === 4, 'Author semantic fixture shape changed unexpectedly.');
+  const serializedAuthorDocument = JSON.stringify(authorDocument);
+  for (const expected of [
+    '"rowSpan":2',
+    '"colSpan":2',
+    '"align":"center"',
+    '"verticalAlign":"middle"',
+    '"kind":"art-font-text"',
+    '"kind":"raw-text"'
+  ]) {
+    requireText(serializedAuthorDocument, expected, 'author-document.uadoc.json');
+  }
+  requireText(readUtf8(path.join(fixtureRoot, 'author-dsl.txt')), '{c:2}', 'author-dsl.txt');
+  requireText(readUtf8(path.join(fixtureRoot, 'author-dsl.txt')), '{r:2}', 'author-dsl.txt');
 
   const webPackage = readJson(webPackagePath);
   requireText(webPackage.scripts.test, 'semantic-uaf-beta.test.mjs', 'packages/web/package.json test script');

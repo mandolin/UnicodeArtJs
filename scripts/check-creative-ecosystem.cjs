@@ -16,6 +16,7 @@ const requiredFiles = [
   'docs/creative-ecosystem.md',
   'docs/semantic-uaf-beta.md',
   'docs/uaf-authoring.md',
+  'docs/semantic-document-authoring.md',
   'docs/extension-manifest.md',
   'docs/extension-authoring.md',
   'docs/extension-sdk.md',
@@ -100,9 +101,11 @@ assertCondition(
   requireText(ciWorkflow, 'npm run creative-ecosystem:check', '.github/workflows/ci.yml');
   requireText(docsIndex, 'creative-ecosystem.md', 'docs/README.md');
   requireText(docsIndex, 'uaf-authoring.md', 'docs/README.md');
+  requireText(docsIndex, 'semantic-document-authoring.md', 'docs/README.md');
   requireText(developmentDoc, 'npm run creative-ecosystem:check', 'docs/development.md');
   requireText(releaseGate, 'creative-ecosystem:check', 'docs/release-gate.md');
   requireText(releaseGate, 'uaf-authoring:check', 'docs/release-gate.md');
+  requireText(releaseGate, 'semantic-document-authoring:check', 'docs/release-gate.md');
 
 for (const expected of [
   'unicode-art-font@1',
@@ -110,11 +113,13 @@ for (const expected of [
   'unicode-art-extension@1',
   'unicode-art-gallery-index@1',
   'uaf-authoring.md',
+  'semantic-document-authoring.md',
   'semantic-uaf-beta.md',
   'extension-authoring.md',
   'gallery-submission.md',
   'packages/extension-line-banner/assets/line-font.uafont.json',
   'npm run uaf-authoring:check',
+  'npm run semantic-document-authoring:check',
   'npm run creative-ecosystem:check',
   'npm run release:gate'
 ]) {
@@ -124,6 +129,7 @@ for (const expected of [
 for (const expected of [
   'unicode-art-font',
   'semantic-document',
+  'semantic-document-authoring.md',
   'npm run semantic-uaf-beta:check'
 ]) {
   requireText(semanticDoc, expected, 'docs/semantic-uaf-beta.md');

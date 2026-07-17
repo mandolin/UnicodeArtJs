@@ -65,6 +65,7 @@
     "glyph-width:check": "node scripts/check-glyph-width-layout.cjs",
     "semantic-uaf-beta:check": "npm run build:core && node scripts/check-semantic-uaf-beta.cjs",
     "uaf-authoring:check": "npm run build:core && node scripts/check-uaf-authoring.cjs",
+    "semantic-document-authoring:check": "npm run build:core && node scripts/check-semantic-document-authoring.cjs",
     "extension-sdk:check": "npm run build:core && node scripts/check-extension-sdk.cjs",
     "creative-ecosystem:check": "node scripts/check-creative-ecosystem.cjs",
     "desktop-host:check": "node scripts/check-desktop-host-baseline.cjs",
@@ -81,7 +82,7 @@
     "pack:cli": "npm --workspace packages/cli pack --dry-run",
     "release:verify": "node scripts/release-gate.cjs",
     "release:verify:publish": "node scripts/release-gate.cjs --strict-publish",
-    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run config-model:check && npm run glyph-width:check && npm run semantic-uaf-beta:check && npm run uaf-authoring:check && npm run extension-sdk:check && npm run creative-ecosystem:check && npm run desktop-host:check && npm run optional-adapters:check && npm run performance-release:check && npm run release-materials:check && npm run docs:quality:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
+    "release:gate": "npm run check && npm run docs:all:check && npm run recipes:check && npm run gallery:check && npm run support:check && npm run public-entry:check && npm run stability:check && npm run config-model:check && npm run glyph-width:check && npm run semantic-uaf-beta:check && npm run uaf-authoring:check && npm run semantic-document-authoring:check && npm run extension-sdk:check && npm run creative-ecosystem:check && npm run desktop-host:check && npm run optional-adapters:check && npm run performance-release:check && npm run release-materials:check && npm run docs:quality:check && npm run pack:core && npm run pack:cli && npm run package:vscode && npm run release:verify"
   },
   "optionalDependencies": {
     "@rollup/rollup-darwin-arm64": "4.62.2",

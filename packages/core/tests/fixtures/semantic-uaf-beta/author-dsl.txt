@@ -1,0 +1,1 @@
+{h}Name|Value{n}{c:2}{t:Core}|Alpha{n}{t:Raw\|Text}{n}{f}{r:2}{t:MIT}
