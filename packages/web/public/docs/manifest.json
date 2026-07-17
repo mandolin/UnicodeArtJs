@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-17T07:49:09.491Z",
+  "generatedAt": "2026-07-17T12:11:13.287Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -106,7 +106,7 @@
       {
         "id": "extension",
         "title": "Extension",
-        "docCount": 4,
+        "docCount": 5,
         "docs": [
           {
             "path": "docs/extension-sdk.md",
@@ -119,6 +119,10 @@
           {
             "path": "docs/semantic-uaf-beta.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/semantic-uaf-beta.md"
+          },
+          {
+            "path": "docs/uaf-authoring.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/uaf-authoring.md"
           },
           {
             "path": "docs/creative-ecosystem.md",

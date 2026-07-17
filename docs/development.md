@@ -175,6 +175,16 @@ npm run creative-ecosystem:check
 
 该命令会检查 [创作生态总览](creative-ecosystem.md)、UAF / 语义布局契约、声明式扩展 SDK、官方 Line Banner 示例、静态画廊索引和 release gate 接线。它是一个轻量总览门禁，不替代 `semantic-uaf-beta:check`、`extension-sdk:check` 和 `gallery:check` 对具体格式与资源的校验。
 
+## UAF 字体作者路径
+
+修改 UAF 字体格式说明、官方示例字体、UAF 作者指南或 CLI 字体预检入口时，运行：
+
+```bash
+npm run uaf-authoring:check
+```
+
+该命令会检查 [UAF 字体作者指南](uaf-authoring.md)、官方 Line Banner 字体、beta fixture、Core 渲染和 CLI `font validate/inspect`。它保护作者可照着执行的最小路径，不能替代完整 Core 测试。
+
 ## 桌面宿主基线
 
 修改桌面宿主公开契约、`*.uaproj` fixture、Compatible 文档、Core capability 接入说明或错误模型说明时，运行：

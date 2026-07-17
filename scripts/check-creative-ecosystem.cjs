@@ -15,6 +15,7 @@ const repositoryRoot = path.resolve(__dirname, '..');
 const requiredFiles = [
   'docs/creative-ecosystem.md',
   'docs/semantic-uaf-beta.md',
+  'docs/uaf-authoring.md',
   'docs/extension-manifest.md',
   'docs/extension-authoring.md',
   'docs/extension-sdk.md',
@@ -94,22 +95,26 @@ assertCondition(
   packageJson.scripts?.['creative-ecosystem:check'] === 'node scripts/check-creative-ecosystem.cjs',
   'package.json 必须声明 creative-ecosystem:check。'
 );
-requireText(packageJson.scripts?.['release:gate'] || '', 'creative-ecosystem:check', 'package.json release:gate');
-requireText(ciWorkflow, 'Check Creative Ecosystem', '.github/workflows/ci.yml');
-requireText(ciWorkflow, 'npm run creative-ecosystem:check', '.github/workflows/ci.yml');
-requireText(docsIndex, 'creative-ecosystem.md', 'docs/README.md');
-requireText(developmentDoc, 'npm run creative-ecosystem:check', 'docs/development.md');
-requireText(releaseGate, 'creative-ecosystem:check', 'docs/release-gate.md');
+  requireText(packageJson.scripts?.['release:gate'] || '', 'creative-ecosystem:check', 'package.json release:gate');
+  requireText(ciWorkflow, 'Check Creative Ecosystem', '.github/workflows/ci.yml');
+  requireText(ciWorkflow, 'npm run creative-ecosystem:check', '.github/workflows/ci.yml');
+  requireText(docsIndex, 'creative-ecosystem.md', 'docs/README.md');
+  requireText(docsIndex, 'uaf-authoring.md', 'docs/README.md');
+  requireText(developmentDoc, 'npm run creative-ecosystem:check', 'docs/development.md');
+  requireText(releaseGate, 'creative-ecosystem:check', 'docs/release-gate.md');
+  requireText(releaseGate, 'uaf-authoring:check', 'docs/release-gate.md');
 
 for (const expected of [
   'unicode-art-font@1',
   'semantic-document@1',
   'unicode-art-extension@1',
   'unicode-art-gallery-index@1',
+  'uaf-authoring.md',
   'semantic-uaf-beta.md',
   'extension-authoring.md',
   'gallery-submission.md',
   'packages/extension-line-banner/assets/line-font.uafont.json',
+  'npm run uaf-authoring:check',
   'npm run creative-ecosystem:check',
   'npm run release:gate'
 ]) {

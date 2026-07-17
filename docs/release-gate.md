@@ -51,6 +51,7 @@ npm run release:verify:publish
 - `config-model:check` can validate the shared configuration model across Core, CLI, Web, and the VSCode extension.
 - `glyph-width:check` can validate glyph-width layout documentation, the shared calculator helper, critical call sites, and regression test coverage.
 - `semantic-uaf-beta:check` can validate the UAF / semantic-document beta contract, canonical fixtures, Core rendering, CLI consumption, and Web fixture coverage.
+- `uaf-authoring:check` can validate the UAF author guide, official line font, beta fixture, Core rendering, CLI font validation, and author-facing entry links.
 - `extension-sdk:check` can validate the declarative extension SDK, the official Line Banner package, Core manifest parsing, CLI side-load preflight, and Web manifest-only inspection coverage.
 - `creative-ecosystem:check` can validate the UAF, semantic layout, UAEM, official extension package, static gallery, and author-facing documentation links as one creative-asset baseline.
 - `desktop-host:check` can validate the desktop host baseline, canonical `*.uaproj` v1 fixtures, Compatible documentation links, and release-gate integration.

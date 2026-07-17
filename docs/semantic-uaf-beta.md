@@ -88,4 +88,4 @@ npm run semantic-uaf-beta:check
 - 自动修复非严格等宽字素字体的实际像素偏差。
 - 第三方扩展执行代码或远程下载资产。
 
-相关说明见 [实验能力稳定性矩阵](experimental-stability.md)、[字素宽度与布局一致性](glyph-width-layout.md) 和 [声明式扩展清单](extension-manifest.md)。
+作者制作 `.uafont.json` 时可先阅读 [UAF 字体作者指南](uaf-authoring.md)，再按本文的 beta 契约确认字段和 fixture 兼容性。相关说明见 [实验能力稳定性矩阵](experimental-stability.md)、[字素宽度与布局一致性](glyph-width-layout.md) 和 [声明式扩展清单](extension-manifest.md)。

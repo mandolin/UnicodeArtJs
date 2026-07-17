@@ -117,6 +117,9 @@ jobs:
       - name: Check Semantic UAF Beta
         run: npm run semantic-uaf-beta:check
 
+      - name: Check UAF Authoring
+        run: npm run uaf-authoring:check
+
       - name: Check Extension SDK
         run: npm run extension-sdk:check
 
