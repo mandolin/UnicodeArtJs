@@ -55,6 +55,7 @@ npm run release:verify:publish
 - `semantic-document-authoring:check` can validate the semantic document author guide, author fixtures, DSL import, Core rendering, and CLI document rendering.
 - `extension-sdk:check` can validate the declarative extension SDK, the official Line Banner package, Core manifest parsing, CLI side-load preflight, and Web manifest-only inspection coverage.
 - `extension-example:check` can validate the official Line Banner example package, copyable UAEM template, package README, license, Core resource parsing, copied-package CLI preflight, and resource rendering.
+- `host-sideload:check` can validate the shared Core / CLI / Web / VS Code / Desktop / Compatible side-load boundary, including manifest-only Web inspection, declared-resource reads, realpath containment, and the no-code-execution rule.
 - `creative-ecosystem:check` can validate the UAF, semantic layout, UAEM, official extension package, static gallery, and author-facing documentation links as one creative-asset baseline.
 - `desktop-host:check` can validate the desktop host baseline, canonical `*.uaproj` v1 fixtures, Compatible documentation links, and release-gate integration.
 - `optional-adapters:check` can validate 可选输入格式 (optional input format) and adapter policy, Core default image formats, VS Code image entrypoints, Compatible documentation links, and release-gate integration.

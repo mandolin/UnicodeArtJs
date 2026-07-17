@@ -20,6 +20,7 @@ const requiredFiles = [
   'docs/extension-manifest.md',
   'docs/extension-authoring.md',
   'docs/extension-sdk.md',
+  'docs/host-sideload-boundary.md',
   'docs/gallery.md',
   'docs/gallery-submission.md',
   'docs/gallery-review.md',
@@ -126,6 +127,7 @@ for (const expected of [
   'npm run semantic-document-authoring:check',
   'npm run creative-ecosystem:check',
   'npm run extension-example:check',
+  'npm run host-sideload:check',
   'npm run release:gate'
 ]) {
   requireText(overview, expected, 'docs/creative-ecosystem.md');

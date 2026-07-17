@@ -18,6 +18,7 @@
 - [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
 - [生态兼容性与升级说明](ecosystem-compatibility.md)
 - [宿主接入指南](host-integration.md)
+- [宿主侧载与资源读取边界](host-sideload-boundary.md)
 - [桌面宿主基线](desktop-host-baseline.md)
 - [可选输入格式与 Adapter 策略](optional-input-adapters.md)
 - [性能基线与发布计划](performance-and-release-plan.md)

@@ -129,6 +129,9 @@ jobs:
       - name: Check Official Extension Example
         run: npm run extension-example:check
 
+      - name: Check Host Sideload Boundary
+        run: npm run host-sideload:check
+
       - name: Check Creative Ecosystem
         run: npm run creative-ecosystem:check
 

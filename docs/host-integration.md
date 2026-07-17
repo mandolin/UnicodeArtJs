@@ -107,3 +107,7 @@ GIF、SVG、TIFF、PDF 等默认 Core 不承诺的输入格式，应遵循
 
 桌面应用还应遵循 [桌面宿主基线](desktop-host-baseline.md)：使用 `*.uaproj` v1 项目文件、读取
 `getCoreCapabilities()`、复用 UAEM 声明式扩展边界，并将 Tauri/Electron 的文件、窗口、更新和安装器能力留在独立宿主仓库内。
+
+资源包读取、静态画廊、Web 只读检查、VS Code 后续侧载和桌面受控 IPC 的共同边界见
+[宿主侧载与资源读取边界](host-sideload-boundary.md)。宿主实现 UAEM 或画廊能力时，应以该矩阵为准，不要把
+`unicode-art-extension@1` 描述成脚本插件、远程市场或自动安装机制。

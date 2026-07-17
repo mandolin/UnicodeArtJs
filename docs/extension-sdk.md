@@ -3,6 +3,7 @@
 UnicodeArtJs 的扩展 SDK 目前指 UAEM v1（UnicodeArtJs Extension Manifest）及其配套的本地侧载规则。它是一个数据包契约，不是运行时代码插件系统。扩展可以声明艺术字字体、语义文档模板等本地资源；宿主可以解析清单、检查兼容性，并在用户明确选择后读取清单目录内的声明资源。
 
 如果你只是想写一个扩展包，请先看[声明式扩展作者指南](extension-authoring.md)。本文面向需要接入宿主、做自动校验或准备官方扩展示例的开发者。
+多宿主资源读取策略、静态画廊和未来动态能力边界见 [宿主侧载与资源读取边界](host-sideload-boundary.md)。
 
 ## SDK 边界
 
@@ -27,6 +28,7 @@ UAEM v1 明确不支持 JavaScript、WASM、shell 命令、二进制程序、依
 | Desktop | 使用 Core 契约，侧载资源仍应显式确认 | 后续由桌面宿主设计受控项目文件和缓存 | 本地创作工作台 |
 
 宿主不能因为清单兼容就自动安装或执行扩展。CLI 的 `extension validate` 和 `extension inspect` 也只做本地预检，不写入全局状态。
+更完整的 Core / CLI / Web / VS Code / Desktop / Compatible 读取矩阵见 [宿主侧载与资源读取边界](host-sideload-boundary.md)。
 
 ## 权限模型
 

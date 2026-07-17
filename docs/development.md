@@ -185,6 +185,16 @@ npm run extension-example:check
 
 该命令会检查官方 Line Banner 包是否仍可复制、可验证、可侧载；同时覆盖 Core 资源解析、CLI 本地预检、复制后目录校验和资源渲染。
 
+## 宿主侧载边界
+
+修改 UAEM 宿主能力矩阵、Web 只读清单检查、VS Code 后续侧载、桌面资源包读取、Compatible 侧载说明或静态画廊资源读取边界时，运行：
+
+```bash
+npm run host-sideload:check
+```
+
+该命令会检查 [宿主侧载与资源读取边界](host-sideload-boundary.md)、宿主接入指南、声明式扩展 SDK、Web / VS Code / Desktop / Compatible 文档、CI 和 release gate 是否仍保持同一套“显式选择、只读清单、逐项资源读取、不执行代码、不自动联网”契约。
+
 ## 创作生态
 
 修改 UAF、语义布局、UAEM、官方扩展示例、静态画廊或创作作者路径时，运行：
