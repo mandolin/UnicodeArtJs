@@ -1181,7 +1181,8 @@ details.config-details summary:hover {
 
 .docs-entry-kind,
 .docs-entry-description,
-.docs-entry-surface {
+.docs-entry-surface,
+.docs-entry-symbols {
   color: var(--text-secondary);
   font-size: 0.76rem;
 }
@@ -1229,7 +1230,7 @@ details.config-details summary:hover {
 }
 
 .docs-metrics {
-  min-height: 160px;
+  min-height: 96px;
   margin: var(--spacing-md);
   padding: var(--spacing-md);
   overflow: auto;
@@ -1240,6 +1241,70 @@ details.config-details summary:hover {
   font-size: 0.8rem;
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+.docs-symbols {
+  display: grid;
+  gap: var(--spacing-sm);
+  max-height: 320px;
+  margin: 0 var(--spacing-md) var(--spacing-md);
+  overflow: auto;
+}
+
+.docs-symbols[hidden] {
+  display: none;
+}
+
+.docs-symbols-header {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.docs-symbol-card {
+  display: grid;
+  gap: 4px;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-preview);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.docs-symbol-card:hover,
+.docs-symbol-card:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.14);
+  outline: none;
+  text-decoration: none;
+}
+
+.docs-symbol-kind,
+.docs-symbol-source {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.docs-symbol-name {
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.docs-symbol-signature {
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.docs-symbol-summary {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.45;
 }
 
 .docs-actions {

@@ -385,11 +385,19 @@ async function main() {
         sectionCount: document.querySelector('#docsSectionCount')?.textContent,
         title: document.querySelector('#docsTitle')?.textContent,
         guideHref: document.querySelector('#docsGuideLink')?.getAttribute('href'),
+        symbolCount: document.querySelectorAll('#docsSymbols [data-docs-symbol-id]').length,
+        firstSymbolHref: document.querySelector('#docsSymbols [data-docs-symbol-id]')?.getAttribute('href'),
+        symbolText: document.querySelector('#docsSymbols')?.textContent || '',
         pageText: document.querySelector('#docsWorkbench')?.textContent || '',
       }));
       if (docsState.count !== '4') throw new Error('Public docs entry count changed');
       if (docsState.sectionCount !== '8') throw new Error('Public docs section count changed');
       if (!docsState.title?.includes('Core')) throw new Error('Default docs entry was not selected');
+      if (docsState.symbolCount < 80) throw new Error('Core API symbol index was not rendered');
+      if (!docsState.symbolText.includes('textToArt')) throw new Error('Core API symbol index does not include textToArt');
+      if (!docsState.firstSymbolHref?.startsWith('https://github.com/mandolin/UnicodeArtJs/')) {
+        throw new Error('API symbol source link does not point to the public repository');
+      }
       if (!docsState.guideHref?.startsWith('https://github.com/mandolin/UnicodeArtJs/')) {
         throw new Error('Docs guide link does not point to the public repository');
       }
@@ -401,9 +409,11 @@ async function main() {
         title: document.querySelector('#docsTitle')?.textContent,
         metrics: document.querySelector('#docsMetrics')?.textContent || '',
         guideHref: document.querySelector('#docsGuideLink')?.getAttribute('href'),
+        symbolCount: document.querySelectorAll('#docsSymbols [data-docs-symbol-id]').length,
       }));
       if (!sectionState.title?.includes('Quickstart')) throw new Error('Docs section selection did not render Quickstart');
       if (!sectionState.metrics.includes('README.md')) throw new Error('Docs section did not list public docs');
+      if (sectionState.symbolCount !== 0) throw new Error('Docs section should not keep API symbols selected');
       if (!sectionState.guideHref?.startsWith('https://github.com/mandolin/UnicodeArtJs/')) {
         throw new Error('Docs section guide link does not point to the public repository');
       }

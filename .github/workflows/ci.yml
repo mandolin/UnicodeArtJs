@@ -78,6 +78,12 @@ jobs:
       - name: Check Documentation Manifest
         run: npm run docs:manifest:check
 
+      - name: Check Public Docs Site Data
+        run: npm run docs:public-site:check
+
+      - name: Check Public API Reference
+        run: npm run docs:api-reference:check
+
       - name: Check Developer Docs Architecture
         run: npm run docs:architecture:check
 

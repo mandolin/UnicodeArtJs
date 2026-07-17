@@ -17,6 +17,8 @@ const docsArchitecturePath = path.join(repositoryRoot, 'fixtures', 'docs-site', 
 const publicManifestPath = path.join(repositoryRoot, 'packages', 'web', 'public', 'docs', 'manifest.json');
 const repositoryUrl = 'https://github.com/mandolin/UnicodeArtJs';
 const pagesUrl = 'https://mandolin.github.io/UnicodeArtJs/';
+const apiReferenceContract = 'unicodeartjs-public-api-reference';
+const summaryMaxLength = 260;
 const forbiddenFragments = [
   '.generated-docs',
   'work-zone',
@@ -42,6 +44,80 @@ function toRepositoryTreeUrl(publicPath) {
   return `${repositoryUrl}/blob/main/${normalizedPath}`;
 }
 
+function toRepositorySourceUrl(sourcePath, line) {
+  const normalizedPath = String(sourcePath || '').replace(/\\/g, '/').replace(/^\/+/, '');
+  const lineNumber = Number(line);
+  const suffix = Number.isInteger(lineNumber) && lineNumber > 0 ? `#L${lineNumber}` : '';
+  return `${repositoryUrl}/blob/main/${normalizedPath}${suffix}`;
+}
+
+function cleanText(value, maxLength = summaryMaxLength) {
+  const cleaned = String(value || '')
+    .replace(/<lang\b[^>]*>|<\/lang>|<zh-CN>|<\/zh-CN>|<en>|<\/en>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (cleaned.length <= maxLength) return cleaned;
+  return `${cleaned.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
+}
+
+function toLine(value) {
+  const line = Number(value);
+  return Number.isInteger(line) && line > 0 ? line : undefined;
+}
+
+function toTypeText(type) {
+  if (!type) return '';
+  if (Array.isArray(type)) return type.join('|');
+  if (Array.isArray(type.names)) return type.names.join('|');
+  return String(type);
+}
+
+function buildJsdocSignature(node) {
+  const name = String(node.name || node.title || node.longname || '');
+  if (node.kind !== 'function') return name;
+
+  const params = Array.isArray(node.jsdoc?.params) ? node.jsdoc.params : [];
+  const signatureParams = params.map((param) => {
+    const paramName = String(param.name || 'param');
+    const typeText = toTypeText(param.type);
+    return typeText ? `${paramName}: ${typeText}` : paramName;
+  });
+  return `${name}(${signatureParams.join(', ')})`;
+}
+
+function getJsdocLocalizedSummary(node) {
+  const localized = node.i18n?.localized || node.i18n?.generation?.perLocale || {};
+  const zh = cleanText(localized['zh-CN']?.text || localized.zh?.text || '');
+  const en = cleanText(localized.en?.text || localized['en-US']?.text || '');
+  const fallback = cleanText(node.summary || node.description || '');
+
+  if (zh || en) {
+    return removeUndefined({
+      'zh-CN': zh || fallback,
+      'en-US': en || fallback || zh,
+    });
+  }
+
+  return fallback;
+}
+
+function toPublicSymbol(entry, symbol, fallbackKind = 'symbol') {
+  const sourcePath = symbol.sourcePath;
+  const sourceLine = toLine(symbol.sourceLine);
+  return removeUndefined({
+    id: `${entry.id}:${symbol.id}`,
+    name: cleanText(symbol.name, 120),
+    kind: cleanText(symbol.kind || fallbackKind, 40),
+    signature: cleanText(symbol.signature || symbol.name, 180),
+    summary: symbol.summary,
+    source: {
+      path: sourcePath,
+      line: sourceLine,
+      url: sourcePath ? toRepositorySourceUrl(sourcePath, sourceLine) : undefined,
+    },
+  });
+}
+
 function toPublicEntry(entry) {
   return {
     id: entry.id,
@@ -58,6 +134,109 @@ function toPublicEntry(entry) {
       inputCount: entry.metrics?.inputCount ?? undefined,
       nodeCount: entry.metrics?.nodeCount ?? undefined,
       requiredFiles: entry.metrics?.requiredFiles ?? undefined,
+    },
+  };
+}
+
+function collectTsdocSymbols(entry) {
+  const outputRoot = path.join(repositoryRoot, entry.outputRoot);
+  const resultPath = path.join(repositoryRoot, entry.primaryOutput);
+  const result = readJson(resultPath);
+  const symbols = [];
+
+  for (const artifact of result.artifacts || []) {
+    if (artifact.kind !== 'hia-document') continue;
+
+    const documentPath = path.join(outputRoot, artifact.path);
+    const document = readJson(documentPath);
+    for (const symbol of document.symbols || []) {
+      const definedIn = symbol.source?.definedIn || {};
+      const sourcePath = definedIn.relativePath || symbol.source?.path;
+      if (!symbol.name || !sourcePath) continue;
+
+      symbols.push(toPublicSymbol(entry, {
+        id: `${artifact.path}:${symbol.id}`,
+        name: symbol.name,
+        kind: symbol.kind || symbol.metadata?.tsdoc?.tsKind || 'symbol',
+        signature: symbol.signature || symbol.name,
+        summary: cleanText(symbol.summary || ''),
+        sourcePath,
+        sourceLine: definedIn.position?.line || definedIn.range?.start?.line,
+      }));
+    }
+  }
+
+  return symbols.sort(comparePublicSymbols);
+}
+
+function collectHiaJsdocSymbols(entry) {
+  const integration = readJson(path.join(repositoryRoot, entry.integrationPath));
+  const nodes = Array.isArray(integration.ir?.nodes) ? integration.ir.nodes : [];
+  const symbols = [];
+
+  for (const node of nodes) {
+    const definedIn = node.source?.definedIn || {};
+    const sourcePath = definedIn.relativePath;
+    if (!node.name || !sourcePath) continue;
+
+    symbols.push(toPublicSymbol(entry, {
+      id: node.id || node.longname || node.name,
+      name: node.name,
+      kind: node.kind || 'symbol',
+      signature: buildJsdocSignature(node),
+      summary: getJsdocLocalizedSummary(node),
+      sourcePath,
+      sourceLine: definedIn.position?.line || definedIn.range?.start?.line,
+    }));
+  }
+
+  return symbols.sort(comparePublicSymbols);
+}
+
+function comparePublicSymbols(left, right) {
+  const leftPath = left.source?.path || '';
+  const rightPath = right.source?.path || '';
+  if (leftPath !== rightPath) return leftPath.localeCompare(rightPath);
+  const leftLine = left.source?.line || 0;
+  const rightLine = right.source?.line || 0;
+  if (leftLine !== rightLine) return leftLine - rightLine;
+  return String(left.name || '').localeCompare(String(right.name || ''));
+}
+
+function collectPublicSymbols(entry) {
+  if (entry.documentationKind === 'hia-tsdoc') return collectTsdocSymbols(entry);
+  if (entry.documentationKind === 'hia-jsdoc') return collectHiaJsdocSymbols(entry);
+  return [];
+}
+
+function toPublicApiReference(source) {
+  const apiEntries = (source.entries || []).map((entry) => {
+    const symbols = collectPublicSymbols(entry);
+    const sourceFileCount = new Set(symbols.map((symbol) => symbol.source?.path).filter(Boolean)).size;
+    return {
+      entryId: entry.id,
+      title: entry.title,
+      packageName: entry.packageName,
+      packageVersion: entry.packageVersion,
+      surface: entry.surface,
+      documentationKind: entry.documentationKind,
+      stability: entry.stability,
+      symbolCount: symbols.length,
+      sourceFileCount,
+      symbols,
+    };
+  });
+
+  const allSymbols = apiEntries.flatMap((entry) => entry.symbols);
+  return {
+    contract: apiReferenceContract,
+    version: 1,
+    symbolCount: allSymbols.length,
+    sourceFileCount: new Set(allSymbols.map((symbol) => symbol.source?.path).filter(Boolean)).size,
+    entries: apiEntries,
+    generatedFrom: {
+      sourceContract: source.contract,
+      sourceContractVersion: source.contractVersion,
     },
   };
 }
@@ -128,6 +307,7 @@ function buildPublicManifest() {
       publicDataOnly: true,
     },
     architecture: toPublicArchitecture(source),
+    apiReference: toPublicApiReference(source),
     entries: entries.map(toPublicEntry),
   });
 }

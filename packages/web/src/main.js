@@ -201,6 +201,11 @@ const UI_MESSAGES = {
     'docs.sections.title': '文档路径',
     'docs.section.docCount': '{count} 个页面',
     'docs.section.docs': '包含页面',
+    'docs.symbolCount': '{count} 个 API 符号',
+    'docs.sourceFileCount': '源码文件',
+    'docs.symbols.title': 'API 符号索引',
+    'docs.symbols.empty': '暂无公开符号索引。',
+    'docs.symbols.source': '源码',
     'docs.kind.hia-tsdoc': 'TSDoc 中间文档',
     'docs.kind.hia-jsdoc': 'JSDoc API 文档',
     'docs.kind.section': '文档路径',
@@ -215,6 +220,8 @@ const UI_MESSAGES = {
     'docs.metric.artifactCount': '产物',
     'docs.metric.inputCount': '输入',
     'docs.metric.nodeCount': '节点',
+    'docs.metric.symbolCount': 'API 符号',
+    'docs.metric.sourceFileCount': '源码文件',
     'docs.metric.requiredFiles': '文件',
     'docs.section.quickstart': 'Quickstart',
     'docs.section.quickstart.description': '安装、运行和预览的最短路径。',
@@ -463,6 +470,11 @@ const UI_MESSAGES = {
     'docs.sections.title': 'Documentation paths',
     'docs.section.docCount': '{count} pages',
     'docs.section.docs': 'Included pages',
+    'docs.symbolCount': '{count} API symbols',
+    'docs.sourceFileCount': 'Source files',
+    'docs.symbols.title': 'API symbol index',
+    'docs.symbols.empty': 'No public symbol index yet.',
+    'docs.symbols.source': 'Source',
     'docs.kind.hia-tsdoc': 'TSDoc intermediate docs',
     'docs.kind.hia-jsdoc': 'JSDoc API docs',
     'docs.kind.section': 'Documentation path',
@@ -477,6 +489,8 @@ const UI_MESSAGES = {
     'docs.metric.artifactCount': 'Artifacts',
     'docs.metric.inputCount': 'Inputs',
     'docs.metric.nodeCount': 'Nodes',
+    'docs.metric.symbolCount': 'API symbols',
+    'docs.metric.sourceFileCount': 'Source files',
     'docs.metric.requiredFiles': 'Files',
     'docs.section.quickstart': 'Quickstart',
     'docs.section.quickstart.description': 'Shortest install, run, and preview path.',
@@ -767,6 +781,7 @@ const DOM = {
   docsCheckCommand: '#docsCheckCommand',
   docsDescription: '#docsDescription',
   docsMetrics: '#docsMetrics',
+  docsSymbols: '#docsSymbols',
   docsGuideLink: '#docsGuideLink',
   docsRepoLink: '#docsRepoLink',
 };
@@ -2021,6 +2036,8 @@ class DocsController {
     }
     const rawArchitecture = raw.architecture && typeof raw.architecture === 'object' ? raw.architecture : {};
     const rawSections = Array.isArray(rawArchitecture.sections) ? rawArchitecture.sections : [];
+    const rawApiReference = raw.apiReference && typeof raw.apiReference === 'object' ? raw.apiReference : {};
+    const rawApiEntries = Array.isArray(rawApiReference.entries) ? rawApiReference.entries : [];
     return {
       ...raw,
       architecture: {
@@ -2038,6 +2055,32 @@ class DocsController {
             }))
             : [],
         })).filter((section) => section.id),
+      },
+      apiReference: {
+        ...rawApiReference,
+        symbolCount: Number.isFinite(Number(rawApiReference.symbolCount)) ? Number(rawApiReference.symbolCount) : 0,
+        sourceFileCount: Number.isFinite(Number(rawApiReference.sourceFileCount)) ? Number(rawApiReference.sourceFileCount) : 0,
+        entries: rawApiEntries.map((entry) => ({
+          ...entry,
+          entryId: String(entry.entryId || ''),
+          symbolCount: Number.isFinite(Number(entry.symbolCount)) ? Number(entry.symbolCount) : 0,
+          sourceFileCount: Number.isFinite(Number(entry.sourceFileCount)) ? Number(entry.sourceFileCount) : 0,
+          symbols: Array.isArray(entry.symbols)
+            ? entry.symbols.map((symbol) => ({
+              ...symbol,
+              id: String(symbol.id || ''),
+              name: String(symbol.name || ''),
+              kind: String(symbol.kind || ''),
+              signature: String(symbol.signature || symbol.name || ''),
+              summary: this.normalizeLocalizedText(symbol.summary),
+              source: {
+                path: String(symbol.source?.path || ''),
+                line: Number.isFinite(Number(symbol.source?.line)) ? Number(symbol.source.line) : undefined,
+                url: String(symbol.source?.url || ''),
+              },
+            })).filter((symbol) => symbol.id && symbol.name)
+            : [],
+        })).filter((entry) => entry.entryId),
       },
       entries: raw.entries.map((entry) => ({
         ...entry,
@@ -2130,6 +2173,13 @@ class DocsController {
         .addClass('docs-entry-surface')
         .text(this.formatSurface(entry.surface))
         .appendTo($button);
+      const apiEntry = this.findApiEntry(entry.id);
+      if (apiEntry) {
+        $('<span>')
+          .addClass('docs-entry-symbols')
+          .text(this.t('docs.symbolCount', { count: apiEntry.symbolCount }))
+          .appendTo($button);
+      }
 
       $('<article>').attr('role', 'listitem').append($button).appendTo($grid);
     });
@@ -2178,7 +2228,13 @@ class DocsController {
     $(DOM.docsCheckCommand).text(entry.checkCommand || '--');
     $(DOM.docsMetadata).prop('hidden', false);
     $(DOM.docsDescription).text(this.buildDescription(entry));
-    $(DOM.docsMetrics).text(this.formatMetrics(entry.metrics));
+    const apiEntry = this.findApiEntry(entry.id);
+    $(DOM.docsMetrics).text(this.formatMetrics({
+      ...entry.metrics,
+      symbolCount: apiEntry?.symbolCount,
+      sourceFileCount: apiEntry?.sourceFileCount,
+    }));
+    this.renderSymbols(apiEntry);
     $(DOM.docsGuideLink).attr('href', entry.guideUrl || this.manifest?.docsHomeUrl || '#');
   }
 
@@ -2199,6 +2255,7 @@ class DocsController {
     $(DOM.docsMetadata).prop('hidden', false);
     $(DOM.docsDescription).text(this.formatSectionDescription(section));
     $(DOM.docsMetrics).text(this.formatSectionDocs(section));
+    this.renderSymbols(null);
     $(DOM.docsGuideLink).attr('href', firstDocUrl);
   }
 
@@ -2209,6 +2266,7 @@ class DocsController {
     $(DOM.docsMetadata).prop('hidden', true);
     $(DOM.docsDescription).text(this.t(key));
     $(DOM.docsMetrics).text('');
+    this.renderSymbols(null);
   }
 
   setStatus(key, params = {}, state = 'info') {
@@ -2257,6 +2315,80 @@ class DocsController {
       .filter((doc) => doc.path)
       .map((doc) => `- ${doc.path}`);
     return lines.length > 0 ? `${this.t('docs.section.docs')}\n${lines.join('\n')}` : '';
+  }
+
+  findApiEntry(entryId) {
+    return this.manifest?.apiReference?.entries?.find((entry) => entry.entryId === entryId) || null;
+  }
+
+  normalizeLocalizedText(value) {
+    if (typeof value === 'string') return value;
+    if (!value || typeof value !== 'object') return '';
+    return {
+      'zh-CN': String(value['zh-CN'] || value.zh || ''),
+      'en-US': String(value['en-US'] || value.en || ''),
+    };
+  }
+
+  formatLocalizedText(value) {
+    if (typeof value === 'string') return value;
+    if (!value || typeof value !== 'object') return '';
+    const locale = this.appController.i18nManager.currentLocale;
+    if (value[locale]) return value[locale];
+    if (locale.startsWith('en') && value['en-US']) return value['en-US'];
+    return value['zh-CN'] || value['en-US'] || '';
+  }
+
+  renderSymbols(apiEntry) {
+    const $symbols = $(DOM.docsSymbols);
+    $symbols.empty();
+    if (!apiEntry?.symbols?.length) {
+      $symbols.prop('hidden', true);
+      return;
+    }
+
+    $symbols.prop('hidden', false);
+    $('<h3>')
+      .addClass('docs-symbols-header')
+      .text(`${this.t('docs.symbols.title')} · ${apiEntry.symbolCount}`)
+      .appendTo($symbols);
+
+    apiEntry.symbols.forEach((symbol) => {
+      const sourceLabel = symbol.source?.path
+        ? `${symbol.source.path}${symbol.source.line ? `:${symbol.source.line}` : ''}`
+        : '';
+      const $card = $('<a>')
+        .attr({
+          href: symbol.source?.url || this.manifest?.repository || '#',
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          'data-docs-symbol-id': symbol.id,
+        })
+        .addClass('docs-symbol-card');
+
+      $('<span>')
+        .addClass('docs-symbol-kind')
+        .text(symbol.kind)
+        .appendTo($card);
+      $('<strong>')
+        .addClass('docs-symbol-name')
+        .text(symbol.name)
+        .appendTo($card);
+      $('<code>')
+        .addClass('docs-symbol-signature')
+        .text(symbol.signature)
+        .appendTo($card);
+      $('<p>')
+        .addClass('docs-symbol-summary')
+        .text(this.formatLocalizedText(symbol.summary))
+        .appendTo($card);
+      $('<span>')
+        .addClass('docs-symbol-source')
+        .text(`${this.t('docs.symbols.source')}: ${sourceLabel}`)
+        .appendTo($card);
+
+      $('<article>').attr('role', 'listitem').append($card).appendTo($symbols);
+    });
   }
 
   formatDate(value) {
