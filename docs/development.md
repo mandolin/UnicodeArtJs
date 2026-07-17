@@ -165,6 +165,16 @@ npm run extension-sdk:check
 
 该命令会检查 [声明式扩展 SDK](extension-sdk.md)、[UAEM v1 清单规范](extension-manifest.md)、官方 Line Banner 示例、Core 解析结果、CLI 本地侧载预检和 Web 只读清单测试入口。UAEM v1 仍保持纯声明式边界，不允许通过资源包执行第三方代码。
 
+## 创作生态
+
+修改 UAF、语义布局、UAEM、官方扩展示例、静态画廊或创作作者路径时，运行：
+
+```bash
+npm run creative-ecosystem:check
+```
+
+该命令会检查 [创作生态总览](creative-ecosystem.md)、UAF / 语义布局契约、声明式扩展 SDK、官方 Line Banner 示例、静态画廊索引和 release gate 接线。它是一个轻量总览门禁，不替代 `semantic-uaf-beta:check`、`extension-sdk:check` 和 `gallery:check` 对具体格式与资源的校验。
+
 ## 桌面宿主基线
 
 修改桌面宿主公开契约、`*.uaproj` fixture、Compatible 文档、Core capability 接入说明或错误模型说明时，运行：

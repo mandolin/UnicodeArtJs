@@ -51,7 +51,8 @@
       "requiredDocs": [
         "docs/extension-sdk.md",
         "docs/extension-manifest.md",
-        "docs/semantic-uaf-beta.md"
+        "docs/semantic-uaf-beta.md",
+        "docs/creative-ecosystem.md"
       ]
     },
     {
