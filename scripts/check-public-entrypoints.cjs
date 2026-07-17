@@ -76,6 +76,7 @@ function assertPackageMetadata(relativePath, expected) {
 for (const relativePath of [
   'README.md',
   'docs/README.md',
+  'docs/quickstart.md',
   'docs/support.md',
   'docs/known-limitations.md',
   'docs/experimental-stability.md',
@@ -110,6 +111,7 @@ for (const expected of [
   'docs/support.md',
   'docs/known-limitations.md',
   'docs/gallery.md',
+  'docs/quickstart.md',
   'docs/recipes.md'
 ]) {
   requireText(rootReadme, expected, 'README.md');
@@ -117,6 +119,7 @@ for (const expected of [
 
 const docsIndex = readUtf8('docs/README.md');
 for (const expected of [
+  'quickstart.md',
   'support.md',
   'known-limitations.md',
   'experimental-stability.md',

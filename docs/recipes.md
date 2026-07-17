@@ -4,6 +4,27 @@
 
 在线工具站：<https://mandolin.github.io/UnicodeArtJs/>
 
+如果你还没有确定入口，先看 [Quickstart](quickstart.md)。
+
+## 最短路径
+
+只想在线试一下：打开工具站，选择“文字 Banner”或“图片转字符画”，生成后使用 TXT / HTML / PNG 导出。
+
+只想在终端跑一条命令：
+
+```bash
+npm install -g unicode-art-cli
+unicode-art text "Recipe" --height 8 --chars " .:-=+*#%@"
+```
+
+只想在代码里调用：
+
+```bash
+npm install unicode-art-js
+```
+
+然后使用本页后面的 Core 示例。
+
 ## 本仓库内运行示例
 
 仓库根目录提供一组可执行 Node 示例：
@@ -208,4 +229,4 @@ unicode-art extension validate packages/extension-line-banner/unicode-art-extens
 
 - 新增稳定公共入口时，应补一个最小 recipe 或说明为什么暂不适合。
 - 示例不得依赖未提交 fixture、本机私有字体文件、密钥或一次性调试目录。
-- 修改示例、README 或公开命令后运行 `npm run recipes:check`。
+- 修改 Quickstart、Recipes、示例、README 或公开命令后运行 `npm run recipes:check`。

@@ -3,6 +3,7 @@
 这里存放面向使用者、二次开发者和发布维护者的公开文档。
 
 - [公开路线](roadmap.md)
+- [快速上手](quickstart.md)
 - [依赖与许可证政策](license-audit.md)
 - [支持与反馈](support.md)
 - [已知限制](known-limitations.md)

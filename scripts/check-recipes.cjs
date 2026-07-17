@@ -15,6 +15,8 @@ const { spawnSync } = require('node:child_process');
 const repoRoot = path.resolve(__dirname, '..');
 const nodeBin = process.execPath;
 const recipeDocPath = path.join(repoRoot, 'docs', 'recipes.md');
+const quickstartDocPath = path.join(repoRoot, 'docs', 'quickstart.md');
+const rootReadmePath = path.join(repoRoot, 'README.md');
 const cliEntryPath = path.join(repoRoot, 'packages', 'cli', 'src', 'console.js');
 
 const nodeExamples = [
@@ -48,26 +50,69 @@ function run(command, args, options = {}) {
 }
 
 function checkRecipeDoc() {
-  if (!fs.existsSync(recipeDocPath)) {
-    fail('Missing docs/recipes.md.');
-  }
-
-  const text = fs.readFileSync(recipeDocPath, 'utf8');
-  for (const fragment of ['work-zone', 'ai/codex', '.generated-docs', 'K:\\', 'C:\\']) {
-    if (text.includes(fragment)) {
-      fail(`docs/recipes.md leaks internal fragment: ${fragment}`);
+  for (const [filePath, label] of [
+    [recipeDocPath, 'docs/recipes.md'],
+    [quickstartDocPath, 'docs/quickstart.md'],
+    [rootReadmePath, 'README.md'],
+  ]) {
+    if (!fs.existsSync(filePath)) {
+      fail(`Missing ${label}.`);
     }
   }
 
-  for (const expected of [
+  const recipeText = fs.readFileSync(recipeDocPath, 'utf8');
+  const quickstartText = fs.readFileSync(quickstartDocPath, 'utf8');
+  const rootReadmeText = fs.readFileSync(rootReadmePath, 'utf8');
+
+  for (const fragment of ['work-zone', 'ai/codex', '.generated-docs', 'K:\\', 'C:\\']) {
+    for (const [label, content] of [
+      ['docs/recipes.md', recipeText],
+      ['docs/quickstart.md', quickstartText],
+      ['README.md', rootReadmeText],
+    ]) {
+      if (content.includes(fragment)) {
+        fail(`${label} leaks internal fragment: ${fragment}`);
+      }
+    }
+  }
+
+  const recipeReferences = [
+    'quickstart.md',
     'examples/node/text-banner.mjs',
     'examples/node/image-file.mjs',
     'examples/node/semantic-document.mjs',
     'examples/node/uaf-font.mjs',
+    'npm install unicode-art-js',
+    'npm install -g unicode-art-cli',
+    'unicode-art text "Recipe"',
     'UnicodeArtJs: Open Converter',
-  ]) {
-    if (!text.includes(expected)) {
+  ];
+
+  for (const expected of recipeReferences) {
+    if (!recipeText.includes(expected)) {
       fail(`docs/recipes.md is missing recipe reference: ${expected}`);
+    }
+  }
+
+  for (const expected of [
+    'https://mandolin.github.io/UnicodeArtJs/',
+    'npm install unicode-art-js',
+    'npm install -g unicode-art-cli',
+    'UnicodeArtJs: Open Converter',
+    'npm run recipes:check',
+  ]) {
+    if (!quickstartText.includes(expected)) {
+      fail(`docs/quickstart.md is missing quickstart reference: ${expected}`);
+    }
+  }
+
+  for (const expected of [
+    'docs/quickstart.md',
+    'docs/recipes.md',
+    'https://mandolin.github.io/UnicodeArtJs/',
+  ]) {
+    if (!rootReadmeText.includes(expected)) {
+      fail(`README.md is missing quickstart reference: ${expected}`);
     }
   }
 }

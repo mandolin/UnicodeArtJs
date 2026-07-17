@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-16T19:41:59.527Z",
+  "generatedAt": "2026-07-17T03:34:19.182Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -30,11 +30,15 @@
       {
         "id": "quickstart",
         "title": "Quickstart",
-        "docCount": 2,
+        "docCount": 3,
         "docs": [
           {
             "path": "README.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/README.md"
+          },
+          {
+            "path": "docs/quickstart.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/quickstart.md"
           },
           {
             "path": "docs/recipes.md",

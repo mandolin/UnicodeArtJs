@@ -19,3 +19,5 @@ node examples/node/uaf-font.mjs
 ```
 
 更多使用场景见 [docs/recipes.md](../docs/recipes.md)。
+
+如果只是第一次试用，建议先看 [Quickstart](../docs/quickstart.md)。
