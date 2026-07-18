@@ -33,6 +33,9 @@ const requiredFiles = [
   'packages/extension-line-banner/README.md',
   'packages/extension-line-banner/unicode-art-extension.json',
   'packages/cli/tests/e2e-test.js',
+  'packages/web/src/resource-discovery.js',
+  'packages/web/tests/resource-discovery.test.mjs',
+  'packages/web/tests/e2e-smoke.mjs',
   'packages/web/public/gallery/index.json',
   'packages/web/public/gallery/resource-manifest.json',
   'package.json',
@@ -98,6 +101,9 @@ const galleryReviewDoc = readUtf8('docs/gallery-review.md');
 const resourceDiscoveryDoc = readUtf8('docs/resource-discovery-experimental.md');
 const cliReadme = readUtf8('packages/cli/README.md');
 const cliE2eTest = readUtf8('packages/cli/tests/e2e-test.js');
+const webResourceModule = readUtf8('packages/web/src/resource-discovery.js');
+const webResourceTest = readUtf8('packages/web/tests/resource-discovery.test.mjs');
+const webE2eTest = readUtf8('packages/web/tests/e2e-smoke.mjs');
 const extensionReadme = readUtf8('packages/extension-line-banner/README.md');
 const extensionManifest = readJson('packages/extension-line-banner/unicode-art-extension.json');
 const galleryIndex = readJson('packages/web/public/gallery/index.json');
@@ -109,18 +115,23 @@ assertCondition(
 );
   requireText(packageJson.scripts?.['release:gate'] || '', 'creative-ecosystem:check', 'package.json release:gate');
   requireText(packageJson.scripts?.['release:gate'] || '', 'resource-discovery:check', 'package.json release:gate');
+  requireText(packageJson.scripts?.['release:gate'] || '', 'web-resource-discovery:check', 'package.json release:gate');
   requireText(ciWorkflow, 'Check Creative Ecosystem', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'npm run creative-ecosystem:check', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'Check Resource Discovery', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'npm run resource-discovery:check', '.github/workflows/ci.yml');
+  requireText(ciWorkflow, 'Check Web Resource Discovery', '.github/workflows/ci.yml');
+  requireText(ciWorkflow, 'npm run web-resource-discovery:check', '.github/workflows/ci.yml');
   requireText(docsIndex, 'creative-ecosystem.md', 'docs/README.md');
   requireText(docsIndex, 'resource-discovery-experimental.md', 'docs/README.md');
   requireText(docsIndex, 'uaf-authoring.md', 'docs/README.md');
   requireText(docsIndex, 'semantic-document-authoring.md', 'docs/README.md');
   requireText(developmentDoc, 'npm run creative-ecosystem:check', 'docs/development.md');
   requireText(developmentDoc, 'npm run resource-discovery:check', 'docs/development.md');
+  requireText(developmentDoc, 'npm run web-resource-discovery:check', 'docs/development.md');
   requireText(releaseGate, 'creative-ecosystem:check', 'docs/release-gate.md');
   requireText(releaseGate, 'resource-discovery:check', 'docs/release-gate.md');
+  requireText(releaseGate, 'web-resource-discovery:check', 'docs/release-gate.md');
   requireText(releaseGate, 'uaf-authoring:check', 'docs/release-gate.md');
   requireText(releaseGate, 'semantic-document-authoring:check', 'docs/release-gate.md');
   requireText(releaseGate, 'extension-example:check', 'docs/release-gate.md');
@@ -144,6 +155,7 @@ for (const expected of [
   'npm run extension-example:check',
   'npm run host-sideload:check',
   'npm run resource-discovery:check',
+  'npm run web-resource-discovery:check',
   'npm run release:gate'
 ]) {
   requireText(overview, expected, 'docs/creative-ecosystem.md');
@@ -183,6 +195,8 @@ for (const expected of [
   'hash 不替代许可证审计',
   'resource-manifest.json',
   'npm run resource-discovery:check',
+  'npm run web-resource-discovery:check',
+  '在线工具',
   'unicode-art resource validate',
   'unicode-art resource inspect',
   '不执行资源内容',
@@ -207,6 +221,28 @@ for (const expected of [
   '不会联网、下载、安装、导入或执行资源内容'
 ]) {
   requireText(cliReadme, expected, 'packages/cli/README.md');
+}
+
+for (const expected of [
+  'parseUnicodeArtResourceManifest',
+  'verifyUnicodeArtResourceBytes',
+  '不安装、不执行资源'
+]) {
+  requireText(webResourceModule, expected, 'packages/web/src/resource-discovery.js');
+}
+
+for (const expected of [
+  'verifies real resource bytes',
+  'automatic install'
+]) {
+  requireText(webResourceTest, expected, 'packages/web/tests/resource-discovery.test.mjs');
+}
+
+for (const expected of [
+  'loads read-only resource discovery manifest',
+  '#resourceStatus'
+]) {
+  requireText(webE2eTest, expected, 'packages/web/tests/e2e-smoke.mjs');
 }
 
 for (const expected of [

@@ -15,6 +15,12 @@ import {
   resolveUnicodeArtGalleryArtworkUrl,
 } from './gallery-index.js';
 import {
+  matchResourceManifestWithGallery,
+  parseUnicodeArtResourceManifest,
+  resolveUnicodeArtResourceDiscoveryUrl,
+  verifyUnicodeArtResourceBytes,
+} from './resource-discovery.js';
+import {
   createCanvasFontAvailabilityChecker,
   getFontAvailabilitySummary,
 } from './font-availability.js';
@@ -84,6 +90,7 @@ const UI_MESSAGES = {
     'mode.text': '文字Banner',
     'mode.editor': '编辑器',
     'mode.gallery': '作品画廊',
+    'mode.resources': '资源发现',
     'mode.docs': '开发文档',
     'editor.sourceRegion': '编辑器源文件与模板',
     'editor.previewRegion': '编辑器预览',
@@ -177,6 +184,44 @@ const UI_MESSAGES = {
     'gallery.tag.bilingual': '双语',
     'gallery.tag.width': '宽度',
     'gallery.tag.review': '审核',
+    'resource.region': 'UnicodeArtJs 资源发现',
+    'resource.detailRegion': '资源校验详情',
+    'resource.title': '实验性资源发现',
+    'resource.intro': '只读取本站随同发布的静态资源清单，展示资源、hash 与校验状态；不会安装、启用或执行资源。',
+    'resource.status.ready': '正在准备资源清单',
+    'resource.status.loading': '正在载入并校验同源资源',
+    'resource.status.loaded': '已校验 {verified} / {total} 个资源',
+    'resource.status.error': '资源发现载入失败：{message}',
+    'resource.resourceCount': '资源',
+    'resource.verifiedCount': '已校验',
+    'resource.network': '联网',
+    'resource.automaticInstall': '自动安装',
+    'resource.reviewedAt': '清单审核',
+    'resource.network.none': '无',
+    'resource.automaticInstall.false': '关闭',
+    'resource.refresh': '重新校验',
+    'resource.openDocs': '说明文档',
+    'resource.noSelection': '选择一个资源查看详情',
+    'resource.detailPlaceholder': '从左侧选择一个资源。页面只展示校验信息，不会导入或安装。',
+    'resource.kind.semantic-document': '语义布局文档',
+    'resource.kind.unicode-art-font': 'Unicode 艺术字字体',
+    'resource.status.verified': '已验证',
+    'resource.status.failed': '校验失败',
+    'resource.status.pending': '待校验',
+    'resource.id': '资源 ID',
+    'resource.kind': '类型',
+    'resource.source': '路径',
+    'resource.license': '许可证',
+    'resource.size': '大小',
+    'resource.sha256': 'sha256',
+    'resource.actualSha256': '实际 sha256',
+    'resource.boundary': '边界',
+    'resource.boundaryText': '同源读取；不安装；不执行；hash 不替代许可证审计。',
+    'resource.openGallery': '在画廊中查看',
+    'resource.hashPrefix': 'sha256: {hash}',
+    'resource.sizeBytes': '{size} 字节',
+    'resource.checkOk': 'size 与 sha256 匹配',
+    'resource.checkFail': '{reason}',
     'docs.region': 'UnicodeArtJs 开发文档',
     'docs.previewRegion': '文档详情',
     'docs.title': 'UnicodeArtJs 开发文档',
@@ -354,6 +399,7 @@ const UI_MESSAGES = {
     'mode.text': 'Text Banner',
     'mode.editor': 'Editor',
     'mode.gallery': 'Gallery',
+    'mode.resources': 'Resource Discovery',
     'mode.docs': 'Developer Docs',
     'editor.sourceRegion': 'Editor source and templates',
     'editor.previewRegion': 'Editor preview',
@@ -447,6 +493,44 @@ const UI_MESSAGES = {
     'gallery.tag.bilingual': 'Bilingual',
     'gallery.tag.width': 'Width',
     'gallery.tag.review': 'Review',
+    'resource.region': 'UnicodeArtJs resource discovery',
+    'resource.detailRegion': 'Resource verification detail',
+    'resource.title': 'Experimental Resource Discovery',
+    'resource.intro': 'Reads only the static resource manifest shipped with this site, showing resources, hashes, and verification status. It does not install, enable, or execute resources.',
+    'resource.status.ready': 'Preparing the resource manifest',
+    'resource.status.loading': 'Loading and verifying same-origin resources',
+    'resource.status.loaded': '{verified} / {total} resources verified',
+    'resource.status.error': 'Resource discovery failed: {message}',
+    'resource.resourceCount': 'Resources',
+    'resource.verifiedCount': 'Verified',
+    'resource.network': 'Network',
+    'resource.automaticInstall': 'Automatic install',
+    'resource.reviewedAt': 'Manifest reviewed',
+    'resource.network.none': 'None',
+    'resource.automaticInstall.false': 'Off',
+    'resource.refresh': 'Re-verify',
+    'resource.openDocs': 'Docs',
+    'resource.noSelection': 'Select a resource for details',
+    'resource.detailPlaceholder': 'Choose a resource from the left. This page only displays verification data and never imports or installs resources.',
+    'resource.kind.semantic-document': 'Semantic layout document',
+    'resource.kind.unicode-art-font': 'Unicode art font',
+    'resource.status.verified': 'Verified',
+    'resource.status.failed': 'Failed',
+    'resource.status.pending': 'Pending',
+    'resource.id': 'Resource ID',
+    'resource.kind': 'Kind',
+    'resource.source': 'Path',
+    'resource.license': 'License',
+    'resource.size': 'Size',
+    'resource.sha256': 'sha256',
+    'resource.actualSha256': 'Actual sha256',
+    'resource.boundary': 'Boundary',
+    'resource.boundaryText': 'Same-origin read only; no install; no execution; hashes do not replace license review.',
+    'resource.openGallery': 'View in gallery',
+    'resource.hashPrefix': 'sha256: {hash}',
+    'resource.sizeBytes': '{size} bytes',
+    'resource.checkOk': 'size and sha256 match',
+    'resource.checkFail': '{reason}',
     'docs.region': 'UnicodeArtJs developer documentation',
     'docs.previewRegion': 'Documentation detail',
     'docs.title': 'UnicodeArtJs Developer Docs',
@@ -664,6 +748,7 @@ const DOM = {
   converterWorkbench: '#converterWorkbench',
   editorWorkbench: '#editorWorkbench',
   galleryWorkbench: '#galleryWorkbench',
+  resourceWorkbench: '#resourceWorkbench',
   docsWorkbench: '#docsWorkbench',
   imageInputPanel: '#imageInputPanel',
   textInputPanel: '#textInputPanel',
@@ -766,6 +851,29 @@ const DOM = {
   galleryCopy: '#galleryCopy',
   galleryDownload: '#galleryDownload',
   galleryOpenEditor: '#galleryOpenEditor',
+
+  resourceStatus: '#resourceStatus',
+  resourceCount: '#resourceCount',
+  resourceVerifiedCount: '#resourceVerifiedCount',
+  resourceNetwork: '#resourceNetwork',
+  resourceAutomaticInstall: '#resourceAutomaticInstall',
+  resourceReviewedAt: '#resourceReviewedAt',
+  resourceRefresh: '#resourceRefresh',
+  resourceGrid: '#resourceGrid',
+  resourceKind: '#resourceKind',
+  resourceTitle: '#resourceTitle',
+  resourceBadge: '#resourceBadge',
+  resourceMetadata: '#resourceMetadata',
+  resourceId: '#resourceId',
+  resourceKindValue: '#resourceKindValue',
+  resourceSource: '#resourceSource',
+  resourceLicense: '#resourceLicense',
+  resourceSize: '#resourceSize',
+  resourceSha256: '#resourceSha256',
+  resourceActualSha256: '#resourceActualSha256',
+  resourceCheckResult: '#resourceCheckResult',
+  resourceBoundary: '#resourceBoundary',
+  resourceOpenGallery: '#resourceOpenGallery',
 
   docsStatus: '#docsStatus',
   docsEntryCount: '#docsEntryCount',
@@ -1954,6 +2062,303 @@ class GalleryController {
 
 //#endregion
 
+//#region 🟩 实验性资源发现
+
+/**
+ * 🟢 Web 只读资源发现控制器
+ *
+ * 🔹 只读取当前站点随同发布的 `gallery/resource-manifest.json`。
+ * 🔹 只访问 manifest 中声明的同源 gallery 资源，不接受用户输入 URL。
+ * 🔹 校验结果仅用于展示；页面不安装、不启用、不执行任何资源。
+ */
+class ResourceDiscoveryController {
+  constructor(appController) {
+    this.appController = appController;
+    this.manifest = null;
+    this.galleryIndex = null;
+    this.resourceStates = [];
+    this.selectedResourceId = '';
+    this.statusState = 'info';
+    this.loadGeneration = 0;
+  }
+
+  bindEvents($doc) {
+    $doc.on('click', DOM.resourceRefresh, () => void this.ensureLoaded(true));
+    $doc.on('click', '[data-resource-id]', (event) => {
+      const id = String($(event.currentTarget).attr('data-resource-id') || '');
+      this.selectResource(id);
+    });
+    $doc.on('click', DOM.resourceOpenGallery, () => void this.openSelectedResourceInGallery());
+  }
+
+  async activate() {
+    await this.ensureLoaded();
+  }
+
+  refreshLocale() {
+    if (!this.manifest) {
+      this.setStatus('resource.status.ready');
+      this.setInspectorPlaceholder();
+      return;
+    }
+    this.renderSummary();
+    this.renderGrid();
+    this.renderSelectedResource();
+    this.updateLoadedStatus();
+  }
+
+  t(key, params = {}) {
+    return this.appController.i18nManager.t(key, params);
+  }
+
+  async ensureLoaded(force = false) {
+    if (this.manifest && !force) {
+      this.renderSummary();
+      this.renderGrid();
+      if (!this.selectedResourceId && this.resourceStates.length > 0) {
+        this.selectResource(this.resourceStates[0].resource.id);
+      } else {
+        this.renderSelectedResource();
+      }
+      this.updateLoadedStatus();
+      return;
+    }
+
+    const request = ++this.loadGeneration;
+    this.setStatus('resource.status.loading');
+    this.setInspectorPlaceholder();
+    $(DOM.resourceRefresh).prop('disabled', true);
+
+    try {
+      const state = await this.loadDiscoveryState();
+      if (request !== this.loadGeneration) return;
+      this.manifest = state.manifest;
+      this.galleryIndex = state.galleryIndex;
+      this.resourceStates = state.resourceStates;
+      if (!this.resourceStates.some((item) => item.resource.id === this.selectedResourceId)) {
+        this.selectedResourceId = this.resourceStates[0]?.resource.id || '';
+      }
+      this.renderSummary();
+      this.renderGrid();
+      this.renderSelectedResource();
+      this.updateLoadedStatus();
+    } catch (error) {
+      if (request !== this.loadGeneration) return;
+      const message = error instanceof Error ? error.message : String(error);
+      this.manifest = null;
+      this.galleryIndex = null;
+      this.resourceStates = [];
+      this.setStatus('resource.status.error', { message }, 'error');
+      this.renderSummary();
+      this.renderGrid();
+      this.setInspectorPlaceholder(message);
+    } finally {
+      if (request === this.loadGeneration) $(DOM.resourceRefresh).prop('disabled', false);
+    }
+  }
+
+  async loadDiscoveryState() {
+    const manifestUrl = resolveUnicodeArtResourceDiscoveryUrl('resource-manifest.json');
+    const manifestResponse = await fetch(manifestUrl, { cache: 'no-store' });
+    if (!manifestResponse.ok) throw new Error(`HTTP ${manifestResponse.status}`);
+    const manifest = parseUnicodeArtResourceManifest(await manifestResponse.text());
+
+    const indexUrl = resolveUnicodeArtResourceDiscoveryUrl(manifest.index);
+    const indexResponse = await fetch(indexUrl, { cache: 'no-store' });
+    if (!indexResponse.ok) throw new Error(`HTTP ${indexResponse.status}`);
+    const galleryIndex = parseUnicodeArtGalleryIndex(await indexResponse.text());
+    matchResourceManifestWithGallery(manifest, galleryIndex);
+
+    const artworkMap = new Map(galleryIndex.artworks.map((artwork) => [artwork.id, artwork]));
+    const resourceStates = await Promise.all(manifest.resources.map(async (resource) => {
+      try {
+        const resourceUrl = resolveUnicodeArtResourceDiscoveryUrl(resource.source);
+        const response = await fetch(resourceUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const verification = await verifyUnicodeArtResourceBytes(resource, await response.arrayBuffer());
+        if (!verification.ok) {
+          const reason = [
+            verification.sizeOk ? '' : 'size mismatch',
+            verification.sha256Ok ? '' : 'sha256 mismatch',
+          ].filter(Boolean).join(', ');
+          throw new Error(reason || 'verification failed');
+        }
+        return Object.freeze({
+          resource,
+          artwork: artworkMap.get(resource.id),
+          verification,
+          ok: true,
+          error: '',
+        });
+      } catch (error) {
+        return Object.freeze({
+          resource,
+          artwork: artworkMap.get(resource.id),
+          verification: null,
+          ok: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }));
+
+    return Object.freeze({
+      manifest,
+      galleryIndex,
+      resourceStates: Object.freeze(resourceStates),
+    });
+  }
+
+  renderSummary() {
+    const total = this.manifest?.resources.length || 0;
+    const verified = this.resourceStates.filter((item) => item.ok).length;
+    $(DOM.resourceCount).text(total ? String(total) : '--');
+    $(DOM.resourceVerifiedCount).text(total ? String(verified) : '--');
+    $(DOM.resourceNetwork).text(this.manifest ? this.formatNetwork(this.manifest.network) : '--');
+    $(DOM.resourceAutomaticInstall).text(this.manifest ? this.formatAutomaticInstall(this.manifest.automaticInstall) : '--');
+    $(DOM.resourceReviewedAt).text(this.manifest?.reviewedAt || '--');
+  }
+
+  renderGrid() {
+    const $grid = $(DOM.resourceGrid);
+    $grid.empty();
+    this.resourceStates.forEach((item) => {
+      const { resource, artwork } = item;
+      const isSelected = resource.id === this.selectedResourceId;
+      const $button = $('<button>')
+        .attr({
+          type: 'button',
+          'data-resource-id': resource.id,
+          'data-state': item.ok ? 'verified' : 'failed',
+          'aria-pressed': String(isSelected),
+        })
+        .addClass('resource-card')
+        .toggleClass('selected', isSelected);
+
+      $('<span>')
+        .addClass('resource-card-kind')
+        .text(this.t(`resource.kind.${resource.kind}`))
+        .appendTo($button);
+      $('<strong>')
+        .addClass('resource-card-title')
+        .text(artwork ? getGalleryLocalizedText(artwork.title, AppState.config.locale) : resource.id)
+        .appendTo($button);
+      $('<span>')
+        .addClass('resource-card-id')
+        .text(resource.id)
+        .appendTo($button);
+      $('<span>')
+        .addClass('resource-card-hash')
+        .text(this.t('resource.hashPrefix', { hash: this.shortHash(resource.sha256) }))
+        .appendTo($button);
+      $('<span>')
+        .addClass('resource-card-status')
+        .text(this.t(item.ok ? 'resource.status.verified' : 'resource.status.failed'))
+        .appendTo($button);
+
+      $('<article>').attr('role', 'listitem').append($button).appendTo($grid);
+    });
+  }
+
+  selectResource(id) {
+    if (!this.resourceStates.some((item) => item.resource.id === id)) return;
+    this.selectedResourceId = id;
+    this.renderGrid();
+    this.renderSelectedResource();
+  }
+
+  renderSelectedResource() {
+    const item = this.resourceStates.find((entry) => entry.resource.id === this.selectedResourceId);
+    if (!item) {
+      this.setInspectorPlaceholder();
+      return;
+    }
+
+    const { resource, artwork, verification } = item;
+    $(DOM.resourceKind).text(this.t(`resource.kind.${resource.kind}`));
+    $(DOM.resourceTitle).text(artwork ? getGalleryLocalizedText(artwork.title, AppState.config.locale) : resource.id);
+    $(DOM.resourceBadge)
+      .text(this.t(item.ok ? 'resource.status.verified' : 'resource.status.failed'))
+      .attr('data-state', item.ok ? 'verified' : 'failed');
+    $(DOM.resourceId).text(resource.id);
+    $(DOM.resourceKindValue).text(this.t(`resource.kind.${resource.kind}`));
+    $(DOM.resourceSource).text(resource.source);
+    $(DOM.resourceLicense).text(`${resource.license.expression} · ${resource.license.origin}`);
+    $(DOM.resourceSize).text(this.t('resource.sizeBytes', { size: resource.size }));
+    $(DOM.resourceSha256).text(resource.sha256);
+    $(DOM.resourceActualSha256).text(verification?.actualSha256 || '--');
+    $(DOM.resourceBoundary).text(this.t('resource.boundaryText'));
+    $(DOM.resourceMetadata).prop('hidden', false);
+    $(DOM.resourceCheckResult).text(this.formatCheckResult(item));
+    $(DOM.resourceOpenGallery).prop('disabled', !artwork);
+  }
+
+  setInspectorPlaceholder(message = '') {
+    $(DOM.resourceKind).text('');
+    $(DOM.resourceTitle).text(this.t('resource.noSelection'));
+    $(DOM.resourceBadge)
+      .text(this.t('resource.status.pending'))
+      .attr('data-state', 'pending');
+    $(DOM.resourceMetadata).prop('hidden', true);
+    $(DOM.resourceCheckResult).text(message || this.t('resource.detailPlaceholder'));
+    $(DOM.resourceOpenGallery).prop('disabled', true);
+  }
+
+  setStatus(key, params = {}, state = 'info') {
+    this.statusState = state;
+    $(DOM.resourceStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
+  updateLoadedStatus() {
+    const total = this.resourceStates.length;
+    const verified = this.resourceStates.filter((item) => item.ok).length;
+    this.setStatus('resource.status.loaded', {
+      verified,
+      total,
+    }, verified === total ? 'success' : 'error');
+  }
+
+  formatCheckResult(item) {
+    const { resource, verification } = item;
+    const lines = [
+      item.ok ? this.t('resource.checkOk') : this.t('resource.checkFail', { reason: item.error }),
+      `${this.t('resource.id')}: ${resource.id}`,
+      `${this.t('resource.source')}: ${resource.source}`,
+      `${this.t('resource.size')}: ${verification?.actualSize ?? '--'} / ${resource.size}`,
+      `${this.t('resource.sha256')}: ${resource.sha256}`,
+      `${this.t('resource.actualSha256')}: ${verification?.actualSha256 || '--'}`,
+      `${this.t('resource.boundary')}: ${this.t('resource.boundaryText')}`,
+    ];
+    return lines.join('\n');
+  }
+
+  shortHash(hash) {
+    return `${hash.slice(0, 12)}…${hash.slice(-8)}`;
+  }
+
+  formatNetwork(value) {
+    const key = `resource.network.${value}`;
+    const label = this.t(key);
+    return label === key ? String(value) : label;
+  }
+
+  formatAutomaticInstall(value) {
+    const key = `resource.automaticInstall.${String(value)}`;
+    const label = this.t(key);
+    return label === key ? String(value) : label;
+  }
+
+  async openSelectedResourceInGallery() {
+    const item = this.resourceStates.find((entry) => entry.resource.id === this.selectedResourceId);
+    if (!item?.artwork) return;
+    await this.appController.switchMode('gallery');
+    await this.appController.galleryController.selectArtwork(item.resource.id);
+  }
+}
+
+//#endregion
+
 //#region 🟩 公开开发文档入口
 
 /**
@@ -2424,6 +2829,7 @@ class AppController {
     this.artGenerator = new ArtGenerator();
     this.editorController = new EditorController(this);
     this.galleryController = new GalleryController(this);
+    this.resourceDiscoveryController = new ResourceDiscoveryController(this);
     this.docsController = new DocsController(this);
     this.fontAvailabilityChecker = createCanvasFontAvailabilityChecker(document);
     this.isBraveBrowser = false;
@@ -2575,6 +2981,9 @@ class AppController {
     // 静态画廊
     this.galleryController.bindEvents($doc);
 
+    // 实验性资源发现
+    this.resourceDiscoveryController.bindEvents($doc);
+
     // 公开开发文档
     this.docsController.bindEvents($doc);
 
@@ -2598,12 +3007,13 @@ class AppController {
    * 后仍被键盘焦点访问。静态数据页首次激活时才读取同源索引。
    */
   async switchMode(mode) {
-    if (!['image', 'text', 'editor', 'gallery', 'docs'].includes(mode)) return;
+    if (!['image', 'text', 'editor', 'gallery', 'resources', 'docs'].includes(mode)) return;
     $(DOM.modeButtons).removeClass('active');
     $(`${DOM.modeButtons}[data-mode="${mode}"]`).addClass('active');
     if (mode === 'editor') {
       $(DOM.converterWorkbench).prop('hidden', true);
       $(DOM.galleryWorkbench).prop('hidden', true);
+      $(DOM.resourceWorkbench).prop('hidden', true);
       $(DOM.docsWorkbench).prop('hidden', true);
       $(DOM.editorWorkbench).prop('hidden', false);
       AppState.mode = mode;
@@ -2614,6 +3024,7 @@ class AppController {
     if (mode === 'gallery') {
       $(DOM.converterWorkbench).prop('hidden', true);
       $(DOM.editorWorkbench).prop('hidden', true);
+      $(DOM.resourceWorkbench).prop('hidden', true);
       $(DOM.docsWorkbench).prop('hidden', true);
       $(DOM.galleryWorkbench).prop('hidden', false);
       AppState.mode = mode;
@@ -2621,10 +3032,22 @@ class AppController {
       return;
     }
 
+    if (mode === 'resources') {
+      $(DOM.converterWorkbench).prop('hidden', true);
+      $(DOM.editorWorkbench).prop('hidden', true);
+      $(DOM.galleryWorkbench).prop('hidden', true);
+      $(DOM.docsWorkbench).prop('hidden', true);
+      $(DOM.resourceWorkbench).prop('hidden', false);
+      AppState.mode = mode;
+      await this.resourceDiscoveryController.activate();
+      return;
+    }
+
     if (mode === 'docs') {
       $(DOM.converterWorkbench).prop('hidden', true);
       $(DOM.editorWorkbench).prop('hidden', true);
       $(DOM.galleryWorkbench).prop('hidden', true);
+      $(DOM.resourceWorkbench).prop('hidden', true);
       $(DOM.docsWorkbench).prop('hidden', false);
       AppState.mode = mode;
       await this.docsController.activate();
@@ -2633,6 +3056,7 @@ class AppController {
 
     $(DOM.editorWorkbench).prop('hidden', true);
     $(DOM.galleryWorkbench).prop('hidden', true);
+    $(DOM.resourceWorkbench).prop('hidden', true);
     $(DOM.docsWorkbench).prop('hidden', true);
     $(DOM.converterWorkbench).prop('hidden', false);
     if (mode === 'image') { $(DOM.imageInputPanel).show(); $(DOM.textInputPanel).hide(); }
@@ -2674,6 +3098,7 @@ class AppController {
     this.initBoxStylePreview();
     this.editorController.refreshLocale();
     this.galleryController.refreshLocale();
+    this.resourceDiscoveryController.refreshLocale();
     this.docsController.refreshLocale();
     this.refreshFontAvailability();
     this.saveConfig();
@@ -2923,6 +3348,7 @@ class AppController {
       return;
     }
     if (AppState.mode === 'gallery') return;
+    if (AppState.mode === 'resources') return;
     if (AppState.mode === 'docs') return;
     if (AppState.mode === 'image' && !AppState.imageFile) { this.setPlaceholder(this.i18nManager.t('preview.uploadImage')); return; }
     if (AppState.mode === 'text' && !AppState.textContent.trim()) { this.setPlaceholder(this.i18nManager.t('preview.enterText')); return; }

@@ -142,7 +142,7 @@ async function main() {
 
     await test('mode buttons exist', async () => {
       const buttons = await page.$$('.mode-btn');
-      if (buttons.length < 5) throw new Error('A mode button is missing');
+      if (buttons.length < 6) throw new Error('A mode button is missing');
     });
 
     await test('theme selector exists', async () => {
@@ -425,6 +425,59 @@ async function main() {
       await page.waitForSelector('#converterWorkbench:not([hidden])', { timeout: 3000 });
     });
 
+    await test('loads read-only resource discovery manifest and verification status', async () => {
+      await page.click('.mode-btn[data-mode="resources"]');
+      await page.waitForSelector('#resourceWorkbench:not([hidden])', { timeout: 5000 });
+      await page.waitForFunction(
+        () => document.querySelectorAll('#resourceGrid [data-resource-id]').length >= 5,
+        undefined,
+        { timeout: 10_000 },
+      );
+      await page.waitForFunction(
+        () => document.querySelector('#resourceStatus')?.dataset.state === 'success',
+        undefined,
+        { timeout: 10_000 },
+      );
+
+      const state = await page.evaluate(() => ({
+        count: Number(document.querySelector('#resourceCount')?.textContent || 0),
+        verified: Number(document.querySelector('#resourceVerifiedCount')?.textContent || 0),
+        network: document.querySelector('#resourceNetwork')?.textContent,
+        autoInstall: document.querySelector('#resourceAutomaticInstall')?.textContent,
+        badge: document.querySelector('#resourceBadge')?.dataset.state,
+        check: document.querySelector('#resourceCheckResult')?.textContent || '',
+        pageText: document.querySelector('#resourceWorkbench')?.textContent || '',
+      }));
+      if (state.count < 5 || state.verified !== state.count) {
+        throw new Error('Resource discovery did not verify all static resources');
+      }
+      if (!/无|None/.test(state.network || '') || !/关闭|Off/.test(state.autoInstall || '')) {
+        throw new Error('Resource discovery boundary flags were not rendered');
+      }
+      if (state.badge !== 'verified' || !/sha256|size/.test(state.check)) {
+        throw new Error('Resource discovery detail verification was not rendered');
+      }
+      if (!/不安装|does not install|never imports/i.test(state.pageText)) {
+        throw new Error('Resource discovery page did not expose the read-only boundary');
+      }
+
+      await page.click('[data-resource-id="review-workflow"]');
+      await page.waitForFunction(
+        () => (document.querySelector('#resourceId')?.textContent || '') === 'review-workflow',
+        undefined,
+        { timeout: 5000 },
+      );
+      await page.click('#resourceOpenGallery');
+      await page.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
+      await page.waitForFunction(
+        () => document.querySelector('[data-gallery-artwork-id="review-workflow"]')?.classList.contains('selected'),
+        undefined,
+        { timeout: 10_000 },
+      );
+      await page.click('.mode-btn[data-mode="text"]');
+      await page.waitForSelector('#converterWorkbench:not([hidden])', { timeout: 3000 });
+    });
+
     await test('box panel toggle works', async () => {
       const checked = await page.isChecked('#boxEnabled');
       if (!checked) throw new Error('Box not enabled');
@@ -597,6 +650,7 @@ async function main() {
         undefined,
         { timeout: 10_000 },
       );
+      await page.click('[data-gallery-artwork-id="line-banner-uaj"]');
       await page.waitForFunction(
         () => (document.querySelector('#galleryPreview')?.textContent || '').includes('/\\'),
         undefined,

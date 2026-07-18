@@ -107,6 +107,9 @@ jobs:
       - name: Check Resource Discovery
         run: npm run resource-discovery:check
 
+      - name: Check Web Resource Discovery
+        run: npm run web-resource-discovery:check
+
       - name: Check Support Governance
         run: npm run support:check
 

@@ -68,6 +68,10 @@
         <span class="mode-icon">🗂️</span>
         <span class="mode-text" data-i18n="mode.gallery">作品画廊</span>
       </button>
+      <button class="mode-btn" data-mode="resources" type="button">
+        <span class="mode-icon">🔎</span>
+        <span class="mode-text" data-i18n="mode.resources">资源发现</span>
+      </button>
       <button class="mode-btn" data-mode="docs" type="button">
         <span class="mode-icon">📚</span>
         <span class="mode-text" data-i18n="mode.docs">开发文档</span>
@@ -482,6 +486,100 @@
           <button class="btn" id="galleryCopy" type="button" disabled data-i18n="gallery.copy">复制字符画</button>
           <button class="btn" id="galleryDownload" type="button" disabled data-i18n="gallery.download">下载源文件</button>
           <button class="btn primary" id="galleryOpenEditor" type="button" disabled data-i18n="gallery.openEditor">在编辑器中打开</button>
+        </div>
+      </section>
+    </main>
+    <!--#endregion-->
+
+    <!--#region 🟩 实验性资源发现 -->
+    <main class="resource-workbench" id="resourceWorkbench" hidden>
+      <section class="resource-catalog" aria-label="UnicodeArtJs 资源发现" data-i18n-aria-label="resource.region">
+        <header class="resource-header">
+          <div>
+            <h2 data-i18n="resource.title">实验性资源发现</h2>
+            <p data-i18n="resource.intro">只读取本站随同发布的静态资源清单，展示资源、hash 与校验状态；不会安装、启用或执行资源。</p>
+          </div>
+          <p class="resource-status" id="resourceStatus" aria-live="polite" data-i18n="resource.status.ready">正在准备资源清单</p>
+        </header>
+
+        <dl class="resource-summary">
+          <div>
+            <dt data-i18n="resource.resourceCount">资源</dt>
+            <dd id="resourceCount">--</dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.verifiedCount">已校验</dt>
+            <dd id="resourceVerifiedCount">--</dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.network">联网</dt>
+            <dd id="resourceNetwork">--</dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.automaticInstall">自动安装</dt>
+            <dd id="resourceAutomaticInstall">--</dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.reviewedAt">清单审核</dt>
+            <dd id="resourceReviewedAt">--</dd>
+          </div>
+        </dl>
+
+        <div class="resource-toolbar">
+          <button class="btn" id="resourceRefresh" type="button" data-i18n="resource.refresh">重新校验</button>
+          <a class="btn resource-link" href="https://github.com/mandolin/UnicodeArtJs/blob/main/docs/resource-discovery-experimental.md" target="_blank" rel="noopener noreferrer" data-i18n="resource.openDocs">说明文档</a>
+        </div>
+
+        <div class="resource-grid" id="resourceGrid" role="list" aria-live="polite"></div>
+      </section>
+
+      <section class="resource-inspector" aria-label="资源校验详情" data-i18n-aria-label="resource.detailRegion">
+        <header class="resource-inspector-header">
+          <div>
+            <p class="resource-eyebrow" id="resourceKind"></p>
+            <h2 id="resourceTitle" data-i18n="resource.noSelection">选择一个资源查看详情</h2>
+          </div>
+          <span class="resource-badge" id="resourceBadge" data-state="pending" data-i18n="resource.status.pending">待校验</span>
+        </header>
+
+        <dl class="resource-metadata" id="resourceMetadata" hidden>
+          <div>
+            <dt data-i18n="resource.id">资源 ID</dt>
+            <dd id="resourceId"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.kind">类型</dt>
+            <dd id="resourceKindValue"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.source">路径</dt>
+            <dd id="resourceSource"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.license">许可证</dt>
+            <dd id="resourceLicense"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.size">大小</dt>
+            <dd id="resourceSize"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.sha256">sha256</dt>
+            <dd id="resourceSha256"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.actualSha256">实际 sha256</dt>
+            <dd id="resourceActualSha256"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.boundary">边界</dt>
+            <dd id="resourceBoundary" data-i18n="resource.boundaryText">同源读取；不安装；不执行；hash 不替代许可证审计。</dd>
+          </div>
+        </dl>
+
+        <pre class="resource-check-result" id="resourceCheckResult" aria-live="polite" data-i18n="resource.detailPlaceholder">从左侧选择一个资源。页面只展示校验信息，不会导入或安装。</pre>
+        <div class="resource-actions">
+          <button class="btn primary" id="resourceOpenGallery" type="button" disabled data-i18n="resource.openGallery">在画廊中查看</button>
         </div>
       </section>
     </main>
