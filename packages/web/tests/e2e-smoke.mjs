@@ -112,6 +112,32 @@ async function waitForEditorPreview(page, description, previewText) {
   }
 }
 
+/**
+ * 切回文本转换工作台；用于失败恢复，避免某个模式测试污染后续用例。
+ * @param {import('playwright').Page} page Playwright 页面实例
+ */
+async function switchToTextWorkbench(page) {
+  await page.click('.mode-btn[data-mode="text"]');
+  await page.waitForSelector('#converterWorkbench:not([hidden])', { timeout: 3000 });
+}
+
+/**
+ * 读取资源发现页的调试快照，方便定位远端 Pages 的短暂传播状态。
+ * @param {import('playwright').Page} page Playwright 页面实例
+ */
+async function getResourceDiscoverySnapshot(page) {
+  return await page.evaluate(() => ({
+    status: document.querySelector('#resourceStatus')?.textContent || '',
+    statusState: document.querySelector('#resourceStatus')?.dataset.state || '',
+    count: document.querySelector('#resourceCount')?.textContent || '',
+    verified: document.querySelector('#resourceVerifiedCount')?.textContent || '',
+    firstFailed: Array.from(document.querySelectorAll('#resourceGrid [data-resource-id]'))
+      .find((node) => node.getAttribute('data-state') === 'failed')
+      ?.textContent?.replace(/\s+/g, ' ').trim() || '',
+    detail: document.querySelector('#resourceCheckResult')?.textContent || '',
+  }));
+}
+
 //#endregion
 
 //#region Main Flow
@@ -426,59 +452,71 @@ async function main() {
     });
 
     await test('loads read-only resource discovery manifest and verification status', async () => {
-      await page.click('.mode-btn[data-mode="resources"]');
-      await page.waitForSelector('#resourceWorkbench:not([hidden])', { timeout: 5000 });
-      await page.waitForFunction(
-        () => document.querySelectorAll('#resourceGrid [data-resource-id]').length >= 5,
-        undefined,
-        { timeout: 10_000 },
-      );
-      await page.waitForFunction(
-        () => document.querySelector('#resourceStatus')?.dataset.state === 'success',
-        undefined,
-        { timeout: 10_000 },
-      );
+      try {
+        await page.click('.mode-btn[data-mode="resources"]');
+        await page.waitForSelector('#resourceWorkbench:not([hidden])', { timeout: 5000 });
+        await page.waitForFunction(
+          () => document.querySelectorAll('#resourceGrid [data-resource-id]').length >= 5,
+          undefined,
+          { timeout: 10_000 },
+        );
+        try {
+          await page.waitForFunction(
+            () => document.querySelector('#resourceStatus')?.dataset.state === 'success',
+            undefined,
+            { timeout: 10_000 },
+          );
+        } catch (error) {
+          const snapshot = await getResourceDiscoverySnapshot(page);
+          throw new Error(`${error.message}; resource snapshot: ${JSON.stringify(snapshot)}`);
+        }
 
-      const state = await page.evaluate(() => ({
-        count: Number(document.querySelector('#resourceCount')?.textContent || 0),
-        verified: Number(document.querySelector('#resourceVerifiedCount')?.textContent || 0),
-        network: document.querySelector('#resourceNetwork')?.textContent,
-        autoInstall: document.querySelector('#resourceAutomaticInstall')?.textContent,
-        badge: document.querySelector('#resourceBadge')?.dataset.state,
-        check: document.querySelector('#resourceCheckResult')?.textContent || '',
-        pageText: document.querySelector('#resourceWorkbench')?.textContent || '',
-      }));
-      if (state.count < 5 || state.verified !== state.count) {
-        throw new Error('Resource discovery did not verify all static resources');
-      }
-      if (!/无|None/.test(state.network || '') || !/关闭|Off/.test(state.autoInstall || '')) {
-        throw new Error('Resource discovery boundary flags were not rendered');
-      }
-      if (state.badge !== 'verified' || !/sha256|size/.test(state.check)) {
-        throw new Error('Resource discovery detail verification was not rendered');
-      }
-      if (!/不安装|does not install|never imports/i.test(state.pageText)) {
-        throw new Error('Resource discovery page did not expose the read-only boundary');
-      }
+        const state = await page.evaluate(() => ({
+          count: Number(document.querySelector('#resourceCount')?.textContent || 0),
+          verified: Number(document.querySelector('#resourceVerifiedCount')?.textContent || 0),
+          network: document.querySelector('#resourceNetwork')?.textContent,
+          autoInstall: document.querySelector('#resourceAutomaticInstall')?.textContent,
+          badge: document.querySelector('#resourceBadge')?.dataset.state,
+          check: document.querySelector('#resourceCheckResult')?.textContent || '',
+          pageText: document.querySelector('#resourceWorkbench')?.textContent || '',
+        }));
+        if (state.count < 5 || state.verified !== state.count) {
+          throw new Error('Resource discovery did not verify all static resources');
+        }
+        if (!/无|None/.test(state.network || '') || !/关闭|Off/.test(state.autoInstall || '')) {
+          throw new Error('Resource discovery boundary flags were not rendered');
+        }
+        if (state.badge !== 'verified' || !/sha256|size/.test(state.check)) {
+          throw new Error('Resource discovery detail verification was not rendered');
+        }
+        if (!/不安装|does not install|never imports/i.test(state.pageText)) {
+          throw new Error('Resource discovery page did not expose the read-only boundary');
+        }
 
-      await page.click('[data-resource-id="review-workflow"]');
-      await page.waitForFunction(
-        () => (document.querySelector('#resourceId')?.textContent || '') === 'review-workflow',
-        undefined,
-        { timeout: 5000 },
-      );
-      await page.click('#resourceOpenGallery');
-      await page.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
-      await page.waitForFunction(
-        () => document.querySelector('[data-gallery-artwork-id="review-workflow"]')?.classList.contains('selected'),
-        undefined,
-        { timeout: 10_000 },
-      );
-      await page.click('.mode-btn[data-mode="text"]');
-      await page.waitForSelector('#converterWorkbench:not([hidden])', { timeout: 3000 });
+        await page.click('[data-resource-id="review-workflow"]');
+        await page.waitForFunction(
+          () => (document.querySelector('#resourceId')?.textContent || '') === 'review-workflow',
+          undefined,
+          { timeout: 5000 },
+        );
+        await page.click('#resourceOpenGallery');
+        await page.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
+        await page.waitForFunction(
+          () => document.querySelector('[data-gallery-artwork-id="review-workflow"]')?.classList.contains('selected'),
+          undefined,
+          { timeout: 10_000 },
+        );
+      } finally {
+        try {
+          await switchToTextWorkbench(page);
+        } catch {
+          // 失败恢复不能覆盖原始断言错误。
+        }
+      }
     });
 
     await test('box panel toggle works', async () => {
+      await switchToTextWorkbench(page);
       const checked = await page.isChecked('#boxEnabled');
       if (!checked) throw new Error('Box not enabled');
       await page.click('#boxEnabled');

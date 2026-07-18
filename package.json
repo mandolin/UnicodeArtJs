@@ -63,6 +63,7 @@
     "resource-discovery:check": "node scripts/check-resource-discovery.cjs",
     "resource-trust:check": "node scripts/check-resource-trust.cjs",
     "web-resource-discovery:check": "node scripts/check-web-resource-discovery.cjs",
+    "pages-resource-discovery:wait": "node scripts/wait-pages-resource-discovery.cjs",
     "support:check": "node scripts/check-support-governance.cjs",
     "public-entry:check": "node scripts/check-public-entrypoints.cjs",
     "stability:check": "npm run build:core && node scripts/check-experimental-stability.cjs",

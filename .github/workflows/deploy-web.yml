@@ -21,11 +21,13 @@ on:
       - 'docs/**'
       - 'packages/core/**'
       - 'packages/web/**'
+      - 'scripts/check-resource-*.cjs'
       - 'scripts/check-*-docs.cjs'
       - 'scripts/check-documentation-quality.cjs'
       - 'scripts/check-release-materials.cjs'
       - 'scripts/generate-*-docs.cjs'
       - 'scripts/generate-public-docs-site-data.cjs'
+      - 'scripts/wait-pages-resource-discovery.cjs'
       - 'tools/docs/**'
       - 'tsdoc.*.json'
   workflow_dispatch:
@@ -93,6 +95,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Wait for deployed resource discovery files
+        env:
+          BASE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: npm run pages-resource-discovery:wait
 
       - name: Smoke deployed Pages
         env:
