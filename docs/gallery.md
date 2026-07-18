@@ -38,6 +38,8 @@
 
 每件作品必须具备小写稳定 ID、双语标题和说明、标签、作者、`original` 来源状态、许可证与审核日期。资源只能放在同目录的 `artworks/` 中，且仅允许 `.uadoc.json` 或 `.uafont.json`。浏览器加载前会拒绝越出资源根目录的路径，载入后仍会调用 Core 校验对应文档或字体格式。
 
+同目录还包含 `resource-manifest.json`，它为每个公开资源记录 size 与 sha256。维护者修改画廊资源后，应同时运行 `npm run gallery:check` 和 `npm run resource-discovery:check`，确保索引、资源文件和 hash 清单保持一致。
+
 ## 投稿与添加审核作品
 
 画廊现在接受可审查的候选投稿。建议先提交 Gallery artwork proposal Issue 说明作品类型、来源和许可证；准备好 JSON 资产后，再通过 PR 修改 `packages/web/public/gallery/artworks/` 与 `packages/web/public/gallery/index.json`。
@@ -50,6 +52,6 @@
 - UAF 或语义文档能够通过 Core 校验，且不依赖本机路径、远程 URL 或脚本。
 - 索引中的标题、说明、标签与许可信息准确，中文和英文都可读。
 - 对照审核指南完成人工预览；上线后如发现来源、许可证或渲染问题，应按回退流程移除索引条目。
-- 运行 `npm run gallery:check`、`npm --workspace packages/web test`，必要时运行 `npm --workspace packages/web run test:e2e`。
+- 运行 `npm run gallery:check`、`npm run resource-discovery:check`、`npm --workspace packages/web test`，必要时运行 `npm --workspace packages/web run test:e2e`。
 
 作品画廊仍然是受控静态画廊，不是开放上传平台。后续的资源发现、作者页和作品页会优先保持静态展示与用户确认边界，相关术语见 [实验性静态资源发现](resource-discovery-experimental.md)。搜索服务、账号系统与内容审核后台会在需要时以独立设计进入后续版本。

@@ -248,6 +248,16 @@ npm run gallery:check
 
 该命令会重新构建 Core，并检查画廊索引、作品文件、投稿与审核文档、Issue/PR 模板、许可证来源、标签翻译和 UAF / 语义文档解析。投稿流程见 [静态画廊投稿指南](gallery-submission.md)，维护者审核与回退流程见 [静态画廊审核指南](gallery-review.md)。
 
+## 静态资源发现
+
+修改 `packages/web/public/gallery/resource-manifest.json`、画廊资源 hash、资源发现说明或宿主读取边界时，运行：
+
+```bash
+npm run resource-discovery:check
+```
+
+该命令会校验 [实验性静态资源发现](resource-discovery-experimental.md) 当前使用的同源资源清单，确认资源 ID、类型、路径、size、sha256、许可证和画廊索引一致。它只读取仓库内静态文件，不联网、不安装资源，也不执行资源内容。
+
 ## 支持与反馈入口
 
 Issue 模板、反馈路由、已知限制页和标签目录由轻量脚本保护：

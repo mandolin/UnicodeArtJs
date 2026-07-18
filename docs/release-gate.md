@@ -10,7 +10,7 @@ From the repository root:
 npm run release:gate
 ```
 
-The command runs package checks, documentation checks, recipe/example checks, static gallery checks, release-material checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
+The command runs package checks, documentation checks, recipe/example checks, static gallery checks, static resource-discovery hash checks, release-material checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
 
 For npm/Marketplace publish preparation after switching all publish-time dependencies to npm versions:
 
@@ -46,6 +46,7 @@ npm run release:verify:publish
 - `docs:hia:target:check` can validate the project-level HIA target docs adoption config, Core / VS Code TSDoc producer results, CI wiring, release-gate wiring, and source-content privacy.
 - `recipes:check` can run the public Node examples and representative CLI recipes.
 - `gallery:check` can validate the static gallery index, reviewed artwork files, submission/review templates, rollback guidance, licenses, localized tags, and Core parsing of UAF / semantic-document assets.
+- `resource-discovery:check` can validate the same-origin gallery resource manifest, resource path containment, file size, sha256, license metadata, and minimal UAF / semantic-document JSON shapes.
 - `support:check` can validate the support guide, known limitations page, Issue Forms, and public label catalog.
 - `public-entry:check` can validate public README links, package metadata, package README support links, and repository entrypoints.
 - `stability:check` can validate the experimental stability matrix against `getCoreCapabilities()`.

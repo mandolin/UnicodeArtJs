@@ -32,6 +32,7 @@ const requiredFiles = [
   'packages/extension-line-banner/README.md',
   'packages/extension-line-banner/unicode-art-extension.json',
   'packages/web/public/gallery/index.json',
+  'packages/web/public/gallery/resource-manifest.json',
   'package.json',
   '.github/workflows/ci.yml'
 ];
@@ -96,20 +97,26 @@ const resourceDiscoveryDoc = readUtf8('docs/resource-discovery-experimental.md')
 const extensionReadme = readUtf8('packages/extension-line-banner/README.md');
 const extensionManifest = readJson('packages/extension-line-banner/unicode-art-extension.json');
 const galleryIndex = readJson('packages/web/public/gallery/index.json');
+const resourceManifest = readJson('packages/web/public/gallery/resource-manifest.json');
 
 assertCondition(
   packageJson.scripts?.['creative-ecosystem:check'] === 'node scripts/check-creative-ecosystem.cjs',
   'package.json 必须声明 creative-ecosystem:check。'
 );
   requireText(packageJson.scripts?.['release:gate'] || '', 'creative-ecosystem:check', 'package.json release:gate');
+  requireText(packageJson.scripts?.['release:gate'] || '', 'resource-discovery:check', 'package.json release:gate');
   requireText(ciWorkflow, 'Check Creative Ecosystem', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'npm run creative-ecosystem:check', '.github/workflows/ci.yml');
+  requireText(ciWorkflow, 'Check Resource Discovery', '.github/workflows/ci.yml');
+  requireText(ciWorkflow, 'npm run resource-discovery:check', '.github/workflows/ci.yml');
   requireText(docsIndex, 'creative-ecosystem.md', 'docs/README.md');
   requireText(docsIndex, 'resource-discovery-experimental.md', 'docs/README.md');
   requireText(docsIndex, 'uaf-authoring.md', 'docs/README.md');
   requireText(docsIndex, 'semantic-document-authoring.md', 'docs/README.md');
   requireText(developmentDoc, 'npm run creative-ecosystem:check', 'docs/development.md');
+  requireText(developmentDoc, 'npm run resource-discovery:check', 'docs/development.md');
   requireText(releaseGate, 'creative-ecosystem:check', 'docs/release-gate.md');
+  requireText(releaseGate, 'resource-discovery:check', 'docs/release-gate.md');
   requireText(releaseGate, 'uaf-authoring:check', 'docs/release-gate.md');
   requireText(releaseGate, 'semantic-document-authoring:check', 'docs/release-gate.md');
   requireText(releaseGate, 'extension-example:check', 'docs/release-gate.md');
@@ -132,6 +139,7 @@ for (const expected of [
   'npm run creative-ecosystem:check',
   'npm run extension-example:check',
   'npm run host-sideload:check',
+  'npm run resource-discovery:check',
   'npm run release:gate'
 ]) {
   requireText(overview, expected, 'docs/creative-ecosystem.md');
@@ -156,6 +164,7 @@ for (const expected of [
 
 for (const expected of [
   'unicode-art-gallery-index',
+  'resource-manifest.json',
   'gallery-submission.md',
   'gallery-review.md',
   'resource-discovery-experimental.md',
@@ -168,6 +177,8 @@ for (const expected of [
   '# 实验性静态资源发现',
   '发现不等于安装',
   'hash 不替代许可证审计',
+  'resource-manifest.json',
+  'npm run resource-discovery:check',
   '不执行资源内容',
   '用户确认',
   'host-sideload-boundary.md',
@@ -193,6 +204,15 @@ requireText(extensionReadme, 'extension-sdk.md', 'packages/extension-line-banner
 
 assertCondition(galleryIndex.format === 'unicode-art-gallery-index', '画廊索引格式不正确。');
 assertCondition(galleryIndex.version === 1, '画廊索引版本必须为 1。');
+assertCondition(resourceManifest.format === 'unicode-art-gallery-resource-manifest', '资源发现 manifest 格式不正确。');
+assertCondition(resourceManifest.version === 1, '资源发现 manifest 版本必须为 1。');
+assertCondition(resourceManifest.index === 'index.json', '资源发现 manifest 必须指向画廊索引。');
+assertCondition(resourceManifest.network === 'none', '资源发现 manifest 不得声明联网能力。');
+assertCondition(resourceManifest.automaticInstall === false, '资源发现 manifest 不得声明自动安装能力。');
+assertCondition(
+  Array.isArray(resourceManifest.resources) && resourceManifest.resources.length === (galleryIndex.artworks || []).length,
+  '资源发现 manifest 必须覆盖全部画廊作品。'
+);
 const galleryKinds = new Set(galleryIndex.artworks?.map((artwork) => artwork.kind));
 assertCondition(galleryKinds.has('unicode-art-font'), '静态画廊必须包含至少一个 UAF 作品。');
 assertCondition(galleryKinds.has('semantic-document'), '静态画廊必须包含至少一个语义文档作品。');

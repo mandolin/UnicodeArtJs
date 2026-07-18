@@ -171,6 +171,7 @@ npm run test:web:e2e
 ```bash
 npm run docs:all:check
 npm run creative-ecosystem:check
+npm run resource-discovery:check
 npm run host-sideload:check
 npm run docs:hia:target:check
 npm run release:gate

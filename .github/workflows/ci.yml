@@ -102,6 +102,9 @@ jobs:
       - name: Check Gallery
         run: npm run gallery:check
 
+      - name: Check Resource Discovery
+        run: npm run resource-discovery:check
+
       - name: Check Support Governance
         run: npm run support:check
 
