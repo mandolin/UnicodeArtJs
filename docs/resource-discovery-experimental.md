@@ -35,7 +35,7 @@ unicode-art resource validate packages/web/public/gallery/resource-manifest.json
 
 - `resource-lock.json`：锁定 `resource-manifest.json`、撤回列表和每个资源的 size / sha256。
 - `resource-revocations.json`：记录当前已知撤回列表；当前为空，表示没有已知撤回。
-- `resource-signature.json`：记录签名 envelope。当前状态为 `unsigned-draft`，表示 hash lock 已可验证，但还没有启用真实维护者签名。
+- `resource-signature.json`：记录签名 envelope。当前状态为 `unsigned-draft`，表示 hash lock 已可验证，但还没有启用真实维护者签名。仓库的 `resource-trust:check` 会同时验证 signed、invalid、expired 和 revoked 等 test-only 签名路径，确保未来启用维护者签名时不会把坏签名误判为可信。
 
 在线工具也提供“资源发现”实验页。该页面只读取本站随同发布的 `gallery/resource-manifest.json`、`gallery/index.json` 和同源 `gallery/artworks/` 资源，展示资源类型、许可证、size、sha256 和浏览器端重新计算的校验结果。页面不会读取任意远程 URL，不会安装资源，也不会执行资源内容。
 

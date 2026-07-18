@@ -1,0 +1,52 @@
+{
+  "format": "unicode-art-gallery-resource-signature",
+  "version": 1,
+  "fixture": {
+    "testOnly": true,
+    "generatedBy": "work-zone/dev/scripts/check-signing-dry-run.cjs",
+    "variant": "wrong-key",
+    "sourceLock": "packages/web/public/gallery/resource-lock.json"
+  },
+  "subject": {
+    "schema": "unicode-art-gallery-resource-lock@1",
+    "lock": "resource-lock.json",
+    "lockSha256": "4563212292e1f169b27e9cc66eaa025d37e1bb998517a2b7fb0a7d1c519c14b6",
+    "canonicalization": "jcs-rfc8785",
+    "digestAlgorithm": "sha256",
+    "payloadSha256": "10ffa5c113f70ac06fc002502ef63d06b926d397662ce794a42faffd4e39e3f3"
+  },
+  "trust": {
+    "status": "maintainer-signed",
+    "testOnly": true,
+    "signatureRequiredForStable": true,
+    "warning": {
+      "zh-CN": "这是 test-only dry-run 签名，不得用于生产发布或公开画廊信任声明。",
+      "en-US": "This is a test-only dry-run signature and must not be used for production releases or public gallery trust."
+    }
+  },
+  "signature": {
+    "role": "maintainer",
+    "algorithm": "ed25519",
+    "keyId": "test-only-missing-2026-q3",
+    "signedAt": "2026-07-19T00:00:00.000Z",
+    "expiresAt": "2026-10-19T00:00:00.000Z",
+    "payloadSha256": "10ffa5c113f70ac06fc002502ef63d06b926d397662ce794a42faffd4e39e3f3",
+    "value": "uBsunCDSHiJ2tUFpRIy2NzdOWgVD7rZYm5IpQtSJHxAWmL-px-V9Ic9gEroiNtQBuOtblW2wgEITJ3QDZPeVDA"
+  },
+  "keyring": [
+    {
+      "keyId": "test-only-mandolin-2026-q3",
+      "role": "maintainer",
+      "algorithm": "ed25519",
+      "publicKeyEncoding": "spki-base64url",
+      "publicKey": "MCowBQYDK2VwAyEAImw9OOs9bBeL4-6zoABHejdtWR09CZc8sZtcjMcw5SE",
+      "validFrom": "2026-07-19T00:00:00.000Z",
+      "validUntil": "2026-10-19T00:00:00.000Z",
+      "status": "active",
+      "owner": "test-only",
+      "purpose": "official-gallery-resource-lock-dry-run",
+      "testOnly": true,
+      "notes": "TEST-ONLY public key for W-art-P12.3 dry-run fixtures."
+    }
+  ]
+}

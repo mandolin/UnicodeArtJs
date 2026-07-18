@@ -15,9 +15,13 @@ const path = require('node:path');
 const repositoryRoot = path.resolve(__dirname, '..');
 const defaultGalleryRoot = path.join(repositoryRoot, 'packages', 'web', 'public', 'gallery');
 const defaultGalleryRelativeRoot = 'packages/web/public/gallery';
+const defaultFixtureRoot = path.join(repositoryRoot, 'fixtures', 'resource-trust');
 const allowedKinds = new Set(['unicode-art-font', 'semantic-document']);
 const allowedRevocationReasons = new Set(['license', 'provenance', 'quality', 'security', 'replaced', 'other']);
 const allowedKeyStatuses = new Set(['active', 'retired', 'revoked', 'compromised']);
+
+// 测试矩阵使用固定时间，避免 fixture 随真实日期流逝而误报。
+const fixtureVerificationDate = new Date('2026-07-20T00:00:00.000Z');
 
 function fail(message) {
   throw new Error(message);
@@ -283,7 +287,9 @@ function fromBase64Url(value, label) {
   return Buffer.from(padded.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
 }
 
-function assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock) {
+function assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock, options = {}) {
+  const verificationDate = options.verificationDate || new Date();
+
   assertRecord(signatureEnvelope, 'resource-signature');
   if (signatureEnvelope.format !== 'unicode-art-gallery-resource-signature' || signatureEnvelope.version !== 1) {
     fail('resource-signature 必须使用 unicode-art-gallery-resource-signature@1。');
@@ -346,6 +352,14 @@ function assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock) {
   }
   assertIsoDateTime(signatureEnvelope.signature.signedAt, 'resource-signature.signature.signedAt');
   assertIsoDateTime(signatureEnvelope.signature.expiresAt, 'resource-signature.signature.expiresAt');
+  const signedAt = new Date(signatureEnvelope.signature.signedAt);
+  const expiresAt = new Date(signatureEnvelope.signature.expiresAt);
+  if (signedAt > verificationDate) {
+    fail('resource-signature.signature.signedAt 晚于验证时间。');
+  }
+  if (expiresAt <= verificationDate) {
+    fail('resource-signature.signature.expiresAt 已过期。');
+  }
 
   if (!Array.isArray(signatureEnvelope.keyring) || signatureEnvelope.keyring.length === 0) {
     fail('maintainer-signed 必须提供 keyring。');
@@ -369,6 +383,14 @@ function assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock) {
   }
   assertIsoDateTime(key.validFrom, 'resource-signature.key.validFrom');
   assertIsoDateTime(key.validUntil, 'resource-signature.key.validUntil');
+  const keyValidFrom = new Date(key.validFrom);
+  const keyValidUntil = new Date(key.validUntil);
+  if (keyValidFrom > verificationDate) {
+    fail('签名 key 尚未生效。');
+  }
+  if (keyValidUntil <= verificationDate) {
+    fail('签名 key 已过期。');
+  }
 
   const publicKey = crypto.createPublicKey({
     key: fromBase64Url(key.publicKey, 'resource-signature.key.publicKey'),
@@ -384,11 +406,11 @@ function assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock) {
   return { status, verified: true, payloadSha256 };
 }
 
-function checkResourceTrust(galleryRoot) {
+function checkResourceTrust(galleryRoot, options = {}) {
   const manifestPath = path.join(galleryRoot, 'resource-manifest.json');
   const lockPath = path.join(galleryRoot, 'resource-lock.json');
   const revocationsPath = path.join(galleryRoot, 'resource-revocations.json');
-  const signaturePath = path.join(galleryRoot, 'resource-signature.json');
+  const signaturePath = options.signaturePath || path.join(galleryRoot, 'resource-signature.json');
 
   for (const filePath of [manifestPath, lockPath, revocationsPath, signaturePath]) {
     if (!fs.existsSync(filePath)) {
@@ -407,7 +429,7 @@ function checkResourceTrust(galleryRoot) {
 
   const lockSummary = assertResourceLock(galleryRoot, manifest, lock, revocationsPath);
   assertRevocations(revocations, lockSummary.resources);
-  const signatureSummary = assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock);
+  const signatureSummary = assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock, options);
 
   return {
     galleryRoot: projectRelative(galleryRoot),
@@ -421,6 +443,87 @@ function checkResourceTrust(galleryRoot) {
   };
 }
 
+function expectFixtureFailure(label, callback, expectedFragment) {
+  try {
+    callback();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes(expectedFragment)) {
+      fail(`${label} 失败原因不符合预期。期待包含 "${expectedFragment}"，实际为: ${message}`);
+    }
+    return;
+  }
+  fail(`${label} 应该失败，但实际通过。`);
+}
+
+function checkSignatureFixtureMatrix(galleryRoot, fixtureRoot = defaultFixtureRoot) {
+  if (!fs.existsSync(fixtureRoot) || !fs.statSync(fixtureRoot).isDirectory()) {
+    fail(`缺少 resource trust fixture 目录: ${projectRelative(fixtureRoot)}`);
+  }
+
+  const cases = [
+    {
+      label: 'unsigned-draft',
+      file: path.join(galleryRoot, 'resource-signature.json'),
+      expect: 'pass',
+      status: 'unsigned-draft',
+    },
+    {
+      label: 'signed',
+      file: path.join(fixtureRoot, 'resource-signature-signed-test-only-v1.json'),
+      expect: 'pass',
+      status: 'maintainer-signed',
+    },
+    {
+      label: 'invalid-signature',
+      file: path.join(fixtureRoot, 'resource-signature-invalid-test-only-v1.json'),
+      expect: 'fail',
+      message: '无法验证',
+    },
+    {
+      label: 'expired',
+      file: path.join(fixtureRoot, 'resource-signature-expired-test-only-v1.json'),
+      expect: 'fail',
+      message: '已过期',
+    },
+    {
+      label: 'revoked-key',
+      file: path.join(fixtureRoot, 'resource-signature-revoked-key-test-only-v1.json'),
+      expect: 'fail',
+      message: '签名 key 已不可用: revoked',
+    },
+    {
+      label: 'wrong-key',
+      file: path.join(fixtureRoot, 'resource-signature-wrong-key-test-only-v1.json'),
+      expect: 'fail',
+      message: 'keyring 缺少签名 keyId',
+    },
+  ];
+
+  for (const item of cases) {
+    if (!fs.existsSync(item.file)) {
+      fail(`缺少 resource trust fixture: ${projectRelative(item.file)}`);
+    }
+
+    const runCase = () => checkResourceTrust(galleryRoot, {
+      signaturePath: item.file,
+      verificationDate: fixtureVerificationDate,
+    });
+
+    if (item.expect === 'pass') {
+      const summary = runCase();
+      if (summary.trustStatus !== item.status) {
+        fail(`${item.label} fixture 状态不符合预期: ${summary.trustStatus}`);
+      }
+      continue;
+    }
+
+    expectFixtureFailure(`${item.label} fixture`, runCase, item.message);
+  }
+
+  return cases.length;
+}
+
 const galleryArg = process.argv[2];
 const galleryRoot = galleryArg
   ? path.resolve(repositoryRoot, galleryArg)
@@ -431,8 +534,9 @@ try {
     fail(`gallery 目录不存在: ${galleryArg || defaultGalleryRelativeRoot}`);
   }
   const summary = checkResourceTrust(galleryRoot);
+  const fixtureCount = galleryArg ? 0 : checkSignatureFixtureMatrix(galleryRoot);
   process.stdout.write(
-    `Resource trust checks passed. status=${summary.trustStatus} resources=${summary.resources} revocations=${summary.revocations}\n`
+    `Resource trust checks passed. status=${summary.trustStatus} resources=${summary.resources} revocations=${summary.revocations} fixtures=${fixtureCount}\n`
   );
   if (summary.warning) {
     process.stdout.write(`Warning: ${summary.warning}\n`);
