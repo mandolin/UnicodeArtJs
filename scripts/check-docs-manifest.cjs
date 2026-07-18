@@ -22,7 +22,7 @@ const expectedEntries = {
   },
   'cli-jsdoc': {
     documentationKind: 'hia-jsdoc',
-    nodeCount: 30,
+    nodeCount: 37,
     pluginVersion: '0.1.1'
   },
   'web-jsdoc': {

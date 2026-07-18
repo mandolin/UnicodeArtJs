@@ -29,8 +29,10 @@ const requiredFiles = [
   'docs/README.md',
   'docs/development.md',
   'docs/release-gate.md',
+  'packages/cli/README.md',
   'packages/extension-line-banner/README.md',
   'packages/extension-line-banner/unicode-art-extension.json',
+  'packages/cli/tests/e2e-test.js',
   'packages/web/public/gallery/index.json',
   'packages/web/public/gallery/resource-manifest.json',
   'package.json',
@@ -94,6 +96,8 @@ const extensionSdk = readUtf8('docs/extension-sdk.md');
 const galleryDoc = readUtf8('docs/gallery.md');
 const galleryReviewDoc = readUtf8('docs/gallery-review.md');
 const resourceDiscoveryDoc = readUtf8('docs/resource-discovery-experimental.md');
+const cliReadme = readUtf8('packages/cli/README.md');
+const cliE2eTest = readUtf8('packages/cli/tests/e2e-test.js');
 const extensionReadme = readUtf8('packages/extension-line-banner/README.md');
 const extensionManifest = readJson('packages/extension-line-banner/unicode-art-extension.json');
 const galleryIndex = readJson('packages/web/public/gallery/index.json');
@@ -179,6 +183,8 @@ for (const expected of [
   'hash 不替代许可证审计',
   'resource-manifest.json',
   'npm run resource-discovery:check',
+  'unicode-art resource validate',
+  'unicode-art resource inspect',
   '不执行资源内容',
   '用户确认',
   'host-sideload-boundary.md',
@@ -193,6 +199,22 @@ for (const expected of [
   'npm run gallery:check'
 ]) {
   requireText(galleryReviewDoc, expected, 'docs/gallery-review.md');
+}
+
+for (const expected of [
+  'unicode-art resource validate',
+  'unicode-art resource inspect',
+  '不会联网、下载、安装、导入或执行资源内容'
+]) {
+  requireText(cliReadme, expected, 'packages/cli/README.md');
+}
+
+for (const expected of [
+  'Test 32: CLI resource discovery commands',
+  'resource',
+  'sha256 mismatch'
+]) {
+  requireText(cliE2eTest, expected, 'packages/cli/tests/e2e-test.js');
 }
 
 assertCondition(extensionManifest.format === 'unicode-art-extension', '官方扩展示例必须保持 UAEM 格式。');

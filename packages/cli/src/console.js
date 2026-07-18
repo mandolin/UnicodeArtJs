@@ -80,6 +80,7 @@ const { cosmiconfig } = require('cosmiconfig');
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const cliPackage = require('../package.json');
 
 // 导入core库
@@ -462,6 +463,49 @@ extensionCommand
     }
   });
 
+/**
+ * 🟢 静态资源发现检查命令组
+ *
+ * @lang zh-CN 实验性静态资源发现清单的本地只读检查命令组；只读取本地 manifest、索引和已声明资源，不下载、不安装、不执行内容。
+ * @lang en Local read-only inspection command group for experimental static resource-discovery manifests; it reads only local manifests, indexes, and declared resources without downloading, installing, or executing content.
+ * @constant {Command}
+ */
+const resourceCommand = program
+  .command('resource')
+  .description('Validate local static resource-discovery manifests');
+
+resourceCommand
+  .command('validate')
+  .description('Validate a local gallery resource manifest and every declared hash')
+  .argument('<manifest>', 'Path to resource-manifest.json')
+  .option('--json', 'Print machine-readable resource summary')
+  .option('--lang <locale>', 'Language (zh-CN|en-US)')
+  .action(async (...args) => {
+    try {
+      const manifestPath = args[0];
+      const command = args[args.length - 1];
+      await handleResourceManifestCommand(manifestPath, getCommandOptions(command), 'validate');
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
+resourceCommand
+  .command('inspect')
+  .description('Inspect a local gallery resource manifest without importing it')
+  .argument('<manifest>', 'Path to resource-manifest.json')
+  .option('--json', 'Print machine-readable resource summary')
+  .option('--lang <locale>', 'Language (zh-CN|en-US)')
+  .action(async (...args) => {
+    try {
+      const manifestPath = args[0];
+      const command = args[args.length - 1];
+      await handleResourceManifestCommand(manifestPath, getCommandOptions(command), 'inspect');
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
 //#endregion
 
 //#region 🟩 命令处理函数
@@ -794,6 +838,323 @@ function assertExtensionResourceInsideRoot(extensionRoot, resourcePath, declared
   const root = extensionRoot.endsWith(path.sep) ? extensionRoot : extensionRoot + path.sep;
   if (!resourcePath.startsWith(root)) {
     throw new Error('Extension resource escapes manifest root: ' + declaredPath);
+  }
+}
+
+/**
+ * 🟢 检查本地静态资源发现清单
+ *
+ * @lang zh-CN 校验或查看本地 gallery resource manifest 及其同源资源；该命令只读本地文件，不下载、导入、安装或执行资源。
+ * @lang en Validates or inspects a local gallery resource manifest and its same-origin resources; the command only reads local files and never downloads, imports, installs, or executes resources.
+ *
+ * @param {string} input - <lang key="cli.resource.param.input"><zh-CN>本地 `resource-manifest.json` 路径；不接受标准输入。</zh-CN><en>Local `resource-manifest.json` path; standard input is not accepted.</en></lang>
+ * @param {Object} options - <lang key="cli.resource.param.options"><zh-CN>资源发现命令选项。</zh-CN><en>Resource-discovery command options.</en></lang>
+ * @param {string} operation - <lang key="cli.resource.param.operation"><zh-CN>`validate` 或 `inspect` 操作名。</zh-CN><en>`validate` or `inspect` operation name.</en></lang>
+ * @returns {Promise<void>} <lang key="cli.resource.returns"><zh-CN>完成清单与资源校验后兑现的 Promise。</zh-CN><en>Promise fulfilled after manifest and resource validation output.</en></lang>
+ * @throws {Error} <lang key="cli.resource.throws"><zh-CN>当清单、索引、资源路径、size 或 hash 校验失败时抛出。</zh-CN><en>Thrown when manifest, index, resource path, size, or hash validation fails.</en></lang>
+ */
+async function handleResourceManifestCommand(input, options, operation) {
+  const lang = options.lang || 'zh-CN';
+  const i18n = loadLanguage(lang);
+  if (input === '-') {
+    throw new Error('Resource manifest must be a local file path; stdin has no trusted resource root');
+  }
+  if (!fs.existsSync(input)) {
+    throw new Error('Resource manifest file not found: ' + input);
+  }
+
+  const manifestPath = fs.realpathSync(input);
+  const summary = inspectResourceManifest(manifestPath, lang);
+
+  if (options.json) {
+    console.log(JSON.stringify(summary, null, 2));
+    return;
+  }
+  if (operation === 'validate') {
+    console.log(chalk.green(t(i18n, 'commands.resource.valid')));
+  }
+  console.log(chalk.blue(t(i18n, 'commands.resource.summary', {
+    resources: summary.resources.length,
+    bytes: summary.totals.bytes,
+    reviewedAt: summary.reviewedAt
+  })));
+  console.log(chalk.gray(t(i18n, 'commands.resource.boundary', {
+    network: summary.network,
+    automaticInstall: summary.automaticInstall
+  })));
+  for (const resource of summary.resources) {
+    console.log(chalk.gray('  - ' + resource.id + ' [' + resource.kind + '] ' + resource.source + ' sha256:' + resource.sha256.slice(0, 12)));
+  }
+}
+
+/**
+ * 🟢 校验资源发现 manifest 与画廊索引
+ *
+ * @lang zh-CN 读取本地资源发现 manifest、关联 gallery index 和全部声明资源，并返回不含资源正文的可机器读取摘要。
+ * @lang en Reads a local resource-discovery manifest, the related gallery index, and every declared resource, then returns a machine-readable summary without resource bodies.
+ *
+ * @param {string} manifestPath - <lang key="cli.resourceManifest.param.manifestPath"><zh-CN>已 realpath 的资源发现 manifest 路径。</zh-CN><en>Realpath-resolved resource-discovery manifest path.</en></lang>
+ * @param {string} lang - <lang key="cli.resourceManifest.param.lang"><zh-CN>Core 错误消息语言。</zh-CN><en>Locale used for Core error messages.</en></lang>
+ * @returns {Object} <lang key="cli.resourceManifest.returns"><zh-CN>资源发现清单摘要。</zh-CN><en>Resource-discovery manifest summary.</en></lang>
+ * @throws {Error} <lang key="cli.resourceManifest.throws"><zh-CN>当 manifest、索引或资源文件不符合当前实验格式时抛出。</zh-CN><en>Thrown when the manifest, index, or resource files violate the current experimental format.</en></lang>
+ */
+function inspectResourceManifest(manifestPath, lang) {
+  const manifestRoot = path.dirname(manifestPath);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+  if (manifest.format !== 'unicode-art-gallery-resource-manifest' || manifest.version !== 1) {
+    throw new Error('Resource manifest must use unicode-art-gallery-resource-manifest@1');
+  }
+  if (manifest.network !== 'none') {
+    throw new Error('Resource manifest network must be none');
+  }
+  if (manifest.automaticInstall !== false) {
+    throw new Error('Resource manifest automaticInstall must be false');
+  }
+  assertResourceManifestDate(manifest.reviewedAt, 'manifest.reviewedAt');
+  const indexRelativePath = assertResourceManifestRelativePath(manifest.index, 'manifest.index');
+  const resourceRootRelativePath = assertResourceManifestRelativePath(manifest.resourceRoot, 'manifest.resourceRoot', { directory: true });
+
+  const indexCandidate = path.resolve(manifestRoot, ...indexRelativePath.split('/'));
+  if (!fs.existsSync(indexCandidate)) {
+    throw new Error('Resource manifest index file not found: ' + manifest.index);
+  }
+  const indexPath = fs.realpathSync(indexCandidate);
+  assertResourceDiscoveryPathInsideRoot(manifestRoot, indexPath, manifest.index);
+
+  const resourceRootCandidate = path.resolve(manifestRoot, ...resourceRootRelativePath.split('/').filter(Boolean));
+  if (!fs.existsSync(resourceRootCandidate) || !fs.statSync(resourceRootCandidate).isDirectory()) {
+    throw new Error('Resource manifest resourceRoot directory not found: ' + manifest.resourceRoot);
+  }
+  const resourceRootPath = fs.realpathSync(resourceRootCandidate);
+  assertResourceDiscoveryPathInsideRoot(manifestRoot, resourceRootPath, manifest.resourceRoot);
+
+  const galleryIndex = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+  if (galleryIndex.format !== 'unicode-art-gallery-index' || galleryIndex.version !== 1) {
+    throw new Error('Resource manifest index must use unicode-art-gallery-index@1');
+  }
+  if (!Array.isArray(galleryIndex.artworks)) {
+    throw new Error('Resource manifest index artworks must be an array');
+  }
+  if (!Array.isArray(manifest.resources) || manifest.resources.length === 0) {
+    throw new Error('Resource manifest resources must be a non-empty array');
+  }
+  if (manifest.resources.length !== galleryIndex.artworks.length) {
+    throw new Error('Resource manifest must cover every gallery artwork');
+  }
+
+  const artworkMap = new Map();
+  for (const artwork of galleryIndex.artworks) {
+    if (artworkMap.has(artwork.id)) {
+      throw new Error('Duplicate gallery artwork id: ' + artwork.id);
+    }
+    artworkMap.set(artwork.id, artwork);
+  }
+
+  const seenIds = new Set();
+  const resources = manifest.resources.map((resource) => {
+    if (seenIds.has(resource.id)) {
+      throw new Error('Duplicate resource manifest id: ' + resource.id);
+    }
+    seenIds.add(resource.id);
+    return inspectResourceManifestResource({
+      manifestRoot,
+      resourceRootPath,
+      resourceRoot: manifest.resourceRoot,
+      artworkMap,
+      resource,
+      lang
+    });
+  });
+
+  for (const id of artworkMap.keys()) {
+    if (!seenIds.has(id)) {
+      throw new Error('Gallery artwork missing from resource manifest: ' + id);
+    }
+  }
+
+  const totals = resources.reduce((accumulator, resource) => {
+    accumulator.resources += 1;
+    accumulator.bytes += resource.size;
+    if (resource.kind === 'unicode-art-font') accumulator.unicodeArtFonts += 1;
+    if (resource.kind === 'semantic-document') accumulator.semanticDocuments += 1;
+    return accumulator;
+  }, { resources: 0, bytes: 0, unicodeArtFonts: 0, semanticDocuments: 0 });
+
+  return {
+    format: manifest.format,
+    version: manifest.version,
+    index: manifest.index,
+    resourceRoot: manifest.resourceRoot,
+    network: manifest.network,
+    automaticInstall: manifest.automaticInstall,
+    reviewedAt: manifest.reviewedAt,
+    resources,
+    totals
+  };
+}
+
+/**
+ * 🟢 校验单个资源发现条目
+ *
+ * @lang zh-CN 在资源根目录内读取单个 manifest 条目，复核 size、sha256、画廊索引元数据和 Core 可解析性。
+ * @lang en Reads one manifest entry within the resource root and verifies size, sha256, gallery-index metadata, and Core parsability.
+ *
+ * @param {Object} context - <lang key="cli.resourceItem.param.context"><zh-CN>资源发现校验上下文。</zh-CN><en>Resource-discovery validation context.</en></lang>
+ * @returns {Object} <lang key="cli.resourceItem.returns"><zh-CN>单个资源的只读摘要。</zh-CN><en>Read-only summary for one resource.</en></lang>
+ * @throws {Error} <lang key="cli.resourceItem.throws"><zh-CN>当资源条目、真实路径、hash 或 Core 解析失败时抛出。</zh-CN><en>Thrown when the resource entry, real path, hash, or Core parsing fails.</en></lang>
+ */
+function inspectResourceManifestResource(context) {
+  const { manifestRoot, resourceRootPath, resourceRoot, artworkMap, resource, lang } = context;
+  if (!/^[a-z0-9][a-z0-9-]{1,63}$/.test(resource.id || '')) {
+    throw new Error('Invalid resource manifest id: ' + (resource.id || '<empty>'));
+  }
+  if (!['unicode-art-font', 'semantic-document'].includes(resource.kind)) {
+    throw new Error('Unsupported resource manifest kind: ' + resource.kind);
+  }
+  const source = assertResourceManifestRelativePath(resource.source, resource.id + '.source');
+  if (!source.startsWith(resourceRoot)) {
+    throw new Error('Resource manifest source must stay under resourceRoot: ' + resource.source);
+  }
+  if (!/^[a-f0-9]{64}$/.test(resource.sha256 || '')) {
+    throw new Error('Resource manifest sha256 must be 64 lowercase hex chars: ' + resource.id);
+  }
+  if (!Number.isInteger(resource.size) || resource.size <= 0) {
+    throw new Error('Resource manifest size must be a positive integer: ' + resource.id);
+  }
+  assertResourceManifestDate(resource.reviewedAt, resource.id + '.reviewedAt');
+
+  const artwork = artworkMap.get(resource.id);
+  if (!artwork) {
+    throw new Error('Resource manifest item has no gallery index artwork: ' + resource.id);
+  }
+  if (artwork.kind !== resource.kind || artwork.source !== resource.source) {
+    throw new Error('Resource manifest item differs from gallery index: ' + resource.id);
+  }
+  if (
+    !resource.license
+    || resource.license.expression !== artwork.license?.expression
+    || resource.license.origin !== artwork.license?.origin
+  ) {
+    throw new Error('Resource manifest license differs from gallery index: ' + resource.id);
+  }
+  if (resource.reviewedAt !== artwork.reviewedAt) {
+    throw new Error('Resource manifest reviewedAt differs from gallery index: ' + resource.id);
+  }
+
+  const candidate = path.resolve(manifestRoot, ...source.split('/'));
+  if (!fs.existsSync(candidate)) {
+    throw new Error('Resource file not found: ' + resource.source);
+  }
+  const resourcePath = fs.realpathSync(candidate);
+  assertResourceDiscoveryPathInsideRoot(resourceRootPath, resourcePath, resource.source);
+  const content = fs.readFileSync(resourcePath);
+  if (content.length !== resource.size) {
+    throw new Error('Resource size mismatch: ' + resource.id);
+  }
+  const sha256 = crypto.createHash('sha256').update(content).digest('hex');
+  if (sha256 !== resource.sha256) {
+    throw new Error('Resource sha256 mismatch: ' + resource.id);
+  }
+
+  if (resource.kind === 'unicode-art-font') {
+    const font = parseUnicodeArtFontJson(content.toString('utf-8'), { locale: lang });
+    return {
+      id: resource.id,
+      kind: resource.kind,
+      source: resource.source,
+      size: resource.size,
+      sha256: resource.sha256,
+      license: resource.license,
+      reviewedAt: resource.reviewedAt,
+      hashMatched: true,
+      summary: {
+        id: font.meta.id,
+        glyphs: Object.keys(font.glyphs).length,
+        height: font.metrics.height,
+        permissiveForOfficialBundle: isPermissiveUnicodeArtFontLicense(font.meta.license.expression)
+      }
+    };
+  }
+
+  const document = parseSemanticDocumentJson(content.toString('utf-8'), { locale: lang });
+  return {
+    id: resource.id,
+    kind: resource.kind,
+    source: resource.source,
+    size: resource.size,
+    sha256: resource.sha256,
+    license: resource.license,
+    reviewedAt: resource.reviewedAt,
+    hashMatched: true,
+    summary: { version: document.version, rows: document.rows.length }
+  };
+}
+
+/**
+ * 🟢 校验资源发现相对路径
+ *
+ * @lang zh-CN 只允许普通相对路径，拒绝绝对路径、URL、盘符、反斜杠和 `..` 段。
+ * @lang en Allows only ordinary relative paths and rejects absolute paths, URLs, drive prefixes, backslashes, and `..` segments.
+ *
+ * @param {string} value - <lang key="cli.resourceRelativePath.param.value"><zh-CN>待检查路径。</zh-CN><en>Path to validate.</en></lang>
+ * @param {string} label - <lang key="cli.resourceRelativePath.param.label"><zh-CN>错误消息标签。</zh-CN><en>Error-message label.</en></lang>
+ * @param {Object} options - <lang key="cli.resourceRelativePath.param.options"><zh-CN>路径选项；`directory` 要求以 `/` 结尾。</zh-CN><en>Path options; `directory` requires a trailing `/`.</en></lang>
+ * @returns {string} <lang key="cli.resourceRelativePath.returns"><zh-CN>已确认安全的原始相对路径。</zh-CN><en>Original relative path after safety checks.</en></lang>
+ * @throws {Error} <lang key="cli.resourceRelativePath.throws"><zh-CN>当路径不是安全相对路径时抛出。</zh-CN><en>Thrown when the path is not a safe relative path.</en></lang>
+ */
+function assertResourceManifestRelativePath(value, label, options = {}) {
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new Error(label + ' must be a non-empty relative path');
+  }
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(value) || value.includes('\\') || value.includes(':') || value.startsWith('/') || value.startsWith('//')) {
+    throw new Error(label + ' must not be absolute, remote, or platform-specific');
+  }
+  if (value.split('/').includes('..')) {
+    throw new Error(label + ' must not contain .. path segments');
+  }
+  if (options.directory && !value.endsWith('/')) {
+    throw new Error(label + ' must end with /');
+  }
+  return value;
+}
+
+/**
+ * 🟢 复核资源发现真实路径边界
+ *
+ * @lang zh-CN 复核索引或资源真实路径仍位于声明的根目录中，防御符号链接逃逸和路径混淆。
+ * @lang en Verifies that an index or resource real path remains within the declared root directory, guarding against symlink escapes and path confusion.
+ *
+ * @param {string} rootPath - <lang key="cli.resourcePath.param.root"><zh-CN>允许的真实根目录。</zh-CN><en>Allowed real root directory.</en></lang>
+ * @param {string} candidatePath - <lang key="cli.resourcePath.param.candidate"><zh-CN>候选真实路径。</zh-CN><en>Candidate real path.</en></lang>
+ * @param {string} declaredPath - <lang key="cli.resourcePath.param.declared"><zh-CN>清单中的原始路径。</zh-CN><en>Original manifest-declared path.</en></lang>
+ * @returns {void} <lang key="cli.resourcePath.returns"><zh-CN>路径安全时不返回值。</zh-CN><en>Returns no value when the path is safe.</en></lang>
+ * @throws {Error} <lang key="cli.resourcePath.throws"><zh-CN>当真实路径越出根目录时抛出。</zh-CN><en>Thrown when the real path escapes the root directory.</en></lang>
+ */
+function assertResourceDiscoveryPathInsideRoot(rootPath, candidatePath, declaredPath) {
+  const root = rootPath.endsWith(path.sep) ? rootPath : rootPath + path.sep;
+  if (candidatePath !== rootPath && !candidatePath.startsWith(root)) {
+    throw new Error('Resource discovery path escapes root: ' + declaredPath);
+  }
+}
+
+/**
+ * 🟢 校验资源发现日期
+ *
+ * @lang zh-CN 检查资源发现 manifest 与资源条目的审核日期是否为有效 `YYYY-MM-DD`。
+ * @lang en Checks that resource-discovery manifest and resource review dates are valid `YYYY-MM-DD` values.
+ *
+ * @param {string} value - <lang key="cli.resourceDate.param.value"><zh-CN>待检查日期。</zh-CN><en>Date value to validate.</en></lang>
+ * @param {string} label - <lang key="cli.resourceDate.param.label"><zh-CN>错误消息标签。</zh-CN><en>Error-message label.</en></lang>
+ * @returns {void} <lang key="cli.resourceDate.returns"><zh-CN>日期合法时不返回值。</zh-CN><en>Returns no value when the date is valid.</en></lang>
+ * @throws {Error} <lang key="cli.resourceDate.throws"><zh-CN>当日期不是有效日历日期时抛出。</zh-CN><en>Thrown when the date is not a valid calendar date.</en></lang>
+ */
+function assertResourceManifestDate(value, label) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) {
+    throw new Error(label + ' must use YYYY-MM-DD');
+  }
+  const parsed = new Date(value + 'T00:00:00Z');
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
+    throw new Error(label + ' is not a valid calendar date');
   }
 }
 

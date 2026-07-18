@@ -48,6 +48,15 @@ const officialExtensionManifestPath = path.resolve(
   'extension-line-banner',
   'unicode-art-extension.json'
 );
+const galleryResourceManifestPath = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  'web',
+  'public',
+  'gallery',
+  'resource-manifest.json'
+);
 const cliPackage = require('../package.json');
 
 /**
@@ -1038,6 +1047,61 @@ async function testDeclarativeExtensionCommands() {
   }
 }
 
+/**
+ * 🔶 Test 32: 静态资源发现 manifest 可被 CLI 只读校验
+ */
+async function testResourceDiscoveryCommands() {
+  const validation = runCli([
+    'resource',
+    'validate',
+    galleryResourceManifestPath,
+    '--lang',
+    'en-US'
+  ]);
+  if (validation.status !== 0 || !validation.stdout.includes('manifest passed validation')) {
+    throw new Error(validation.stderr || validation.stdout);
+  }
+
+  const inspect = runCli([
+    'resource',
+    'inspect',
+    galleryResourceManifestPath,
+    '--json',
+    '--lang',
+    'en-US'
+  ]);
+  if (inspect.status !== 0) {
+    throw new Error(inspect.stderr || inspect.stdout);
+  }
+  const summary = JSON.parse(inspect.stdout);
+  if (
+    summary.format !== 'unicode-art-gallery-resource-manifest'
+    || summary.network !== 'none'
+    || summary.automaticInstall !== false
+    || summary.totals.resources < 5
+    || !summary.resources.every((resource) => resource.hashMatched === true)
+  ) {
+    throw new Error('Unexpected resource discovery summary: ' + inspect.stdout);
+  }
+
+  const tempDir = createTempDir();
+  try {
+    const tempGalleryRoot = path.join(tempDir, 'gallery');
+    fs.cpSync(path.dirname(galleryResourceManifestPath), tempGalleryRoot, { recursive: true });
+    const tempManifestPath = path.join(tempGalleryRoot, 'resource-manifest.json');
+    const manifest = JSON.parse(fs.readFileSync(tempManifestPath, 'utf-8'));
+    manifest.resources[0].sha256 = '0'.repeat(64);
+    fs.writeFileSync(tempManifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+
+    const failed = runCli(['resource', 'validate', tempManifestPath, '--lang', 'en-US']);
+    if (failed.status === 0 || !(failed.stderr + failed.stdout).includes('sha256 mismatch')) {
+      throw new Error('Corrupted resource hash was not rejected');
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
 //#endregion
 
 //#region 🟩 执行测试
@@ -1074,6 +1138,7 @@ async function testDeclarativeExtensionCommands() {
   await runTest('Test 29: CLI semantic document command', testSemanticDocumentCommand);
   await runTest('Test 30: CLI Unicode art font commands', testUnicodeArtFontCommands);
   await runTest('Test 31: CLI declarative extension commands', testDeclarativeExtensionCommands);
+  await runTest('Test 32: CLI resource discovery commands', testResourceDiscoveryCommands);
   
   console.log('\n' + '='.repeat(50));
   console.log(chalk.green(`✅ Passed: ${passed}`));

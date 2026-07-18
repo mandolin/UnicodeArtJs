@@ -38,6 +38,12 @@
       "incompatibleLabel": "incompatible",
       "incompatible": "Extension is incompatible with the current CLI: ${reasons}"
     },
+    "resource": {
+      "description": "Validate local static resource-discovery manifests",
+      "valid": "✅ Static resource-discovery manifest passed validation",
+      "summary": "${resources} resources · ${bytes} bytes · reviewed ${reviewedAt}",
+      "boundary": "Read-only boundary: network=${network} · automaticInstall=${automaticInstall}"
+    },
     "output": {
       "saved": "💾 Saved to: ${path}"
     }

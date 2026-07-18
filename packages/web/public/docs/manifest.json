@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-17T12:53:33.425Z",
+  "generatedAt": "2026-07-18T10:59:40.089Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -208,7 +208,7 @@
   "apiReference": {
     "contract": "unicodeartjs-public-api-reference",
     "version": 1,
-    "symbolCount": 161,
+    "symbolCount": 168,
     "sourceFileCount": 44,
     "entries": [
       {
@@ -1384,7 +1384,7 @@
         "surface": "cli",
         "documentationKind": "hia-jsdoc",
         "stability": "pilot",
-        "symbolCount": 30,
+        "symbolCount": 37,
         "sourceFileCount": 1,
         "symbols": [
           {
@@ -1413,8 +1413,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 122,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L122"
+              "line": 123,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L123"
             }
           },
           {
@@ -1428,8 +1428,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 149,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L149"
+              "line": 150,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L150"
             }
           },
           {
@@ -1443,8 +1443,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 386,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L386"
+              "line": 387,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L387"
             }
           },
           {
@@ -1458,8 +1458,23 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 429,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L429"
+              "line": 430,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L430"
+            }
+          },
+          {
+            "id": "cli-jsdoc:jsdoc:constant:module:@unicode-art/cli~resourceCommand",
+            "name": "resourceCommand",
+            "kind": "constant",
+            "signature": "resourceCommand",
+            "summary": {
+              "zh-CN": "实验性静态资源发现清单的本地只读检查命令组；只读取本地 manifest、索引和已声明资源，不下载、不安装、不执行内容。",
+              "en-US": "Local read-only inspection command group for experimental static resource-discovery manifests; it reads only local manifests, indexes, and declared resources without downloading, installing, or executing content."
+            },
+            "source": {
+              "path": "packages/cli/src/console.js",
+              "line": 473,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L473"
             }
           },
           {
@@ -1473,8 +1488,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 478,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L478"
+              "line": 522,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L522"
             }
           },
           {
@@ -1488,8 +1503,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 496,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L496"
+              "line": 540,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L540"
             }
           },
           {
@@ -1503,8 +1518,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 543,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L543"
+              "line": 587,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L587"
             }
           },
           {
@@ -1518,8 +1533,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 588,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L588"
+              "line": 632,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L632"
             }
           },
           {
@@ -1533,8 +1548,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 636,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L636"
+              "line": 680,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L680"
             }
           },
           {
@@ -1548,8 +1563,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 679,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L679"
+              "line": 723,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L723"
             }
           },
           {
@@ -1563,8 +1578,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 751,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L751"
+              "line": 795,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L795"
             }
           },
           {
@@ -1578,8 +1593,98 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 793,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L793"
+              "line": 837,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L837"
+            }
+          },
+          {
+            "id": "cli-jsdoc:jsdoc:function:module:@unicode-art/cli~handleResourceManifestCommand",
+            "name": "handleResourceManifestCommand",
+            "kind": "function",
+            "signature": "handleResourceManifestCommand(input: string, options: Object, operation: string)",
+            "summary": {
+              "zh-CN": "校验或查看本地 gallery resource manifest 及其同源资源；该命令只读本地文件，不下载、导入、安装或执行资源。",
+              "en-US": "Validates or inspects a local gallery resource manifest and its same-origin resources; the command only reads local files and never downloads, imports, installs, or executes resources."
+            },
+            "source": {
+              "path": "packages/cli/src/console.js",
+              "line": 856,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L856"
+            }
+          },
+          {
+            "id": "cli-jsdoc:jsdoc:function:module:@unicode-art/cli~inspectResourceManifest",
+            "name": "inspectResourceManifest",
+            "kind": "function",
+            "signature": "inspectResourceManifest(manifestPath: string, lang: string)",
+            "summary": {
+              "zh-CN": "读取本地资源发现 manifest、关联 gallery index 和全部声明资源，并返回不含资源正文的可机器读取摘要。",
+              "en-US": "Reads a local resource-discovery manifest, the related gallery index, and every declared resource, then returns a machine-readable summary without resource bodies."
+            },
+            "source": {
+              "path": "packages/cli/src/console.js",
+              "line": 901,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L901"
+            }
+          },
+          {
+            "id": "cli-jsdoc:jsdoc:function:module:@unicode-art/cli~inspectResourceManifestResource",
+            "name": "inspectResourceManifestResource",
+            "kind": "function",
+            "signature": "inspectResourceManifestResource(context: Object)",
+            "summary": {
+              "zh-CN": "在资源根目录内读取单个 manifest 条目，复核 size、sha256、画廊索引元数据和 Core 可解析性。",
+              "en-US": "Reads one manifest entry within the resource root and verifies size, sha256, gallery-index metadata, and Core parsability."
+            },
+            "source": {
+              "path": "packages/cli/src/console.js",
+              "line": 1006,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1006"
+            }
+          },
+          {
+            "id": "cli-jsdoc:jsdoc:function:module:@unicode-art/cli~assertResourceManifestRelativePath",
+            "name": "assertResourceManifestRelativePath",
+            "kind": "function",
+            "signature": "assertResourceManifestRelativePath(value: string, label: string, options: Object)",
+            "summary": {
+              "zh-CN": "只允许普通相对路径，拒绝绝对路径、URL、盘符、反斜杠和 `..` 段。",
+              "en-US": "Allows only ordinary relative paths and rejects absolute paths, URLs, drive prefixes, backslashes, and `..` segments."
+            },
+            "source": {
+              "path": "packages/cli/src/console.js",
+              "line": 1105,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1105"
+            }
+          },
+          {
+            "id": "cli-jsdoc:jsdoc:function:module:@unicode-art/cli~assertResourceDiscoveryPathInsideRoot",
+            "name": "assertResourceDiscoveryPathInsideRoot",
+            "kind": "function",
+            "signature": "assertResourceDiscoveryPathInsideRoot(rootPath: string, candidatePath: string, declaredPath: string)",
+            "summary": {
+              "zh-CN": "复核索引或资源真实路径仍位于声明的根目录中，防御符号链接逃逸和路径混淆。",
+              "en-US": "Verifies that an index or resource real path remains within the declared root directory, guarding against symlink escapes and path confusion."
+            },
+            "source": {
+              "path": "packages/cli/src/console.js",
+              "line": 1133,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1133"
+            }
+          },
+          {
+            "id": "cli-jsdoc:jsdoc:function:module:@unicode-art/cli~assertResourceManifestDate",
+            "name": "assertResourceManifestDate",
+            "kind": "function",
+            "signature": "assertResourceManifestDate(value: string, label: string)",
+            "summary": {
+              "zh-CN": "检查资源发现 manifest 与资源条目的审核日期是否为有效 `YYYY-MM-DD`。",
+              "en-US": "Checks that resource-discovery manifest and resource review dates are valid `YYYY-MM-DD` values."
+            },
+            "source": {
+              "path": "packages/cli/src/console.js",
+              "line": 1151,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1151"
             }
           },
           {
@@ -1593,8 +1698,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 814,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L814"
+              "line": 1175,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1175"
             }
           },
           {
@@ -1608,8 +1713,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 854,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L854"
+              "line": 1215,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1215"
             }
           },
           {
@@ -1623,8 +1728,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 930,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L930"
+              "line": 1291,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1291"
             }
           },
           {
@@ -1638,8 +1743,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1031,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1031"
+              "line": 1392,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1392"
             }
           },
           {
@@ -1653,8 +1758,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1050,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1050"
+              "line": 1411,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1411"
             }
           },
           {
@@ -1668,8 +1773,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1069,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1069"
+              "line": 1430,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1430"
             }
           },
           {
@@ -1683,8 +1788,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1090,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1090"
+              "line": 1451,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1451"
             }
           },
           {
@@ -1698,8 +1803,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1122,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1122"
+              "line": 1483,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1483"
             }
           },
           {
@@ -1713,8 +1818,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1171,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1171"
+              "line": 1532,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1532"
             }
           },
           {
@@ -1728,8 +1833,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1201,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1201"
+              "line": 1562,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1562"
             }
           },
           {
@@ -1743,8 +1848,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1223,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1223"
+              "line": 1584,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1584"
             }
           },
           {
@@ -1758,8 +1863,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1238,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1238"
+              "line": 1599,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1599"
             }
           },
           {
@@ -1773,8 +1878,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1254,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1254"
+              "line": 1615,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1615"
             }
           },
           {
@@ -1788,8 +1893,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1267,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1267"
+              "line": 1628,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1628"
             }
           },
           {
@@ -1803,8 +1908,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1282,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1282"
+              "line": 1643,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1643"
             }
           },
           {
@@ -1818,8 +1923,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1305,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1305"
+              "line": 1666,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1666"
             }
           },
           {
@@ -1833,8 +1938,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1337,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1337"
+              "line": 1698,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1698"
             }
           }
         ]
@@ -2342,7 +2447,7 @@
       "guideUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/code-documentation.md#双语-jsdoc-约定",
       "checkCommand": "npm run docs:cli:check",
       "metrics": {
-        "nodeCount": 30,
+        "nodeCount": 37,
         "requiredFiles": [
           "index.html",
           "index.zh-CN.html",

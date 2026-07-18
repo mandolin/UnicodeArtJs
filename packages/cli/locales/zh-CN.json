@@ -38,6 +38,12 @@
       "incompatibleLabel": "不兼容",
       "incompatible": "扩展与当前 CLI 不兼容: ${reasons}"
     },
+    "resource": {
+      "description": "检查本地静态资源发现清单",
+      "valid": "✅ 静态资源发现清单校验通过",
+      "summary": "${resources} 个资源 · ${bytes} 字节 · 审核日期 ${reviewedAt}",
+      "boundary": "只读边界: network=${network} · automaticInstall=${automaticInstall}"
+    },
     "output": {
       "saved": "💾 已保存到: ${path}"
     }

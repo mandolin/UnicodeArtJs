@@ -258,6 +258,13 @@ npm run resource-discovery:check
 
 该命令会校验 [实验性静态资源发现](resource-discovery-experimental.md) 当前使用的同源资源清单，确认资源 ID、类型、路径、size、sha256、许可证和画廊索引一致。它只读取仓库内静态文件，不联网、不安装资源，也不执行资源内容。
 
+CLI 也提供等价的只读宿主入口，可用于发布脚本或第三方宿主预检：
+
+```bash
+unicode-art resource validate packages/web/public/gallery/resource-manifest.json
+unicode-art resource inspect packages/web/public/gallery/resource-manifest.json --json
+```
+
 ## 支持与反馈入口
 
 Issue 模板、反馈路由、已知限制页和标签目录由轻量脚本保护：
