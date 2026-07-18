@@ -93,9 +93,11 @@ describe('UnicodeArtJs declarative extension manifests', () => {
 
     expect(manifest.meta.id).toBe('org.unicodeartjs.line-banner');
     expect(manifest.meta.license).toMatchObject({ expression: 'MIT', origin: 'original' });
-    expect(manifest.resources.map((resource) => resource.kind).sort()).toEqual([
-      'semantic-document',
-      'unicode-art-font'
+    expect(manifest.resources.map((resource) => [resource.id, resource.kind, resource.path]).sort()).toEqual([
+      ['banner-template', 'semantic-document', 'assets/banner-template.uadoc.json'],
+      ['block-poster-font', 'unicode-art-font', 'assets/block-poster-font.uafont.json'],
+      ['line-font', 'unicode-art-font', 'assets/line-font.uafont.json'],
+      ['poster-template', 'semantic-document', 'assets/poster-template.uadoc.json']
     ]);
 
     for (const target of ['cli', 'web', 'vscode', 'desktop'] as const) {
