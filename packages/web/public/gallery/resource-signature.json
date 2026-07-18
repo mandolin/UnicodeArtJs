@@ -1,0 +1,22 @@
+{
+  "format": "unicode-art-gallery-resource-signature",
+  "version": 1,
+  "subject": {
+    "schema": "unicode-art-gallery-resource-lock@1",
+    "lock": "resource-lock.json",
+    "lockSha256": "4563212292e1f169b27e9cc66eaa025d37e1bb998517a2b7fb0a7d1c519c14b6",
+    "canonicalization": "jcs-rfc8785",
+    "digestAlgorithm": "sha256",
+    "payloadSha256": "10ffa5c113f70ac06fc002502ef63d06b926d397662ce794a42faffd4e39e3f3"
+  },
+  "trust": {
+    "status": "unsigned-draft",
+    "unsignedReason": {
+      "zh-CN": "当前静态画廊信任链仍是 experimental；维护者签名私钥流程尚未公开启用。",
+      "en-US": "The static gallery trust chain is still experimental; the maintainer signing-key workflow is not publicly enabled yet."
+    },
+    "signatureRequiredForStable": true
+  },
+  "signature": null,
+  "keyring": []
+}

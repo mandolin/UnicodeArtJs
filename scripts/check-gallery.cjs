@@ -31,6 +31,7 @@ const requiredPublicText = [
   ['docs/gallery.md', 'gallery-review.md'],
   ['docs/gallery.md', 'resource-manifest.json'],
   ['docs/gallery.md', 'npm run resource-discovery:check'],
+  ['docs/gallery.md', 'npm run resource-trust:check'],
   ['docs/gallery-submission.md', 'npm run gallery:check'],
   ['docs/gallery-submission.md', 'packages/web/public/gallery/artworks/'],
   ['docs/gallery-submission.md', '许可确认'],

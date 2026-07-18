@@ -1,0 +1,11 @@
+{
+  "format": "unicode-art-gallery-resource-revocations",
+  "version": 1,
+  "reviewedAt": "2026-07-18",
+  "policy": {
+    "emptyMeansNoKnownRevocations": true,
+    "resourceIdWithoutVersionRevokesAllVersions": true,
+    "revocationsApplyBeforeRecommendation": true
+  },
+  "revocations": []
+}

@@ -18,6 +18,10 @@ const requiredFiles = [
   'packages/web/index.html',
   'packages/web/tests/resource-discovery.test.mjs',
   'packages/web/tests/e2e-smoke.mjs',
+  'packages/web/public/gallery/resource-lock.json',
+  'packages/web/public/gallery/resource-revocations.json',
+  'packages/web/public/gallery/resource-signature.json',
+  'scripts/check-resource-trust.cjs',
   'docs/resource-discovery-experimental.md',
   'docs/gallery.md',
   'docs/development.md',
@@ -87,8 +91,11 @@ assertCondition(
   'package.json 必须声明 web-resource-discovery:check。',
 );
 requireText(packageJson.scripts?.['release:gate'] || '', 'web-resource-discovery:check', 'package.json release:gate');
+requireText(packageJson.scripts?.['release:gate'] || '', 'resource-trust:check', 'package.json release:gate');
 requireText(ciWorkflow, 'Check Web Resource Discovery', '.github/workflows/ci.yml');
 requireText(ciWorkflow, 'npm run web-resource-discovery:check', '.github/workflows/ci.yml');
+requireText(ciWorkflow, 'Check Resource Trust Chain', '.github/workflows/ci.yml');
+requireText(ciWorkflow, 'npm run resource-trust:check', '.github/workflows/ci.yml');
 
 for (const expected of [
   'UNICODE_ART_RESOURCE_MANIFEST_FORMAT',
@@ -145,9 +152,13 @@ for (const expected of [
 for (const expected of [
   '资源发现',
   'resource-manifest.json',
+  'resource-lock.json',
+  'resource-revocations.json',
+  'resource-signature.json',
   '在线工具',
   '只读',
   '不会安装',
+  'npm run resource-trust:check',
   'npm run web-resource-discovery:check',
 ]) {
   requireText(resourceDoc, expected, 'docs/resource-discovery-experimental.md');

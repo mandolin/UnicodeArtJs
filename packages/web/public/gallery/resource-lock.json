@@ -1,0 +1,88 @@
+{
+  "format": "unicode-art-gallery-resource-lock",
+  "version": 1,
+  "lockedAt": "2026-07-18",
+  "canonicalization": "jcs-rfc8785",
+  "digestAlgorithm": "sha256",
+  "manifest": {
+    "path": "resource-manifest.json",
+    "size": 3420,
+    "sha256": "119b51a147ba186bb79dded62b6c5f970cf1bb7b09f5a0e3e48bf286ac77b06b"
+  },
+  "revocations": {
+    "path": "resource-revocations.json",
+    "size": 292,
+    "sha256": "d88407c125fe90549d984a87228783e14887721a73758b7c24e333852b2cdd2b"
+  },
+  "resources": [
+    {
+      "id": "line-banner-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/line-banner.uafont.json",
+      "size": 983,
+      "sha256": "d8b16b826bed7157340f8481e14b1bbee7ece877d7fea957d91e912104b8b795"
+    },
+    {
+      "id": "stroke-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/stroke-uaj.uafont.json",
+      "size": 1084,
+      "sha256": "598a1b4383deced43fe51eb6e7b98bc8fb17889b38b7ac03bc5d8ab5b4dca88d"
+    },
+    {
+      "id": "block-poster-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/block-poster-uaj.uafont.json",
+      "size": 1193,
+      "sha256": "1a749f61c36703ae8c070057f77d8d82e0ca803d0900e468731cc7c6c1bee6b6"
+    },
+    {
+      "id": "compact-mark-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/compact-mark-uaj.uafont.json",
+      "size": 1000,
+      "sha256": "dc8cfa830679c571217c6bac2c3993fe643d1c1b856f541d09f1d38d85096e28"
+    },
+    {
+      "id": "project-overview",
+      "kind": "semantic-document",
+      "source": "artworks/project-overview.uadoc.json",
+      "size": 759,
+      "sha256": "5b3948207d9533826861a4af4922dfe76a380472819d6065ce4851cbce5009fd"
+    },
+    {
+      "id": "boxed-note",
+      "kind": "semantic-document",
+      "source": "artworks/boxed-note.uadoc.json",
+      "size": 554,
+      "sha256": "0bbbd5ccb0a8f8430f2394a47df5df10f95b83202d47233a0a8f5dd9d5eec1f9"
+    },
+    {
+      "id": "bilingual-grid",
+      "kind": "semantic-document",
+      "source": "artworks/bilingual-grid.uadoc.json",
+      "size": 672,
+      "sha256": "d44875cf258cb9ac46d531f456c6bd5de8edefea638a39d2e03eb461a4c2724d"
+    },
+    {
+      "id": "review-workflow",
+      "kind": "semantic-document",
+      "source": "artworks/review-workflow.uadoc.json",
+      "size": 2035,
+      "sha256": "cd9270f00114209221aafe150484fd9e0d0ad489d3d657e18b0493ba66e90051"
+    },
+    {
+      "id": "uaf-poster-suite",
+      "kind": "semantic-document",
+      "source": "artworks/uaf-poster-suite.uadoc.json",
+      "size": 3215,
+      "sha256": "eeb9b30ce58406ae9f1fbc14617ebb1daef553157b44052abe6229b806382915"
+    }
+  ],
+  "totals": {
+    "resources": 9,
+    "bytes": 11495,
+    "unicodeArtFonts": 4,
+    "semanticDocuments": 5
+  }
+}

@@ -38,9 +38,9 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 
 | 能力 ID | 当前范围 | 稳定化去向 | 进入下一状态前需要完成 |
 | --- | --- | --- | --- |
-| `resource.discovery.staticDraft` | 静态资源发现术语、hash、来源和作者 / 作品页原型。 | 继续 experimental | 公开最小 validator、撤回语义和用户确认边界。 |
-| `resource.discovery.hashLock` | 资源文件 sha256 摘要与本地校验思路；当前画廊已有 `resource-manifest.json` 与 `resource-discovery:check`。 | 继续 experimental | CLI / Web 至少一条公开 verify 路径，且文档明确 hash 不替代许可证审计。 |
-| `resource.discovery.trustChain` | 维护者签名、keyring 和撤回列表设计。 | 继续 experimental | 完成最小签名 envelope、撤回 fixture、发布后验证和迁移说明。 |
+| `resource.discovery.staticDraft` | 静态资源发现术语、hash、来源和作者 / 作品页原型。 | 继续 experimental | 继续观察真实投稿、审核和宿主展示反馈。 |
+| `resource.discovery.hashLock` | 资源文件 sha256 摘要、`resource-lock.json` 与本地校验路径；当前画廊已有 CLI / Web 只读 verify 路径。 | 继续 experimental | 冻结 sidecar 字段和迁移说明，并继续明确 hash 不替代许可证审计。 |
+| `resource.discovery.trustChain` | `resource-signature.json`、`resource-revocations.json` 和当前 `unsigned-draft` envelope。 | 继续 experimental | 启用真实维护者签名私钥流程、key rotation 和多宿主展示。 |
 
 ## 创作生态收口快照
 

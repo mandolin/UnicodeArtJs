@@ -38,6 +38,10 @@ const requiredFiles = [
   'packages/web/tests/e2e-smoke.mjs',
   'packages/web/public/gallery/index.json',
   'packages/web/public/gallery/resource-manifest.json',
+  'packages/web/public/gallery/resource-lock.json',
+  'packages/web/public/gallery/resource-revocations.json',
+  'packages/web/public/gallery/resource-signature.json',
+  'scripts/check-resource-trust.cjs',
   'package.json',
   '.github/workflows/ci.yml'
 ];
@@ -108,6 +112,10 @@ const extensionReadme = readUtf8('packages/extension-line-banner/README.md');
 const extensionManifest = readJson('packages/extension-line-banner/unicode-art-extension.json');
 const galleryIndex = readJson('packages/web/public/gallery/index.json');
 const resourceManifest = readJson('packages/web/public/gallery/resource-manifest.json');
+const resourceLock = readJson('packages/web/public/gallery/resource-lock.json');
+const resourceRevocations = readJson('packages/web/public/gallery/resource-revocations.json');
+const resourceSignature = readJson('packages/web/public/gallery/resource-signature.json');
+const resourceTrustScript = readUtf8('scripts/check-resource-trust.cjs');
 
 assertCondition(
   packageJson.scripts?.['creative-ecosystem:check'] === 'node scripts/check-creative-ecosystem.cjs',
@@ -115,11 +123,14 @@ assertCondition(
 );
   requireText(packageJson.scripts?.['release:gate'] || '', 'creative-ecosystem:check', 'package.json release:gate');
   requireText(packageJson.scripts?.['release:gate'] || '', 'resource-discovery:check', 'package.json release:gate');
+  requireText(packageJson.scripts?.['release:gate'] || '', 'resource-trust:check', 'package.json release:gate');
   requireText(packageJson.scripts?.['release:gate'] || '', 'web-resource-discovery:check', 'package.json release:gate');
   requireText(ciWorkflow, 'Check Creative Ecosystem', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'npm run creative-ecosystem:check', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'Check Resource Discovery', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'npm run resource-discovery:check', '.github/workflows/ci.yml');
+  requireText(ciWorkflow, 'Check Resource Trust Chain', '.github/workflows/ci.yml');
+  requireText(ciWorkflow, 'npm run resource-trust:check', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'Check Web Resource Discovery', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'npm run web-resource-discovery:check', '.github/workflows/ci.yml');
   requireText(docsIndex, 'creative-ecosystem.md', 'docs/README.md');
@@ -128,9 +139,11 @@ assertCondition(
   requireText(docsIndex, 'semantic-document-authoring.md', 'docs/README.md');
   requireText(developmentDoc, 'npm run creative-ecosystem:check', 'docs/development.md');
   requireText(developmentDoc, 'npm run resource-discovery:check', 'docs/development.md');
+  requireText(developmentDoc, 'npm run resource-trust:check', 'docs/development.md');
   requireText(developmentDoc, 'npm run web-resource-discovery:check', 'docs/development.md');
   requireText(releaseGate, 'creative-ecosystem:check', 'docs/release-gate.md');
   requireText(releaseGate, 'resource-discovery:check', 'docs/release-gate.md');
+  requireText(releaseGate, 'resource-trust:check', 'docs/release-gate.md');
   requireText(releaseGate, 'web-resource-discovery:check', 'docs/release-gate.md');
   requireText(releaseGate, 'uaf-authoring:check', 'docs/release-gate.md');
   requireText(releaseGate, 'semantic-document-authoring:check', 'docs/release-gate.md');
@@ -155,6 +168,7 @@ for (const expected of [
   'npm run extension-example:check',
   'npm run host-sideload:check',
   'npm run resource-discovery:check',
+  'npm run resource-trust:check',
   'npm run web-resource-discovery:check',
   'npm run release:gate'
 ]) {
@@ -194,8 +208,13 @@ for (const expected of [
   '发现不等于安装',
   'hash 不替代许可证审计',
   'resource-manifest.json',
+  'resource-lock.json',
+  'resource-revocations.json',
+  'resource-signature.json',
   'npm run resource-discovery:check',
+  'npm run resource-trust:check',
   'npm run web-resource-discovery:check',
+  'unsigned-draft',
   '在线工具',
   'unicode-art resource validate',
   'unicode-art resource inspect',
@@ -246,6 +265,16 @@ for (const expected of [
 }
 
 for (const expected of [
+  'resource-lock.json',
+  'resource-revocations.json',
+  'resource-signature.json',
+  'unsigned-draft',
+  'crypto.verify'
+]) {
+  requireText(resourceTrustScript, expected, 'scripts/check-resource-trust.cjs');
+}
+
+for (const expected of [
   'Test 32: CLI resource discovery commands',
   'resource',
   'sha256 mismatch'
@@ -271,6 +300,13 @@ assertCondition(
   Array.isArray(resourceManifest.resources) && resourceManifest.resources.length === (galleryIndex.artworks || []).length,
   '资源发现 manifest 必须覆盖全部画廊作品。'
 );
+assertCondition(resourceLock.format === 'unicode-art-gallery-resource-lock', '资源 lock 格式不正确。');
+assertCondition(resourceLock.version === 1, '资源 lock 版本必须为 1。');
+assertCondition(resourceLock.resources.length === resourceManifest.resources.length, '资源 lock 必须覆盖 manifest 全部资源。');
+assertCondition(resourceRevocations.format === 'unicode-art-gallery-resource-revocations', '资源撤回列表格式不正确。');
+assertCondition(Array.isArray(resourceRevocations.revocations), '资源撤回列表必须使用数组。');
+assertCondition(resourceSignature.format === 'unicode-art-gallery-resource-signature', '资源签名 envelope 格式不正确。');
+assertCondition(resourceSignature.trust?.status === 'unsigned-draft', '当前公开画廊签名状态必须明确为 unsigned-draft。');
 const galleryKinds = new Set(galleryIndex.artworks?.map((artwork) => artwork.kind));
 assertCondition(galleryKinds.has('unicode-art-font'), '静态画廊必须包含至少一个 UAF 作品。');
 assertCondition(galleryKinds.has('semantic-document'), '静态画廊必须包含至少一个语义文档作品。');
