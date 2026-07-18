@@ -35,6 +35,7 @@ UnicodeArtJs 的目标是围绕同一套核心转换能力，提供 JavaScript/T
 - 类 FIGlet 的 Unicode 艺术字库、开放字体格式和编辑工具。
 - Box、表格、艺术字与普通字符画的组合排版。
 - [静态作品画廊](gallery.md)：收录许可与来源明确的原创 UAF 和语义布局示例；后续再依据实际需求评估开放投稿或动态服务。
+- [实验性静态资源发现](resource-discovery-experimental.md)：在不提供自动安装和远程执行的前提下，展示资源来源、hash、作者与作品入口。
 
 ### 开发者文档
 

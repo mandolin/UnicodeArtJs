@@ -21,6 +21,7 @@ const requiredFiles = [
   'docs/extension-authoring.md',
   'docs/extension-sdk.md',
   'docs/host-sideload-boundary.md',
+  'docs/resource-discovery-experimental.md',
   'docs/gallery.md',
   'docs/gallery-submission.md',
   'docs/gallery-review.md',
@@ -91,6 +92,7 @@ const semanticDoc = readUtf8('docs/semantic-uaf-beta.md');
 const extensionSdk = readUtf8('docs/extension-sdk.md');
 const galleryDoc = readUtf8('docs/gallery.md');
 const galleryReviewDoc = readUtf8('docs/gallery-review.md');
+const resourceDiscoveryDoc = readUtf8('docs/resource-discovery-experimental.md');
 const extensionReadme = readUtf8('packages/extension-line-banner/README.md');
 const extensionManifest = readJson('packages/extension-line-banner/unicode-art-extension.json');
 const galleryIndex = readJson('packages/web/public/gallery/index.json');
@@ -103,6 +105,7 @@ assertCondition(
   requireText(ciWorkflow, 'Check Creative Ecosystem', '.github/workflows/ci.yml');
   requireText(ciWorkflow, 'npm run creative-ecosystem:check', '.github/workflows/ci.yml');
   requireText(docsIndex, 'creative-ecosystem.md', 'docs/README.md');
+  requireText(docsIndex, 'resource-discovery-experimental.md', 'docs/README.md');
   requireText(docsIndex, 'uaf-authoring.md', 'docs/README.md');
   requireText(docsIndex, 'semantic-document-authoring.md', 'docs/README.md');
   requireText(developmentDoc, 'npm run creative-ecosystem:check', 'docs/development.md');
@@ -122,6 +125,7 @@ for (const expected of [
   'extension-authoring.md',
   'gallery-submission.md',
   'gallery-review.md',
+  'resource-discovery-experimental.md',
   'packages/extension-line-banner/assets/line-font.uafont.json',
   'npm run uaf-authoring:check',
   'npm run semantic-document-authoring:check',
@@ -154,9 +158,22 @@ for (const expected of [
   'unicode-art-gallery-index',
   'gallery-submission.md',
   'gallery-review.md',
+  'resource-discovery-experimental.md',
   'npm run gallery:check'
 ]) {
   requireText(galleryDoc, expected, 'docs/gallery.md');
+}
+
+for (const expected of [
+  '# 实验性静态资源发现',
+  '发现不等于安装',
+  'hash 不替代许可证审计',
+  '不执行资源内容',
+  '用户确认',
+  'host-sideload-boundary.md',
+  'experimental-stability.md'
+]) {
+  requireText(resourceDiscoveryDoc, expected, 'docs/resource-discovery-experimental.md');
 }
 
 for (const expected of [

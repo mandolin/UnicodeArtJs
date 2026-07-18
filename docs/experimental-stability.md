@@ -34,6 +34,14 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 | --- | --- | --- | --- |
 | `web.gallery.staticIndex` | GitHub Pages 静态画廊索引、审核作品和投稿流程。 | Stable 候选 | 冻结索引字段、审核 checklist、作品类型扩展策略和内容政策边界。 |
 
+## 资源发现公开试点
+
+| 能力 ID | 当前范围 | 稳定化去向 | 进入下一状态前需要完成 |
+| --- | --- | --- | --- |
+| `resource.discovery.staticDraft` | 静态资源发现术语、hash、来源和作者 / 作品页原型。 | 继续 experimental | 公开最小 validator、撤回语义和用户确认边界。 |
+| `resource.discovery.hashLock` | 资源文件 sha256 摘要与本地校验思路。 | 继续 experimental | CLI / Web 至少一条公开 verify 路径，且文档明确 hash 不替代许可证审计。 |
+| `resource.discovery.trustChain` | 维护者签名、keyring 和撤回列表设计。 | 继续 experimental | 完成最小签名 envelope、撤回 fixture、发布后验证和迁移说明。 |
+
 ## 创作生态收口快照
 
 UAF、语义文档、UAEM 资源包和静态画廊已经形成同一条作者路径：官方示例、公开指南、canonical fixture、Core / CLI / Web 消费路径和自动检查都能互相印证。这意味着它们适合继续面向高级用户和宿主开发者试用，但仍不等于格式已经进入长期 stable 承诺。
@@ -65,4 +73,4 @@ UAF、语义文档、UAEM 资源包和静态画廊已经形成同一条作者路
 - reserved 配置可以保存和迁移，但不要向用户承诺它已经影响输出。
 - legacy 字段可继续读取旧配置；新文档、示例和 UI 应使用新的分组配置。
 
-相关边界也可参考 [已知限制](known-limitations.md)、[宿主接入指南](host-integration.md)、[UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)、[声明式扩展清单](extension-manifest.md) 和 [声明式扩展 SDK](extension-sdk.md)。
+相关边界也可参考 [已知限制](known-limitations.md)、[宿主接入指南](host-integration.md)、[UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)、[声明式扩展清单](extension-manifest.md)、[声明式扩展 SDK](extension-sdk.md) 和 [实验性静态资源发现](resource-discovery-experimental.md)。
