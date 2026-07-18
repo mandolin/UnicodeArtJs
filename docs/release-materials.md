@@ -188,6 +188,7 @@ npm run release:gate
 
 发布后确认 GitHub Pages 与 CI 成功，并在 release notes 中明确 “No runtime package bump” 或列出实际发布的包级 tag。
 如果更新涉及 `resource-lock.json`、`resource-revocations.json` 或 `resource-signature.json`，release notes 应说明当前信任状态仍为 `unsigned-draft`，并提示发现不等于安装。
+如果更新包含资源撤回，release notes 应列出被撤回资源的 `resourceId`、原因、`revokedAt`、可选 `replacedBy`、对缓存资源的影响，以及宿主应如何提示用户不要继续导入或推荐该资源。
 
 ## GitHub Release
 
