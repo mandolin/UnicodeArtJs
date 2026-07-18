@@ -1,0 +1,4 @@
+# Gallery resource files are covered by byte-level size and sha256 manifests.
+# Keep their checkout bytes stable across Windows/macOS/Linux.
+packages/web/public/gallery/*.json text eol=lf
+packages/web/public/gallery/**/*.json text eol=lf
