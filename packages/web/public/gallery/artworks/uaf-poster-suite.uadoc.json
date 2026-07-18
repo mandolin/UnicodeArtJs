@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "colSpan": 2,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "art-font-text",
+              "text": "UAF JS",
+              "font": {
+                "format": "unicode-art-font",
+                "version": 1,
+                "meta": {
+                  "id": "org.unicodeartjs.gallery.block-poster-uaj-embedded",
+                  "name": "Block Poster UAJ Embedded",
+                  "authors": ["UnicodeArtJs"],
+                  "description": "Embedded copy of the original block poster UAF sample font for semantic gallery previews.",
+                  "license": {
+                    "expression": "MIT",
+                    "origin": "original"
+                  },
+                  "creation": {
+                    "method": "ai-assisted",
+                    "tool": "codex-manual-grid-review"
+                  }
+                },
+                "metrics": {
+                  "height": 6,
+                  "defaultAdvance": 6,
+                  "letterSpacing": 1,
+                  "fallbackGlyph": "?"
+                },
+                "glyphs": {
+                  " ": {
+                    "lines": ["", "", "", "", "", ""],
+                    "advance": 3
+                  },
+                  "A": {
+                    "lines": [" ####", "##  ##", "######", "##  ##", "##  ##", "##  ##"]
+                  },
+                  "F": {
+                    "lines": ["######", "##", "#####", "##", "##", "##"]
+                  },
+                  "J": {
+                    "lines": ["  ####", "    ##", "    ##", "##  ##", "##  ##", " ####"]
+                  },
+                  "S": {
+                    "lines": [" ####", "##", " ####", "    ##", "##  ##", " ####"]
+                  },
+                  "U": {
+                    "lines": ["##  ##", "##  ##", "##  ##", "##  ##", "##  ##", " ####"]
+                  },
+                  "?": {
+                    "lines": ["?????", "    ?", "  ??", "  ?", "", "  ?"]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "role": "column-header",
+          "blocks": [{ "kind": "raw-text", "text": "Resource" }]
+        },
+        {
+          "role": "column-header",
+          "blocks": [{ "kind": "raw-text", "text": "Role" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Block Poster UAF" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Font candidate" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Poster Suite" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Semantic template" }]
+        }
+      ]
+    },
+    {
+      "role": "footer",
+      "cells": [
+        {
+          "colSpan": 2,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "raw-text",
+              "text": "Static JSON package: font + template"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

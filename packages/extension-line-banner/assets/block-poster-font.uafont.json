@@ -1,0 +1,48 @@
+{
+  "format": "unicode-art-font",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.line-banner.block-poster-font",
+    "name": "Block Poster Font",
+    "authors": ["UnicodeArtJs"],
+    "description": "Original block poster UAF sample font packaged with the official declaration-only extension example.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "ai-assisted",
+      "tool": "codex-manual-grid-review"
+    }
+  },
+  "metrics": {
+    "height": 6,
+    "defaultAdvance": 6,
+    "letterSpacing": 1,
+    "fallbackGlyph": "?"
+  },
+  "glyphs": {
+    " ": {
+      "lines": ["", "", "", "", "", ""],
+      "advance": 3
+    },
+    "A": {
+      "lines": [" ####", "##  ##", "######", "##  ##", "##  ##", "##  ##"]
+    },
+    "F": {
+      "lines": ["######", "##", "#####", "##", "##", "##"]
+    },
+    "J": {
+      "lines": ["  ####", "    ##", "    ##", "##  ##", "##  ##", " ####"]
+    },
+    "S": {
+      "lines": [" ####", "##", " ####", "    ##", "##  ##", " ####"]
+    },
+    "U": {
+      "lines": ["##  ##", "##  ##", "##  ##", "##  ##", "##  ##", " ####"]
+    },
+    "?": {
+      "lines": ["?????", "    ?", "  ??", "  ?", "", "  ?"]
+    }
+  }
+}

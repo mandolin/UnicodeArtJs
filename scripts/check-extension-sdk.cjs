@@ -159,13 +159,20 @@ function checkOfficialPackage() {
   for (const capability of ['unicode-art-font', 'semantic-document']) {
     assertCondition(manifest.capabilities.includes(capability), `Official extension capability missing: ${capability}`);
   }
-  assertCondition(manifest.resources.length === 2, 'Official extension must keep two baseline resources.');
+  assertCondition(manifest.resources.length === 4, 'Official extension must keep the reviewed baseline and poster resources.');
 
   const resources = new Map(manifest.resources.map((resource) => [resource.id, resource]));
-  assertCondition(resources.get('line-font')?.kind === 'unicode-art-font', 'Official line-font resource changed.');
-  assertCondition(resources.get('banner-template')?.kind === 'semantic-document', 'Official banner-template resource changed.');
-  assertSafeRelativeResourcePath(resources.get('line-font').path, '.uafont.json');
-  assertSafeRelativeResourcePath(resources.get('banner-template').path, '.uadoc.json');
+  const expectedResources = [
+    ['line-font', 'unicode-art-font', '.uafont.json'],
+    ['banner-template', 'semantic-document', '.uadoc.json'],
+    ['block-poster-font', 'unicode-art-font', '.uafont.json'],
+    ['poster-template', 'semantic-document', '.uadoc.json']
+  ];
+  for (const [id, kind, suffix] of expectedResources) {
+    const resource = resources.get(id);
+    assertCondition(resource?.kind === kind, `Official ${id} resource changed.`);
+    assertSafeRelativeResourcePath(resource.path, suffix);
+  }
 }
 
 function checkCoreAndCli() {
@@ -203,7 +210,7 @@ function checkCoreAndCli() {
   const summary = JSON.parse(inspection.stdout);
   assertCondition(summary.id === 'org.unicodeartjs.line-banner', 'CLI extension inspect returned wrong id.');
   assertCondition(summary.compatibility.compatible === true, 'CLI extension inspect must remain compatible.');
-  assertCondition(summary.resources.length === 2, 'CLI extension inspect must include both resources.');
+  assertCondition(summary.resources.length === 4, 'CLI extension inspect must include all reviewed resources.');
   const resourceKinds = new Set(summary.resources.map((resource) => resource.kind));
   assertCondition(resourceKinds.has('unicode-art-font'), 'CLI extension inspect missing UAF resource.');
   assertCondition(resourceKinds.has('semantic-document'), 'CLI extension inspect missing semantic resource.');

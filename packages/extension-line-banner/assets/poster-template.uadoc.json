@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "rows": [
+    {
+      "role": "header",
+      "cells": [
+        {
+          "colSpan": 2,
+          "align": "center",
+          "blocks": [
+            {
+              "kind": "art-font-text",
+              "text": "UAF JS",
+              "font": {
+                "format": "unicode-art-font",
+                "version": 1,
+                "meta": {
+                  "id": "org.unicodeartjs.line-banner.block-poster-font-embedded",
+                  "name": "Block Poster Font Embedded",
+                  "authors": ["UnicodeArtJs"],
+                  "license": {
+                    "expression": "MIT",
+                    "origin": "original"
+                  },
+                  "creation": {
+                    "method": "ai-assisted",
+                    "tool": "codex-manual-grid-review"
+                  }
+                },
+                "metrics": {
+                  "height": 6,
+                  "defaultAdvance": 6,
+                  "letterSpacing": 1,
+                  "fallbackGlyph": "?"
+                },
+                "glyphs": {
+                  " ": {
+                    "lines": ["", "", "", "", "", ""],
+                    "advance": 3
+                  },
+                  "A": {
+                    "lines": [" ####", "##  ##", "######", "##  ##", "##  ##", "##  ##"]
+                  },
+                  "F": {
+                    "lines": ["######", "##", "#####", "##", "##", "##"]
+                  },
+                  "J": {
+                    "lines": ["  ####", "    ##", "    ##", "##  ##", "##  ##", " ####"]
+                  },
+                  "S": {
+                    "lines": [" ####", "##", " ####", "    ##", "##  ##", " ####"]
+                  },
+                  "U": {
+                    "lines": ["##  ##", "##  ##", "##  ##", "##  ##", "##  ##", " ####"]
+                  },
+                  "?": {
+                    "lines": ["?????", "    ?", "  ??", "  ?", "", "  ?"]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "role": "column-header",
+          "blocks": [{ "kind": "raw-text", "text": "Package" }]
+        },
+        {
+          "role": "column-header",
+          "blocks": [{ "kind": "raw-text", "text": "Resource" }]
+        }
+      ]
+    },
+    {
+      "cells": [
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Line Banner" }]
+        },
+        {
+          "blocks": [{ "kind": "raw-text", "text": "Poster Template" }]
+        }
+      ]
+    }
+  ]
+}

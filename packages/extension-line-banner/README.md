@@ -12,6 +12,8 @@ packages/extension-line-banner/
   assets/
     line-font.uafont.json
     banner-template.uadoc.json
+    block-poster-font.uafont.json
+    poster-template.uadoc.json
   README.md
   TEMPLATE.md
   LICENSE
@@ -21,7 +23,9 @@ packages/extension-line-banner/
 
 - `assets/line-font.uafont.json`：原创 MIT UAF 字体，覆盖 `A`、`U`、`J` 和 fallback 字形，可作为最小字体模板。
 - `assets/banner-template.uadoc.json`：原创 MIT 语义文档模板，演示 `art-font-text` 如何嵌入 UAF 字体。
-- `unicode-art-extension.json`：UAEM v1 清单，声明两个本地资源，并限制宿主只读取清单目录内的声明文件。
+- `assets/block-poster-font.uafont.json`：原创 MIT 块面 UAF 字体，覆盖 `UAF JS` 样本。
+- `assets/poster-template.uadoc.json`：原创 MIT 语义文档模板，演示字体资源与模板资源如何同包声明。
+- `unicode-art-extension.json`：UAEM v1 清单，声明多份本地资源，并限制宿主只读取清单目录内的声明文件。
 
 ## 验证
 
@@ -32,7 +36,9 @@ npm run extension-example:check
 node packages/cli/src/console.js extension validate packages/extension-line-banner/unicode-art-extension.json --lang zh-CN
 node packages/cli/src/console.js extension inspect packages/extension-line-banner/unicode-art-extension.json --json --lang zh-CN
 node packages/cli/src/console.js font validate packages/extension-line-banner/assets/line-font.uafont.json --lang zh-CN
+node packages/cli/src/console.js font validate packages/extension-line-banner/assets/block-poster-font.uafont.json --lang zh-CN
 node packages/cli/src/console.js document packages/extension-line-banner/assets/banner-template.uadoc.json --height 4 --no-config --lang zh-CN
+node packages/cli/src/console.js document packages/extension-line-banner/assets/poster-template.uadoc.json --height 8 --no-config --lang zh-CN
 ```
 
 这些命令只做本地预检，不安装、注册或执行扩展。

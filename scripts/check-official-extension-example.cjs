@@ -19,11 +19,15 @@ const extensionRoot = path.join(repositoryRoot, 'packages', 'extension-line-bann
 const manifestPath = path.join(extensionRoot, 'unicode-art-extension.json');
 const fontPath = path.join(extensionRoot, 'assets', 'line-font.uafont.json');
 const documentPath = path.join(extensionRoot, 'assets', 'banner-template.uadoc.json');
+const posterFontPath = path.join(extensionRoot, 'assets', 'block-poster-font.uafont.json');
+const posterDocumentPath = path.join(extensionRoot, 'assets', 'poster-template.uadoc.json');
 
 const requiredFiles = [
   'packages/extension-line-banner/unicode-art-extension.json',
   'packages/extension-line-banner/assets/line-font.uafont.json',
   'packages/extension-line-banner/assets/banner-template.uadoc.json',
+  'packages/extension-line-banner/assets/block-poster-font.uafont.json',
+  'packages/extension-line-banner/assets/poster-template.uadoc.json',
   'packages/extension-line-banner/README.md',
   'packages/extension-line-banner/TEMPLATE.md',
   'packages/extension-line-banner/LICENSE',
@@ -116,6 +120,8 @@ function checkDocsAndPackageShape() {
     'extension-example:check',
     'line-font.uafont.json',
     'banner-template.uadoc.json',
+    'block-poster-font.uafont.json',
+    'poster-template.uadoc.json',
     '不安装、注册或执行扩展'
   ]) {
     requireText(readme, expected, 'packages/extension-line-banner/README.md');
@@ -158,15 +164,30 @@ async function checkCoreResources() {
   const manifest = core.parseUnicodeArtExtensionManifestJson(readUtf8(manifestPath), { locale: 'zh-CN' });
   const font = core.parseUnicodeArtFontJson(readUtf8(fontPath), { locale: 'zh-CN' });
   const document = core.parseSemanticDocumentJson(readUtf8(documentPath), { locale: 'zh-CN' });
+  const posterFont = core.parseUnicodeArtFontJson(readUtf8(posterFontPath), { locale: 'zh-CN' });
+  const posterDocument = core.parseSemanticDocumentJson(readUtf8(posterDocumentPath), { locale: 'zh-CN' });
 
   assertCondition(manifest.meta.id === 'org.unicodeartjs.line-banner', 'Official extension id changed.');
-  assertCondition(manifest.resources.length === 2, 'Official extension resource count changed.');
+  assertCondition(manifest.resources.length === 4, 'Official extension resource count changed.');
+  const manifestResourceIds = new Set(manifest.resources.map((resource) => resource.id));
+  for (const expectedResourceId of ['line-font', 'banner-template', 'block-poster-font', 'poster-template']) {
+    assertCondition(manifestResourceIds.has(expectedResourceId), `Official extension is missing resource ${expectedResourceId}.`);
+  }
   assertCondition(font.meta.id === 'org.unicodeartjs.line-banner-font', 'Official UAF font id changed.');
   assertCondition(document.rows.length === 1, 'Official semantic template row count changed.');
+  assertCondition(
+    posterFont.meta.id === 'org.unicodeartjs.line-banner.block-poster-font',
+    'Official poster UAF font id changed.'
+  );
+  assertCondition(posterDocument.rows.length === 3, 'Official poster semantic template row count changed.');
 
   const renderedFont = core.renderUnicodeArtFontText(font, 'UAJ', { locale: 'zh-CN' });
   assertCondition(renderedFont.content === '|| /\\ _|\n\\/ || \\/', 'Official UAF font rendering changed.');
   assertCondition(renderedFont.rows === 2 && renderedFont.cols === 8, 'Official UAF font metrics changed.');
+
+  const renderedPosterFont = core.renderUnicodeArtFontText(posterFont, 'UAF JS', { locale: 'zh-CN' });
+  assertCondition(renderedPosterFont.missingGlyphs.length === 0, 'Official poster font should cover UAF JS.');
+  assertCondition(renderedPosterFont.rows === 6 && renderedPosterFont.cols > 30, 'Official poster font metrics changed.');
 
   const renderedDocument = await core.renderSemanticDocumentWithAdapter(document, {
     outputFormat: core.OutputFormat.PLAIN_TEXT,
@@ -183,6 +204,22 @@ async function checkCoreResources() {
   }, { grid: true });
   requireText(renderedDocument.content, 'Extension', 'Official semantic template rendering');
   requireText(renderedDocument.content, '|| /\\ _|', 'Official semantic template rendering');
+
+  const renderedPosterDocument = await core.renderSemanticDocumentWithAdapter(posterDocument, {
+    outputFormat: core.OutputFormat.PLAIN_TEXT,
+    box: {
+      style: 'ascii',
+      renderStage: 'layout',
+      mode: 'grid',
+      separators: { rows: true, columns: true },
+      cell: { padding: { left: 1, right: 1 } }
+    },
+    locale: 'zh-CN'
+  }, async () => {
+    throw new Error('Official poster template should not require art-text rendering.');
+  }, { grid: true });
+  requireText(renderedPosterDocument.content, 'Poster Template', 'Official poster semantic template rendering');
+  requireText(renderedPosterDocument.content, '######', 'Official poster semantic template rendering');
 }
 
 function checkCliAndCopyablePackage() {
@@ -207,9 +244,10 @@ function checkCliAndCopyablePackage() {
   ]);
   const summary = JSON.parse(inspection.stdout);
   assertCondition(summary.id === 'org.unicodeartjs.line-banner', 'CLI inspect returned wrong extension id.');
-  assertCondition(summary.resources.length === 2, 'CLI inspect resource count changed.');
+  assertCondition(summary.resources.length === 4, 'CLI inspect resource count changed.');
 
   run(process.execPath, [cliEntryPath, 'font', 'validate', fontPath, '--lang', 'en-US']);
+  run(process.execPath, [cliEntryPath, 'font', 'validate', posterFontPath, '--lang', 'en-US']);
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'unicode-art-extension-example-'));
   try {
@@ -234,6 +272,23 @@ function checkCliAndCopyablePackage() {
     const rendered = readUtf8(outputPath);
     requireText(rendered, 'Extension', 'CLI copied semantic template output');
     requireText(rendered, '|| /\\ _|', 'CLI copied semantic template output');
+
+    const posterOutputPath = path.join(tempDir, 'poster-template.txt');
+    run(process.execPath, [
+      cliEntryPath,
+      'document',
+      path.join(copiedRoot, 'assets', 'poster-template.uadoc.json'),
+      '--height',
+      '8',
+      '--output',
+      posterOutputPath,
+      '--no-config',
+      '--lang',
+      'en-US'
+    ]);
+    const renderedPoster = readUtf8(posterOutputPath);
+    requireText(renderedPoster, 'Poster Template', 'CLI copied poster template output');
+    requireText(renderedPoster, '######', 'CLI copied poster template output');
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

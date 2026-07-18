@@ -176,6 +176,26 @@
         "origin": "original"
       },
       "reviewedAt": "2026-07-18"
+    },
+    {
+      "id": "uaf-poster-suite",
+      "kind": "semantic-document",
+      "source": "artworks/uaf-poster-suite.uadoc.json",
+      "title": {
+        "zh-CN": "UAF 海报套件",
+        "en-US": "UAF Poster Suite"
+      },
+      "description": {
+        "zh-CN": "使用块面 UAF 字体嵌入语义文档的原创套件示例。",
+        "en-US": "An original suite example that embeds a block UAF font inside a semantic document."
+      },
+      "tags": ["layout", "document", "font", "original"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-18"
     }
   ]
 }

@@ -45,6 +45,20 @@
       "path": "assets/banner-template.uadoc.json",
       "name": "Banner Template",
       "description": "A compact semantic document template with an embedded original UAF font."
+    },
+    {
+      "id": "block-poster-font",
+      "kind": "unicode-art-font",
+      "path": "assets/block-poster-font.uafont.json",
+      "name": "Block Poster Font",
+      "description": "A block poster UAF font packaged with a matching semantic template."
+    },
+    {
+      "id": "poster-template",
+      "kind": "semantic-document",
+      "path": "assets/poster-template.uadoc.json",
+      "name": "Poster Template",
+      "description": "A semantic document template embedding the block poster font family."
     }
   ]
 }
