@@ -88,7 +88,8 @@ unicode-art resource validate packages/web/public/gallery/resource-manifest.json
 7. 缓存时记录来源、hash、Core 版本和导入时间。
 8. 发现撤回或校验失败时，不替换用户当前内容。
 
-更完整的宿主读取边界见 [宿主侧载与资源读取边界](host-sideload-boundary.md)。
+更完整的宿主读取边界见 [宿主侧载与资源读取边界](host-sideload-boundary.md)。其中的“资源发现导入确认矩阵”定义了
+CLI、Web、VS Code Extension、Desktop 和 Compatible 应用在导入确认、缓存目标和失败回退上的共同要求。
 
 ## 不属于当前能力的事项
 
