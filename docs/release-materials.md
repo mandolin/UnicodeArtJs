@@ -152,14 +152,19 @@ npm run docs:all:check
 npm run check:web
 npm run build:web
 npm run test:web:e2e
+npm run resource-discovery:check
+npm run resource-trust:check
+npm run web-resource-discovery:check
 ```
 
 发布后核验：
 
 - 工作流 `Deploy Web to GitHub Pages` 成功。
+- 工作流步骤 `Wait for deployed resource discovery files` 成功，确认 Pages 上的 `resource-manifest.json`、`resource-lock.json`、`resource-revocations.json`、`resource-signature.json` 和随站资源字节已完成传播。
 - 页面入口可访问：<https://mandolin.github.io/UnicodeArtJs/>
 - Text Banner 和 Image to Art 至少各执行一次 smoke。
 - 视觉字体和字素字体选择在 Chrome / Edge 120+ 中可见并能影响对应行为。
+- “资源发现”实验页能展示同源资源、size、sha256、`unsigned-draft` 信任状态和不自动安装边界。
 - 文档页能读取公开 manifest，且不暴露内部路径。
 
 ## Creative Ecosystem / Docs-only Update
@@ -172,12 +177,17 @@ npm run test:web:e2e
 npm run docs:all:check
 npm run creative-ecosystem:check
 npm run resource-discovery:check
+npm run resource-trust:check
+npm run web-resource-discovery:check
 npm run host-sideload:check
+npm run docs:public-site:check
+npm run release-materials:check
 npm run docs:hia:target:check
 npm run release:gate
 ```
 
 发布后确认 GitHub Pages 与 CI 成功，并在 release notes 中明确 “No runtime package bump” 或列出实际发布的包级 tag。
+如果更新涉及 `resource-lock.json`、`resource-revocations.json` 或 `resource-signature.json`，release notes 应说明当前信任状态仍为 `unsigned-draft`，并提示发现不等于安装。
 
 ## GitHub Release
 
@@ -195,6 +205,7 @@ GitHub Release 用于汇总跨渠道发布结果。建议使用包级 tag：
 
 - 本地 `npm run release:gate` 是否通过。
 - 远端 CI 和 GitHub Pages run 是否通过。
+- 资源发现信任链是否通过 `resource-trust:check`，Pages 资源等待步骤是否成功。
 - `npm view unicode-art-js version` 和 `npm view unicode-art-cli version` 的返回值。
 - Marketplace 页面版本、安装 smoke 和命令面板 smoke。
 - 是否需要回写 README、package metadata、`docs/quickstart.md`、`docs/migration-guide.md` 或 `docs/known-limitations.md`。

@@ -32,8 +32,10 @@
       "title": "Integration",
       "requiredDocs": [
         "docs/host-integration.md",
+        "docs/host-sideload-boundary.md",
         "docs/web-integration.md",
-        "docs/vscode-extension-integration.md"
+        "docs/vscode-extension-integration.md",
+        "docs/desktop-host-baseline.md"
       ]
     },
     {
@@ -54,7 +56,9 @@
         "docs/semantic-uaf-beta.md",
         "docs/uaf-authoring.md",
         "docs/semantic-document-authoring.md",
-        "docs/creative-ecosystem.md"
+        "docs/creative-ecosystem.md",
+        "docs/gallery.md",
+        "docs/resource-discovery-experimental.md"
       ]
     },
     {
@@ -74,6 +78,7 @@
         "docs/release-gate.md",
         "docs/release-materials.md",
         "docs/performance-and-release-plan.md",
+        "docs/vscode-extension-release-checklist.md",
         "docs/runtime-sbom.md"
       ]
     },
@@ -83,6 +88,7 @@
       "requiredDocs": [
         "docs/support.md",
         "docs/gallery-submission.md",
+        "docs/gallery-review.md",
         "docs/roadmap.md"
       ]
     }

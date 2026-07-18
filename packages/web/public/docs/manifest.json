@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-18T10:59:40.089Z",
+  "generatedAt": "2026-07-18T15:19:34.297Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -68,11 +68,15 @@
       {
         "id": "integration",
         "title": "Integration",
-        "docCount": 3,
+        "docCount": 5,
         "docs": [
           {
             "path": "docs/host-integration.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/host-integration.md"
+          },
+          {
+            "path": "docs/host-sideload-boundary.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/host-sideload-boundary.md"
           },
           {
             "path": "docs/web-integration.md",
@@ -81,6 +85,10 @@
           {
             "path": "docs/vscode-extension-integration.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/vscode-extension-integration.md"
+          },
+          {
+            "path": "docs/desktop-host-baseline.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/desktop-host-baseline.md"
           }
         ]
       },
@@ -106,7 +114,7 @@
       {
         "id": "extension",
         "title": "Extension",
-        "docCount": 6,
+        "docCount": 8,
         "docs": [
           {
             "path": "docs/extension-sdk.md",
@@ -131,6 +139,14 @@
           {
             "path": "docs/creative-ecosystem.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/creative-ecosystem.md"
+          },
+          {
+            "path": "docs/gallery.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/gallery.md"
+          },
+          {
+            "path": "docs/resource-discovery-experimental.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/resource-discovery-experimental.md"
           }
         ]
       },
@@ -160,7 +176,7 @@
       {
         "id": "release",
         "title": "Release",
-        "docCount": 4,
+        "docCount": 5,
         "docs": [
           {
             "path": "docs/release-gate.md",
@@ -175,6 +191,10 @@
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/performance-and-release-plan.md"
           },
           {
+            "path": "docs/vscode-extension-release-checklist.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/vscode-extension-release-checklist.md"
+          },
+          {
             "path": "docs/runtime-sbom.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/runtime-sbom.md"
           }
@@ -183,7 +203,7 @@
       {
         "id": "contribute",
         "title": "Contribute",
-        "docCount": 3,
+        "docCount": 4,
         "docs": [
           {
             "path": "docs/support.md",
@@ -192,6 +212,10 @@
           {
             "path": "docs/gallery-submission.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/gallery-submission.md"
+          },
+          {
+            "path": "docs/gallery-review.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/gallery-review.md"
           },
           {
             "path": "docs/roadmap.md",

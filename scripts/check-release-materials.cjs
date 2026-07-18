@@ -87,6 +87,17 @@ const requiredReleaseMaterialTexts = [
   'npm',
   'VS Code Marketplace',
   'GitHub Pages',
+  'resource-discovery:check',
+  'resource-trust:check',
+  'web-resource-discovery:check',
+  'host-sideload:check',
+  'docs:public-site:check',
+  'release-materials:check',
+  'resource-lock.json',
+  'resource-revocations.json',
+  'resource-signature.json',
+  'unsigned-draft',
+  'Wait for deployed resource discovery files',
   'npm run release:gate',
   'npm run release:verify:publish',
   'npm view unicode-art-js version',
@@ -122,6 +133,8 @@ requireText(docsIndex, 'release-materials.md', 'docs/README.md');
 requireText(ciWorkflow, 'Check Release Materials', '.github/workflows/ci.yml');
 requireText(ciWorkflow, 'npm run release-materials:check', '.github/workflows/ci.yml');
 requireText(deployWebWorkflow, 'npm run docs:all:check', '.github/workflows/deploy-web.yml');
+requireText(deployWebWorkflow, 'npm run pages-resource-discovery:wait', '.github/workflows/deploy-web.yml');
+requireText(deployWebWorkflow, 'Wait for deployed resource discovery files', '.github/workflows/deploy-web.yml');
 
 assertCondition(
   packageJson.scripts?.['release-materials:check'] === 'node scripts/check-release-materials.cjs',

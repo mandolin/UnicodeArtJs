@@ -59,12 +59,12 @@ npm run release:verify:publish
 - `semantic-document-authoring:check` can validate the semantic document author guide, author fixtures, DSL import, Core rendering, and CLI document rendering.
 - `extension-sdk:check` can validate the declarative extension SDK, the official Line Banner package, Core manifest parsing, CLI side-load preflight, and Web manifest-only inspection coverage.
 - `extension-example:check` can validate the official Line Banner example package, copyable UAEM template, package README, license, Core resource parsing, copied-package CLI preflight, and resource rendering.
-- `host-sideload:check` can validate the shared Core / CLI / Web / VS Code / Desktop / Compatible side-load boundary, including manifest-only Web inspection, declared-resource reads, realpath containment, and the no-code-execution rule.
+- `host-sideload:check` can validate the shared Core / CLI / Web / VS Code / Desktop / Compatible side-load boundary, including manifest-only Web inspection, declared-resource reads, realpath containment, the no-code-execution rule, and the resource import confirmation matrix.
 - `creative-ecosystem:check` can validate the UAF, semantic layout, UAEM, official extension package, static gallery, and author-facing documentation links as one creative-asset baseline.
 - `desktop-host:check` can validate the desktop host baseline, canonical `*.uaproj` v1 fixtures, Compatible documentation links, and release-gate integration.
 - `optional-adapters:check` can validate 可选输入格式 (optional input format) and adapter policy, Core default image formats, VS Code image entrypoints, Compatible documentation links, and release-gate integration.
 - `performance-release:check` can validate the public performance baseline, `benchmark:core` command wiring, CI step, release surfaces, and version decision rules.
-- `release-materials:check` can validate [`docs/release-materials.md`](release-materials.md), release note templates, npm / Marketplace / GitHub Pages post-release checks, and package-level tag reminders.
+- `release-materials:check` can validate [`docs/release-materials.md`](release-materials.md), release note templates, npm / Marketplace / GitHub Pages post-release checks, resource discovery trust-chain reminders, and package-level tag reminders.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).
