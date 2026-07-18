@@ -1023,10 +1023,16 @@ async function testDeclarativeExtensionCommands() {
     throw new Error(inspect.stderr || inspect.stdout);
   }
   const summary = JSON.parse(inspect.stdout);
+  const resourceIds = summary.resources.map((resource) => resource.id).sort();
   if (
     summary.id !== 'org.unicodeartjs.line-banner'
     || summary.compatibility.compatible !== true
-    || summary.resources.length !== 2
+    || JSON.stringify(resourceIds) !== JSON.stringify([
+      'banner-template',
+      'block-poster-font',
+      'line-font',
+      'poster-template'
+    ])
   ) {
     throw new Error('Unexpected declarative extension summary: ' + inspect.stdout);
   }
