@@ -1,0 +1,48 @@
+{
+  "format": "unicode-art-font",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.gallery.compact-mark-uaj",
+    "name": "Compact Mark UAJ",
+    "authors": ["UnicodeArtJs"],
+    "description": "Original AI-assisted compact mark UAF sample font for reviewed gallery previews.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "ai-assisted",
+      "tool": "codex-manual-grid-review"
+    }
+  },
+  "metrics": {
+    "height": 3,
+    "defaultAdvance": 4,
+    "letterSpacing": 1,
+    "fallbackGlyph": "?"
+  },
+  "glyphs": {
+    " ": {
+      "lines": ["", "", ""],
+      "advance": 2
+    },
+    "A": {
+      "lines": [" /\\", "/--\\", "|  |"]
+    },
+    "F": {
+      "lines": ["|--", "|--", "|"]
+    },
+    "J": {
+      "lines": [" --|", "   |", "\\__/"]
+    },
+    "S": {
+      "lines": ["/--", "\\--", "--/"]
+    },
+    "U": {
+      "lines": ["|  |", "|  |", "\\__/"]
+    },
+    "?": {
+      "lines": ["???", " ??", " ?"]
+    }
+  }
+}

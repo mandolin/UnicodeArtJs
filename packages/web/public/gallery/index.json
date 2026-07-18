@@ -35,6 +35,69 @@
       "reviewedAt": "2026-07-14"
     },
     {
+      "id": "stroke-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/stroke-uaj.uafont.json",
+      "sample": "UAF JS",
+      "title": {
+        "zh-CN": "线描 UAF",
+        "en-US": "Stroke UAF"
+      },
+      "description": {
+        "zh-CN": "一套原创线描风格 UAF 字体样本，用于检视紧凑标题的笔画感。",
+        "en-US": "An original stroke-style UAF sample font for compact title previews."
+      },
+      "tags": ["banner", "font", "original"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-18"
+    },
+    {
+      "id": "block-poster-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/block-poster-uaj.uafont.json",
+      "sample": "UAF JS",
+      "title": {
+        "zh-CN": "块面海报 UAF",
+        "en-US": "Block Poster UAF"
+      },
+      "description": {
+        "zh-CN": "一套原创块面风格 UAF 字体样本，用于测试更厚重的标题效果。",
+        "en-US": "An original block poster UAF sample font for heavier title previews."
+      },
+      "tags": ["banner", "font", "original"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-18"
+    },
+    {
+      "id": "compact-mark-uaj",
+      "kind": "unicode-art-font",
+      "source": "artworks/compact-mark-uaj.uafont.json",
+      "sample": "UAF JS",
+      "title": {
+        "zh-CN": "紧凑标记 UAF",
+        "en-US": "Compact Mark UAF"
+      },
+      "description": {
+        "zh-CN": "一套原创紧凑风格 UAF 字体样本，用于较小空间里的标记和短标题。",
+        "en-US": "An original compact UAF sample font for small marks and short titles."
+      },
+      "tags": ["banner", "font", "original"],
+      "author": "UnicodeArtJs",
+      "license": {
+        "expression": "MIT",
+        "origin": "original"
+      },
+      "reviewedAt": "2026-07-18"
+    },
+    {
       "id": "project-overview",
       "kind": "semantic-document",
       "source": "artworks/project-overview.uadoc.json",

@@ -1,0 +1,48 @@
+{
+  "format": "unicode-art-font",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.gallery.block-poster-uaj",
+    "name": "Block Poster UAJ",
+    "authors": ["UnicodeArtJs"],
+    "description": "Original AI-assisted block poster UAF sample font for reviewed gallery previews.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "ai-assisted",
+      "tool": "codex-manual-grid-review"
+    }
+  },
+  "metrics": {
+    "height": 6,
+    "defaultAdvance": 6,
+    "letterSpacing": 1,
+    "fallbackGlyph": "?"
+  },
+  "glyphs": {
+    " ": {
+      "lines": ["", "", "", "", "", ""],
+      "advance": 3
+    },
+    "A": {
+      "lines": [" ####", "##  ##", "######", "##  ##", "##  ##", "##  ##"]
+    },
+    "F": {
+      "lines": ["######", "##", "#####", "##", "##", "##"]
+    },
+    "J": {
+      "lines": ["  ####", "    ##", "    ##", "##  ##", "##  ##", " ####"]
+    },
+    "S": {
+      "lines": [" ####", "##", " ####", "    ##", "##  ##", " ####"]
+    },
+    "U": {
+      "lines": ["##  ##", "##  ##", "##  ##", "##  ##", "##  ##", " ####"]
+    },
+    "?": {
+      "lines": ["?????", "    ?", "  ??", "  ?", "", "  ?"]
+    }
+  }
+}

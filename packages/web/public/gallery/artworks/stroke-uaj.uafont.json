@@ -1,0 +1,48 @@
+{
+  "format": "unicode-art-font",
+  "version": 1,
+  "meta": {
+    "id": "org.unicodeartjs.gallery.stroke-uaj",
+    "name": "Stroke UAJ",
+    "authors": ["UnicodeArtJs"],
+    "description": "Original AI-assisted stroke-style UAF sample font for reviewed gallery previews.",
+    "license": {
+      "expression": "MIT",
+      "origin": "original"
+    },
+    "creation": {
+      "method": "ai-assisted",
+      "tool": "codex-manual-grid-review"
+    }
+  },
+  "metrics": {
+    "height": 5,
+    "defaultAdvance": 5,
+    "letterSpacing": 1,
+    "fallbackGlyph": "?"
+  },
+  "glyphs": {
+    " ": {
+      "lines": ["", "", "", "", ""],
+      "advance": 3
+    },
+    "A": {
+      "lines": [" /\\", "/  \\", "|--|", "|  |", "|  |"]
+    },
+    "F": {
+      "lines": ["|---", "|", "|---", "|", "|"]
+    },
+    "J": {
+      "lines": [" --|", "   |", "   |", "|  |", "\\__/"]
+    },
+    "S": {
+      "lines": ["/---", "|", "\\--\\", "   |", "---/"]
+    },
+    "U": {
+      "lines": ["|  |", "|  |", "|  |", "|  |", "\\__/"]
+    },
+    "?": {
+      "lines": ["???", "  ?", " ??", "", " ?"]
+    }
+  }
+}
