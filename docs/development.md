@@ -176,7 +176,7 @@ npm run semantic-document-authoring:check
 npm run extension-sdk:check
 ```
 
-该命令会检查 [声明式扩展 SDK](extension-sdk.md)、[UAEM v1 清单规范](extension-manifest.md)、官方 Line Banner 示例、Core 解析结果、CLI 本地侧载预检和 Web 只读清单测试入口。UAEM v1 仍保持纯声明式边界，不允许通过资源包执行第三方代码。
+该命令会检查 [声明式扩展 SDK](extension-sdk.md)、[UAEM v1 清单规范](extension-manifest.md)、官方 Line Banner 示例、Core 解析结果、CLI 本地侧载预检和 Web 清单检查入口。UAEM v1 仍保持纯声明式边界，不允许通过资源包执行第三方代码。
 
 ## 官方扩展示例包
 
@@ -190,13 +190,13 @@ npm run extension-example:check
 
 ## 宿主侧载边界
 
-修改 UAEM 宿主能力矩阵、Web 只读清单检查、VS Code 后续侧载、桌面资源包读取、Compatible 侧载说明或静态画廊资源读取边界时，运行：
+修改 UAEM 宿主能力矩阵、Web 清单检查与确认导入、VS Code 后续侧载、桌面资源包读取、Compatible 侧载说明或静态画廊资源读取边界时，运行：
 
 ```bash
 npm run host-sideload:check
 ```
 
-该命令会检查 [宿主侧载与资源读取边界](host-sideload-boundary.md)、宿主接入指南、声明式扩展 SDK、Web / VS Code / Desktop / Compatible 文档、CI 和 release gate 是否仍保持同一套“显式选择、只读清单、逐项资源读取、不执行代码、不自动联网”契约。
+该命令会检查 [宿主侧载与资源读取边界](host-sideload-boundary.md)、宿主接入指南、声明式扩展 SDK、Web / VS Code / Desktop / Compatible 文档、CI 和 release gate 是否仍保持同一套“显式选择、逐项资源读取、确认导入、不执行代码、不自动联网”契约。
 
 ## 创作生态
 
@@ -258,7 +258,7 @@ npm run resource-trust:check
 npm run web-resource-discovery:check
 ```
 
-`resource-discovery:check` 会校验 [实验性静态资源发现](resource-discovery-experimental.md) 当前使用的同源资源清单，确认资源 ID、类型、路径、size、sha256、许可证和画廊索引一致。`resource-trust:check` 会校验 `resource-lock.json`、`resource-revocations.json` 和 `resource-signature.json`，确认 hash lock、撤回列表和当前 `maintainer-signed` 签名 envelope 没有漂移，并继续覆盖 `unsigned-draft` 与坏签名 fixture。`web-resource-discovery:check` 会确认在线工具的“资源发现”实验页、浏览器端 hash 校验、E2E 和只读边界仍然存在。它们只读取仓库内静态文件或同源随站资源，不联网、不安装资源，也不执行资源内容。
+`resource-discovery:check` 会校验 [实验性静态资源发现](resource-discovery-experimental.md) 当前使用的同源资源清单，确认资源 ID、类型、路径、size、sha256、许可证和画廊索引一致。`resource-trust:check` 会校验 `resource-lock.json`、`resource-revocations.json` 和 `resource-signature.json`，确认 hash lock、撤回列表和当前 `maintainer-signed` 签名 envelope 没有漂移，并继续覆盖 `unsigned-draft` 与坏签名 fixture。`web-resource-discovery:check` 会确认在线工具的“资源发现”实验页、浏览器端 hash 校验、签名状态、确认导入 E2E 和边界文案仍然存在。它们只读取仓库内静态文件或同源随站资源，不联网、不自动安装资源，也不执行资源内容。
 
 CLI 也提供等价的只读宿主入口，可用于发布脚本或第三方宿主预检：
 

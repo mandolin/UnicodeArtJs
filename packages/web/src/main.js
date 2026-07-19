@@ -21,6 +21,13 @@ import {
   verifyUnicodeArtResourceBytes,
 } from './resource-discovery.js';
 import {
+  getUnicodeArtResourceRevocationStatus,
+  parseUnicodeArtResourceLock,
+  parseUnicodeArtResourceRevocations,
+  parseUnicodeArtResourceSignature,
+  verifyUnicodeArtResourceTrust,
+} from './resource-trust.js';
+import {
   createCanvasFontAvailabilityChecker,
   getFontAvailabilitySummary,
 } from './font-availability.js';
@@ -187,10 +194,11 @@ const UI_MESSAGES = {
     'resource.region': 'UnicodeArtJs 资源发现',
     'resource.detailRegion': '资源校验详情',
     'resource.title': '实验性资源发现',
-    'resource.intro': '只读取本站随同发布的静态资源清单，展示资源、hash 与校验状态；不会安装、启用或执行资源。',
+    'resource.intro': '读取本站随同发布的静态资源清单，展示 hash、签名与撤回状态；不会自动安装、启用或执行资源，导入需手动确认。',
     'resource.status.ready': '正在准备资源清单',
     'resource.status.loading': '正在载入并校验同源资源',
     'resource.status.loaded': '已校验 {verified} / {total} 个资源',
+    'resource.status.importing': '正在复核并导入资源',
     'resource.status.error': '资源发现载入失败：{message}',
     'resource.resourceCount': '资源',
     'resource.verifiedCount': '已校验',
@@ -202,7 +210,7 @@ const UI_MESSAGES = {
     'resource.refresh': '重新校验',
     'resource.openDocs': '说明文档',
     'resource.noSelection': '选择一个资源查看详情',
-    'resource.detailPlaceholder': '从左侧选择一个资源。页面只展示校验信息，不会导入或安装。',
+    'resource.detailPlaceholder': '从左侧选择一个资源。页面默认只展示校验信息；导入编辑器需要再次确认。',
     'resource.kind.semantic-document': '语义布局文档',
     'resource.kind.unicode-art-font': 'Unicode 艺术字字体',
     'resource.status.verified': '已验证',
@@ -215,9 +223,33 @@ const UI_MESSAGES = {
     'resource.size': '大小',
     'resource.sha256': 'sha256',
     'resource.actualSha256': '实际 sha256',
+    'resource.trustStatus': '信任状态',
+    'resource.revocationStatus': '撤回状态',
+    'resource.cacheTarget': '缓存目标',
     'resource.boundary': '边界',
-    'resource.boundaryText': '同源读取；不安装；不执行；hash 不替代许可证审计。',
+    'resource.boundaryText': '同源读取；不自动安装；不执行；导入前复核 hash、撤回与维护者签名。',
     'resource.openGallery': '在画廊中查看',
+    'resource.importEditor': '确认后导入编辑器',
+    'resource.importDialogTitle': '导入已验证资源',
+    'resource.importDialogBody': '该资源将写入当前浏览器的 source-first 编辑器工作区，并替换当前编辑器内容。',
+    'resource.importConfirm': '确认导入',
+    'resource.importCancel': '取消',
+    'resource.importAllowed': '可导入',
+    'resource.importBlocked': '不可导入',
+    'resource.importBlockedReason': '阻止原因',
+    'resource.cacheTarget.editorWorkspace': '当前浏览器编辑器工作区',
+    'resource.trust.maintainer-signed': '维护者签名已验证',
+    'resource.trust.unsigned-draft': '未签名草稿',
+    'resource.trust.invalid-signature': '签名无效或浏览器不支持验证',
+    'resource.trust.expired': '签名或密钥已过期',
+    'resource.trust.revoked-key': '签名密钥已撤回',
+    'resource.revocation.not-revoked': '未撤回',
+    'resource.revocation.revoked-resource': '已撤回',
+    'resource.import.block.hash': '资源字节未通过 size/sha256 校验',
+    'resource.import.block.signature': '资源签名链未通过或当前浏览器不支持验证',
+    'resource.import.block.revoked': '资源已撤回',
+    'resource.import.block.artwork': '画廊索引缺少对应条目',
+    'resource.import.block.unknown': '资源当前不可导入',
     'resource.hashPrefix': 'sha256: {hash}',
     'resource.sizeBytes': '{size} 字节',
     'resource.checkOk': 'size 与 sha256 匹配',
@@ -378,6 +410,9 @@ const UI_MESSAGES = {
     'toast.exportPngFailed': 'PNG导出失败',
     'toast.copyDone': '已复制到剪贴板',
     'toast.copyFailed': '复制失败，请手动选择文本复制',
+    'toast.resourceImported': '资源已导入编辑器',
+    'toast.resourceImportBlocked': '该资源当前不可导入：{reason}',
+    'toast.resourceImportFailed': '资源导入失败: {message}',
     'export.copy': '📋 复制',
     'validate.height': '高度必须大于0',
     'validate.width': '宽度必须大于0',
@@ -496,10 +531,11 @@ const UI_MESSAGES = {
     'resource.region': 'UnicodeArtJs resource discovery',
     'resource.detailRegion': 'Resource verification detail',
     'resource.title': 'Experimental Resource Discovery',
-    'resource.intro': 'Reads only the static resource manifest shipped with this site, showing resources, hashes, and verification status. It does not install, enable, or execute resources.',
+    'resource.intro': 'Reads the static resource manifest shipped with this site, showing hashes, signatures, and revocations. It never auto-installs, enables, or executes resources; imports require confirmation.',
     'resource.status.ready': 'Preparing the resource manifest',
     'resource.status.loading': 'Loading and verifying same-origin resources',
     'resource.status.loaded': '{verified} / {total} resources verified',
+    'resource.status.importing': 'Re-verifying and importing resource',
     'resource.status.error': 'Resource discovery failed: {message}',
     'resource.resourceCount': 'Resources',
     'resource.verifiedCount': 'Verified',
@@ -511,7 +547,7 @@ const UI_MESSAGES = {
     'resource.refresh': 'Re-verify',
     'resource.openDocs': 'Docs',
     'resource.noSelection': 'Select a resource for details',
-    'resource.detailPlaceholder': 'Choose a resource from the left. This page only displays verification data and never imports or installs resources.',
+    'resource.detailPlaceholder': 'Choose a resource from the left. This page displays verification data by default; editor import requires another confirmation.',
     'resource.kind.semantic-document': 'Semantic layout document',
     'resource.kind.unicode-art-font': 'Unicode art font',
     'resource.status.verified': 'Verified',
@@ -524,9 +560,33 @@ const UI_MESSAGES = {
     'resource.size': 'Size',
     'resource.sha256': 'sha256',
     'resource.actualSha256': 'Actual sha256',
+    'resource.trustStatus': 'Trust status',
+    'resource.revocationStatus': 'Revocation status',
+    'resource.cacheTarget': 'Cache target',
     'resource.boundary': 'Boundary',
-    'resource.boundaryText': 'Same-origin read only; no install; no execution; hashes do not replace license review.',
+    'resource.boundaryText': 'Same-origin read; no automatic install; no execution; hash, revocation, and maintainer signature are rechecked before import.',
     'resource.openGallery': 'View in gallery',
+    'resource.importEditor': 'Import to editor after confirmation',
+    'resource.importDialogTitle': 'Import verified resource',
+    'resource.importDialogBody': 'This resource will be written to the current browser source-first editor workspace and replace the current editor content.',
+    'resource.importConfirm': 'Import',
+    'resource.importCancel': 'Cancel',
+    'resource.importAllowed': 'Import allowed',
+    'resource.importBlocked': 'Import blocked',
+    'resource.importBlockedReason': 'Block reason',
+    'resource.cacheTarget.editorWorkspace': 'Current browser editor workspace',
+    'resource.trust.maintainer-signed': 'Maintainer signature verified',
+    'resource.trust.unsigned-draft': 'Unsigned draft',
+    'resource.trust.invalid-signature': 'Invalid signature or unsupported browser verification',
+    'resource.trust.expired': 'Signature or key expired',
+    'resource.trust.revoked-key': 'Signing key revoked',
+    'resource.revocation.not-revoked': 'Not revoked',
+    'resource.revocation.revoked-resource': 'Revoked',
+    'resource.import.block.hash': 'Resource bytes failed size/sha256 verification',
+    'resource.import.block.signature': 'Resource trust chain failed or this browser cannot verify it',
+    'resource.import.block.revoked': 'Resource was revoked',
+    'resource.import.block.artwork': 'Matching gallery entry is missing',
+    'resource.import.block.unknown': 'Resource is not importable right now',
     'resource.hashPrefix': 'sha256: {hash}',
     'resource.sizeBytes': '{size} bytes',
     'resource.checkOk': 'size and sha256 match',
@@ -687,6 +747,9 @@ const UI_MESSAGES = {
     'toast.exportPngFailed': 'PNG export failed',
     'toast.copyDone': 'Copied to clipboard',
     'toast.copyFailed': 'Copy failed. Please select and copy manually.',
+    'toast.resourceImported': 'Resource imported into the editor',
+    'toast.resourceImportBlocked': 'This resource cannot be imported: {reason}',
+    'toast.resourceImportFailed': 'Resource import failed: {message}',
     'export.copy': '📋 Copy',
     'validate.height': 'Height must be greater than 0',
     'validate.width': 'Width must be greater than 0',
@@ -871,9 +934,18 @@ const DOM = {
   resourceSize: '#resourceSize',
   resourceSha256: '#resourceSha256',
   resourceActualSha256: '#resourceActualSha256',
+  resourceTrustStatus: '#resourceTrustStatus',
+  resourceRevocationStatus: '#resourceRevocationStatus',
+  resourceCacheTarget: '#resourceCacheTarget',
   resourceCheckResult: '#resourceCheckResult',
   resourceBoundary: '#resourceBoundary',
   resourceOpenGallery: '#resourceOpenGallery',
+  resourceImportEditor: '#resourceImportEditor',
+  resourceImportDialog: '#resourceImportDialog',
+  resourceImportFacts: '#resourceImportFacts',
+  resourceImportBody: '#resourceImportBody',
+  resourceImportConfirm: '#resourceImportConfirm',
+  resourceImportCancel: '#resourceImportCancel',
 
   docsStatus: '#docsStatus',
   docsEntryCount: '#docsEntryCount',
@@ -2065,21 +2137,24 @@ class GalleryController {
 //#region 🟩 实验性资源发现
 
 /**
- * 🟢 Web 只读资源发现控制器
+ * 🟢 Web 资源发现与确认导入控制器
  *
- * 🔹 只读取当前站点随同发布的 `gallery/resource-manifest.json`。
- * 🔹 只访问 manifest 中声明的同源 gallery 资源，不接受用户输入 URL。
- * 🔹 校验结果仅用于展示；页面不安装、不启用、不执行任何资源。
+ * 🔹 只读取当前站点随同发布的 `gallery/` 静态 sidecar 与资源。
+ * 🔹 先校验 manifest、lock、revocations、签名，再校验单个资源字节。
+ * 🔹 页面不会自动安装或执行资源；导入编辑器必须由用户显式确认。
  */
 class ResourceDiscoveryController {
   constructor(appController) {
     this.appController = appController;
     this.manifest = null;
     this.galleryIndex = null;
+    this.trustSummary = null;
+    this.revocations = null;
     this.resourceStates = [];
     this.selectedResourceId = '';
     this.statusState = 'info';
     this.loadGeneration = 0;
+    this.resourceSourceDecoder = new TextDecoder('utf-8', { fatal: false });
   }
 
   bindEvents($doc) {
@@ -2089,6 +2164,7 @@ class ResourceDiscoveryController {
       this.selectResource(id);
     });
     $doc.on('click', DOM.resourceOpenGallery, () => void this.openSelectedResourceInGallery());
+    $doc.on('click', DOM.resourceImportEditor, () => void this.importSelectedResourceToEditor());
   }
 
   async activate() {
@@ -2134,6 +2210,8 @@ class ResourceDiscoveryController {
       if (request !== this.loadGeneration) return;
       this.manifest = state.manifest;
       this.galleryIndex = state.galleryIndex;
+      this.trustSummary = state.trustSummary;
+      this.revocations = state.revocations;
       this.resourceStates = state.resourceStates;
       if (!this.resourceStates.some((item) => item.resource.id === this.selectedResourceId)) {
         this.selectedResourceId = this.resourceStates[0]?.resource.id || '';
@@ -2147,6 +2225,8 @@ class ResourceDiscoveryController {
       const message = error instanceof Error ? error.message : String(error);
       this.manifest = null;
       this.galleryIndex = null;
+      this.trustSummary = null;
+      this.revocations = null;
       this.resourceStates = [];
       this.setStatus('resource.status.error', { message }, 'error');
       this.renderSummary();
@@ -2158,24 +2238,43 @@ class ResourceDiscoveryController {
   }
 
   async loadDiscoveryState() {
-    const manifestUrl = resolveUnicodeArtResourceDiscoveryUrl('resource-manifest.json');
-    const manifestResponse = await fetch(manifestUrl, { cache: 'no-store' });
-    if (!manifestResponse.ok) throw new Error(`HTTP ${manifestResponse.status}`);
-    const manifest = parseUnicodeArtResourceManifest(await manifestResponse.text());
+    const manifestFile = await this.fetchDiscoveryFile('resource-manifest.json');
+    const manifest = parseUnicodeArtResourceManifest(manifestFile.text);
 
-    const indexUrl = resolveUnicodeArtResourceDiscoveryUrl(manifest.index);
-    const indexResponse = await fetch(indexUrl, { cache: 'no-store' });
-    if (!indexResponse.ok) throw new Error(`HTTP ${indexResponse.status}`);
-    const galleryIndex = parseUnicodeArtGalleryIndex(await indexResponse.text());
+    const [
+      indexFile,
+      lockFile,
+      revocationsFile,
+      signatureFile,
+    ] = await Promise.all([
+      this.fetchDiscoveryFile(manifest.index),
+      this.fetchDiscoveryFile('resource-lock.json'),
+      this.fetchDiscoveryFile('resource-revocations.json'),
+      this.fetchDiscoveryFile('resource-signature.json'),
+    ]);
+
+    const galleryIndex = parseUnicodeArtGalleryIndex(indexFile.text);
     matchResourceManifestWithGallery(manifest, galleryIndex);
+    const lock = parseUnicodeArtResourceLock(lockFile.text);
+    const revocations = parseUnicodeArtResourceRevocations(revocationsFile.text);
+    const signatureEnvelope = parseUnicodeArtResourceSignature(signatureFile.text);
+    const trustSummary = await verifyUnicodeArtResourceTrust({
+      manifest,
+      lock,
+      revocations,
+      signatureEnvelope,
+      manifestBytes: manifestFile.bytes,
+      lockBytes: lockFile.bytes,
+      revocationsBytes: revocationsFile.bytes,
+    });
 
     const artworkMap = new Map(galleryIndex.artworks.map((artwork) => [artwork.id, artwork]));
     const resourceStates = await Promise.all(manifest.resources.map(async (resource) => {
+      const artwork = artworkMap.get(resource.id);
+      const revocation = getUnicodeArtResourceRevocationStatus(revocations, resource.id);
       try {
-        const resourceUrl = resolveUnicodeArtResourceDiscoveryUrl(resource.source);
-        const response = await fetch(resourceUrl, { cache: 'no-store' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const verification = await verifyUnicodeArtResourceBytes(resource, await response.arrayBuffer());
+        const resourceFile = await this.fetchDiscoveryFile(resource.source);
+        const verification = await verifyUnicodeArtResourceBytes(resource, resourceFile.bytes);
         if (!verification.ok) {
           const reason = [
             verification.sizeOk ? '' : 'size mismatch',
@@ -2185,16 +2284,22 @@ class ResourceDiscoveryController {
         }
         return Object.freeze({
           resource,
-          artwork: artworkMap.get(resource.id),
+          artwork,
           verification,
+          trustStatus: trustSummary.status,
+          revocation,
+          importAllowed: Boolean(trustSummary.importAllowed && !revocation.revoked && artwork),
           ok: true,
           error: '',
         });
       } catch (error) {
         return Object.freeze({
           resource,
-          artwork: artworkMap.get(resource.id),
+          artwork,
           verification: null,
+          trustStatus: trustSummary.status,
+          revocation,
+          importAllowed: false,
           ok: false,
           error: error instanceof Error ? error.message : String(error),
         });
@@ -2204,7 +2309,20 @@ class ResourceDiscoveryController {
     return Object.freeze({
       manifest,
       galleryIndex,
+      trustSummary,
+      revocations,
       resourceStates: Object.freeze(resourceStates),
+    });
+  }
+
+  async fetchDiscoveryFile(relativePath) {
+    const url = resolveUnicodeArtResourceDiscoveryUrl(relativePath);
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${relativePath}`);
+    const bytes = await response.arrayBuffer();
+    return Object.freeze({
+      bytes,
+      text: this.resourceSourceDecoder.decode(bytes),
     });
   }
 
@@ -2286,10 +2404,14 @@ class ResourceDiscoveryController {
     $(DOM.resourceSize).text(this.t('resource.sizeBytes', { size: resource.size }));
     $(DOM.resourceSha256).text(resource.sha256);
     $(DOM.resourceActualSha256).text(verification?.actualSha256 || '--');
+    $(DOM.resourceTrustStatus).text(this.formatTrustStatus(item.trustStatus));
+    $(DOM.resourceRevocationStatus).text(this.formatRevocationStatus(item.revocation));
+    $(DOM.resourceCacheTarget).text(this.t('resource.cacheTarget.editorWorkspace'));
     $(DOM.resourceBoundary).text(this.t('resource.boundaryText'));
     $(DOM.resourceMetadata).prop('hidden', false);
     $(DOM.resourceCheckResult).text(this.formatCheckResult(item));
     $(DOM.resourceOpenGallery).prop('disabled', !artwork);
+    $(DOM.resourceImportEditor).prop('disabled', !this.canImportResource(item));
   }
 
   setInspectorPlaceholder(message = '') {
@@ -2301,6 +2423,7 @@ class ResourceDiscoveryController {
     $(DOM.resourceMetadata).prop('hidden', true);
     $(DOM.resourceCheckResult).text(message || this.t('resource.detailPlaceholder'));
     $(DOM.resourceOpenGallery).prop('disabled', true);
+    $(DOM.resourceImportEditor).prop('disabled', true);
   }
 
   setStatus(key, params = {}, state = 'info') {
@@ -2316,11 +2439,14 @@ class ResourceDiscoveryController {
     this.setStatus('resource.status.loaded', {
       verified,
       total,
-    }, verified === total ? 'success' : 'error');
+    }, verified === total && this.trustSummary?.importAllowed ? 'success' : 'error');
   }
 
   formatCheckResult(item) {
     const { resource, verification } = item;
+    const importLine = this.canImportResource(item)
+      ? this.t('resource.importAllowed')
+      : `${this.t('resource.importBlocked')}: ${this.formatImportBlockReason(item)}`;
     const lines = [
       item.ok ? this.t('resource.checkOk') : this.t('resource.checkFail', { reason: item.error }),
       `${this.t('resource.id')}: ${resource.id}`,
@@ -2328,9 +2454,107 @@ class ResourceDiscoveryController {
       `${this.t('resource.size')}: ${verification?.actualSize ?? '--'} / ${resource.size}`,
       `${this.t('resource.sha256')}: ${resource.sha256}`,
       `${this.t('resource.actualSha256')}: ${verification?.actualSha256 || '--'}`,
+      `${this.t('resource.trustStatus')}: ${this.formatTrustStatus(item.trustStatus)}`,
+      `${this.t('resource.revocationStatus')}: ${this.formatRevocationStatus(item.revocation)}`,
+      `${this.t('resource.cacheTarget')}: ${this.t('resource.cacheTarget.editorWorkspace')}`,
+      `${this.t('resource.importBlockedReason')}: ${importLine}`,
       `${this.t('resource.boundary')}: ${this.t('resource.boundaryText')}`,
     ];
     return lines.join('\n');
+  }
+
+  canImportResource(item) {
+    return Boolean(item?.ok && item.importAllowed && item.artwork);
+  }
+
+  formatTrustStatus(status) {
+    const key = `resource.trust.${status || 'invalid-signature'}`;
+    const label = this.t(key);
+    return label === key ? String(status || 'invalid-signature') : label;
+  }
+
+  formatRevocationStatus(revocation) {
+    const status = revocation?.status || 'not-revoked';
+    const key = `resource.revocation.${status}`;
+    const label = this.t(key);
+    return label === key ? status : label;
+  }
+
+  formatImportBlockReason(item) {
+    if (!item?.ok) return this.t('resource.import.block.hash');
+    if (item.revocation?.revoked) return this.t('resource.import.block.revoked');
+    if (!item.artwork) return this.t('resource.import.block.artwork');
+    if (!this.trustSummary?.importAllowed || item.trustStatus !== 'maintainer-signed') {
+      return this.t('resource.import.block.signature');
+    }
+    return this.t('resource.import.block.unknown');
+  }
+
+  buildImportFacts(item) {
+    return [
+      [this.t('resource.id'), item.resource.id],
+      [this.t('resource.kind'), this.t(`resource.kind.${item.resource.kind}`)],
+      [this.t('resource.license'), `${item.resource.license.expression} · ${item.resource.license.origin}`],
+      [this.t('resource.sha256'), item.resource.sha256],
+      [this.t('resource.trustStatus'), this.formatTrustStatus(item.trustStatus)],
+      [this.t('resource.revocationStatus'), this.formatRevocationStatus(item.revocation)],
+      [this.t('resource.cacheTarget'), this.t('resource.cacheTarget.editorWorkspace')],
+    ];
+  }
+
+  async confirmResourceImport(item) {
+    const $dialog = $(DOM.resourceImportDialog);
+    const dialog = $dialog[0];
+    const facts = this.buildImportFacts(item);
+    $(DOM.resourceImportBody).text(this.t('resource.importDialogBody'));
+
+    const $facts = $(DOM.resourceImportFacts).empty();
+    facts.forEach(([label, value]) => {
+      $('<dt>').text(label).appendTo($facts);
+      $('<dd>').text(value).appendTo($facts);
+    });
+
+    if (!dialog || typeof dialog.showModal !== 'function') {
+      const text = facts.map(([label, value]) => `${label}: ${value}`).join('\n');
+      return window.confirm(`${this.t('resource.importDialogBody')}\n\n${text}`);
+    }
+
+    dialog.returnValue = '';
+    return await new Promise((resolve) => {
+      dialog.addEventListener('close', () => {
+        resolve(dialog.returnValue === 'confirm');
+      }, { once: true });
+      dialog.showModal();
+    });
+  }
+
+  async importSelectedResourceToEditor() {
+    const item = this.resourceStates.find((entry) => entry.resource.id === this.selectedResourceId);
+    if (!this.canImportResource(item)) {
+      const reason = this.formatImportBlockReason(item);
+      this.appController.toastManager.warning(this.t('toast.resourceImportBlocked', { reason }));
+      return;
+    }
+
+    const confirmed = await this.confirmResourceImport(item);
+    if (!confirmed) return;
+
+    this.setStatus('resource.status.importing');
+    try {
+      const resourceFile = await this.fetchDiscoveryFile(item.resource.source);
+      const verification = await verifyUnicodeArtResourceBytes(item.resource, resourceFile.bytes);
+      if (!verification.ok) {
+        throw new Error(this.t('resource.import.block.hash'));
+      }
+      const workspaceKind = item.resource.kind === 'unicode-art-font' ? 'font' : 'document';
+      this.appController.editorController.validateSource(resourceFile.text, workspaceKind);
+      this.appController.openGalleryArtworkInEditor(item.artwork, resourceFile.text);
+      this.appController.toastManager.success(this.t('toast.resourceImported'));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.appController.toastManager.error(this.t('toast.resourceImportFailed', { message }));
+      this.updateLoadedStatus();
+    }
   }
 
   shortHash(hash) {

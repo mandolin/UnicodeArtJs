@@ -13,7 +13,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/unit.test.js && node --test tests/gallery-index.test.mjs && node --test tests/resource-discovery.test.mjs && node --test tests/public-docs.test.mjs && node --test tests/semantic-uaf-beta.test.mjs",
+    "test": "node tests/unit.test.js && node --test tests/gallery-index.test.mjs && node --test tests/resource-discovery.test.mjs && node --test tests/resource-trust.test.mjs && node --test tests/public-docs.test.mjs && node --test tests/semantic-uaf-beta.test.mjs",
     "test:e2e": "node tests/e2e-smoke.mjs",
     "test:pages": "node tests/pages-smoke.mjs",
     "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\" \"tests/**/*.mjs\"",

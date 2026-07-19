@@ -48,7 +48,7 @@ npm run release:verify:publish
 - `gallery:check` can validate the static gallery index, reviewed artwork files, submission/review templates, rollback guidance, licenses, localized tags, and Core parsing of UAF / semantic-document assets.
 - `resource-discovery:check` and the CLI `resource validate` path can validate the same-origin gallery resource manifest, resource path containment, file size, sha256, license metadata, and minimal UAF / semantic-document JSON shapes.
 - `resource-trust:check` can validate the gallery `resource-lock.json`, `resource-revocations.json`, and `resource-signature.json`, including hash lock drift, active-resource revocation conflicts, the current `maintainer-signed` signature envelope, and unsigned-draft / test-only signed / invalid / expired / revoked signature paths.
-- `web-resource-discovery:check` can validate the experimental Web resource-discovery page, same-origin manifest parser, browser sha256 verification path, E2E coverage, and read-only boundary text.
+- `web-resource-discovery:check` can validate the experimental Web resource-discovery page, same-origin manifest parser, browser sha256 verification path, trust/revocation status, confirmed editor-import E2E coverage, and no-auto-install boundary text.
 - `support:check` can validate the support guide, known limitations page, Issue Forms, and public label catalog.
 - `public-entry:check` can validate public README links, package metadata, package README support links, and repository entrypoints.
 - `stability:check` can validate the experimental stability matrix against `getCoreCapabilities()`.

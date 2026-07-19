@@ -8,7 +8,8 @@ UnicodeArtJs Web 是基于浏览器的字符画工作台，不是一个向页面
 | --- | --- | --- |
 | `unicode-art-js/browser` | 浏览器中的图片、文字、能力查询与进度/取消入口 | Core 公开入口；高层图片/文字转换目前为 experimental。 |
 | `packages/web/src/gallery-index.js` | 审核静态画廊索引的解析、双语文本读取与同源资源 URL 校验 | 可独立导入的 Web 模块，提供 HIA JSDoc 文档。 |
-| `packages/web/src/main.js` | DOM 绑定、页面状态、导入导出、主题、编辑器和画廊控制器 | 工具站内部实现，不构成稳定 SDK。 |
+| `packages/web/src/main.js` | DOM 绑定、页面状态、导入导出、主题、编辑器、画廊和资源发现控制器 | 工具站内部实现，不构成稳定 SDK。 |
+| `packages/web/src/resource-trust.js` | 浏览器端 resource-lock、撤回列表和维护者签名复核 | experimental Web 模块；只用于同源随站资源的导入确认。 |
 | `public/gallery/` | 已审核的同源 UAF/语义文档示例 | 静态内容，不是上传或远程扩展分发接口。 |
 
 页面中的 `window.app` 只用于页面启动和本地调试，不是稳定、版本化或受支持的第三方调用面。不要在其它应用中依赖它。
@@ -60,7 +61,7 @@ preview.textContent = result.content;
 - Web 中的 UAEM 检查只读取用户显式选择的清单文本并评估 Web 兼容性；不会读取同目录资源、下载、安装、注册或执行扩展代码。
 - 浏览器普通文件选择器不提供相邻目录权限，因此 Web 默认不做完整 UAEM 资源侧载。若后续接入目录授权，也必须遵循 [宿主侧载与资源读取边界](host-sideload-boundary.md) 的显式选择和逐项读取规则。
 - 静态画廊只接受同源 `gallery/` 根目录内的审核 JSON。索引解析器会拒绝路径穿越、远程 URL、未知资源类型和未声明字段；展示文本使用 `textContent`，不拼接为 HTML。
-- 资源发现页只是只读摘要和 hash 复核入口。把资源打开到编辑器、保存为模板或写入 `localStorage` 前，需要用户主动点击对应操作；校验失败或用户取消时，不替换当前编辑器内容。
+- 资源发现页默认只展示摘要、hash、维护者签名和撤回状态。把资源导入编辑器前，会重新读取同源资源、复核 size / sha256、确认未撤回并验证 `maintainer-signed` 签名；校验失败、浏览器不支持签名验证或用户取消时，不替换当前编辑器内容。
 - HTML 导出必须对字符画内容转义；浏览器文件、剪贴板和 Canvas 导出仍受对应浏览器的权限和安全策略约束。
 
 ## jQuery 与构建

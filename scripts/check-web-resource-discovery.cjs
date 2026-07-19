@@ -3,8 +3,8 @@
 /**
  * 校验 Web 实验性资源发现入口。
  *
- * 该脚本保护浏览器页面的只读资源发现路径，确保页面只展示随站发布的
- * 同源 gallery manifest 与 hash 校验状态，不退化为自动安装或任意 URL 读取。
+ * 该脚本保护浏览器页面的资源发现与确认导入路径，确保页面只读取随站
+ * 发布的同源 gallery sidecar 与资源，不退化为自动安装或任意 URL 读取。
  */
 
 const fs = require('node:fs');
@@ -14,9 +14,11 @@ const repositoryRoot = path.resolve(__dirname, '..');
 
 const requiredFiles = [
   'packages/web/src/resource-discovery.js',
+  'packages/web/src/resource-trust.js',
   'packages/web/src/main.js',
   'packages/web/index.html',
   'packages/web/tests/resource-discovery.test.mjs',
+  'packages/web/tests/resource-trust.test.mjs',
   'packages/web/tests/e2e-smoke.mjs',
   'packages/web/public/gallery/resource-lock.json',
   'packages/web/public/gallery/resource-revocations.json',
@@ -77,9 +79,11 @@ for (const relativePath of requiredFiles) {
 const packageJson = readJson('package.json');
 const ciWorkflow = readUtf8('.github/workflows/ci.yml');
 const resourceModule = readUtf8('packages/web/src/resource-discovery.js');
+const resourceTrustModule = readUtf8('packages/web/src/resource-trust.js');
 const webMain = readUtf8('packages/web/src/main.js');
 const webHtml = readUtf8('packages/web/index.html');
 const unitTest = readUtf8('packages/web/tests/resource-discovery.test.mjs');
+const resourceTrustTest = readUtf8('packages/web/tests/resource-trust.test.mjs');
 const e2eTest = readUtf8('packages/web/tests/e2e-smoke.mjs');
 const resourceDoc = readUtf8('docs/resource-discovery-experimental.md');
 const galleryDoc = readUtf8('docs/gallery.md');
@@ -115,6 +119,10 @@ for (const expected of [
   'ResourceDiscoveryController',
   'resource-manifest.json',
   'verifyUnicodeArtResourceBytes',
+  'verifyUnicodeArtResourceTrust',
+  'parseUnicodeArtResourceSignature',
+  'confirmResourceImport',
+  'resourceImportEditor',
   'resource.status.loaded',
   'resource.boundaryText',
   'resources',
@@ -123,11 +131,25 @@ for (const expected of [
 }
 
 for (const expected of [
+  'parseUnicodeArtResourceLock',
+  'parseUnicodeArtResourceRevocations',
+  'parseUnicodeArtResourceSignature',
+  'verifyUnicodeArtResourceTrust',
+  'Ed25519',
+  'maintainer-signed',
+  'importAllowed',
+]) {
+  requireText(resourceTrustModule, expected, 'packages/web/src/resource-trust.js');
+}
+
+for (const expected of [
   'data-mode="resources"',
   'id="resourceWorkbench"',
   'id="resourceGrid"',
   'id="resourceOpenGallery"',
-  '不会安装、启用或执行资源',
+  'id="resourceImportEditor"',
+  'id="resourceImportDialog"',
+  '导入需手动确认',
 ]) {
   requireText(webHtml, expected, 'packages/web/index.html');
 }
@@ -141,9 +163,18 @@ for (const expected of [
 }
 
 for (const expected of [
-  'loads read-only resource discovery manifest',
+  'production maintainer-signed resource trust chain',
+  'invalid maintainer signature fixture',
+  'marks revoked resources',
+]) {
+  requireText(resourceTrustTest, expected, 'packages/web/tests/resource-trust.test.mjs');
+}
+
+for (const expected of [
+  'loads resource discovery manifest and supports confirmed editor import',
   '#resourceStatus',
-  'resourceOpenGallery',
+  'resourceImportEditor',
+  'resourceImportConfirm',
   'Resource discovery did not verify all static resources',
 ]) {
   requireText(e2eTest, expected, 'packages/web/tests/e2e-smoke.mjs');
@@ -156,8 +187,8 @@ for (const expected of [
   'resource-revocations.json',
   'resource-signature.json',
   '在线工具',
-  '只读',
-  '不会安装',
+  '不会自动安装',
+  '确认导入',
   'npm run resource-trust:check',
   'npm run web-resource-discovery:check',
 ]) {

@@ -38,7 +38,7 @@
 
 每件作品必须具备小写稳定 ID、双语标题和说明、标签、作者、`original` 来源状态、许可证与审核日期。资源只能放在同目录的 `artworks/` 中，且仅允许 `.uadoc.json` 或 `.uafont.json`。浏览器加载前会拒绝越出资源根目录的路径，载入后仍会调用 Core 校验对应文档或字体格式。
 
-同目录还包含 `resource-manifest.json`，它为每个公开资源记录 size 与 sha256。在线工具的“资源发现”实验页会读取这份同源清单并在浏览器端重新计算 hash，用于展示随站资源是否仍与清单一致。画廊还发布 `resource-lock.json`、`resource-revocations.json` 和 `resource-signature.json`，用于 experimental hash lock、撤回列表和当前 `maintainer-signed` 签名 envelope。维护者修改画廊资源后，应同时运行 `npm run gallery:check`、`npm run resource-discovery:check`、`npm run resource-trust:check` 和 `npm run web-resource-discovery:check`，也可用 `unicode-art resource validate <manifest>` 做 CLI 只读预检，确保索引、资源文件和 hash 清单保持一致。
+同目录还包含 `resource-manifest.json`，它为每个公开资源记录 size 与 sha256。在线工具的“资源发现”实验页会读取这份同源清单并在浏览器端重新计算 hash，用于展示随站资源是否仍与清单一致；通过维护者签名和撤回检查的资源，可以在用户确认后导入 source-first 编辑器。画廊还发布 `resource-lock.json`、`resource-revocations.json` 和 `resource-signature.json`，用于 experimental hash lock、撤回列表和当前 `maintainer-signed` 签名 envelope。维护者修改画廊资源后，应同时运行 `npm run gallery:check`、`npm run resource-discovery:check`、`npm run resource-trust:check` 和 `npm run web-resource-discovery:check`，也可用 `unicode-art resource validate <manifest>` 做 CLI 只读预检，确保索引、资源文件和 hash 清单保持一致。
 
 ## 投稿与添加审核作品
 

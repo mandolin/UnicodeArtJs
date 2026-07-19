@@ -37,7 +37,7 @@ unicode-art resource validate packages/web/public/gallery/resource-manifest.json
 - `resource-revocations.json`：记录当前已知撤回列表；当前为空，表示没有已知撤回。
 - `resource-signature.json`：记录签名 envelope。当前公开状态为 `maintainer-signed`，表示 `resource-lock.json` 已由维护者生产签名；能力整体仍是 experimental，签名不替代许可证和来源审计。仓库的 `resource-trust:check` 会同时验证 `unsigned-draft`、signed、invalid、expired 和 revoked 等路径，确保草案状态不会被误判为签名通过，也不会把坏签名误判为可信。
 
-在线工具也提供“资源发现”实验页。该页面只读取本站随同发布的 `gallery/resource-manifest.json`、`gallery/index.json` 和同源 `gallery/artworks/` 资源，展示资源类型、许可证、size、sha256 和浏览器端重新计算的校验结果。页面不会读取任意远程 URL，不会安装资源，也不会执行资源内容。
+在线工具也提供“资源发现”实验页。该页面只读取本站随同发布的 `gallery/resource-manifest.json`、`gallery/index.json`、信任链 sidecar 和同源 `gallery/artworks/` 资源，展示资源类型、许可证、size、sha256、维护者签名和撤回状态。通过 hash、撤回和 `maintainer-signed` 签名校验的资源，可以在用户确认导入后写入当前浏览器的 source-first 编辑器工作区。页面不会读取任意远程 URL，不会自动安装资源，也不会执行资源内容。
 
 声明式扩展清单仍是本地资源包机制。作者可以用 [声明式扩展作者指南](extension-authoring.md) 制作本地包，并用 CLI 或宿主工具做预检。它不是脚本插件，也不是自动安装入口。
 

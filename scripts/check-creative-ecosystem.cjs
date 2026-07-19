@@ -259,8 +259,9 @@ for (const expected of [
 }
 
 for (const expected of [
-  'loads read-only resource discovery manifest',
-  '#resourceStatus'
+  'loads resource discovery manifest and supports confirmed editor import',
+  '#resourceStatus',
+  'resourceImportConfirm'
 ]) {
   requireText(webE2eTest, expected, 'packages/web/tests/e2e-smoke.mjs');
 }

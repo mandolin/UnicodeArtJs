@@ -497,7 +497,7 @@
         <header class="resource-header">
           <div>
             <h2 data-i18n="resource.title">实验性资源发现</h2>
-            <p data-i18n="resource.intro">只读取本站随同发布的静态资源清单，展示资源、hash 与校验状态；不会安装、启用或执行资源。</p>
+            <p data-i18n="resource.intro">读取本站随同发布的静态资源清单，展示 hash、签名与撤回状态；不会自动安装、启用或执行资源，导入需手动确认。</p>
           </div>
           <p class="resource-status" id="resourceStatus" aria-live="polite" data-i18n="resource.status.ready">正在准备资源清单</p>
         </header>
@@ -572,14 +572,27 @@
             <dd id="resourceActualSha256"></dd>
           </div>
           <div>
+            <dt data-i18n="resource.trustStatus">信任状态</dt>
+            <dd id="resourceTrustStatus"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.revocationStatus">撤回状态</dt>
+            <dd id="resourceRevocationStatus"></dd>
+          </div>
+          <div>
+            <dt data-i18n="resource.cacheTarget">缓存目标</dt>
+            <dd id="resourceCacheTarget"></dd>
+          </div>
+          <div>
             <dt data-i18n="resource.boundary">边界</dt>
-            <dd id="resourceBoundary" data-i18n="resource.boundaryText">同源读取；不安装；不执行；hash 不替代许可证审计。</dd>
+            <dd id="resourceBoundary" data-i18n="resource.boundaryText">同源读取；不自动安装；不执行；导入前复核 hash、撤回与维护者签名。</dd>
           </div>
         </dl>
 
-        <pre class="resource-check-result" id="resourceCheckResult" aria-live="polite" data-i18n="resource.detailPlaceholder">从左侧选择一个资源。页面只展示校验信息，不会导入或安装。</pre>
+        <pre class="resource-check-result" id="resourceCheckResult" aria-live="polite" data-i18n="resource.detailPlaceholder">从左侧选择一个资源。页面默认只展示校验信息；导入编辑器需要再次确认。</pre>
         <div class="resource-actions">
           <button class="btn primary" id="resourceOpenGallery" type="button" disabled data-i18n="resource.openGallery">在画廊中查看</button>
+          <button class="btn" id="resourceImportEditor" type="button" disabled data-i18n="resource.importEditor">确认后导入编辑器</button>
         </div>
       </section>
     </main>
@@ -675,6 +688,22 @@
 
   <!-- Toast -->
   <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <!--#region 🟩 资源导入确认 -->
+  <dialog class="resource-import-dialog" id="resourceImportDialog" aria-labelledby="resourceImportDialogTitle">
+    <form class="resource-import-panel" method="dialog">
+      <header>
+        <h2 id="resourceImportDialogTitle" data-i18n="resource.importDialogTitle">导入已验证资源</h2>
+        <p id="resourceImportBody" data-i18n="resource.importDialogBody">该资源将写入当前浏览器的 source-first 编辑器工作区，并替换当前编辑器内容。</p>
+      </header>
+      <dl class="resource-import-facts" id="resourceImportFacts"></dl>
+      <div class="resource-import-actions">
+        <button class="btn" id="resourceImportCancel" type="submit" value="cancel" data-i18n="resource.importCancel">取消</button>
+        <button class="btn primary" id="resourceImportConfirm" type="submit" value="confirm" data-i18n="resource.importConfirm">确认导入</button>
+      </div>
+    </form>
+  </dialog>
+  <!--#endregion-->
 
   <!-- jQuery: GitHub Pages优先使用CDN；二次开发/离线打包由main.js动态导入本地jquery兜底 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"

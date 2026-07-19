@@ -131,6 +131,9 @@ async function getResourceDiscoverySnapshot(page) {
     statusState: document.querySelector('#resourceStatus')?.dataset.state || '',
     count: document.querySelector('#resourceCount')?.textContent || '',
     verified: document.querySelector('#resourceVerifiedCount')?.textContent || '',
+    trust: document.querySelector('#resourceTrustStatus')?.textContent || '',
+    revocation: document.querySelector('#resourceRevocationStatus')?.textContent || '',
+    importDisabled: document.querySelector('#resourceImportEditor')?.disabled ?? true,
     firstFailed: Array.from(document.querySelectorAll('#resourceGrid [data-resource-id]'))
       .find((node) => node.getAttribute('data-state') === 'failed')
       ?.textContent?.replace(/\s+/g, ' ').trim() || '',
@@ -451,7 +454,7 @@ async function main() {
       await page.waitForSelector('#converterWorkbench:not([hidden])', { timeout: 3000 });
     });
 
-    await test('loads read-only resource discovery manifest and verification status', async () => {
+    await test('loads resource discovery manifest and supports confirmed editor import', async () => {
       try {
         await page.click('.mode-btn[data-mode="resources"]');
         await page.waitForSelector('#resourceWorkbench:not([hidden])', { timeout: 5000 });
@@ -477,6 +480,9 @@ async function main() {
           network: document.querySelector('#resourceNetwork')?.textContent,
           autoInstall: document.querySelector('#resourceAutomaticInstall')?.textContent,
           badge: document.querySelector('#resourceBadge')?.dataset.state,
+          trust: document.querySelector('#resourceTrustStatus')?.textContent,
+          revocation: document.querySelector('#resourceRevocationStatus')?.textContent,
+          importDisabled: document.querySelector('#resourceImportEditor')?.disabled,
           check: document.querySelector('#resourceCheckResult')?.textContent || '',
           pageText: document.querySelector('#resourceWorkbench')?.textContent || '',
         }));
@@ -489,8 +495,14 @@ async function main() {
         if (state.badge !== 'verified' || !/sha256|size/.test(state.check)) {
           throw new Error('Resource discovery detail verification was not rendered');
         }
-        if (!/不安装|does not install|never imports/i.test(state.pageText)) {
-          throw new Error('Resource discovery page did not expose the read-only boundary');
+        if (!/维护者|Maintainer/i.test(state.trust || '') || !/未撤回|Not revoked/i.test(state.revocation || '')) {
+          throw new Error('Resource discovery trust and revocation status were not rendered');
+        }
+        if (state.importDisabled) {
+          throw new Error('Resource discovery did not enable confirmed import for a signed resource');
+        }
+        if (!/不自动安装|no automatic install|确认|confirmation/i.test(state.pageText)) {
+          throw new Error('Resource discovery page did not expose the confirmation boundary');
         }
 
         await page.click('[data-resource-id="review-workflow"]');
@@ -499,6 +511,28 @@ async function main() {
           undefined,
           { timeout: 5000 },
         );
+        await page.click('#resourceImportEditor');
+        await page.waitForSelector('#resourceImportDialog[open]', { timeout: 3000 });
+        await page.click('#resourceImportCancel');
+        await page.waitForFunction(
+          () => !document.querySelector('#resourceImportDialog')?.open,
+          undefined,
+          { timeout: 3000 },
+        );
+        await page.waitForSelector('#resourceWorkbench:not([hidden])', { timeout: 3000 });
+
+        await page.click('#resourceImportEditor');
+        await page.waitForSelector('#resourceImportDialog[open]', { timeout: 3000 });
+        await page.click('#resourceImportConfirm');
+        await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
+        await page.waitForFunction(
+          () => (document.querySelector('#editorSource')?.value || '').includes('Gallery Review Workflow'),
+          undefined,
+          { timeout: 5000 },
+        );
+
+        await page.click('.mode-btn[data-mode="resources"]');
+        await page.waitForSelector('#resourceWorkbench:not([hidden])', { timeout: 5000 });
         await page.click('#resourceOpenGallery');
         await page.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
         await page.waitForFunction(
