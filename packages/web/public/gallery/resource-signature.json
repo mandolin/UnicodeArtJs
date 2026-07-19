@@ -10,13 +10,34 @@
     "payloadSha256": "10ffa5c113f70ac06fc002502ef63d06b926d397662ce794a42faffd4e39e3f3"
   },
   "trust": {
-    "status": "unsigned-draft",
-    "unsignedReason": {
-      "zh-CN": "当前静态画廊信任链仍是 experimental；维护者签名私钥流程尚未公开启用。",
-      "en-US": "The static gallery trust chain is still experimental; the maintainer signing-key workflow is not publicly enabled yet."
-    },
-    "signatureRequiredForStable": true
+    "status": "maintainer-signed",
+    "signatureRequiredForStable": true,
+    "note": {
+      "zh-CN": "该资源锁由 UnicodeArtJs 维护者生产签名；签名不替代许可证和来源审计。",
+      "en-US": "This resource lock is production-signed by a UnicodeArtJs maintainer; signing does not replace license and provenance review."
+    }
   },
-  "signature": null,
-  "keyring": []
+  "signature": {
+    "role": "maintainer",
+    "algorithm": "ed25519",
+    "keyId": "mandolin-2026-q3",
+    "signedAt": "2026-07-19T04:37:00.000Z",
+    "expiresAt": "2026-10-17T04:37:00.000Z",
+    "payloadSha256": "10ffa5c113f70ac06fc002502ef63d06b926d397662ce794a42faffd4e39e3f3",
+    "value": "KLiJKoA6tlaizRJEuzl9W0zVs5yXSToHhhNlBgn_F6t4aovb--FxY_otpSr5KpcXJJvw6YRSHC_Nv3LuAPo_BA"
+  },
+  "keyring": [
+    {
+      "keyId": "mandolin-2026-q3",
+      "role": "maintainer",
+      "algorithm": "ed25519",
+      "publicKeyEncoding": "spki-base64url",
+      "publicKey": "MCowBQYDK2VwAyEAuSh2HECxcCw2OfQ0WD-s0k9QZtNz9kTZV89-9baQrbc",
+      "validFrom": "2026-07-19T04:36:16.970Z",
+      "validUntil": "2027-01-15T04:36:16.970Z",
+      "status": "active",
+      "owner": "mandolin",
+      "purpose": "official-gallery-resource-lock"
+    }
+  ]
 }

@@ -164,7 +164,7 @@ npm run web-resource-discovery:check
 - 页面入口可访问：<https://mandolin.github.io/UnicodeArtJs/>
 - Text Banner 和 Image to Art 至少各执行一次 smoke。
 - 视觉字体和字素字体选择在 Chrome / Edge 120+ 中可见并能影响对应行为。
-- “资源发现”实验页能展示同源资源、size、sha256、`unsigned-draft` 信任状态和不自动安装边界。
+- “资源发现”实验页能展示同源资源、size、sha256、`maintainer-signed` 或 `unsigned-draft` 信任状态和不自动安装边界。
 - 文档页能读取公开 manifest，且不暴露内部路径。
 
 ## Creative Ecosystem / Docs-only Update
@@ -187,7 +187,7 @@ npm run release:gate
 ```
 
 发布后确认 GitHub Pages 与 CI 成功，并在 release notes 中明确 “No runtime package bump” 或列出实际发布的包级 tag。
-如果更新涉及 `resource-lock.json`、`resource-revocations.json` 或 `resource-signature.json`，release notes 应说明当前信任状态仍为 `unsigned-draft`，并提示发现不等于安装。
+如果更新涉及 `resource-lock.json`、`resource-revocations.json` 或 `resource-signature.json`，release notes 应说明当前信任状态，例如 `maintainer-signed` 或 `unsigned-draft`，并提示发现不等于安装、签名不替代许可证和来源审计。
 如果更新包含资源撤回，release notes 应列出被撤回资源的 `resourceId`、原因、`revokedAt`、可选 `replacedBy`、对缓存资源的影响，以及宿主应如何提示用户不要继续导入或推荐该资源。
 
 ## GitHub Release

@@ -5,7 +5,8 @@
  *
  * 本脚本只读取仓库内 gallery sidecar：resource-lock、resource-revocations
  * 和 resource-signature。它验证 hash lock、撤回列表和签名 envelope 形状；
- * 当前公开画廊允许明确的 unsigned-draft，但不会把它误报为已签名。
+ * 公开画廊可以是 unsigned-draft 或 maintainer-signed，但不会把草案状态
+ * 误报为已签名，也不会接受坏签名。
  */
 
 const crypto = require('node:crypto');
@@ -431,6 +432,13 @@ function checkResourceTrust(galleryRoot, options = {}) {
   assertRevocations(revocations, lockSummary.resources);
   const signatureSummary = assertSignatureEnvelope(galleryRoot, signatureEnvelope, lock, options);
 
+  if (!options.signaturePath && signatureSummary.status === 'maintainer-signed') {
+    const signatureKeyId = signatureEnvelope.signature?.keyId || '';
+    if (signatureKeyId.startsWith('test-only-') || JSON.stringify(signatureEnvelope).includes('"testOnly"')) {
+      fail('公开 maintainer-signed resource-signature 不得使用 test-only key 或 testOnly 标记。');
+    }
+  }
+
   return {
     galleryRoot: projectRelative(galleryRoot),
     resources: lockSummary.totals.resources,
@@ -464,7 +472,7 @@ function checkSignatureFixtureMatrix(galleryRoot, fixtureRoot = defaultFixtureRo
   const cases = [
     {
       label: 'unsigned-draft',
-      file: path.join(galleryRoot, 'resource-signature.json'),
+      file: path.join(fixtureRoot, 'resource-signature-unsigned-draft-v1.json'),
       expect: 'pass',
       status: 'unsigned-draft',
     },

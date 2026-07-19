@@ -100,6 +100,7 @@ const requiredReleaseMaterialTexts = [
   'revokedAt',
   'replacedBy',
   '缓存资源',
+  'maintainer-signed',
   'unsigned-draft',
   'Wait for deployed resource discovery files',
   'npm run release:gate',

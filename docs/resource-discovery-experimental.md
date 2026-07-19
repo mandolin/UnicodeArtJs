@@ -35,7 +35,7 @@ unicode-art resource validate packages/web/public/gallery/resource-manifest.json
 
 - `resource-lock.json`：锁定 `resource-manifest.json`、撤回列表和每个资源的 size / sha256。
 - `resource-revocations.json`：记录当前已知撤回列表；当前为空，表示没有已知撤回。
-- `resource-signature.json`：记录签名 envelope。当前状态为 `unsigned-draft`，表示 hash lock 已可验证，但还没有启用真实维护者签名。仓库的 `resource-trust:check` 会同时验证 signed、invalid、expired 和 revoked 等 test-only 签名路径，确保未来启用维护者签名时不会把坏签名误判为可信。
+- `resource-signature.json`：记录签名 envelope。当前公开状态为 `maintainer-signed`，表示 `resource-lock.json` 已由维护者生产签名；能力整体仍是 experimental，签名不替代许可证和来源审计。仓库的 `resource-trust:check` 会同时验证 `unsigned-draft`、signed、invalid、expired 和 revoked 等路径，确保草案状态不会被误判为签名通过，也不会把坏签名误判为可信。
 
 在线工具也提供“资源发现”实验页。该页面只读取本站随同发布的 `gallery/resource-manifest.json`、`gallery/index.json` 和同源 `gallery/artworks/` 资源，展示资源类型、许可证、size、sha256 和浏览器端重新计算的校验结果。页面不会读取任意远程 URL，不会安装资源，也不会执行资源内容。
 
@@ -47,7 +47,7 @@ unicode-art resource validate packages/web/public/gallery/resource-manifest.json
 
 - 独立的静态资源索引。
 - 作者页和作品页的公开数据格式。
-- 真实维护者签名私钥流程、key rotation 和签名发布时间表。
+- 真实维护者签名私钥流程的长期轮换、撤回和多宿主展示。
 - 多宿主对同一份信任链 sidecar 的统一展示。
 - CLI、VS Code 和桌面宿主对同一份资源索引的统一展示。
 
@@ -69,7 +69,7 @@ unicode-art resource validate packages/web/public/gallery/resource-manifest.json
 资源索引只能帮助维护和验证事实来源，不能替代人工判断：
 
 - hash 只能证明文件内容一致，不能证明内容一定安全或许可一定正确。
-- `unsigned-draft` 只表示文件可被 hash lock 复核，不表示维护者签名已经启用。
+- `unsigned-draft` 只表示文件可被 hash lock 复核，不表示维护者签名已经启用；`maintainer-signed` 表示维护者发布链验证通过，但仍不替代许可证、来源和内容审核。
 - 许可证字段应使用清晰的 SPDX 表达式，但最终仍需要维护者审核来源和归属。
 - 原创、导入、派生、混合来源应分开标注。
 - AI 辅助创作应明确说明，避免把来源不明素材包装成原创资源。

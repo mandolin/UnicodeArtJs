@@ -214,6 +214,7 @@ for (const expected of [
   'npm run resource-discovery:check',
   'npm run resource-trust:check',
   'npm run web-resource-discovery:check',
+  'maintainer-signed',
   'unsigned-draft',
   '在线工具',
   'unicode-art resource validate',
@@ -269,6 +270,7 @@ for (const expected of [
   'resource-revocations.json',
   'resource-signature.json',
   'unsigned-draft',
+  'maintainer-signed',
   'crypto.verify'
 ]) {
   requireText(resourceTrustScript, expected, 'scripts/check-resource-trust.cjs');
@@ -306,7 +308,7 @@ assertCondition(resourceLock.resources.length === resourceManifest.resources.len
 assertCondition(resourceRevocations.format === 'unicode-art-gallery-resource-revocations', '资源撤回列表格式不正确。');
 assertCondition(Array.isArray(resourceRevocations.revocations), '资源撤回列表必须使用数组。');
 assertCondition(resourceSignature.format === 'unicode-art-gallery-resource-signature', '资源签名 envelope 格式不正确。');
-assertCondition(resourceSignature.trust?.status === 'unsigned-draft', '当前公开画廊签名状态必须明确为 unsigned-draft。');
+assertCondition(resourceSignature.trust?.status === 'maintainer-signed', '当前公开画廊签名状态必须明确为 maintainer-signed。');
 const galleryKinds = new Set(galleryIndex.artworks?.map((artwork) => artwork.kind));
 assertCondition(galleryKinds.has('unicode-art-font'), '静态画廊必须包含至少一个 UAF 作品。');
 assertCondition(galleryKinds.has('semantic-document'), '静态画廊必须包含至少一个语义文档作品。');
