@@ -733,6 +733,47 @@ async function main() {
       if (!source.includes('"kind": "paste-selection"')) throw new Error('CellCanvas history did not record paste operation');
     });
 
+    await test('imports SpecialArtResult into CellCanvas and exports projections', async () => {
+      const fixturePath = path.resolve(
+        projectRoot,
+        '../../work-zone/dev/fixtures/special-art-auditable-textfx-prototype-v0.sample.json',
+      );
+
+      await page.setInputFiles('#editorImportFile', fixturePath);
+      await page.waitForFunction(
+        () => document.querySelector('#editorKind')?.value === 'cellcanvas'
+          && document.querySelector('#editorStatus')?.dataset.state === 'success',
+        undefined,
+        { timeout: 5000 },
+      );
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="9"][data-cellcanvas-height="3"]', {
+        timeout: 5000,
+      });
+
+      const source = await page.inputValue('#editorSource');
+      if (!source.includes('"plainTextPreviewUsed": false')) {
+        throw new Error('SpecialArt import did not record the canonical CellMap boundary');
+      }
+      if (!source.includes('UA_CELLCANVAS_SPECIAL_ART_IMPORTED')) {
+        throw new Error('SpecialArt import diagnostic was not recorded');
+      }
+
+      const txtDownload = page.waitForEvent('download');
+      await page.click('#editorCellCanvasExportTxt');
+      const txtFile = await txtDownload;
+      if (txtFile.suggestedFilename() !== 'unicode-art-cellcanvas.txt') {
+        throw new Error(`Unexpected CellCanvas TXT filename: ${txtFile.suggestedFilename()}`);
+      }
+
+      const htmlDownload = page.waitForEvent('download');
+      await page.click('#editorCellCanvasExportHtml');
+      const htmlFile = await htmlDownload;
+      if (htmlFile.suggestedFilename() !== 'unicode-art-cellcanvas.html') {
+        throw new Error(`Unexpected CellCanvas HTML filename: ${htmlFile.suggestedFilename()}`);
+      }
+    });
+
     await test('rejects invalid imports without replacing the current editor source', async () => {
       const before = await page.inputValue('#editorSource');
       await page.setInputFiles('#editorImportFile', {

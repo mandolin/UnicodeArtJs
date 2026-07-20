@@ -34,10 +34,13 @@ import {
 import {
   CELL_CANVAS_DRAFT_SCHEMA,
   CELL_CANVAS_PRESETS,
+  cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
+  cellCanvasDraftToPlainTextProjection,
   copyCellCanvasSelection as copyCellCanvasSelectionDraft,
   createDefaultCellCanvasDraft,
   createCellCanvasDraftFromPreset,
+  createCellCanvasDraftFromSpecialArtResult,
   getActiveCellMap,
   getCellCanvasHistoryState,
   pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
@@ -177,6 +180,8 @@ const UI_MESSAGES = {
     'editor.status.redoDone': '已重做',
     'editor.status.clipboardEmpty': '剪贴板没有可粘贴的字素选区',
     'editor.status.historyEmpty': '没有可执行的历史操作',
+    'editor.status.specialArtImported': 'SpecialArt 结果已作为 CellCanvas 导入',
+    'editor.status.projectionExported': 'CellCanvas 投影已导出：{kind}',
     'cellcanvas.section': 'CellCanvas 单格编辑',
     'cellcanvas.selection': '选区',
     'cellcanvas.x': 'X',
@@ -192,6 +197,8 @@ const UI_MESSAGES = {
     'cellcanvas.paste': '粘贴',
     'cellcanvas.undo': '撤销',
     'cellcanvas.redo': '重做',
+    'cellcanvas.exportTxt': '导出 TXT 投影',
+    'cellcanvas.exportHtml': '导出 HTML 投影',
     'cellcanvas.help': '点击预览网格中的字素格后，可在这里修改单格内容和颜色。',
     'gallery.region': 'UnicodeArtJs 作品画廊',
     'gallery.previewRegion': '作品字符画预览',
@@ -542,6 +549,8 @@ const UI_MESSAGES = {
     'editor.status.redoDone': 'Redone',
     'editor.status.clipboardEmpty': 'No glyph-cell selection to paste',
     'editor.status.historyEmpty': 'No history operation available',
+    'editor.status.specialArtImported': 'SpecialArt result imported as CellCanvas',
+    'editor.status.projectionExported': 'CellCanvas projection exported: {kind}',
     'cellcanvas.section': 'CellCanvas single-cell editing',
     'cellcanvas.selection': 'Selection',
     'cellcanvas.x': 'X',
@@ -557,6 +566,8 @@ const UI_MESSAGES = {
     'cellcanvas.paste': 'Paste',
     'cellcanvas.undo': 'Undo',
     'cellcanvas.redo': 'Redo',
+    'cellcanvas.exportTxt': 'Export TXT projection',
+    'cellcanvas.exportHtml': 'Export HTML projection',
     'cellcanvas.help': 'Click a glyph cell in the preview grid, then adjust its content and colors here.',
     'gallery.region': 'UnicodeArtJs art gallery',
     'gallery.previewRegion': 'Artwork preview',
@@ -975,6 +986,8 @@ const DOM = {
   editorCellCanvasPaste: '#editorCellCanvasPaste',
   editorCellCanvasUndo: '#editorCellCanvasUndo',
   editorCellCanvasRedo: '#editorCellCanvasRedo',
+  editorCellCanvasExportTxt: '#editorCellCanvasExportTxt',
+  editorCellCanvasExportHtml: '#editorCellCanvasExportHtml',
   editorStatus: '#editorStatus',
   editorFormatLabel: '#editorFormatLabel',
   editorValidate: '#editorValidate',
@@ -1492,6 +1505,8 @@ class EditorController {
     $doc.on('click', DOM.editorCellCanvasPaste, () => this.pasteCellCanvasClipboard());
     $doc.on('click', DOM.editorCellCanvasUndo, () => this.undoCellCanvasHistory());
     $doc.on('click', DOM.editorCellCanvasRedo, () => this.redoCellCanvasHistory());
+    $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
+    $doc.on('click', DOM.editorCellCanvasExportHtml, () => this.exportCellCanvasHtml());
     $doc.on('click', DOM.editorCopy, () => this.copyPreview());
   }
 
@@ -1587,6 +1602,8 @@ class EditorController {
     const isCellCanvas = this.workspace.kind === 'cellcanvas';
     $(DOM.editorFontOptions).prop('hidden', !isFont);
     $(DOM.editorCellCanvasOptions).prop('hidden', !isCellCanvas);
+    $(DOM.editorCellCanvasExportTxt).prop('hidden', !isCellCanvas);
+    $(DOM.editorCellCanvasExportHtml).prop('hidden', !isCellCanvas);
     $(DOM.editorFormatLabel).text(
       isFont ? 'unicode-art-font@1' : isCellCanvas ? CELL_CANVAS_DRAFT_SCHEMA : 'semantic-document@1',
     );
@@ -2071,19 +2088,24 @@ class EditorController {
     try {
       const source = await file.text();
       const parsed = JSON.parse(source);
+      const isSpecialArtResult = parsed?.schema === 'unicodeartjs-special-art-result@0'
+        || parsed?.result?.schema === 'unicodeartjs-special-art-result@0';
       const kind = parsed?.format === 'unicode-art-font'
         ? 'font'
-        : parsed?.schema === CELL_CANVAS_DRAFT_SCHEMA
+        : parsed?.schema === CELL_CANVAS_DRAFT_SCHEMA || isSpecialArtResult
           ? 'cellcanvas'
           : 'document';
-      this.validateSource(source, kind);
+      const effectiveSource = isSpecialArtResult
+        ? JSON.stringify(createCellCanvasDraftFromSpecialArtResult(parsed, { sourceFixture: file.name }), null, 2)
+        : source;
+      this.validateSource(effectiveSource, kind);
       this.workspace.kind = kind;
-      this.updateCurrentSource(source);
+      this.updateCurrentSource(effectiveSource);
       this.syncControlsFromWorkspace();
       this.refreshLocale();
       this.result = null;
       this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
-      this.setStatus('editor.status.imported', {}, 'success');
+      this.setStatus(isSpecialArtResult ? 'editor.status.specialArtImported' : 'editor.status.imported', {}, 'success');
     } catch (error) {
       this.handleEditorError(error);
     }
@@ -2178,6 +2200,57 @@ class EditorController {
       this.setStatus('editor.status.copyDone', {}, 'success');
     } catch {
       this.setStatus('editor.status.copyFailed', {}, 'error');
+    }
+  }
+
+  /**
+   * 从当前 CellCanvas 草稿导出 TXT 投影。
+   */
+  exportCellCanvasPlainText() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const projection = cellCanvasDraftToPlainTextProjection(draft);
+      const blob = new Blob([projection.content], { type: 'text/plain;charset=utf-8' });
+      this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.txt');
+      this.setStatus('editor.status.projectionExported', { kind: 'TXT' }, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 从当前 CellCanvas 草稿导出 HTML 投影。
+   */
+  exportCellCanvasHtml() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const projection = cellCanvasDraftToHtmlProjection(draft);
+      const html = [
+        '<!doctype html>',
+        '<html lang="zh-CN">',
+        '<head>',
+        '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        '<title>UnicodeArtJs CellCanvas</title>',
+        '<style>',
+        'body{margin:24px;background:#f8fafc;color:#111827;}',
+        '.unicode-art-cellcanvas{font-family:monospace;white-space:pre;line-height:1.2;font-size:16px;}',
+        '</style>',
+        '</head>',
+        '<body>',
+        projection.content,
+        '</body>',
+        '</html>',
+      ].join('\n');
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.html');
+      this.setStatus('editor.status.projectionExported', { kind: 'HTML' }, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
     }
   }
 

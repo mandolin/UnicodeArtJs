@@ -12,10 +12,13 @@ import {
 } from '../src/font-availability.js';
 import {
   CELL_CANVAS_DRAFT_SCHEMA,
+  cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
+  cellCanvasDraftToPlainTextProjection,
   copyCellCanvasSelection,
   createCellCanvasDraftFromPreset,
   createDefaultCellCanvasDraft,
+  createCellCanvasDraftFromSpecialArtResult,
   getCellCanvasHistoryState,
   getCellCanvasSelectionCells,
   pasteCellCanvasClipboard,
@@ -156,6 +159,48 @@ describe('CellCanvas固定网格草稿', () => {
     const redone = redoCellCanvasHistory(undone);
     assertEqual(cellCanvasDraftToPlainText(redone).startsWith('#'), true);
     assertEqual(getCellCanvasHistoryState(redone).canRedo, false);
+  });
+
+  it('可从SpecialArtRenderResult结构化导入且不使用plainTextPreview作为事实输入', () => {
+    const specialArtFixture = {
+      stage: 'W-art-P15.test',
+      result: {
+        schema: 'unicodeartjs-special-art-result@0',
+        status: 'ok',
+        cellMap: {
+          width: 2,
+          height: 1,
+          cells: [[
+            { char: 'U', width: 1, role: 'text', sourceGlyph: 'glyph:U' },
+            { char: 'A', width: 1, role: 'text', sourceGlyph: 'glyph:A' },
+          ]],
+        },
+        plainTextPreview: 'WRONG',
+        specialArt: { engineId: 'test-engine', inputText: 'UA' },
+        diagnostics: [{ code: 'UA_TEST', severity: 'info', message: 'ok' }],
+      },
+    };
+
+    const draft = createCellCanvasDraftFromSpecialArtResult(specialArtFixture);
+    assertEqual(validateCellCanvasDocumentDraft(draft).cells, 2);
+    assertEqual(cellCanvasDraftToPlainText(draft), 'UA');
+    assertEqual(draft.importRecords[0].plainTextPreviewUsed, false);
+    assertEqual(draft.importRecords[0].diagnosticCodes.includes('UA_TEST'), true);
+  });
+
+  it('CellCanvas TXT和HTML投影都从CellMap生成', () => {
+    let draft = createDefaultCellCanvasDraft();
+    draft = updateCellCanvasCell(draft, 0, 0, { char: '<', fg: '#123456', bg: 'white' });
+
+    const textProjection = cellCanvasDraftToPlainTextProjection(draft);
+    const htmlProjection = cellCanvasDraftToHtmlProjection(draft);
+
+    assertEqual(textProjection.kind, 'plain-text');
+    assertEqual(textProjection.content.startsWith('<'), true);
+    assertEqual(htmlProjection.kind, 'html');
+    assert(htmlProjection.content.includes('&lt;'), 'HTML投影应转义特殊字符');
+    assert(htmlProjection.content.includes('color:#123456'), 'HTML投影应保留安全前景色');
+    assert(htmlProjection.content.includes('background-color:white'), 'HTML投影应保留安全背景色');
   });
 
 });

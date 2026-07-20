@@ -6,6 +6,7 @@
  * - 将草稿投影为普通字符画文本。
  * - 支持单个字素格的确定性更新。
  * - 支持首轮矩形选区、剪贴板和撤销/重做历史。
+ * - 支持从 SpecialArtRenderResult 结构化导入，并从 CellMap 投影 TXT/HTML。
  *
  * 真实的拖拽选择、图层叠加和插件式导入会在后续 W-art-P16.x
  * 阶段继续扩展。这里先避免把编辑器交互和数据结构绑死。
@@ -18,6 +19,12 @@ export const CELL_CANVAS_DRAFT_SCHEMA = 'unicodeartjs-cellcanvas-document-draft@
 
 /** @type {string} 内部草稿稳定性标记，避免误宣称为公开文件格式。 */
 export const CELL_CANVAS_DRAFT_STABILITY = 'internal-draft';
+
+/** @type {string} CellCanvas 投影描述结构版本。 */
+export const CELL_CANVAS_PROJECTION_SCHEMA = 'unicodeartjs-cellcanvas-projection@0';
+
+/** @type {string} P15 Special Art 结果结构版本。 */
+export const SPECIAL_ART_RESULT_SCHEMA = 'unicodeartjs-special-art-result@0';
 
 /**
  * Web Alpha 阶段可直接加载的 CellCanvas 样例。
@@ -58,6 +65,16 @@ export const CELL_CANVAS_PRESETS = Object.freeze([
  */
 function cloneJson(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+/**
+ * 判断值是否为普通对象。
+ *
+ * @param {unknown} value 待判断值。
+ * @returns {value is Record<string, unknown>} 是否为对象。
+ */
+function isObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
 /**
@@ -116,6 +133,141 @@ function createCellMapFromLines(lines, options = {}) {
  */
 function findCell(cellMap, x, y) {
   return cellMap.cells.find((cell) => cell.x === x && cell.y === y);
+}
+
+/**
+ * 转义 HTML 文本内容。
+ *
+ * @param {unknown} value 原始文本。
+ * @returns {string} HTML 安全文本。
+ */
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+/**
+ * 把用户可编辑颜色值收窄为安全 CSS token。
+ *
+ * 这里不是完整 CSS 解析器，只允许常见颜色写法，避免 HTML 投影把
+ * `;`、`url()` 等额外 CSS 片段带入内联样式。
+ *
+ * @param {unknown} value 原始颜色值。
+ * @returns {string} 可写入 style 的颜色值。
+ */
+function normalizeCssColorToken(value) {
+  const color = String(value ?? '').trim();
+  if (!color) return '';
+  if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
+  if (/^[a-zA-Z][a-zA-Z0-9 -]{0,31}$/.test(color)) return color;
+  if (/^(rgb|rgba|hsl|hsla)\([\d\s,%.+-]+\)$/.test(color)) return color;
+  return '';
+}
+
+/**
+ * 将任意 cell 输入规范为带坐标的 CellCanvas cell。
+ *
+ * @param {unknown} value 原始 cell。
+ * @param {number} x 横坐标。
+ * @param {number} y 纵坐标。
+ * @param {object} defaultCell 缺省 cell。
+ * @returns {object} 规范化后的 cell。
+ */
+function normalizeImportedCell(value, x, y, defaultCell) {
+  const source = isObject(value) ? value : defaultCell;
+  const char = normalizeCellChar(source.char ?? defaultCell.char ?? ' ');
+  const cell = {
+    ...cloneJson(source),
+    x,
+    y,
+    char,
+    width: Number.isInteger(source.width) ? source.width : 1,
+    role: typeof source.role === 'string'
+      ? source.role
+      : char === ' '
+        ? 'empty'
+        : 'text',
+  };
+
+  if (!Object.prototype.hasOwnProperty.call(cell, 'sourceGlyph')) {
+    cell.sourceGlyph = char === ' ' ? null : char;
+  }
+  return cell;
+}
+
+/**
+ * 将嵌套或扁平 cellMap 统一为 CellCanvas 使用的扁平结构。
+ *
+ * P15 的 SpecialArt fixture 使用二维 `cells[y][x]`，而 Web 编辑器内部
+ * 为了更容易做 patch/history 使用扁平数组。差异只在导入层消化。
+ *
+ * @param {object} cellMap 原始 cellMap。
+ * @returns {{ width: number, height: number, cells: Array<object> }} 规范化 cellMap。
+ */
+function normalizeCellMapForDraft(cellMap) {
+  if (!isObject(cellMap)) {
+    throw new Error('CellCanvas import requires a cellMap object.');
+  }
+
+  const width = toInteger(cellMap.width, 0);
+  const height = toInteger(cellMap.height, 0);
+  if (width <= 0 || height <= 0) {
+    throw new Error('CellCanvas imported cellMap must have positive width and height.');
+  }
+
+  const defaultCell = isObject(cellMap.defaultCell)
+    ? cellMap.defaultCell
+    : { char: ' ', width: 1, role: 'empty', sourceGlyph: null };
+  const sourceCells = Array.isArray(cellMap.cells) ? cellMap.cells : [];
+  const flatCells = [];
+  const cellByPosition = new Map();
+
+  if (Array.isArray(sourceCells[0])) {
+    for (let y = 0; y < height; y += 1) {
+      const row = Array.isArray(sourceCells[y]) ? sourceCells[y] : [];
+      for (let x = 0; x < width; x += 1) {
+        flatCells.push(normalizeImportedCell(row[x], x, y, defaultCell));
+      }
+    }
+    return { width, height, cells: flatCells };
+  }
+
+  for (const sourceCell of sourceCells) {
+    if (!isObject(sourceCell)) continue;
+    const x = toInteger(sourceCell.x, -1);
+    const y = toInteger(sourceCell.y, -1);
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+      cellByPosition.set(`${x},${y}`, sourceCell);
+    }
+  }
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      flatCells.push(normalizeImportedCell(cellByPosition.get(`${x},${y}`), x, y, defaultCell));
+    }
+  }
+
+  return { width, height, cells: flatCells };
+}
+
+/**
+ * 从 fixture 包装或直接结果中提取 SpecialArtRenderResult。
+ *
+ * @param {unknown} input SpecialArt fixture 或结果。
+ * @returns {{ result: object, wrapper: object | null }} 提取结果。
+ */
+function extractSpecialArtResult(input) {
+  if (isObject(input) && input.schema === SPECIAL_ART_RESULT_SCHEMA) {
+    return { result: input, wrapper: null };
+  }
+  if (isObject(input) && isObject(input.result) && input.result.schema === SPECIAL_ART_RESULT_SCHEMA) {
+    return { result: input.result, wrapper: input };
+  }
+  throw new Error(`SpecialArtResult schema must be ${SPECIAL_ART_RESULT_SCHEMA}.`);
 }
 
 /**
@@ -409,7 +561,7 @@ export function createDefaultCellCanvasDraft() {
  */
 export function createCellCanvasDraftFromCellMap(input) {
   const layerId = 'layer-imported-main';
-  const cellMap = cloneJson(input.cellMap);
+  const cellMap = normalizeCellMapForDraft(input.cellMap);
 
   return {
     schema: CELL_CANVAS_DRAFT_SCHEMA,
@@ -449,6 +601,7 @@ export function createCellCanvasDraftFromCellMap(input) {
         sourceFixture: input.sourceFixture ?? null,
         canonicalInput: 'SpecialArtRenderResult.cellMap',
         importKind: 'structured-special-art-result',
+        plainTextPreviewUsed: false,
         diagnosticCodes: ['UA_CELLCANVAS_IMPORT_READY'],
       },
     ],
@@ -460,6 +613,64 @@ export function createCellCanvasDraftFromCellMap(input) {
       },
     ],
   };
+}
+
+/**
+ * 从 P15 SpecialArtRenderResult 结构化导入 CellCanvas 草稿。
+ *
+ * 导入只读取 `result.cellMap`。即使结果里有 `plainTextPreview`，
+ * 也只能作为展示投影的历史证据，不能作为 canonical input。
+ *
+ * @param {object} input SpecialArt fixture 包装或直接结果对象。
+ * @param {{ id?: string, title?: string, sourceFixture?: string }} [options] 导入选项。
+ * @returns {object} CellCanvas 草稿。
+ */
+export function createCellCanvasDraftFromSpecialArtResult(input, options = {}) {
+  const { result, wrapper } = extractSpecialArtResult(input);
+  if (result.status && result.status !== 'ok') {
+    throw new Error('SpecialArtResult status must be ok before CellCanvas import.');
+  }
+  if (!isObject(result.cellMap)) {
+    throw new Error('SpecialArtResult.cellMap is required for CellCanvas import.');
+  }
+
+  const engineId = result.specialArt?.engineId ?? 'special-art';
+  const inputText = result.specialArt?.inputText ?? wrapper?.prototype?.inputText ?? 'result';
+  const draft = createCellCanvasDraftFromCellMap({
+    id: options.id ?? `cellcanvas-special-art-${engineId}`,
+    title: options.title ?? `SpecialArt ${inputText} CellCanvas`,
+    sourceStage: wrapper?.stage ?? 'W-art-P15',
+    sourceFixture: options.sourceFixture ?? null,
+    cellMap: result.cellMap,
+  });
+  const diagnosticCodes = Array.isArray(result.diagnostics)
+    ? result.diagnostics.map((item) => item?.code).filter(Boolean)
+    : [];
+
+  draft.importRecords = [
+    {
+      id: `import-${draft.document.id}`,
+      sourceSchema: result.schema,
+      sourceStage: wrapper?.stage ?? null,
+      sourceFixture: options.sourceFixture ?? null,
+      sourceEngine: result.specialArt?.engineId ?? null,
+      canonicalInput: 'SpecialArtRenderResult.cellMap',
+      importKind: 'structured-special-art-result',
+      plainTextPreviewUsed: false,
+      plainTextPreviewPresent: typeof result.plainTextPreview === 'string',
+      diagnosticCodes: ['UA_CELLCANVAS_SPECIAL_ART_IMPORTED', ...diagnosticCodes],
+    },
+  ];
+  draft.diagnostics = [
+    {
+      code: 'UA_CELLCANVAS_SPECIAL_ART_IMPORTED',
+      severity: 'info',
+      message: 'SpecialArtRenderResult.cellMap was imported without using plainTextPreview as input.',
+    },
+    ...(Array.isArray(result.diagnostics) ? cloneJson(result.diagnostics) : []),
+  ];
+
+  return draft;
 }
 
 /**
@@ -534,7 +745,7 @@ export function validateCellCanvasDocumentDraft(draft) {
 
 // #endregion
 
-// #region 文本投影与单格编辑
+// #region 导入投影与单格编辑
 
 /**
  * 将 CellCanvas 草稿投影为纯文本字符画。
@@ -556,6 +767,71 @@ export function cellCanvasDraftToPlainText(draft) {
   }
 
   return lines.join('\n');
+}
+
+/**
+ * 将 CellCanvas 草稿投影为带元数据的纯文本结果。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {{ schema: string, kind: string, source: string, canonical: boolean, rows: number, cols: number, content: string }} 投影结果。
+ */
+export function cellCanvasDraftToPlainTextProjection(draft) {
+  validateCellCanvasDocumentDraft(draft);
+  const cellMap = getActiveCellMap(draft);
+  return {
+    schema: CELL_CANVAS_PROJECTION_SCHEMA,
+    kind: 'plain-text',
+    source: 'CellCanvasDocumentDraft.document.layers[].cellMap',
+    canonical: false,
+    rows: cellMap.height,
+    cols: cellMap.width,
+    content: cellCanvasDraftToPlainText(draft),
+  };
+}
+
+/**
+ * 将 CellCanvas 草稿投影为 HTML 片段。
+ *
+ * HTML 投影直接遍历 CellMap，并为有前景/背景色的格子生成 span。
+ * 该函数不从 plain text 反推模型，也不把投影结果写入历史。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ className?: string }} [options] HTML 选项。
+ * @returns {{ schema: string, kind: string, source: string, canonical: boolean, rows: number, cols: number, content: string }} 投影结果。
+ */
+export function cellCanvasDraftToHtmlProjection(draft, options = {}) {
+  validateCellCanvasDocumentDraft(draft);
+  const cellMap = getActiveCellMap(draft);
+  const className = options.className || 'unicode-art-cellcanvas';
+  const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
+  const lines = [];
+
+  for (let y = 0; y < cellMap.height; y += 1) {
+    let line = '';
+    for (let x = 0; x < cellMap.width; x += 1) {
+      const cell = cellIndex.get(`${x},${y}`) ?? { char: ' ', role: 'empty' };
+      const text = escapeHtml(cell.char ?? ' ');
+      const styles = [];
+      const fg = normalizeCssColorToken(cell.fg);
+      const bg = normalizeCssColorToken(cell.bg);
+      if (fg) styles.push(`color:${fg}`);
+      if (bg) styles.push(`background-color:${bg}`);
+      line += styles.length > 0
+        ? `<span data-x="${x}" data-y="${y}" style="${styles.join(';')}">${text}</span>`
+        : text;
+    }
+    lines.push(line);
+  }
+
+  return {
+    schema: CELL_CANVAS_PROJECTION_SCHEMA,
+    kind: 'html',
+    source: 'CellCanvasDocumentDraft.document.layers[].cellMap',
+    canonical: false,
+    rows: cellMap.height,
+    cols: cellMap.width,
+    content: `<pre class="${escapeHtml(className)}" data-cellcanvas-projection="html" data-cols="${cellMap.width}" data-rows="${cellMap.height}">${lines.join('\n')}</pre>`,
+  };
 }
 
 /**
