@@ -12,16 +12,19 @@ import {
 } from '../src/font-availability.js';
 import {
   CELL_CANVAS_DRAFT_SCHEMA,
+  CELL_CANVAS_PROJECT_SCHEMA,
   cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
   cellCanvasDraftToPlainTextProjection,
   copyCellCanvasSelection,
   createCellCanvasDraftFromPreset,
   createDefaultCellCanvasDraft,
+  createCellCanvasProjectEnvelope,
   createCellCanvasDraftFromSpecialArtResult,
   getCellCanvasHistoryState,
   getCellCanvasSelectionCells,
   pasteCellCanvasClipboard,
+  readCellCanvasDraftFromProjectEnvelope,
   redoCellCanvasHistory,
   setCellCanvasSelection,
   undoCellCanvasHistory,
@@ -201,6 +204,31 @@ describe('CellCanvas固定网格草稿', () => {
     assert(htmlProjection.content.includes('&lt;'), 'HTML投影应转义特殊字符');
     assert(htmlProjection.content.includes('color:#123456'), 'HTML投影应保留安全前景色');
     assert(htmlProjection.content.includes('background-color:white'), 'HTML投影应保留安全背景色');
+  });
+
+  it('CellCanvas内部项目包络可保存并读回活动草稿', () => {
+    const draft = createDefaultCellCanvasDraft();
+    const envelope = createCellCanvasProjectEnvelope(draft, {
+      appVersion: 'test-version',
+      surface: 'web-test',
+      createdAt: '2026-07-21T00:00:00.000Z',
+      updatedAt: '2026-07-21T00:01:00.000Z',
+      sourceResource: {
+        id: 'official-test',
+        sha256: 'abc123',
+        localPath: 'K:\\secret\\image.png',
+      },
+    });
+    const loaded = readCellCanvasDraftFromProjectEnvelope(envelope);
+
+    assertEqual(envelope.schema, CELL_CANVAS_PROJECT_SCHEMA);
+    assertEqual(envelope.stability, 'internal-draft');
+    assertEqual(envelope.app.version, 'test-version');
+    assertEqual(envelope.app.surface, 'web-test');
+    assertEqual(envelope.metadata.width, 8);
+    assertEqual(envelope.sourceResource.id, 'official-test');
+    assertEqual(envelope.sourceResource.localPath, undefined);
+    assertEqual(cellCanvasDraftToPlainText(loaded), cellCanvasDraftToPlainText(draft));
   });
 
 });

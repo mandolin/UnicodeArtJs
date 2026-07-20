@@ -33,6 +33,7 @@ import {
 } from './font-availability.js';
 import {
   CELL_CANVAS_DRAFT_SCHEMA,
+  CELL_CANVAS_PROJECT_SCHEMA,
   CELL_CANVAS_PRESETS,
   cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
@@ -40,10 +41,12 @@ import {
   copyCellCanvasSelection as copyCellCanvasSelectionDraft,
   createDefaultCellCanvasDraft,
   createCellCanvasDraftFromPreset,
+  createCellCanvasProjectEnvelope,
   createCellCanvasDraftFromSpecialArtResult,
   getActiveCellMap,
   getCellCanvasHistoryState,
   pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
+  readCellCanvasDraftFromProjectEnvelope,
   redoCellCanvasHistory as redoCellCanvasHistoryDraft,
   setCellCanvasSelection as setCellCanvasSelectionDraft,
   undoCellCanvasHistory as undoCellCanvasHistoryDraft,
@@ -182,6 +185,10 @@ const UI_MESSAGES = {
     'editor.status.historyEmpty': '没有可执行的历史操作',
     'editor.status.specialArtImported': 'SpecialArt 结果已作为 CellCanvas 导入',
     'editor.status.projectionExported': 'CellCanvas 投影已导出：{kind}',
+    'editor.status.projectSaved': 'CellCanvas 内部项目已保存',
+    'editor.status.projectLoaded': 'CellCanvas 内部项目已加载',
+    'editor.status.pngExported': 'CellCanvas PNG 投影已导出',
+    'editor.status.pngExportFailed': 'CellCanvas PNG 导出失败',
     'cellcanvas.section': 'CellCanvas 单格编辑',
     'cellcanvas.selection': '选区',
     'cellcanvas.x': 'X',
@@ -199,6 +206,9 @@ const UI_MESSAGES = {
     'cellcanvas.redo': '重做',
     'cellcanvas.exportTxt': '导出 TXT 投影',
     'cellcanvas.exportHtml': '导出 HTML 投影',
+    'cellcanvas.exportPng': '导出 PNG 投影',
+    'cellcanvas.saveProject': '保存内部项目',
+    'cellcanvas.openProject': '加载内部项目',
     'cellcanvas.help': '点击预览网格中的字素格后，可在这里修改单格内容和颜色。',
     'gallery.region': 'UnicodeArtJs 作品画廊',
     'gallery.previewRegion': '作品字符画预览',
@@ -551,6 +561,10 @@ const UI_MESSAGES = {
     'editor.status.historyEmpty': 'No history operation available',
     'editor.status.specialArtImported': 'SpecialArt result imported as CellCanvas',
     'editor.status.projectionExported': 'CellCanvas projection exported: {kind}',
+    'editor.status.projectSaved': 'CellCanvas internal project saved',
+    'editor.status.projectLoaded': 'CellCanvas internal project loaded',
+    'editor.status.pngExported': 'CellCanvas PNG projection exported',
+    'editor.status.pngExportFailed': 'CellCanvas PNG export failed',
     'cellcanvas.section': 'CellCanvas single-cell editing',
     'cellcanvas.selection': 'Selection',
     'cellcanvas.x': 'X',
@@ -568,6 +582,9 @@ const UI_MESSAGES = {
     'cellcanvas.redo': 'Redo',
     'cellcanvas.exportTxt': 'Export TXT projection',
     'cellcanvas.exportHtml': 'Export HTML projection',
+    'cellcanvas.exportPng': 'Export PNG projection',
+    'cellcanvas.saveProject': 'Save internal project',
+    'cellcanvas.openProject': 'Open internal project',
     'cellcanvas.help': 'Click a glyph cell in the preview grid, then adjust its content and colors here.',
     'gallery.region': 'UnicodeArtJs art gallery',
     'gallery.previewRegion': 'Artwork preview',
@@ -988,6 +1005,10 @@ const DOM = {
   editorCellCanvasRedo: '#editorCellCanvasRedo',
   editorCellCanvasExportTxt: '#editorCellCanvasExportTxt',
   editorCellCanvasExportHtml: '#editorCellCanvasExportHtml',
+  editorCellCanvasExportPng: '#editorCellCanvasExportPng',
+  editorCellCanvasSaveProject: '#editorCellCanvasSaveProject',
+  editorCellCanvasOpenProject: '#editorCellCanvasOpenProject',
+  editorCellCanvasProjectFile: '#editorCellCanvasProjectFile',
   editorStatus: '#editorStatus',
   editorFormatLabel: '#editorFormatLabel',
   editorValidate: '#editorValidate',
@@ -1507,6 +1528,10 @@ class EditorController {
     $doc.on('click', DOM.editorCellCanvasRedo, () => this.redoCellCanvasHistory());
     $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
     $doc.on('click', DOM.editorCellCanvasExportHtml, () => this.exportCellCanvasHtml());
+    $doc.on('click', DOM.editorCellCanvasExportPng, () => void this.exportCellCanvasPng());
+    $doc.on('click', DOM.editorCellCanvasSaveProject, () => this.saveCellCanvasProject());
+    $doc.on('click', DOM.editorCellCanvasOpenProject, () => $(DOM.editorCellCanvasProjectFile).click());
+    $doc.on('change', DOM.editorCellCanvasProjectFile, (event) => this.openCellCanvasProjectFile(event));
     $doc.on('click', DOM.editorCopy, () => this.copyPreview());
   }
 
@@ -1604,6 +1629,9 @@ class EditorController {
     $(DOM.editorCellCanvasOptions).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasExportTxt).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasExportHtml).prop('hidden', !isCellCanvas);
+    $(DOM.editorCellCanvasExportPng).prop('hidden', !isCellCanvas);
+    $(DOM.editorCellCanvasSaveProject).prop('hidden', !isCellCanvas);
+    $(DOM.editorCellCanvasOpenProject).prop('hidden', !isCellCanvas);
     $(DOM.editorFormatLabel).text(
       isFont ? 'unicode-art-font@1' : isCellCanvas ? CELL_CANVAS_DRAFT_SCHEMA : 'semantic-document@1',
     );
@@ -1662,7 +1690,7 @@ class EditorController {
     }
 
     if (kind === 'cellcanvas') {
-      const draft = JSON.parse(source);
+      const draft = readCellCanvasDraftFromProjectEnvelope(JSON.parse(source));
       const summary = validateCellCanvasDocumentDraft(draft);
       return {
         kind,
@@ -1678,6 +1706,18 @@ class EditorController {
       value: document,
       summary: `${document.rows.length}`,
     };
+  }
+
+  /**
+   * 从当前编辑器源码读取 CellCanvas 草稿。
+   *
+   * 这里统一支持 raw draft 与 internal project envelope，避免导入、渲染、
+   * 编辑和导出各自散落 JSON 解析规则。
+   *
+   * @returns {object} 可编辑 CellCanvas 草稿。
+   */
+  readCurrentCellCanvasDraft() {
+    return readCellCanvasDraftFromProjectEnvelope(JSON.parse(this.workspace.cellCanvasSource));
   }
 
   validateCurrentSource() {
@@ -1768,7 +1808,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const draft = this.readCurrentCellCanvasDraft();
       validateCellCanvasDocumentDraft(draft);
       const cellMap = getActiveCellMap(draft);
       const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
@@ -1883,7 +1923,7 @@ class EditorController {
       const x = Number($(target).attr('data-cellcanvas-x'));
       const y = Number($(target).attr('data-cellcanvas-y'));
       const draft = setCellCanvasSelectionDraft(
-        JSON.parse(this.workspace.cellCanvasSource),
+        this.readCurrentCellCanvasDraft(),
         { x, y, width: 1, height: 1 },
       );
       this.commitCellCanvasDraft(draft);
@@ -1903,7 +1943,7 @@ class EditorController {
     try {
       const x = Number($(DOM.editorCellCanvasX).val());
       const y = Number($(DOM.editorCellCanvasY).val());
-      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const draft = this.readCurrentCellCanvasDraft();
       const nextDraft = updateCellCanvasCell(draft, x, y, {
         char: $(DOM.editorCellCanvasChar).val(),
         fg: $(DOM.editorCellCanvasFg).val(),
@@ -1924,7 +1964,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const draft = setCellCanvasSelectionDraft(JSON.parse(this.workspace.cellCanvasSource), {
+      const draft = setCellCanvasSelectionDraft(this.readCurrentCellCanvasDraft(), {
         x: Number($(DOM.editorCellCanvasSelectX).val()),
         y: Number($(DOM.editorCellCanvasSelectY).val()),
         width: Number($(DOM.editorCellCanvasSelectWidth).val()),
@@ -1949,7 +1989,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const draft = copyCellCanvasSelectionDraft(JSON.parse(this.workspace.cellCanvasSource));
+      const draft = copyCellCanvasSelectionDraft(this.readCurrentCellCanvasDraft());
       const clipboard = draft.editorSession.clipboard;
       this.commitCellCanvasDraft(draft);
       this.refreshCellCanvasDraft(draft);
@@ -1969,7 +2009,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const draft = this.readCurrentCellCanvasDraft();
       const selection = draft.editorSession?.selection ?? draft.editorSession?.activeCell ?? { x: 0, y: 0 };
       const nextDraft = pasteCellCanvasClipboardDraft(draft, selection.x, selection.y);
       this.commitCellCanvasDraft(nextDraft);
@@ -1992,7 +2032,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const nextDraft = undoCellCanvasHistoryDraft(JSON.parse(this.workspace.cellCanvasSource));
+      const nextDraft = undoCellCanvasHistoryDraft(this.readCurrentCellCanvasDraft());
       this.commitCellCanvasDraft(nextDraft);
       this.refreshCellCanvasDraft(nextDraft);
       this.setStatus('editor.status.undoDone', {}, 'success');
@@ -2013,7 +2053,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const nextDraft = redoCellCanvasHistoryDraft(JSON.parse(this.workspace.cellCanvasSource));
+      const nextDraft = redoCellCanvasHistoryDraft(this.readCurrentCellCanvasDraft());
       this.commitCellCanvasDraft(nextDraft);
       this.refreshCellCanvasDraft(nextDraft);
       this.setStatus('editor.status.redoDone', {}, 'success');
@@ -2090,14 +2130,17 @@ class EditorController {
       const parsed = JSON.parse(source);
       const isSpecialArtResult = parsed?.schema === 'unicodeartjs-special-art-result@0'
         || parsed?.result?.schema === 'unicodeartjs-special-art-result@0';
+      const isCellCanvasProject = parsed?.schema === CELL_CANVAS_PROJECT_SCHEMA;
       const kind = parsed?.format === 'unicode-art-font'
         ? 'font'
-        : parsed?.schema === CELL_CANVAS_DRAFT_SCHEMA || isSpecialArtResult
+        : parsed?.schema === CELL_CANVAS_DRAFT_SCHEMA || isSpecialArtResult || isCellCanvasProject
           ? 'cellcanvas'
           : 'document';
       const effectiveSource = isSpecialArtResult
         ? JSON.stringify(createCellCanvasDraftFromSpecialArtResult(parsed, { sourceFixture: file.name }), null, 2)
-        : source;
+        : isCellCanvasProject
+          ? JSON.stringify(readCellCanvasDraftFromProjectEnvelope(parsed), null, 2)
+          : source;
       this.validateSource(effectiveSource, kind);
       this.workspace.kind = kind;
       this.updateCurrentSource(effectiveSource);
@@ -2105,7 +2148,15 @@ class EditorController {
       this.refreshLocale();
       this.result = null;
       this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
-      this.setStatus(isSpecialArtResult ? 'editor.status.specialArtImported' : 'editor.status.imported', {}, 'success');
+      this.setStatus(
+        isSpecialArtResult
+          ? 'editor.status.specialArtImported'
+          : isCellCanvasProject
+            ? 'editor.status.projectLoaded'
+            : 'editor.status.imported',
+        {},
+        'success',
+      );
     } catch (error) {
       this.handleEditorError(error);
     }
@@ -2210,7 +2261,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const draft = this.readCurrentCellCanvasDraft();
       const projection = cellCanvasDraftToPlainTextProjection(draft);
       const blob = new Blob([projection.content], { type: 'text/plain;charset=utf-8' });
       this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.txt');
@@ -2227,7 +2278,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
-      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const draft = this.readCurrentCellCanvasDraft();
       const projection = cellCanvasDraftToHtmlProjection(draft);
       const html = [
         '<!doctype html>',
@@ -2249,6 +2300,157 @@ class EditorController {
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.html');
       this.setStatus('editor.status.projectionExported', { kind: 'HTML' }, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 把 canvas 颜色值收窄为浏览器可解析的 fillStyle。
+   *
+   * Canvas 对无效颜色会静默保留旧值，所以这里每次先写入兜底色，再尝试
+   * 用户色，避免坏值污染后续单格绘制。
+   *
+   * @param {CanvasRenderingContext2D} ctx Canvas 2D 上下文。
+   * @param {unknown} value 候选颜色。
+   * @param {string} fallback 兜底颜色。
+   * @returns {string} 可用于绘制的颜色。
+   */
+  resolveCanvasColor(ctx, value, fallback) {
+    const color = String(value ?? '').trim();
+    if (!color || color === 'transparent') return fallback;
+    if (window.CSS?.supports && !window.CSS.supports('color', color)) return fallback;
+    ctx.fillStyle = fallback || '#000000';
+    ctx.fillStyle = color;
+    return ctx.fillStyle;
+  }
+
+  /**
+   * 从 CellMap 逐格重绘 PNG 投影。
+   *
+   * PNG 是 presentation projection，不是 canonical 文件格式。首轮用固定
+   * cell 尺寸保证导出物稳定，后续可根据 glyph profile 扩展成可配置版式。
+   */
+  async exportCellCanvasPng() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const cellMap = getActiveCellMap(draft);
+      if (document.fonts?.ready) await document.fonts.ready.catch(() => {});
+
+      const scale = 2;
+      const fontSize = 18;
+      const cellWidth = 22;
+      const cellHeight = 24;
+      const padding = 18;
+      const logicalWidth = cellMap.width * cellWidth + padding * 2;
+      const logicalHeight = cellMap.height * cellHeight + padding * 2;
+      const canvas = document.createElement('canvas');
+      canvas.className = 'art-export-canvas';
+      canvas.width = Math.ceil(logicalWidth * scale);
+      canvas.height = Math.ceil(logicalHeight * scale);
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        this.setStatus('editor.status.pngExportFailed', {}, 'error');
+        return;
+      }
+
+      ctx.scale(scale, scale);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+      ctx.font = `${fontSize}px ${AppState.config.glyphFont}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
+      for (let y = 0; y < cellMap.height; y += 1) {
+        for (let x = 0; x < cellMap.width; x += 1) {
+          const cell = cellIndex.get(`${x},${y}`) ?? { char: ' ', role: 'empty' };
+          const left = padding + x * cellWidth;
+          const top = padding + y * cellHeight;
+          const bg = this.resolveCanvasColor(ctx, cell.bg, '');
+          if (bg) {
+            ctx.fillStyle = bg;
+            ctx.fillRect(left, top, cellWidth, cellHeight);
+          }
+          if (cell.char !== ' ') {
+            ctx.fillStyle = this.resolveCanvasColor(
+              ctx,
+              cell.fg,
+              cell.role === 'effect' ? '#4a90d9' : '#111827',
+            );
+            ctx.fillText(cell.char, left + cellWidth / 2, top + cellHeight / 2);
+          }
+        }
+      }
+
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) {
+        this.setStatus('editor.status.pngExportFailed', {}, 'error');
+        return;
+      }
+      this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.png');
+      this.setStatus('editor.status.pngExported', {}, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 保存 CellCanvas 内部项目文件候选。
+   *
+   * 下载名使用 `.uart.json`，既能提醒这是 UnicodeArt 内部草稿，也避免
+   * Alpha 阶段过早宣称 `.uart` 已是公开稳定扩展名。
+   */
+  saveCellCanvasProject() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      let appVersion = null;
+      try {
+        appVersion = this.getCoreAdapter().getCoreCapabilities().version ?? null;
+      } catch {
+        appVersion = null;
+      }
+      const envelope = createCellCanvasProjectEnvelope(draft, {
+        appVersion,
+        surface: 'web',
+      });
+      const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: 'application/json;charset=utf-8' });
+      this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.uart.json');
+      this.setStatus('editor.status.projectSaved', {}, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 从用户显式选择的内部项目文件加载 CellCanvas 草稿。
+   *
+   * 浏览器只读取当前 file input 交给它的文件，不会读取相邻目录，也不会
+   * 自动安装或解析外部资源。
+   *
+   * @param {Event} event 文件选择事件。
+   */
+  async openCellCanvasProjectFile(event) {
+    const file = event.target.files?.[0];
+    $(DOM.editorCellCanvasProjectFile).val('');
+    if (!file) return;
+
+    try {
+      const parsed = JSON.parse(await file.text());
+      const draft = readCellCanvasDraftFromProjectEnvelope(parsed);
+      const source = JSON.stringify(draft, null, 2);
+      this.workspace.kind = 'cellcanvas';
+      this.updateCurrentSource(source);
+      this.syncControlsFromWorkspace();
+      this.refreshLocale();
+      this.result = null;
+      this.refreshCellCanvasDraft(draft);
+      this.setStatus('editor.status.projectLoaded', {}, 'success');
     } catch (error) {
       this.handleEditorError(error);
     }

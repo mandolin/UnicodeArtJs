@@ -799,6 +799,48 @@ async function main() {
       if (htmlFile.suggestedFilename() !== 'unicode-art-cellcanvas.html') {
         throw new Error(`Unexpected CellCanvas HTML filename: ${htmlFile.suggestedFilename()}`);
       }
+
+      const pngDownload = page.waitForEvent('download');
+      await page.click('#editorCellCanvasExportPng');
+      const pngFile = await pngDownload;
+      if (pngFile.suggestedFilename() !== 'unicode-art-cellcanvas.png') {
+        throw new Error(`Unexpected CellCanvas PNG filename: ${pngFile.suggestedFilename()}`);
+      }
+
+      const projectDownload = page.waitForEvent('download');
+      await page.click('#editorCellCanvasSaveProject');
+      const projectFile = await projectDownload;
+      if (projectFile.suggestedFilename() !== 'unicode-art-cellcanvas.uart.json') {
+        throw new Error(`Unexpected CellCanvas project filename: ${projectFile.suggestedFilename()}`);
+      }
+
+      const draft = JSON.parse(await page.inputValue('#editorSource'));
+      const projectEnvelope = {
+        schema: 'unicodeartjs-cellcanvas-project@0',
+        stability: 'internal-draft',
+        version: 0,
+        app: { id: 'unicodeartjs-e2e', surface: 'web-e2e', version: 'test' },
+        metadata: {
+          createdAt: '2026-07-21T00:00:00.000Z',
+          updatedAt: '2026-07-21T00:00:00.000Z',
+          width: 3,
+          height: 2,
+          documents: 1,
+        },
+        activeDocumentId: draft.document.id,
+        documents: [draft],
+      };
+      await page.setInputFiles('#editorCellCanvasProjectFile', {
+        name: 'cellcanvas-e2e.uart.json',
+        mimeType: 'application/json',
+        buffer: Buffer.from(JSON.stringify(projectEnvelope), 'utf8'),
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#editorStatus')?.dataset.state === 'success'
+          && document.querySelector('[data-cellcanvas-grid]')?.getAttribute('data-cellcanvas-width') === '3',
+        undefined,
+        { timeout: 5000 },
+      );
     });
 
     await test('rejects invalid imports without replacing the current editor source', async () => {

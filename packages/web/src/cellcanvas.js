@@ -7,6 +7,7 @@
  * - 支持单个字素格的确定性更新。
  * - 支持首轮矩形选区、剪贴板和撤销/重做历史。
  * - 支持从 SpecialArtRenderResult 结构化导入，并从 CellMap 投影 TXT/HTML。
+ * - 支持 internal project envelope 方式保存/加载草稿候选。
  *
  * 真实的拖拽选择、图层叠加和插件式导入会在后续 W-art-P16.x
  * 阶段继续扩展。这里先避免把编辑器交互和数据结构绑死。
@@ -22,6 +23,9 @@ export const CELL_CANVAS_DRAFT_STABILITY = 'internal-draft';
 
 /** @type {string} CellCanvas 投影描述结构版本。 */
 export const CELL_CANVAS_PROJECTION_SCHEMA = 'unicodeartjs-cellcanvas-projection@0';
+
+/** @type {string} CellCanvas 内部项目包络结构版本；不作为公开稳定格式。 */
+export const CELL_CANVAS_PROJECT_SCHEMA = 'unicodeartjs-cellcanvas-project@0';
 
 /** @type {string} P15 Special Art 结果结构版本。 */
 export const SPECIAL_ART_RESULT_SCHEMA = 'unicodeartjs-special-art-result@0';
@@ -68,6 +72,19 @@ function cloneJson(value) {
 }
 
 /**
+ * 规范化内部项目文件时间戳。
+ *
+ * @param {unknown} value 候选时间戳。
+ * @param {string} fallback 兜底 ISO 时间。
+ * @returns {string} ISO 时间字符串。
+ */
+function normalizeIsoTimestamp(value, fallback) {
+  if (typeof value !== 'string') return fallback;
+  const time = Date.parse(value);
+  return Number.isNaN(time) ? fallback : new Date(time).toISOString();
+}
+
+/**
  * 判断值是否为普通对象。
  *
  * @param {unknown} value 待判断值。
@@ -75,6 +92,42 @@ function cloneJson(value) {
  */
 function isObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+/**
+ * 从来源资源记录中摘取可公开保存的低敏字段。
+ *
+ * 内部 `.uart` 项目候选不写入本机绝对路径、浏览器信息或系统信息。
+ * 后续若接入资源库，可以把同源资源 id/hash/trust 状态放进这里。
+ *
+ * @param {unknown} value 原始来源资源。
+ * @returns {object | undefined} 脱敏后的来源记录。
+ */
+function sanitizeProjectSourceResource(value) {
+  if (!isObject(value)) return undefined;
+  const allowedScalarKeys = [
+    'id',
+    'kind',
+    'schema',
+    'source',
+    'engineId',
+    'resourceId',
+    'hash',
+    'sha256',
+    'license',
+    'trust',
+    'reviewedAt',
+  ];
+  const output = {};
+
+  for (const key of allowedScalarKeys) {
+    const candidate = value[key];
+    if (typeof candidate === 'string' || typeof candidate === 'number' || typeof candidate === 'boolean') {
+      output[key] = candidate;
+    }
+  }
+
+  return Object.keys(output).length > 0 ? output : undefined;
 }
 
 /**
@@ -741,6 +794,96 @@ export function validateCellCanvasDocumentDraft(draft) {
     height: cellMap.height,
     cells: cellMap.cells.length,
   };
+}
+
+/**
+ * 创建 CellCanvas 内部项目包络。
+ *
+ * 该包络只用于 Web Alpha 内部保存/加载候选，不声明 `.uart` 为公开稳定格式。
+ * 真正进入公开格式前，还需要在后续周期补兼容矩阵、迁移策略和跨宿主审计。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{
+ *   appVersion?: string,
+ *   surface?: string,
+ *   createdAt?: string,
+ *   updatedAt?: string,
+ *   sourceResource?: object
+ * }} [options] 包络元数据。
+ * @returns {object} 内部项目包络。
+ */
+export function createCellCanvasProjectEnvelope(draft, options = {}) {
+  const summary = validateCellCanvasDocumentDraft(draft);
+  const now = new Date().toISOString();
+  const createdAt = normalizeIsoTimestamp(options.createdAt, now);
+  const updatedAt = normalizeIsoTimestamp(options.updatedAt, createdAt);
+  const sourceResource = sanitizeProjectSourceResource(options.sourceResource);
+  const appVersion = typeof options.appVersion === 'string' && options.appVersion.trim()
+    ? options.appVersion.trim()
+    : null;
+  const surface = typeof options.surface === 'string' && options.surface.trim()
+    ? options.surface.trim()
+    : 'web';
+  const envelope = {
+    schema: CELL_CANVAS_PROJECT_SCHEMA,
+    stability: CELL_CANVAS_DRAFT_STABILITY,
+    version: 0,
+    app: {
+      id: 'unicodeartjs',
+      surface,
+      version: appVersion,
+    },
+    metadata: {
+      createdAt,
+      updatedAt,
+      width: summary.width,
+      height: summary.height,
+      documents: 1,
+    },
+    activeDocumentId: draft.document.id,
+    documents: [cloneJson(draft)],
+  };
+
+  if (sourceResource) envelope.sourceResource = sourceResource;
+  return envelope;
+}
+
+/**
+ * 从内部项目包络读取活动 CellCanvas 草稿。
+ *
+ * Alpha 阶段也允许 raw `CellCanvasDocumentDraft` 直接通过，便于手工调试和
+ * 对旧下载文件的临时兼容。返回值始终是深拷贝，调用方可安全编辑。
+ *
+ * @param {object} input 项目包络或 raw 草稿。
+ * @returns {object} 活动 CellCanvas 草稿。
+ */
+export function readCellCanvasDraftFromProjectEnvelope(input) {
+  if (input?.schema === CELL_CANVAS_DRAFT_SCHEMA) {
+    validateCellCanvasDocumentDraft(input);
+    return cloneJson(input);
+  }
+
+  if (!input || input.schema !== CELL_CANVAS_PROJECT_SCHEMA) {
+    throw new Error(`CellCanvas project schema must be ${CELL_CANVAS_PROJECT_SCHEMA}.`);
+  }
+
+  if (input.stability !== CELL_CANVAS_DRAFT_STABILITY) {
+    throw new Error(`CellCanvas project stability must be ${CELL_CANVAS_DRAFT_STABILITY}.`);
+  }
+
+  if (input.version !== 0) {
+    throw new Error('CellCanvas project version must be 0.');
+  }
+
+  if (!Array.isArray(input.documents) || input.documents.length === 0) {
+    throw new Error('CellCanvas project must contain at least one document.');
+  }
+
+  const activeDocumentId = typeof input.activeDocumentId === 'string' ? input.activeDocumentId : '';
+  const draft = input.documents.find((document) => document?.document?.id === activeDocumentId)
+    ?? input.documents[0];
+  validateCellCanvasDocumentDraft(draft);
+  return cloneJson(draft);
 }
 
 // #endregion
