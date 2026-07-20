@@ -17,15 +17,18 @@ import {
   cellCanvasDraftToPlainText,
   cellCanvasDraftToPlainTextProjection,
   copyCellCanvasSelection,
+  createCellCanvasDraftFromCellMap,
   createCellCanvasDraftFromPreset,
   createDefaultCellCanvasDraft,
   createCellCanvasProjectEnvelope,
   createCellCanvasDraftFromSpecialArtResult,
+  drawCellCanvasConnector,
   getCellCanvasHistoryState,
   getCellCanvasSelectionCells,
   pasteCellCanvasClipboard,
   readCellCanvasDraftFromProjectEnvelope,
   redoCellCanvasHistory,
+  resolveCellCanvasSingleLineChar,
   setCellCanvasSelection,
   undoCellCanvasHistory,
   updateCellCanvasCell,
@@ -229,6 +232,43 @@ describe('CellCanvas固定网格草稿', () => {
     assertEqual(envelope.sourceResource.id, 'official-test');
     assertEqual(envelope.sourceResource.localPath, undefined);
     assertEqual(cellCanvasDraftToPlainText(loaded), cellCanvasDraftToPlainText(draft));
+  });
+
+  it('CellCanvas最小连线器可绘制折线并记录历史', () => {
+    const draft = createCellCanvasDraftFromCellMap({
+      id: 'connector-test',
+      title: 'Connector Test',
+      cellMap: { width: 5, height: 3, cells: [] },
+    });
+    const nextDraft = drawCellCanvasConnector(
+      draft,
+      { x: 0, y: 0 },
+      { x: 4, y: 2 },
+      { route: 'horizontal-first' },
+    );
+    const lines = cellCanvasDraftToPlainText(nextDraft).split('\n');
+
+    assertEqual(resolveCellCanvasSingleLineChar(15), '┼');
+    assertEqual(lines[0], '────┐');
+    assertEqual(lines[1], '    │');
+    assertEqual(lines[2], '    │');
+    assertEqual(getCellCanvasHistoryState(nextDraft).canUndo, true);
+    assertEqual(nextDraft.editorSession.history.entries.at(-1).kind, 'draw-connector');
+  });
+
+  it('CellCanvas连线器会与已有单线字符合并成交叉点', () => {
+    let draft = createCellCanvasDraftFromCellMap({
+      id: 'connector-cross-test',
+      title: 'Connector Cross Test',
+      cellMap: { width: 5, height: 3, cells: [] },
+    });
+    draft = drawCellCanvasConnector(draft, { x: 0, y: 1 }, { x: 4, y: 1 });
+    draft = drawCellCanvasConnector(draft, { x: 2, y: 0 }, { x: 2, y: 2 });
+
+    const lines = cellCanvasDraftToPlainText(draft).split('\n');
+    assertEqual(lines[0], '  │  ');
+    assertEqual(lines[1], '──┼──');
+    assertEqual(lines[2], '  │  ');
   });
 
 });

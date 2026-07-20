@@ -450,6 +450,34 @@
             <button class="btn" id="editorCellCanvasUndo" type="button" data-i18n="cellcanvas.undo">撤销</button>
             <button class="btn" id="editorCellCanvasRedo" type="button" data-i18n="cellcanvas.redo">重做</button>
           </div>
+          <span class="editor-section-label" data-i18n="cellcanvas.connector">连线</span>
+          <div class="editor-cellcanvas-controls">
+            <label for="editorCellCanvasLineFromX">
+              <span data-i18n="cellcanvas.fromX">起点 X</span>
+              <input id="editorCellCanvasLineFromX" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasLineFromY">
+              <span data-i18n="cellcanvas.fromY">起点 Y</span>
+              <input id="editorCellCanvasLineFromY" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasLineToX">
+              <span data-i18n="cellcanvas.toX">终点 X</span>
+              <input id="editorCellCanvasLineToX" type="number" min="0" step="1" value="4">
+            </label>
+            <label for="editorCellCanvasLineToY">
+              <span data-i18n="cellcanvas.toY">终点 Y</span>
+              <input id="editorCellCanvasLineToY" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasLineRoute">
+              <span data-i18n="cellcanvas.route">路由</span>
+              <select id="editorCellCanvasLineRoute">
+                <option value="auto" data-i18n="cellcanvas.routeAuto">自动</option>
+                <option value="horizontal-first" data-i18n="cellcanvas.routeHorizontalFirst">横后竖</option>
+                <option value="vertical-first" data-i18n="cellcanvas.routeVerticalFirst">竖后横</option>
+              </select>
+            </label>
+            <button class="btn" id="editorCellCanvasDrawLine" type="button" data-i18n="cellcanvas.drawConnector">绘制连线</button>
+          </div>
           <p class="field-help" data-i18n="cellcanvas.help">点击预览网格中的字素格后，可在这里修改单格内容和颜色。</p>
         </div>
       </section>

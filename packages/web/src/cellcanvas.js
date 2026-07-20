@@ -422,6 +422,213 @@ function createPatchedCellData(cell, patch) {
   return data;
 }
 
+/** @type {Readonly<Record<string, number>>} 单线连接方向位。 */
+const CONNECTOR_DIRECTION_BITS = Object.freeze({
+  north: 1,
+  east: 2,
+  south: 4,
+  west: 8,
+});
+
+/** @type {Readonly<Record<number, string>>} 单线 box drawing 连接位到字素字符的映射。 */
+const SINGLE_LINE_MASK_TO_CHAR = Object.freeze({
+  0: '•',
+  1: '│',
+  2: '─',
+  3: '└',
+  4: '│',
+  5: '│',
+  6: '┌',
+  7: '├',
+  8: '─',
+  9: '┘',
+  10: '─',
+  11: '┴',
+  12: '┐',
+  13: '┤',
+  14: '┬',
+  15: '┼',
+});
+
+/** @type {Readonly<Record<string, number>>} 单线 box drawing 字符到连接位的映射。 */
+const SINGLE_LINE_CHAR_TO_MASK = Object.freeze({
+  '│': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.south,
+  '┃': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.south,
+  '|': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.south,
+  '─': CONNECTOR_DIRECTION_BITS.east | CONNECTOR_DIRECTION_BITS.west,
+  '━': CONNECTOR_DIRECTION_BITS.east | CONNECTOR_DIRECTION_BITS.west,
+  '-': CONNECTOR_DIRECTION_BITS.east | CONNECTOR_DIRECTION_BITS.west,
+  '┌': CONNECTOR_DIRECTION_BITS.east | CONNECTOR_DIRECTION_BITS.south,
+  '┐': CONNECTOR_DIRECTION_BITS.south | CONNECTOR_DIRECTION_BITS.west,
+  '└': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.east,
+  '┘': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.west,
+  '├': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.east | CONNECTOR_DIRECTION_BITS.south,
+  '┤': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.south | CONNECTOR_DIRECTION_BITS.west,
+  '┬': CONNECTOR_DIRECTION_BITS.east | CONNECTOR_DIRECTION_BITS.south | CONNECTOR_DIRECTION_BITS.west,
+  '┴': CONNECTOR_DIRECTION_BITS.north | CONNECTOR_DIRECTION_BITS.east | CONNECTOR_DIRECTION_BITS.west,
+  '┼': CONNECTOR_DIRECTION_BITS.north
+    | CONNECTOR_DIRECTION_BITS.east
+    | CONNECTOR_DIRECTION_BITS.south
+    | CONNECTOR_DIRECTION_BITS.west,
+  '+': CONNECTOR_DIRECTION_BITS.north
+    | CONNECTOR_DIRECTION_BITS.east
+    | CONNECTOR_DIRECTION_BITS.south
+    | CONNECTOR_DIRECTION_BITS.west,
+});
+
+/**
+ * 将方向位解析为单线 box drawing 字符。
+ *
+ * 首轮仅覆盖单线常见子集；双线、粗线、箭头和圆角会在后续完整
+ * Unicode 线条字符族阶段扩展到同一套连接位模型上。
+ *
+ * @param {number} mask N/E/S/W 连接位。
+ * @returns {string} 单格线条字素。
+ */
+export function resolveCellCanvasSingleLineChar(mask) {
+  return SINGLE_LINE_MASK_TO_CHAR[mask & 15] ?? '┼';
+}
+
+/**
+ * 规范化连线坐标点。
+ *
+ * @param {unknown} point 原始点。
+ * @param {{ width: number, height: number }} cellMap cellMap。
+ * @param {{ x: number, y: number }} fallback 兜底点。
+ * @returns {{ x: number, y: number }} 规范化坐标。
+ */
+function normalizeConnectorPoint(point, cellMap, fallback) {
+  return {
+    x: clamp(toInteger(point?.x, fallback.x), 0, cellMap.width - 1),
+    y: clamp(toInteger(point?.y, fallback.y), 0, cellMap.height - 1),
+  };
+}
+
+/**
+ * 向路径追加一个点，自动去掉相邻重复点。
+ *
+ * @param {Array<{ x: number, y: number }>} path 路径。
+ * @param {{ x: number, y: number }} point 坐标点。
+ */
+function appendConnectorPoint(path, point) {
+  const last = path[path.length - 1];
+  if (!last || last.x !== point.x || last.y !== point.y) {
+    path.push({ x: point.x, y: point.y });
+  }
+}
+
+/**
+ * 向路径追加一段水平或垂直线。
+ *
+ * @param {Array<{ x: number, y: number }>} path 路径。
+ * @param {{ x: number, y: number }} from 起点。
+ * @param {{ x: number, y: number }} to 终点。
+ */
+function appendConnectorSegment(path, from, to) {
+  if (from.x !== to.x && from.y !== to.y) {
+    throw new Error('CellCanvas connector segment must be horizontal or vertical.');
+  }
+
+  const stepX = from.x === to.x ? 0 : from.x < to.x ? 1 : -1;
+  const stepY = from.y === to.y ? 0 : from.y < to.y ? 1 : -1;
+  let x = from.x;
+  let y = from.y;
+  appendConnectorPoint(path, { x, y });
+  while (x !== to.x || y !== to.y) {
+    x += stepX;
+    y += stepY;
+    appendConnectorPoint(path, { x, y });
+  }
+}
+
+/**
+ * 计算两相邻点之间的方向位。
+ *
+ * @param {{ x: number, y: number }} from 当前点。
+ * @param {{ x: number, y: number }} to 相邻点。
+ * @returns {number} 方向位。
+ */
+function getConnectorDirectionBit(from, to) {
+  if (to.x === from.x && to.y === from.y - 1) return CONNECTOR_DIRECTION_BITS.north;
+  if (to.x === from.x + 1 && to.y === from.y) return CONNECTOR_DIRECTION_BITS.east;
+  if (to.x === from.x && to.y === from.y + 1) return CONNECTOR_DIRECTION_BITS.south;
+  if (to.x === from.x - 1 && to.y === from.y) return CONNECTOR_DIRECTION_BITS.west;
+  throw new Error('CellCanvas connector path points must be adjacent.');
+}
+
+/**
+ * 构建首轮连线路径。
+ *
+ * `auto` 在同轴时画直线，否则默认横后竖；这足以验证 connector
+ * 接口和 history 合成，后续可替换成避障、吸附和完整路由器。
+ *
+ * @param {{ x: number, y: number }} from 起点。
+ * @param {{ x: number, y: number }} to 终点。
+ * @param {'auto' | 'horizontal-first' | 'vertical-first'} route 路由方式。
+ * @returns {Array<{ x: number, y: number }>} 连线路径。
+ */
+function buildConnectorPath(from, to, route) {
+  const path = [];
+  if (from.x === to.x || from.y === to.y) {
+    appendConnectorSegment(path, from, to);
+    return path;
+  }
+
+  const turn = route === 'vertical-first'
+    ? { x: from.x, y: to.y }
+    : { x: to.x, y: from.y };
+  appendConnectorSegment(path, from, turn);
+  appendConnectorSegment(path, turn, to);
+  return path;
+}
+
+/**
+ * 将路径点转换为每格连接位。
+ *
+ * @param {Array<{ x: number, y: number }>} path 路径点。
+ * @returns {Map<string, number>} 坐标到连接位。
+ */
+function createConnectorMasks(path) {
+  const masks = new Map();
+  if (path.length === 1) {
+    masks.set(`${path[0].x},${path[0].y}`, 0);
+    return masks;
+  }
+
+  for (let index = 0; index < path.length; index += 1) {
+    const point = path[index];
+    let mask = 0;
+    if (path[index - 1]) mask |= getConnectorDirectionBit(point, path[index - 1]);
+    if (path[index + 1]) mask |= getConnectorDirectionBit(point, path[index + 1]);
+    masks.set(`${point.x},${point.y}`, (masks.get(`${point.x},${point.y}`) ?? 0) | mask);
+  }
+  return masks;
+}
+
+/**
+ * 生成连线后的 cell 快照。
+ *
+ * @param {object} cell 原始 cell。
+ * @param {number} connectorMask 新路径连接位。
+ * @param {{ mergeExisting?: boolean, fg?: string, bg?: string }} options 绘制选项。
+ * @returns {object} 更新后的 cell 快照。
+ */
+function createConnectorCellData(cell, connectorMask, options) {
+  const data = snapshotCellData(cell);
+  const existingMask = options.mergeExisting === false
+    ? 0
+    : SINGLE_LINE_CHAR_TO_MASK[data.char] ?? 0;
+  const mergedMask = existingMask | connectorMask;
+  const char = resolveCellCanvasSingleLineChar(mergedMask);
+  data.char = char;
+  data.width = 1;
+  data.role = 'connector';
+  data.sourceGlyph = char;
+  if (options.fg) data.fg = String(options.fg);
+  if (options.bg) data.bg = String(options.bg);
+  return data;
+}
+
 /**
  * 比较两个 cell 快照是否完全一致。
  *
@@ -1118,6 +1325,80 @@ export function updateCellCanvasCell(draft, x, y, patch) {
   }], {
     historyKind: 'update-cell',
     selectionAfter: { kind: 'single-cell', x, y, width: 1, height: 1 },
+  });
+}
+
+/**
+ * 在 CellCanvas 上绘制最小单线连接器。
+ *
+ * 首轮支持：
+ * - 水平 / 垂直直线。
+ * - 简单横后竖或竖后横折线。
+ * - 与已有单线 box drawing 字符连接位合并，形成常见端点、角、T 字和十字。
+ *
+ * 非目标：
+ * - 不做避障。
+ * - 不做双线、粗线、箭头或圆角。
+ * - 不读取 DOM 预览，也不做多层 overlay。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ x: number, y: number }} from 起点。
+ * @param {{ x: number, y: number }} to 终点。
+ * @param {{
+ *   route?: 'auto' | 'horizontal-first' | 'vertical-first',
+ *   style?: 'single',
+ *   mergeExisting?: boolean,
+ *   fg?: string,
+ *   bg?: string
+ * }} [options] 连线选项。
+ * @returns {object} 更新后的新草稿。
+ */
+export function drawCellCanvasConnector(draft, from, to, options = {}) {
+  validateCellCanvasDocumentDraft(draft);
+  if (options.style && options.style !== 'single') {
+    throw new Error('CellCanvas connector currently supports only single line style.');
+  }
+
+  const cellMap = getActiveCellMap(draft);
+  const start = normalizeConnectorPoint(from, cellMap, { x: 0, y: 0 });
+  const end = normalizeConnectorPoint(to, cellMap, start);
+  const route = options.route === 'vertical-first'
+    ? 'vertical-first'
+    : options.route === 'horizontal-first'
+      ? 'horizontal-first'
+      : 'auto';
+  const path = buildConnectorPath(start, end, route);
+  const masks = createConnectorMasks(path);
+  const cellPatches = [];
+
+  for (const [key, mask] of masks.entries()) {
+    const [x, y] = key.split(',').map((value) => Number(value));
+    const cell = findCell(cellMap, x, y);
+    if (!cell) continue;
+    cellPatches.push({
+      x,
+      y,
+      after: createConnectorCellData(cell, mask, {
+        mergeExisting: options.mergeExisting,
+        fg: options.fg,
+        bg: options.bg,
+      }),
+    });
+  }
+
+  const minX = Math.min(start.x, end.x);
+  const minY = Math.min(start.y, end.y);
+  const maxX = Math.max(start.x, end.x);
+  const maxY = Math.max(start.y, end.y);
+  return applyCellCanvasPatches(draft, cellPatches, {
+    historyKind: 'draw-connector',
+    selectionAfter: {
+      kind: minX === maxX && minY === maxY ? 'single-cell' : 'rectangle',
+      x: minX,
+      y: minY,
+      width: maxX - minX + 1,
+      height: maxY - minY + 1,
+    },
   });
 }
 

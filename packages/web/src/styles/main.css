@@ -1692,7 +1692,8 @@ details.config-details summary:hover {
 .editor-control-group select,
 .editor-control-group input,
 .editor-font-options input,
-.editor-cellcanvas-options input {
+.editor-cellcanvas-options input,
+.editor-cellcanvas-options select {
   min-width: 0;
   width: 100%;
   padding: 6px 10px;
@@ -1707,6 +1708,7 @@ details.config-details summary:hover {
 .editor-control-group input:focus,
 .editor-font-options input:focus,
 .editor-cellcanvas-options input:focus,
+.editor-cellcanvas-options select:focus,
 .cellcanvas-cell:focus,
 .editor-source:focus {
   border-color: var(--color-primary);

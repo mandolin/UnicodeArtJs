@@ -122,6 +122,68 @@ async function switchToTextWorkbench(page) {
 }
 
 /**
+ * 创建一份用于 E2E 的空白 CellCanvas draft JSON。
+ *
+ * 连线 smoke 需要避开内置样例中已有的 `|/-` 字符，否则测试会验证到
+ * 连接位合并细节，而不是纯粹验证 Web 控件调用连线器的通路。
+ *
+ * @param {number} width 画布宽度。
+ * @param {number} height 画布高度。
+ * @returns {string} 可直接写入编辑器源码框的 JSON。
+ */
+function createBlankCellCanvasDraftSource(width, height) {
+  const cells = [];
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      cells.push({
+        x,
+        y,
+        char: ' ',
+        width: 1,
+        role: 'empty',
+        sourceGlyph: null,
+      });
+    }
+  }
+
+  return JSON.stringify({
+    schema: 'unicodeartjs-cellcanvas-document-draft@0',
+    stability: 'internal-draft',
+    document: {
+      schema: 'unicode-art-document',
+      version: 'uadm-0',
+      id: 'cellcanvas-e2e-connector',
+      title: 'CellCanvas E2E Connector',
+      canvas: {
+        width,
+        height,
+        unit: 'glyph-cell',
+      },
+      layers: [
+        {
+          id: 'layer-e2e-main',
+          kind: 'cell-map',
+          locked: false,
+          visible: true,
+          cellMap: {
+            width,
+            height,
+            cells,
+          },
+        },
+      ],
+    },
+    editorSession: {
+      activeLayerId: 'layer-e2e-main',
+      activeCell: { x: 0, y: 0 },
+      selection: { kind: 'single-cell', x: 0, y: 0, width: 1, height: 1 },
+      clipboard: { kind: 'empty' },
+      history: { cursor: 0, entries: [] },
+    },
+  }, null, 2);
+}
+
+/**
  * 读取资源发现页的调试快照，方便定位远端 Pages 的短暂传播状态。
  * @param {import('playwright').Page} page Playwright 页面实例
  */
@@ -731,6 +793,41 @@ async function main() {
 
       const source = await page.inputValue('#editorSource');
       if (!source.includes('"kind": "paste-selection"')) throw new Error('CellCanvas history did not record paste operation');
+    });
+
+    await test('draws a CellCanvas connector and keeps history reversible', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.fill('#editorSource', createBlankCellCanvasDraftSource(5, 2));
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="5"][data-cellcanvas-height="2"]', {
+        timeout: 5000,
+      });
+
+      await page.fill('#editorCellCanvasLineFromX', '0');
+      await page.fill('#editorCellCanvasLineFromY', '0');
+      await page.fill('#editorCellCanvasLineToX', '4');
+      await page.fill('#editorCellCanvasLineToY', '1');
+      await page.selectOption('#editorCellCanvasLineRoute', 'horizontal-first');
+      await page.click('#editorCellCanvasDrawLine');
+      await page.waitForFunction(() => (
+        document.querySelector('[data-cellcanvas-x="4"][data-cellcanvas-y="0"]')?.textContent === '┐'
+        && document.querySelector('[data-cellcanvas-x="4"][data-cellcanvas-y="1"]')?.textContent === '│'
+      ));
+      let source = await page.inputValue('#editorSource');
+      if (!source.includes('"kind": "draw-connector"')) {
+        throw new Error('CellCanvas connector history was not recorded');
+      }
+
+      await page.click('#editorCellCanvasUndo');
+      await page.waitForFunction(() => (
+        document.querySelector('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]')?.textContent === '\u00a0'
+      ));
+      await page.click('#editorCellCanvasRedo');
+      await page.waitForFunction(() => (
+        document.querySelector('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]')?.textContent === '─'
+      ));
+      source = await page.inputValue('#editorSource');
+      if (!source.includes('"char": "┐"')) throw new Error('CellCanvas connector corner was not persisted');
     });
 
     await test('imports SpecialArtResult into CellCanvas and exports projections', async () => {

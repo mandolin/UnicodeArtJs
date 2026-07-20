@@ -43,6 +43,7 @@ import {
   createCellCanvasDraftFromPreset,
   createCellCanvasProjectEnvelope,
   createCellCanvasDraftFromSpecialArtResult,
+  drawCellCanvasConnector,
   getActiveCellMap,
   getCellCanvasHistoryState,
   pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
@@ -189,10 +190,20 @@ const UI_MESSAGES = {
     'editor.status.projectLoaded': 'CellCanvas 内部项目已加载',
     'editor.status.pngExported': 'CellCanvas PNG 投影已导出',
     'editor.status.pngExportFailed': 'CellCanvas PNG 导出失败',
+    'editor.status.connectorDrawn': '连线已绘制 · {cells} 格',
     'cellcanvas.section': 'CellCanvas 单格编辑',
     'cellcanvas.selection': '选区',
+    'cellcanvas.connector': '连线',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
+    'cellcanvas.fromX': '起点 X',
+    'cellcanvas.fromY': '起点 Y',
+    'cellcanvas.toX': '终点 X',
+    'cellcanvas.toY': '终点 Y',
+    'cellcanvas.route': '路由',
+    'cellcanvas.routeAuto': '自动',
+    'cellcanvas.routeHorizontalFirst': '横后竖',
+    'cellcanvas.routeVerticalFirst': '竖后横',
     'cellcanvas.width': '宽',
     'cellcanvas.height': '高',
     'cellcanvas.char': '字素',
@@ -204,6 +215,7 @@ const UI_MESSAGES = {
     'cellcanvas.paste': '粘贴',
     'cellcanvas.undo': '撤销',
     'cellcanvas.redo': '重做',
+    'cellcanvas.drawConnector': '绘制连线',
     'cellcanvas.exportTxt': '导出 TXT 投影',
     'cellcanvas.exportHtml': '导出 HTML 投影',
     'cellcanvas.exportPng': '导出 PNG 投影',
@@ -565,10 +577,20 @@ const UI_MESSAGES = {
     'editor.status.projectLoaded': 'CellCanvas internal project loaded',
     'editor.status.pngExported': 'CellCanvas PNG projection exported',
     'editor.status.pngExportFailed': 'CellCanvas PNG export failed',
+    'editor.status.connectorDrawn': 'Connector drawn · {cells} cells',
     'cellcanvas.section': 'CellCanvas single-cell editing',
     'cellcanvas.selection': 'Selection',
+    'cellcanvas.connector': 'Connector',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
+    'cellcanvas.fromX': 'From X',
+    'cellcanvas.fromY': 'From Y',
+    'cellcanvas.toX': 'To X',
+    'cellcanvas.toY': 'To Y',
+    'cellcanvas.route': 'Route',
+    'cellcanvas.routeAuto': 'Auto',
+    'cellcanvas.routeHorizontalFirst': 'Horizontal first',
+    'cellcanvas.routeVerticalFirst': 'Vertical first',
     'cellcanvas.width': 'W',
     'cellcanvas.height': 'H',
     'cellcanvas.char': 'Glyph',
@@ -580,6 +602,7 @@ const UI_MESSAGES = {
     'cellcanvas.paste': 'Paste',
     'cellcanvas.undo': 'Undo',
     'cellcanvas.redo': 'Redo',
+    'cellcanvas.drawConnector': 'Draw connector',
     'cellcanvas.exportTxt': 'Export TXT projection',
     'cellcanvas.exportHtml': 'Export HTML projection',
     'cellcanvas.exportPng': 'Export PNG projection',
@@ -1003,6 +1026,12 @@ const DOM = {
   editorCellCanvasPaste: '#editorCellCanvasPaste',
   editorCellCanvasUndo: '#editorCellCanvasUndo',
   editorCellCanvasRedo: '#editorCellCanvasRedo',
+  editorCellCanvasLineFromX: '#editorCellCanvasLineFromX',
+  editorCellCanvasLineFromY: '#editorCellCanvasLineFromY',
+  editorCellCanvasLineToX: '#editorCellCanvasLineToX',
+  editorCellCanvasLineToY: '#editorCellCanvasLineToY',
+  editorCellCanvasLineRoute: '#editorCellCanvasLineRoute',
+  editorCellCanvasDrawLine: '#editorCellCanvasDrawLine',
   editorCellCanvasExportTxt: '#editorCellCanvasExportTxt',
   editorCellCanvasExportHtml: '#editorCellCanvasExportHtml',
   editorCellCanvasExportPng: '#editorCellCanvasExportPng',
@@ -1526,6 +1555,7 @@ class EditorController {
     $doc.on('click', DOM.editorCellCanvasPaste, () => this.pasteCellCanvasClipboard());
     $doc.on('click', DOM.editorCellCanvasUndo, () => this.undoCellCanvasHistory());
     $doc.on('click', DOM.editorCellCanvasRedo, () => this.redoCellCanvasHistory());
+    $doc.on('click', DOM.editorCellCanvasDrawLine, () => this.drawCellCanvasConnectorFromControls());
     $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
     $doc.on('click', DOM.editorCellCanvasExportHtml, () => this.exportCellCanvasHtml());
     $doc.on('click', DOM.editorCellCanvasExportPng, () => void this.exportCellCanvasPng());
@@ -1832,6 +1862,20 @@ class EditorController {
       $(DOM.editorCellCanvasSelectY).attr('max', String(cellMap.height - 1)).val(String(selectY));
       $(DOM.editorCellCanvasSelectWidth).attr('max', String(cellMap.width - selectX)).val(String(selectWidth));
       $(DOM.editorCellCanvasSelectHeight).attr('max', String(cellMap.height - selectY)).val(String(selectHeight));
+      const syncLinePointControl = (selector, max, fallback) => {
+        const raw = $(selector).val();
+        const number = raw === '' ? Number.NaN : Number(raw);
+        const value = Number.isFinite(number) ? Math.trunc(number) : fallback;
+        const clamped = Math.min(Math.max(value, 0), max);
+        $(selector).attr('max', String(max)).val(String(clamped));
+      };
+      syncLinePointControl(DOM.editorCellCanvasLineFromX, cellMap.width - 1, selectX);
+      syncLinePointControl(DOM.editorCellCanvasLineFromY, cellMap.height - 1, selectY);
+      syncLinePointControl(DOM.editorCellCanvasLineToX, cellMap.width - 1, Math.min(selectX + 4, cellMap.width - 1));
+      syncLinePointControl(DOM.editorCellCanvasLineToY, cellMap.height - 1, selectY);
+      if (!['auto', 'horizontal-first', 'vertical-first'].includes($(DOM.editorCellCanvasLineRoute).val())) {
+        $(DOM.editorCellCanvasLineRoute).val('auto');
+      }
       $(DOM.editorCellCanvasPaste).prop('disabled', !clipboardReady);
       $(DOM.editorCellCanvasUndo).prop('disabled', !historyState.canUndo);
       $(DOM.editorCellCanvasRedo).prop('disabled', !historyState.canRedo);
@@ -1977,6 +2021,40 @@ class EditorController {
         width: selection.width,
         height: selection.height,
       }, 'info');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 根据连线控件绘制最小 box-drawing 连接器。
+   */
+  drawCellCanvasConnectorFromControls() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const nextDraft = drawCellCanvasConnector(
+        draft,
+        {
+          x: Number($(DOM.editorCellCanvasLineFromX).val()),
+          y: Number($(DOM.editorCellCanvasLineFromY).val()),
+        },
+        {
+          x: Number($(DOM.editorCellCanvasLineToX).val()),
+          y: Number($(DOM.editorCellCanvasLineToY).val()),
+        },
+        {
+          route: $(DOM.editorCellCanvasLineRoute).val(),
+        },
+      );
+      const history = nextDraft.editorSession?.history;
+      const entry = history?.entries?.[Math.max(0, (history?.cursor ?? 1) - 1)];
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      this.setStatus('editor.status.connectorDrawn', {
+        cells: entry?.patches?.length ?? 0,
+      }, 'success');
     } catch (error) {
       this.handleEditorError(error);
     }
