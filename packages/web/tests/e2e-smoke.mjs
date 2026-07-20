@@ -734,12 +734,39 @@ async function main() {
     });
 
     await test('imports SpecialArtResult into CellCanvas and exports projections', async () => {
-      const fixturePath = path.resolve(
-        projectRoot,
-        '../../work-zone/dev/fixtures/special-art-auditable-textfx-prototype-v0.sample.json',
-      );
+      const specialArtFixture = {
+        schema: 'unicodeartjs-special-art-e2e-wrapper@0',
+        stage: 'W-art-P15.e2e',
+        result: {
+          schema: 'unicodeartjs-special-art-result@0',
+          status: 'ok',
+          cellMap: {
+            width: 3,
+            height: 2,
+            cells: [
+              [
+                { char: 'U', width: 1, role: 'text', sourceGlyph: 'glyph:U' },
+                { char: 'A', width: 1, role: 'text', sourceGlyph: 'glyph:A' },
+                { char: 'J', width: 1, role: 'text', sourceGlyph: 'glyph:J' },
+              ],
+              [
+                { char: '.', width: 1, role: 'effect', sourceEffect: 'shadow-textfx' },
+                { char: '.', width: 1, role: 'effect', sourceEffect: 'shadow-textfx' },
+                { char: '.', width: 1, role: 'effect', sourceEffect: 'shadow-textfx' },
+              ],
+            ],
+          },
+          plainTextPreview: 'SHOULD_NOT_BE_INPUT',
+          specialArt: { engineId: 'special-art-e2e', inputText: 'UAJ' },
+          diagnostics: [{ code: 'UA_E2E_SPECIAL_ART', severity: 'info', message: 'ok' }],
+        },
+      };
 
-      await page.setInputFiles('#editorImportFile', fixturePath);
+      await page.setInputFiles('#editorImportFile', {
+        name: 'special-art-e2e-result.json',
+        mimeType: 'application/json',
+        buffer: Buffer.from(JSON.stringify(specialArtFixture), 'utf8'),
+      });
       await page.waitForFunction(
         () => document.querySelector('#editorKind')?.value === 'cellcanvas'
           && document.querySelector('#editorStatus')?.dataset.state === 'success',
@@ -747,7 +774,7 @@ async function main() {
         { timeout: 5000 },
       );
       await page.click('#editorRender');
-      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="9"][data-cellcanvas-height="3"]', {
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="3"][data-cellcanvas-height="2"]', {
         timeout: 5000,
       });
 
