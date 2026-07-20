@@ -1883,9 +1883,15 @@ details.config-details summary:hover {
   background: rgba(74, 144, 217, 0.08);
 }
 
+.cellcanvas-cell.is-selected {
+  border-color: rgba(74, 144, 217, 0.55);
+  background: rgba(74, 144, 217, 0.1);
+}
+
 .cellcanvas-cell.is-active {
   border-color: var(--color-primary);
-  background: rgba(74, 144, 217, 0.16);
+  background: rgba(74, 144, 217, 0.2);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
 }
 
 .cellcanvas-cell[data-cellcanvas-role='effect'] {

@@ -5,8 +5,9 @@
  * - 将结构化 cellMap 包装成可保存的编辑草稿。
  * - 将草稿投影为普通字符画文本。
  * - 支持单个字素格的确定性更新。
+ * - 支持首轮矩形选区、剪贴板和撤销/重做历史。
  *
- * 真实的区域选择、图层叠加、撤销栈和插件式导入会在后续 W-art-P16.x
+ * 真实的拖拽选择、图层叠加和插件式导入会在后续 W-art-P16.x
  * 阶段继续扩展。这里先避免把编辑器交互和数据结构绑死。
  */
 
@@ -115,6 +116,253 @@ function createCellMapFromLines(lines, options = {}) {
  */
 function findCell(cellMap, x, y) {
   return cellMap.cells.find((cell) => cell.x === x && cell.y === y);
+}
+
+/**
+ * 规范化整数坐标。
+ *
+ * @param {unknown} value 原始值。
+ * @param {number} fallback 默认值。
+ * @returns {number} 整数。
+ */
+function toInteger(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.trunc(number) : fallback;
+}
+
+/**
+ * 将数值限制在范围内。
+ *
+ * @param {number} value 原始数值。
+ * @param {number} min 最小值。
+ * @param {number} max 最大值。
+ * @returns {number} 限制后的数值。
+ */
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * 提取可进入历史和剪贴板的 cell 数据。
+ *
+ * @param {object} cell 原始 cell。
+ * @returns {object} 可序列化快照。
+ */
+function snapshotCellData(cell) {
+  const data = {
+    char: normalizeCellChar(cell?.char),
+    width: Number.isInteger(cell?.width) ? cell.width : 1,
+    role: typeof cell?.role === 'string' ? cell.role : 'text',
+    sourceGlyph: Object.prototype.hasOwnProperty.call(cell ?? {}, 'sourceGlyph') ? cell.sourceGlyph : null,
+  };
+
+  if (cell?.fg) data.fg = String(cell.fg);
+  if (cell?.bg) data.bg = String(cell.bg);
+  return data;
+}
+
+/**
+ * 把快照数据写回 cell。
+ *
+ * @param {object} cell 目标 cell。
+ * @param {object} data cell 数据快照。
+ */
+function restoreCellData(cell, data) {
+  cell.char = normalizeCellChar(data?.char);
+  cell.width = Number.isInteger(data?.width) ? data.width : 1;
+  cell.role = typeof data?.role === 'string'
+    ? data.role
+    : cell.char === ' '
+      ? 'empty'
+      : 'text';
+  cell.sourceGlyph = Object.prototype.hasOwnProperty.call(data ?? {}, 'sourceGlyph')
+    ? data.sourceGlyph
+    : cell.char === ' '
+      ? null
+      : cell.char;
+
+  if (data?.fg) cell.fg = String(data.fg);
+  else delete cell.fg;
+
+  if (data?.bg) cell.bg = String(data.bg);
+  else delete cell.bg;
+}
+
+/**
+ * 组合单格 patch 与原 cell，生成完整 after 快照。
+ *
+ * @param {object} cell 原始 cell。
+ * @param {{ char?: unknown, fg?: string, bg?: string }} patch 用户补丁。
+ * @returns {object} 更新后的 cell 快照。
+ */
+function createPatchedCellData(cell, patch) {
+  const data = snapshotCellData(cell);
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'char')) {
+    data.char = normalizeCellChar(patch.char);
+    data.role = data.char === ' ' ? 'empty' : data.role === 'effect' ? 'effect' : 'text';
+    data.sourceGlyph = data.char === ' ' ? null : data.char;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'fg')) {
+    if (patch.fg) data.fg = String(patch.fg);
+    else delete data.fg;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(patch, 'bg')) {
+    if (patch.bg) data.bg = String(patch.bg);
+    else delete data.bg;
+  }
+
+  return data;
+}
+
+/**
+ * 比较两个 cell 快照是否完全一致。
+ *
+ * @param {object} left 左侧快照。
+ * @param {object} right 右侧快照。
+ * @returns {boolean} 是否一致。
+ */
+function isSameCellData(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/**
+ * 确保 editorSession 与 history 结构存在。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {object} editorSession。
+ */
+function ensureEditorSession(draft) {
+  draft.editorSession ??= {};
+  draft.editorSession.viewport ??= { x: 0, y: 0, zoom: 1 };
+  draft.editorSession.activeCell ??= { x: 0, y: 0 };
+  draft.editorSession.selection ??= { kind: 'single-cell', x: 0, y: 0, width: 1, height: 1 };
+  draft.editorSession.clipboard ??= { kind: 'empty' };
+  draft.editorSession.history ??= { cursor: 0, entries: [] };
+  if (!Array.isArray(draft.editorSession.history.entries)) {
+    draft.editorSession.history.entries = [];
+  }
+  draft.editorSession.history.cursor = clamp(
+    toInteger(draft.editorSession.history.cursor, draft.editorSession.history.entries.length),
+    0,
+    draft.editorSession.history.entries.length,
+  );
+  return draft.editorSession;
+}
+
+/**
+ * 规范化一个选区矩形，确保其不会超出画布。
+ *
+ * @param {object} selection 原始选区。
+ * @param {{ width: number, height: number }} cellMap cellMap。
+ * @returns {{ kind: string, x: number, y: number, width: number, height: number }} 规范化选区。
+ */
+function normalizeSelection(selection, cellMap) {
+  const x = clamp(toInteger(selection?.x, 0), 0, cellMap.width - 1);
+  const y = clamp(toInteger(selection?.y, 0), 0, cellMap.height - 1);
+  const width = clamp(toInteger(selection?.width, 1), 1, cellMap.width - x);
+  const height = clamp(toInteger(selection?.height, 1), 1, cellMap.height - y);
+
+  return {
+    kind: width === 1 && height === 1 ? 'single-cell' : 'rectangle',
+    x,
+    y,
+    width,
+    height,
+  };
+}
+
+/**
+ * 将选区写入 editorSession。
+ *
+ * @param {object} session editorSession。
+ * @param {{ kind: string, x: number, y: number, width: number, height: number }} selection 规范化选区。
+ */
+function applySelectionToSession(session, selection) {
+  session.selection = { ...selection };
+  session.activeCell = { x: selection.x, y: selection.y };
+}
+
+/**
+ * 生成一条历史记录。
+ *
+ * @param {string} kind 操作类型。
+ * @param {Array<object>} patches patch 列表。
+ * @param {object} selectionBefore 操作前选区。
+ * @param {object} selectionAfter 操作后选区。
+ * @returns {object} 历史记录。
+ */
+function createHistoryEntry(kind, patches, selectionBefore, selectionAfter) {
+  return {
+    id: `hist-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    kind,
+    createdAt: new Date().toISOString(),
+    selectionBefore,
+    selectionAfter,
+    patches,
+  };
+}
+
+/**
+ * 记录历史，若当前 cursor 位于中间则截断 redo 分支。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {object} entry 历史记录。
+ */
+function pushHistoryEntry(draft, entry) {
+  const session = ensureEditorSession(draft);
+  const history = session.history;
+  const preservedEntries = history.entries.slice(0, history.cursor);
+  preservedEntries.push(entry);
+  session.history = {
+    cursor: preservedEntries.length,
+    entries: preservedEntries,
+  };
+}
+
+/**
+ * 应用若干 cell patch。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {Array<{ x: number, y: number, after: object }>} cellPatches cell patch。
+ * @param {{ historyKind?: string, recordHistory?: boolean, selectionAfter?: object }} [options] 应用选项。
+ * @returns {object} 更新后的草稿。
+ */
+function applyCellCanvasPatches(draft, cellPatches, options = {}) {
+  validateCellCanvasDocumentDraft(draft);
+  const nextDraft = cloneJson(draft);
+  const session = ensureEditorSession(nextDraft);
+  const cellMap = getActiveCellMap(nextDraft);
+  const selectionBefore = normalizeSelection(session.selection, cellMap);
+  const effectivePatches = [];
+
+  for (const patch of cellPatches) {
+    const x = toInteger(patch.x, -1);
+    const y = toInteger(patch.y, -1);
+    const cell = findCell(cellMap, x, y);
+    if (!cell) continue;
+
+    const before = snapshotCellData(cell);
+    restoreCellData(cell, patch.after);
+    const after = snapshotCellData(cell);
+    if (!isSameCellData(before, after)) {
+      effectivePatches.push({ x, y, before, after });
+    }
+  }
+
+  const selectionAfter = normalizeSelection(options.selectionAfter ?? selectionBefore, cellMap);
+  applySelectionToSession(session, selectionAfter);
+
+  if (effectivePatches.length > 0 && options.recordHistory !== false) {
+    pushHistoryEntry(
+      nextDraft,
+      createHistoryEntry(options.historyKind ?? 'cell-patch', effectivePatches, selectionBefore, selectionAfter),
+    );
+  }
+
+  return nextDraft;
 }
 
 // #endregion
@@ -311,6 +559,122 @@ export function cellCanvasDraftToPlainText(draft) {
 }
 
 /**
+ * 设置 CellCanvas 当前矩形选区。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ x: number, y: number, width?: number, height?: number }} selection 选区。
+ * @returns {object} 更新后的新草稿。
+ */
+export function setCellCanvasSelection(draft, selection) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const nextDraft = cloneJson(draft);
+  const session = ensureEditorSession(nextDraft);
+  const cellMap = getActiveCellMap(nextDraft);
+  applySelectionToSession(session, normalizeSelection(selection, cellMap));
+  return nextDraft;
+}
+
+/**
+ * 读取当前选区覆盖的字素格。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {{ selection: object, cells: Array<object> }} 选区和格子列表。
+ */
+export function getCellCanvasSelectionCells(draft) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const cellMap = getActiveCellMap(draft);
+  const session = ensureEditorSession(cloneJson(draft));
+  const selection = normalizeSelection(session.selection, cellMap);
+  const cells = [];
+
+  for (let y = selection.y; y < selection.y + selection.height; y += 1) {
+    for (let x = selection.x; x < selection.x + selection.width; x += 1) {
+      const cell = findCell(cellMap, x, y);
+      if (cell) {
+        cells.push({
+          ...snapshotCellData(cell),
+          x,
+          y,
+          dx: x - selection.x,
+          dy: y - selection.y,
+        });
+      }
+    }
+  }
+
+  return { selection, cells };
+}
+
+/**
+ * 将当前选区复制到 editorSession.clipboard。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {object} 更新后的新草稿。
+ */
+export function copyCellCanvasSelection(draft) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const nextDraft = cloneJson(draft);
+  const session = ensureEditorSession(nextDraft);
+  const { selection, cells } = getCellCanvasSelectionCells(nextDraft);
+  session.clipboard = {
+    kind: 'cell-rectangle',
+    width: selection.width,
+    height: selection.height,
+    cells: cells.map((cell) => ({
+      dx: cell.dx,
+      dy: cell.dy,
+      char: cell.char,
+      width: cell.width,
+      role: cell.role,
+      sourceGlyph: cell.sourceGlyph,
+      ...(cell.fg ? { fg: cell.fg } : {}),
+      ...(cell.bg ? { bg: cell.bg } : {}),
+    })),
+    sourceSelection: selection,
+  };
+  return nextDraft;
+}
+
+/**
+ * 将剪贴板内容粘贴到目标坐标。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {number} targetX 目标横坐标。
+ * @param {number} targetY 目标纵坐标。
+ * @returns {object} 更新后的新草稿。
+ */
+export function pasteCellCanvasClipboard(draft, targetX, targetY) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const session = ensureEditorSession(cloneJson(draft));
+  const clipboard = session.clipboard;
+  if (clipboard?.kind !== 'cell-rectangle' || !Array.isArray(clipboard.cells)) {
+    throw new Error('CellCanvas clipboard does not contain a cell rectangle.');
+  }
+
+  const cellMap = getActiveCellMap(draft);
+  const x = clamp(toInteger(targetX, 0), 0, cellMap.width - 1);
+  const y = clamp(toInteger(targetY, 0), 0, cellMap.height - 1);
+  const width = clamp(toInteger(clipboard.width, 1), 1, cellMap.width - x);
+  const height = clamp(toInteger(clipboard.height, 1), 1, cellMap.height - y);
+  const cellPatches = clipboard.cells
+    .map((cell) => ({
+      x: x + toInteger(cell.dx, 0),
+      y: y + toInteger(cell.dy, 0),
+      after: snapshotCellData(cell),
+    }))
+    .filter((patch) => patch.x < cellMap.width && patch.y < cellMap.height);
+
+  return applyCellCanvasPatches(draft, cellPatches, {
+    historyKind: 'paste-selection',
+    selectionAfter: { kind: 'rectangle', x, y, width, height },
+  });
+}
+
+/**
  * 更新一个 CellCanvas 字素格。
  *
  * @param {object} draft CellCanvas 草稿。
@@ -322,37 +686,91 @@ export function cellCanvasDraftToPlainText(draft) {
 export function updateCellCanvasCell(draft, x, y, patch) {
   validateCellCanvasDocumentDraft(draft);
 
-  const nextDraft = cloneJson(draft);
-  const cellMap = getActiveCellMap(nextDraft);
+  const cellMap = getActiveCellMap(draft);
   const cell = findCell(cellMap, x, y);
   if (!cell) {
     throw new Error(`CellCanvas cell (${x}, ${y}) does not exist.`);
   }
 
-  if (Object.prototype.hasOwnProperty.call(patch, 'char')) {
-    cell.char = normalizeCellChar(patch.char);
-    cell.role = cell.char === ' ' ? 'empty' : cell.role === 'effect' ? 'effect' : 'text';
-    cell.sourceGlyph = cell.char === ' ' ? null : cell.char;
+  return applyCellCanvasPatches(draft, [{
+    x,
+    y,
+    after: createPatchedCellData(cell, patch),
+  }], {
+    historyKind: 'update-cell',
+    selectionAfter: { kind: 'single-cell', x, y, width: 1, height: 1 },
+  });
+}
+
+/**
+ * 获取 CellCanvas 历史状态。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {{ cursor: number, entries: number, canUndo: boolean, canRedo: boolean }} 历史摘要。
+ */
+export function getCellCanvasHistoryState(draft) {
+  const history = ensureEditorSession(cloneJson(draft)).history;
+  return {
+    cursor: history.cursor,
+    entries: history.entries.length,
+    canUndo: history.cursor > 0,
+    canRedo: history.cursor < history.entries.length,
+  };
+}
+
+/**
+ * 撤销最近一次 CellCanvas 历史操作。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {object} 更新后的新草稿。
+ */
+export function undoCellCanvasHistory(draft) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const nextDraft = cloneJson(draft);
+  const session = ensureEditorSession(nextDraft);
+  const history = session.history;
+  if (history.cursor <= 0) {
+    throw new Error('CellCanvas history has nothing to undo.');
   }
 
-  if (Object.prototype.hasOwnProperty.call(patch, 'fg')) {
-    if (patch.fg) {
-      cell.fg = String(patch.fg);
-    } else {
-      delete cell.fg;
-    }
+  const entry = history.entries[history.cursor - 1];
+  const cellMap = getActiveCellMap(nextDraft);
+  for (const patch of entry.patches || []) {
+    const cell = findCell(cellMap, patch.x, patch.y);
+    if (cell) restoreCellData(cell, patch.before);
   }
 
-  if (Object.prototype.hasOwnProperty.call(patch, 'bg')) {
-    if (patch.bg) {
-      cell.bg = String(patch.bg);
-    } else {
-      delete cell.bg;
-    }
+  history.cursor -= 1;
+  applySelectionToSession(session, normalizeSelection(entry.selectionBefore ?? session.selection, cellMap));
+  return nextDraft;
+}
+
+/**
+ * 重做下一次 CellCanvas 历史操作。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {object} 更新后的新草稿。
+ */
+export function redoCellCanvasHistory(draft) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const nextDraft = cloneJson(draft);
+  const session = ensureEditorSession(nextDraft);
+  const history = session.history;
+  if (history.cursor >= history.entries.length) {
+    throw new Error('CellCanvas history has nothing to redo.');
   }
 
-  nextDraft.editorSession.activeCell = { x, y };
-  nextDraft.editorSession.selection = { kind: 'single-cell', x, y, width: 1, height: 1 };
+  const entry = history.entries[history.cursor];
+  const cellMap = getActiveCellMap(nextDraft);
+  for (const patch of entry.patches || []) {
+    const cell = findCell(cellMap, patch.x, patch.y);
+    if (cell) restoreCellData(cell, patch.after);
+  }
+
+  history.cursor += 1;
+  applySelectionToSession(session, normalizeSelection(entry.selectionAfter ?? session.selection, cellMap));
   return nextDraft;
 }
 

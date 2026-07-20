@@ -35,9 +35,15 @@ import {
   CELL_CANVAS_DRAFT_SCHEMA,
   CELL_CANVAS_PRESETS,
   cellCanvasDraftToPlainText,
+  copyCellCanvasSelection as copyCellCanvasSelectionDraft,
   createDefaultCellCanvasDraft,
   createCellCanvasDraftFromPreset,
   getActiveCellMap,
+  getCellCanvasHistoryState,
+  pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
+  redoCellCanvasHistory as redoCellCanvasHistoryDraft,
+  setCellCanvasSelection as setCellCanvasSelectionDraft,
+  undoCellCanvasHistory as undoCellCanvasHistoryDraft,
   updateCellCanvasCell,
   validateCellCanvasDocumentDraft,
 } from './cellcanvas.js';
@@ -164,13 +170,28 @@ const UI_MESSAGES = {
     'editor.status.copyFailed': '复制失败，请手动选择预览内容',
     'editor.status.cellSelected': '已选中字素格 ({x}, {y})',
     'editor.status.cellUpdated': '字素格已更新',
+    'editor.status.selectionApplied': '选区已更新 · {width}x{height}',
+    'editor.status.selectionCopied': '选区已复制 · {width}x{height}',
+    'editor.status.selectionPasted': '选区已粘贴',
+    'editor.status.undoDone': '已撤销',
+    'editor.status.redoDone': '已重做',
+    'editor.status.clipboardEmpty': '剪贴板没有可粘贴的字素选区',
+    'editor.status.historyEmpty': '没有可执行的历史操作',
     'cellcanvas.section': 'CellCanvas 单格编辑',
+    'cellcanvas.selection': '选区',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
+    'cellcanvas.width': '宽',
+    'cellcanvas.height': '高',
     'cellcanvas.char': '字素',
     'cellcanvas.fg': '前景色',
     'cellcanvas.bg': '背景色',
     'cellcanvas.apply': '应用',
+    'cellcanvas.select': '选择',
+    'cellcanvas.copy': '复制',
+    'cellcanvas.paste': '粘贴',
+    'cellcanvas.undo': '撤销',
+    'cellcanvas.redo': '重做',
     'cellcanvas.help': '点击预览网格中的字素格后，可在这里修改单格内容和颜色。',
     'gallery.region': 'UnicodeArtJs 作品画廊',
     'gallery.previewRegion': '作品字符画预览',
@@ -514,13 +535,28 @@ const UI_MESSAGES = {
     'editor.status.copyFailed': 'Copy failed. Select the preview content manually.',
     'editor.status.cellSelected': 'Glyph cell selected ({x}, {y})',
     'editor.status.cellUpdated': 'Glyph cell updated',
+    'editor.status.selectionApplied': 'Selection updated · {width}x{height}',
+    'editor.status.selectionCopied': 'Selection copied · {width}x{height}',
+    'editor.status.selectionPasted': 'Selection pasted',
+    'editor.status.undoDone': 'Undone',
+    'editor.status.redoDone': 'Redone',
+    'editor.status.clipboardEmpty': 'No glyph-cell selection to paste',
+    'editor.status.historyEmpty': 'No history operation available',
     'cellcanvas.section': 'CellCanvas single-cell editing',
+    'cellcanvas.selection': 'Selection',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
+    'cellcanvas.width': 'W',
+    'cellcanvas.height': 'H',
     'cellcanvas.char': 'Glyph',
     'cellcanvas.fg': 'Foreground',
     'cellcanvas.bg': 'Background',
     'cellcanvas.apply': 'Apply',
+    'cellcanvas.select': 'Select',
+    'cellcanvas.copy': 'Copy',
+    'cellcanvas.paste': 'Paste',
+    'cellcanvas.undo': 'Undo',
+    'cellcanvas.redo': 'Redo',
     'cellcanvas.help': 'Click a glyph cell in the preview grid, then adjust its content and colors here.',
     'gallery.region': 'UnicodeArtJs art gallery',
     'gallery.previewRegion': 'Artwork preview',
@@ -930,6 +966,15 @@ const DOM = {
   editorCellCanvasFg: '#editorCellCanvasFg',
   editorCellCanvasBg: '#editorCellCanvasBg',
   editorCellCanvasApply: '#editorCellCanvasApply',
+  editorCellCanvasSelectX: '#editorCellCanvasSelectX',
+  editorCellCanvasSelectY: '#editorCellCanvasSelectY',
+  editorCellCanvasSelectWidth: '#editorCellCanvasSelectWidth',
+  editorCellCanvasSelectHeight: '#editorCellCanvasSelectHeight',
+  editorCellCanvasSelect: '#editorCellCanvasSelect',
+  editorCellCanvasCopy: '#editorCellCanvasCopy',
+  editorCellCanvasPaste: '#editorCellCanvasPaste',
+  editorCellCanvasUndo: '#editorCellCanvasUndo',
+  editorCellCanvasRedo: '#editorCellCanvasRedo',
   editorStatus: '#editorStatus',
   editorFormatLabel: '#editorFormatLabel',
   editorValidate: '#editorValidate',
@@ -1442,6 +1487,11 @@ class EditorController {
     $doc.on('click', DOM.editorEmbedFont, () => this.embedFontInDocument());
     $doc.on('click', '[data-cellcanvas-cell]', (event) => this.selectCellCanvasCell(event.currentTarget));
     $doc.on('click', DOM.editorCellCanvasApply, () => this.applyCellCanvasCellEdit());
+    $doc.on('click', DOM.editorCellCanvasSelect, () => this.applyCellCanvasSelection());
+    $doc.on('click', DOM.editorCellCanvasCopy, () => this.copyCellCanvasSelection());
+    $doc.on('click', DOM.editorCellCanvasPaste, () => this.pasteCellCanvasClipboard());
+    $doc.on('click', DOM.editorCellCanvasUndo, () => this.undoCellCanvasHistory());
+    $doc.on('click', DOM.editorCellCanvasRedo, () => this.redoCellCanvasHistory());
     $doc.on('click', DOM.editorCopy, () => this.copyPreview());
   }
 
@@ -1669,11 +1719,11 @@ class EditorController {
       if (request !== this.renderGeneration) return;
       this.result = result;
       if (validated.kind === 'cellcanvas') {
-        this.renderCellCanvasPreview(validated.value);
+        this.refreshCellCanvasDraft(validated.value);
       } else {
         $(DOM.editorPreview).text(result.content);
+        $(DOM.editorMeta).text(this.t('editor.metaReady', { cols: result.cols, rows: result.rows }));
       }
-      $(DOM.editorMeta).text(this.t('editor.metaReady', { cols: result.cols, rows: result.rows }));
       this.setStatus('editor.status.rendered', {}, 'success');
     } catch (error) {
       if (request === this.renderGeneration) this.handleEditorError(error);
@@ -1708,12 +1758,26 @@ class EditorController {
       const x = Math.min(Math.max(Number(activeCell.x) || 0, 0), cellMap.width - 1);
       const y = Math.min(Math.max(Number(activeCell.y) || 0, 0), cellMap.height - 1);
       const cell = cellMap.cells.find((item) => item.x === x && item.y === y);
+      const selection = draft.editorSession?.selection ?? { x, y, width: 1, height: 1 };
+      const selectX = Math.min(Math.max(Number(selection.x) || 0, 0), cellMap.width - 1);
+      const selectY = Math.min(Math.max(Number(selection.y) || 0, 0), cellMap.height - 1);
+      const selectWidth = Math.min(Math.max(Number(selection.width) || 1, 1), cellMap.width - selectX);
+      const selectHeight = Math.min(Math.max(Number(selection.height) || 1, 1), cellMap.height - selectY);
+      const historyState = getCellCanvasHistoryState(draft);
+      const clipboardReady = draft.editorSession?.clipboard?.kind === 'cell-rectangle';
 
       $(DOM.editorCellCanvasX).attr('max', String(cellMap.width - 1)).val(String(x));
       $(DOM.editorCellCanvasY).attr('max', String(cellMap.height - 1)).val(String(y));
       $(DOM.editorCellCanvasChar).val(cell?.char ?? ' ');
       $(DOM.editorCellCanvasFg).val(cell?.fg ?? '');
       $(DOM.editorCellCanvasBg).val(cell?.bg ?? '');
+      $(DOM.editorCellCanvasSelectX).attr('max', String(cellMap.width - 1)).val(String(selectX));
+      $(DOM.editorCellCanvasSelectY).attr('max', String(cellMap.height - 1)).val(String(selectY));
+      $(DOM.editorCellCanvasSelectWidth).attr('max', String(cellMap.width - selectX)).val(String(selectWidth));
+      $(DOM.editorCellCanvasSelectHeight).attr('max', String(cellMap.height - selectY)).val(String(selectHeight));
+      $(DOM.editorCellCanvasPaste).prop('disabled', !clipboardReady);
+      $(DOM.editorCellCanvasUndo).prop('disabled', !historyState.canUndo);
+      $(DOM.editorCellCanvasRedo).prop('disabled', !historyState.canRedo);
     } catch {
       // 源 JSON 正在编辑时可能暂时无效，控件保持上一次状态即可。
     }
@@ -1727,6 +1791,11 @@ class EditorController {
   renderCellCanvasPreview(draft) {
     const cellMap = getActiveCellMap(draft);
     const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+    const selection = draft.editorSession?.selection ?? { x: activeCell.x, y: activeCell.y, width: 1, height: 1 };
+    const selectionX = Math.min(Math.max(Number(selection.x) || 0, 0), cellMap.width - 1);
+    const selectionY = Math.min(Math.max(Number(selection.y) || 0, 0), cellMap.height - 1);
+    const selectionWidth = Math.min(Math.max(Number(selection.width) || 1, 1), cellMap.width - selectionX);
+    const selectionHeight = Math.min(Math.max(Number(selection.height) || 1, 1), cellMap.height - selectionY);
     const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
     const $grid = $('<span>')
       .addClass('cellcanvas-grid')
@@ -1739,9 +1808,14 @@ class EditorController {
     for (let y = 0; y < cellMap.height; y += 1) {
       for (let x = 0; x < cellMap.width; x += 1) {
         const cell = cellIndex.get(`${x},${y}`) ?? { char: ' ', role: 'empty' };
+        const isSelected = x >= selectionX
+          && x < selectionX + selectionWidth
+          && y >= selectionY
+          && y < selectionY + selectionHeight;
         const $cell = $('<button>')
           .addClass('cellcanvas-cell')
           .toggleClass('is-active', x === activeCell.x && y === activeCell.y)
+          .toggleClass('is-selected', isSelected)
           .attr('type', 'button')
           .attr('role', 'gridcell')
           .attr('data-cellcanvas-cell', 'true')
@@ -1762,6 +1836,25 @@ class EditorController {
   }
 
   /**
+   * 从 CellCanvas 草稿刷新预览结果、元信息和网格。
+   *
+   * @param {object} draft CellCanvas 草稿。
+   */
+  refreshCellCanvasDraft(draft) {
+    const cellMap = getActiveCellMap(draft);
+    this.result = {
+      content: cellCanvasDraftToPlainText(draft),
+      rows: cellMap.height,
+      cols: cellMap.width,
+      duration: 0,
+      draft,
+      kind: 'cellcanvas',
+    };
+    this.renderCellCanvasPreview(draft);
+    $(DOM.editorMeta).text(this.t('editor.metaReady', { cols: cellMap.width, rows: cellMap.height }));
+  }
+
+  /**
    * 选择 CellCanvas 预览中的单个字素格。
    *
    * @param {HTMLElement} target 被点击的字素格按钮。
@@ -1772,20 +1865,12 @@ class EditorController {
     try {
       const x = Number($(target).attr('data-cellcanvas-x'));
       const y = Number($(target).attr('data-cellcanvas-y'));
-      const draft = JSON.parse(this.workspace.cellCanvasSource);
-      validateCellCanvasDocumentDraft(draft);
-      draft.editorSession.activeCell = { x, y };
-      draft.editorSession.selection = { kind: 'single-cell', x, y, width: 1, height: 1 };
+      const draft = setCellCanvasSelectionDraft(
+        JSON.parse(this.workspace.cellCanvasSource),
+        { x, y, width: 1, height: 1 },
+      );
       this.commitCellCanvasDraft(draft);
-      this.renderCellCanvasPreview(draft);
-      this.result = {
-        content: cellCanvasDraftToPlainText(draft),
-        rows: getActiveCellMap(draft).height,
-        cols: getActiveCellMap(draft).width,
-        duration: 0,
-        draft,
-        kind: 'cellcanvas',
-      };
+      this.refreshCellCanvasDraft(draft);
       this.setStatus('editor.status.cellSelected', { x, y }, 'info');
     } catch (error) {
       this.handleEditorError(error);
@@ -1807,20 +1892,120 @@ class EditorController {
         fg: $(DOM.editorCellCanvasFg).val(),
         bg: $(DOM.editorCellCanvasBg).val(),
       });
-      const cellMap = getActiveCellMap(nextDraft);
       this.commitCellCanvasDraft(nextDraft);
-      this.renderCellCanvasPreview(nextDraft);
-      this.result = {
-        content: cellCanvasDraftToPlainText(nextDraft),
-        rows: cellMap.height,
-        cols: cellMap.width,
-        duration: 0,
-        draft: nextDraft,
-        kind: 'cellcanvas',
-      };
-      $(DOM.editorMeta).text(this.t('editor.metaReady', { cols: cellMap.width, rows: cellMap.height }));
+      this.refreshCellCanvasDraft(nextDraft);
       this.setStatus('editor.status.cellUpdated', {}, 'success');
     } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 应用矩形选区控件中的坐标。
+   */
+  applyCellCanvasSelection() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = setCellCanvasSelectionDraft(JSON.parse(this.workspace.cellCanvasSource), {
+        x: Number($(DOM.editorCellCanvasSelectX).val()),
+        y: Number($(DOM.editorCellCanvasSelectY).val()),
+        width: Number($(DOM.editorCellCanvasSelectWidth).val()),
+        height: Number($(DOM.editorCellCanvasSelectHeight).val()),
+      });
+      const selection = draft.editorSession.selection;
+      this.commitCellCanvasDraft(draft);
+      this.refreshCellCanvasDraft(draft);
+      this.setStatus('editor.status.selectionApplied', {
+        width: selection.width,
+        height: selection.height,
+      }, 'info');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 复制当前 CellCanvas 选区。
+   */
+  copyCellCanvasSelection() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = copyCellCanvasSelectionDraft(JSON.parse(this.workspace.cellCanvasSource));
+      const clipboard = draft.editorSession.clipboard;
+      this.commitCellCanvasDraft(draft);
+      this.refreshCellCanvasDraft(draft);
+      this.setStatus('editor.status.selectionCopied', {
+        width: clipboard.width,
+        height: clipboard.height,
+      }, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 将剪贴板内容粘贴到选区起点。
+   */
+  pasteCellCanvasClipboard() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const selection = draft.editorSession?.selection ?? draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+      const nextDraft = pasteCellCanvasClipboardDraft(draft, selection.x, selection.y);
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      this.setStatus('editor.status.selectionPasted', {}, 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('clipboard')) {
+        this.setStatus('editor.status.clipboardEmpty', {}, 'error');
+        return;
+      }
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 撤销最近一次 CellCanvas 修改。
+   */
+  undoCellCanvasHistory() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const nextDraft = undoCellCanvasHistoryDraft(JSON.parse(this.workspace.cellCanvasSource));
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      this.setStatus('editor.status.undoDone', {}, 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('history')) {
+        this.setStatus('editor.status.historyEmpty', {}, 'error');
+        return;
+      }
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 重做下一次 CellCanvas 修改。
+   */
+  redoCellCanvasHistory() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const nextDraft = redoCellCanvasHistoryDraft(JSON.parse(this.workspace.cellCanvasSource));
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      this.setStatus('editor.status.redoDone', {}, 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('history')) {
+        this.setStatus('editor.status.historyEmpty', {}, 'error');
+        return;
+      }
       this.handleEditorError(error);
     }
   }

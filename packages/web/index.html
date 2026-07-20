@@ -426,6 +426,30 @@
             </label>
             <button class="btn primary" id="editorCellCanvasApply" type="button" data-i18n="cellcanvas.apply">应用</button>
           </div>
+          <span class="editor-section-label" data-i18n="cellcanvas.selection">选区</span>
+          <div class="editor-cellcanvas-controls">
+            <label for="editorCellCanvasSelectX">
+              <span data-i18n="cellcanvas.x">X</span>
+              <input id="editorCellCanvasSelectX" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasSelectY">
+              <span data-i18n="cellcanvas.y">Y</span>
+              <input id="editorCellCanvasSelectY" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasSelectWidth">
+              <span data-i18n="cellcanvas.width">宽</span>
+              <input id="editorCellCanvasSelectWidth" type="number" min="1" step="1" value="1">
+            </label>
+            <label for="editorCellCanvasSelectHeight">
+              <span data-i18n="cellcanvas.height">高</span>
+              <input id="editorCellCanvasSelectHeight" type="number" min="1" step="1" value="1">
+            </label>
+            <button class="btn" id="editorCellCanvasSelect" type="button" data-i18n="cellcanvas.select">选择</button>
+            <button class="btn" id="editorCellCanvasCopy" type="button" data-i18n="cellcanvas.copy">复制</button>
+            <button class="btn" id="editorCellCanvasPaste" type="button" data-i18n="cellcanvas.paste">粘贴</button>
+            <button class="btn" id="editorCellCanvasUndo" type="button" data-i18n="cellcanvas.undo">撤销</button>
+            <button class="btn" id="editorCellCanvasRedo" type="button" data-i18n="cellcanvas.redo">重做</button>
+          </div>
           <p class="field-help" data-i18n="cellcanvas.help">点击预览网格中的字素格后，可在这里修改单格内容和颜色。</p>
         </div>
       </section>

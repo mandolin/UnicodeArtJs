@@ -694,6 +694,45 @@ async function main() {
       if (!source.includes('"char": "#"')) throw new Error('CellCanvas draft source did not persist the cell edit');
     });
 
+    await test('supports CellCanvas rectangle selection clipboard and history', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.click('#editorLoadPreset');
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid]', { timeout: 5000 });
+
+      await page.fill('#editorCellCanvasSelectX', '0');
+      await page.fill('#editorCellCanvasSelectY', '0');
+      await page.fill('#editorCellCanvasSelectWidth', '2');
+      await page.fill('#editorCellCanvasSelectHeight', '1');
+      await page.click('#editorCellCanvasSelect');
+      await page.waitForFunction(() => document.querySelectorAll('.cellcanvas-cell.is-selected').length === 2);
+
+      await page.click('#editorCellCanvasCopy');
+      await page.fill('#editorCellCanvasSelectX', '2');
+      await page.fill('#editorCellCanvasSelectY', '0');
+      await page.click('#editorCellCanvasSelect');
+      await page.click('#editorCellCanvasPaste');
+      await page.waitForFunction(() => (
+        document.querySelector('[data-cellcanvas-x="2"][data-cellcanvas-y="0"]')?.textContent === '|'
+        && document.querySelector('[data-cellcanvas-x="3"][data-cellcanvas-y="0"]')?.textContent === '|'
+      ));
+
+      await page.click('#editorCellCanvasUndo');
+      await page.waitForFunction(() => (
+        document.querySelector('[data-cellcanvas-x="2"][data-cellcanvas-y="0"]')?.textContent === '\u00a0'
+        && document.querySelector('[data-cellcanvas-x="3"][data-cellcanvas-y="0"]')?.textContent === '/'
+      ));
+
+      await page.click('#editorCellCanvasRedo');
+      await page.waitForFunction(() => (
+        document.querySelector('[data-cellcanvas-x="2"][data-cellcanvas-y="0"]')?.textContent === '|'
+        && document.querySelector('[data-cellcanvas-x="3"][data-cellcanvas-y="0"]')?.textContent === '|'
+      ));
+
+      const source = await page.inputValue('#editorSource');
+      if (!source.includes('"kind": "paste-selection"')) throw new Error('CellCanvas history did not record paste operation');
+    });
+
     await test('rejects invalid imports without replacing the current editor source', async () => {
       const before = await page.inputValue('#editorSource');
       await page.setInputFiles('#editorImportFile', {

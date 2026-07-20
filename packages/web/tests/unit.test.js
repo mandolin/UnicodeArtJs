@@ -13,8 +13,15 @@ import {
 import {
   CELL_CANVAS_DRAFT_SCHEMA,
   cellCanvasDraftToPlainText,
+  copyCellCanvasSelection,
   createCellCanvasDraftFromPreset,
   createDefaultCellCanvasDraft,
+  getCellCanvasHistoryState,
+  getCellCanvasSelectionCells,
+  pasteCellCanvasClipboard,
+  redoCellCanvasHistory,
+  setCellCanvasSelection,
+  undoCellCanvasHistory,
   updateCellCanvasCell,
   validateCellCanvasDocumentDraft,
 } from '../src/cellcanvas.js';
@@ -118,6 +125,37 @@ describe('CellCanvas固定网格草稿', () => {
     assertEqual(cellCanvasDraftToPlainText(nextDraft).startsWith('#'), true);
     assertEqual(nextDraft.editorSession.activeCell.x, 0);
     assertEqual(nextDraft.editorSession.activeCell.y, 0);
+    assertEqual(getCellCanvasHistoryState(nextDraft).canUndo, true);
+  });
+
+  it('矩形选区可复制并粘贴到新位置', () => {
+    let draft = createDefaultCellCanvasDraft();
+    draft = setCellCanvasSelection(draft, { x: 0, y: 0, width: 2, height: 1 });
+
+    const selected = getCellCanvasSelectionCells(draft);
+    assertEqual(selected.selection.kind, 'rectangle');
+    assertEqual(selected.cells.length, 2);
+
+    draft = copyCellCanvasSelection(draft);
+    draft = setCellCanvasSelection(draft, { x: 2, y: 0, width: 2, height: 1 });
+    const pasted = pasteCellCanvasClipboard(draft, 2, 0);
+
+    const firstLine = cellCanvasDraftToPlainText(pasted).split('\n')[0];
+    assertEqual(firstLine.slice(0, 4), '||||');
+    assertEqual(getCellCanvasHistoryState(pasted).canUndo, true);
+  });
+
+  it('撤销和重做可恢复CellCanvas历史操作', () => {
+    let draft = createDefaultCellCanvasDraft();
+    draft = updateCellCanvasCell(draft, 0, 0, { char: '#' });
+
+    const undone = undoCellCanvasHistory(draft);
+    assertEqual(cellCanvasDraftToPlainText(undone).startsWith('|'), true);
+    assertEqual(getCellCanvasHistoryState(undone).canRedo, true);
+
+    const redone = redoCellCanvasHistory(undone);
+    assertEqual(cellCanvasDraftToPlainText(redone).startsWith('#'), true);
+    assertEqual(getCellCanvasHistoryState(redone).canRedo, false);
   });
 
 });
