@@ -342,6 +342,7 @@
           <select id="editorKind">
             <option value="document" data-i18n="editor.kind.document">布局文档</option>
             <option value="font" data-i18n="editor.kind.font">UAF 艺术字字体</option>
+            <option value="cellcanvas" data-i18n="editor.kind.cellcanvas">CellCanvas 字素画</option>
           </select>
         </div>
 
@@ -372,7 +373,7 @@
 
         <div class="editor-file-actions" aria-label="导入导出" data-i18n-aria-label="editor.fileActions">
           <button class="btn" id="editorImport" type="button" data-i18n="editor.import">导入 JSON</button>
-          <input id="editorImportFile" type="file" accept="application/json,.json,.uafont.json" hidden>
+          <input id="editorImportFile" type="file" accept="application/json,.json,.uafont.json,.cellcanvas-draft.json" hidden>
           <button class="btn" id="editorExport" type="button" data-i18n="editor.export">导出 JSON</button>
         </div>
 
@@ -398,6 +399,34 @@
             <input id="editorFontSample" type="text" value="A?" maxlength="160">
             <button class="btn" id="editorEmbedFont" type="button" data-i18n="editor.embedFont">嵌入文档</button>
           </div>
+        </div>
+
+        <div class="editor-cellcanvas-options" id="editorCellCanvasOptions" hidden>
+          <span class="editor-section-label" data-i18n="cellcanvas.section">CellCanvas 单格编辑</span>
+          <div class="editor-cellcanvas-controls">
+            <label for="editorCellCanvasX">
+              <span data-i18n="cellcanvas.x">X</span>
+              <input id="editorCellCanvasX" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasY">
+              <span data-i18n="cellcanvas.y">Y</span>
+              <input id="editorCellCanvasY" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasChar">
+              <span data-i18n="cellcanvas.char">字素</span>
+              <input id="editorCellCanvasChar" type="text" maxlength="4" value=" ">
+            </label>
+            <label for="editorCellCanvasFg">
+              <span data-i18n="cellcanvas.fg">前景色</span>
+              <input id="editorCellCanvasFg" type="text" maxlength="40" placeholder="#111827">
+            </label>
+            <label for="editorCellCanvasBg">
+              <span data-i18n="cellcanvas.bg">背景色</span>
+              <input id="editorCellCanvasBg" type="text" maxlength="40" placeholder="transparent">
+            </label>
+            <button class="btn primary" id="editorCellCanvasApply" type="button" data-i18n="cellcanvas.apply">应用</button>
+          </div>
+          <p class="field-help" data-i18n="cellcanvas.help">点击预览网格中的字素格后，可在这里修改单格内容和颜色。</p>
         </div>
       </section>
 

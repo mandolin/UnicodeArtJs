@@ -1666,6 +1666,7 @@ details.config-details summary:hover {
 .editor-control-group,
 .editor-source-group,
 .editor-font-options,
+.editor-cellcanvas-options,
 .editor-extension-section {
   display: flex;
   flex-direction: column;
@@ -1673,13 +1674,15 @@ details.config-details summary:hover {
 }
 
 /* `hidden` 的 UA 样式会被上面的 display:flex 覆盖，需在组件层明确恢复隐藏语义。 */
-.editor-font-options[hidden] {
+.editor-font-options[hidden],
+.editor-cellcanvas-options[hidden] {
   display: none;
 }
 
 .editor-control-group > label,
 .editor-source-group > label,
 .editor-font-options > label,
+.editor-cellcanvas-options > label,
 .editor-section-label {
   color: var(--text-secondary);
   font-size: 0.8rem;
@@ -1688,7 +1691,8 @@ details.config-details summary:hover {
 
 .editor-control-group select,
 .editor-control-group input,
-.editor-font-options input {
+.editor-font-options input,
+.editor-cellcanvas-options input {
   min-width: 0;
   width: 100%;
   padding: 6px 10px;
@@ -1702,6 +1706,8 @@ details.config-details summary:hover {
 .editor-control-group select:focus,
 .editor-control-group input:focus,
 .editor-font-options input:focus,
+.editor-cellcanvas-options input:focus,
+.cellcanvas-cell:focus,
 .editor-source:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
@@ -1736,6 +1742,33 @@ details.config-details summary:hover {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--bg-tertiary);
+}
+
+.editor-cellcanvas-options {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-tertiary);
+}
+
+.editor-cellcanvas-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.editor-cellcanvas-controls label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.editor-cellcanvas-controls .btn {
+  align-self: end;
+  min-height: 32px;
 }
 
 .editor-extension-status {
@@ -1810,6 +1843,53 @@ details.config-details summary:hover {
 
 .editor-preview-container {
   min-height: 360px;
+}
+
+.cellcanvas-grid {
+  display: inline-grid;
+  grid-template-columns: repeat(var(--cellcanvas-cols), 1.55rem);
+  grid-auto-rows: 1.55rem;
+  gap: 1px;
+  align-items: stretch;
+  justify-items: stretch;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background:
+    linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+    var(--bg-preview);
+  background-size: 1.55rem 1.55rem;
+}
+
+.cellcanvas-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cellcanvas-cell:hover {
+  border-color: var(--color-primary);
+  background: rgba(74, 144, 217, 0.08);
+}
+
+.cellcanvas-cell.is-active {
+  border-color: var(--color-primary);
+  background: rgba(74, 144, 217, 0.16);
+}
+
+.cellcanvas-cell[data-cellcanvas-role='effect'] {
+  color: var(--color-primary);
 }
 
 @media (max-width: 900px) {

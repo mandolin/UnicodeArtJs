@@ -663,6 +663,37 @@ async function main() {
       if (!source.includes('"art-font-text"')) throw new Error('Embedded document source is missing art-font-text');
     });
 
+    await test('renders and edits a CellCanvas fixed grid alpha draft', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.waitForSelector('#editorCellCanvasOptions:not([hidden])', { timeout: 3000 });
+      await page.click('#editorLoadPreset');
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="8"][data-cellcanvas-height="2"]', {
+        timeout: 5000,
+      });
+
+      const readFirstCellCanvasLine = async () => await page.$$eval(
+        '[data-cellcanvas-cell]',
+        (cells) => cells.slice(0, 8).map((cell) => (
+          cell.textContent === '\u00a0' ? ' ' : cell.textContent
+        )).join(''),
+      );
+      const before = await readFirstCellCanvasLine();
+      if (before !== '|| /\\ _|') throw new Error('CellCanvas preset text was not rendered');
+
+      await page.click('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
+      await page.fill('#editorCellCanvasChar', '#');
+      await page.click('#editorCellCanvasApply');
+      await page.waitForFunction(() => (
+        document.querySelector('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]')?.textContent === '#'
+      ));
+
+      const after = await readFirstCellCanvasLine();
+      const source = await page.inputValue('#editorSource');
+      if (after !== '#| /\\ _|') throw new Error('CellCanvas single-cell preview did not update');
+      if (!source.includes('"char": "#"')) throw new Error('CellCanvas draft source did not persist the cell edit');
+    });
+
     await test('rejects invalid imports without replacing the current editor source', async () => {
       const before = await page.inputValue('#editorSource');
       await page.setInputFiles('#editorImportFile', {

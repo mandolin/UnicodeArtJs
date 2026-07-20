@@ -31,6 +31,16 @@ import {
   createCanvasFontAvailabilityChecker,
   getFontAvailabilitySummary,
 } from './font-availability.js';
+import {
+  CELL_CANVAS_DRAFT_SCHEMA,
+  CELL_CANVAS_PRESETS,
+  cellCanvasDraftToPlainText,
+  createDefaultCellCanvasDraft,
+  createCellCanvasDraftFromPreset,
+  getActiveCellMap,
+  updateCellCanvasCell,
+  validateCellCanvasDocumentDraft,
+} from './cellcanvas.js';
 
 //#region 🟩 应用状态
 
@@ -106,10 +116,13 @@ const UI_MESSAGES = {
     'editor.kind': '编辑内容',
     'editor.kind.document': '布局文档',
     'editor.kind.font': 'UAF 艺术字字体',
+    'editor.kind.cellcanvas': 'CellCanvas 字素画',
     'editor.preset': '内置示例',
     'editor.preset.documentTable': '标题表格',
     'editor.preset.documentArtFont': '嵌入艺术字 Banner',
     'editor.preset.fontLine': '线条艺术字',
+    'editor.preset.cellcanvasLineBanner': '线条 Banner 网格',
+    'editor.preset.cellcanvasShadow': '阴影 TextFx 网格',
     'editor.loadPreset': '载入',
     'editor.templateName': '模板名称',
     'editor.templateNamePlaceholder': '例如：我的标题表格',
@@ -149,6 +162,16 @@ const UI_MESSAGES = {
     'editor.status.templateSelectionRequired': '请选择一个本地模板',
     'editor.status.copyDone': '预览已复制',
     'editor.status.copyFailed': '复制失败，请手动选择预览内容',
+    'editor.status.cellSelected': '已选中字素格 ({x}, {y})',
+    'editor.status.cellUpdated': '字素格已更新',
+    'cellcanvas.section': 'CellCanvas 单格编辑',
+    'cellcanvas.x': 'X',
+    'cellcanvas.y': 'Y',
+    'cellcanvas.char': '字素',
+    'cellcanvas.fg': '前景色',
+    'cellcanvas.bg': '背景色',
+    'cellcanvas.apply': '应用',
+    'cellcanvas.help': '点击预览网格中的字素格后，可在这里修改单格内容和颜色。',
     'gallery.region': 'UnicodeArtJs 作品画廊',
     'gallery.previewRegion': '作品字符画预览',
     'gallery.title': 'UnicodeArtJs 作品画廊',
@@ -443,10 +466,13 @@ const UI_MESSAGES = {
     'editor.kind': 'Content type',
     'editor.kind.document': 'Layout document',
     'editor.kind.font': 'UAF art font',
+    'editor.kind.cellcanvas': 'CellCanvas glyph art',
     'editor.preset': 'Built-in example',
     'editor.preset.documentTable': 'Header table',
     'editor.preset.documentArtFont': 'Embedded art-font banner',
     'editor.preset.fontLine': 'Line art font',
+    'editor.preset.cellcanvasLineBanner': 'Line banner grid',
+    'editor.preset.cellcanvasShadow': 'Shadow TextFx grid',
     'editor.loadPreset': 'Load',
     'editor.templateName': 'Template name',
     'editor.templateNamePlaceholder': 'Example: My header table',
@@ -486,6 +512,16 @@ const UI_MESSAGES = {
     'editor.status.templateSelectionRequired': 'Choose a local template',
     'editor.status.copyDone': 'Preview copied',
     'editor.status.copyFailed': 'Copy failed. Select the preview content manually.',
+    'editor.status.cellSelected': 'Glyph cell selected ({x}, {y})',
+    'editor.status.cellUpdated': 'Glyph cell updated',
+    'cellcanvas.section': 'CellCanvas single-cell editing',
+    'cellcanvas.x': 'X',
+    'cellcanvas.y': 'Y',
+    'cellcanvas.char': 'Glyph',
+    'cellcanvas.fg': 'Foreground',
+    'cellcanvas.bg': 'Background',
+    'cellcanvas.apply': 'Apply',
+    'cellcanvas.help': 'Click a glyph cell in the preview grid, then adjust its content and colors here.',
     'gallery.region': 'UnicodeArtJs art gallery',
     'gallery.previewRegion': 'Artwork preview',
     'gallery.title': 'UnicodeArtJs Art Gallery',
@@ -887,6 +923,13 @@ const DOM = {
   editorFontOptions: '#editorFontOptions',
   editorFontSample: '#editorFontSample',
   editorEmbedFont: '#editorEmbedFont',
+  editorCellCanvasOptions: '#editorCellCanvasOptions',
+  editorCellCanvasX: '#editorCellCanvasX',
+  editorCellCanvasY: '#editorCellCanvasY',
+  editorCellCanvasChar: '#editorCellCanvasChar',
+  editorCellCanvasFg: '#editorCellCanvasFg',
+  editorCellCanvasBg: '#editorCellCanvasBg',
+  editorCellCanvasApply: '#editorCellCanvasApply',
   editorStatus: '#editorStatus',
   editorFormatLabel: '#editorFormatLabel',
   editorValidate: '#editorValidate',
@@ -1335,6 +1378,12 @@ function getEditorBuiltinTemplates() {
       labelKey: 'editor.preset.fontLine',
       source: JSON.stringify(font, null, 2),
     },
+    ...CELL_CANVAS_PRESETS.map((preset) => ({
+      id: preset.id,
+      kind: 'cellcanvas',
+      labelKey: preset.labelKey,
+      source: JSON.stringify(createCellCanvasDraftFromPreset(preset.id), null, 2),
+    })),
   ];
 }
 
@@ -1345,6 +1394,7 @@ function createDefaultEditorWorkspace() {
     kind: 'document',
     documentSource: templates.find((template) => template.id === 'document-table').source,
     fontSource: templates.find((template) => template.id === 'font-line').source,
+    cellCanvasSource: JSON.stringify(createDefaultCellCanvasDraft(), null, 2),
     fontSample: 'A?',
   };
 }
@@ -1390,6 +1440,8 @@ class EditorController {
     $doc.on('click', DOM.editorExtensionInspect, () => $(DOM.editorExtensionFile).click());
     $doc.on('change', DOM.editorExtensionFile, (event) => this.inspectExtensionManifest(event));
     $doc.on('click', DOM.editorEmbedFont, () => this.embedFontInDocument());
+    $doc.on('click', '[data-cellcanvas-cell]', (event) => this.selectCellCanvasCell(event.currentTarget));
+    $doc.on('click', DOM.editorCellCanvasApply, () => this.applyCellCanvasCellEdit());
     $doc.on('click', DOM.editorCopy, () => this.copyPreview());
   }
 
@@ -1420,17 +1472,20 @@ class EditorController {
   }
 
   getCurrentSource() {
-    return this.workspace.kind === 'font' ? this.workspace.fontSource : this.workspace.documentSource;
+    if (this.workspace.kind === 'font') return this.workspace.fontSource;
+    if (this.workspace.kind === 'cellcanvas') return this.workspace.cellCanvasSource;
+    return this.workspace.documentSource;
   }
 
   updateCurrentSource(source) {
     if (this.workspace.kind === 'font') this.workspace.fontSource = source;
+    else if (this.workspace.kind === 'cellcanvas') this.workspace.cellCanvasSource = source;
     else this.workspace.documentSource = source;
     this.persistWorkspace();
   }
 
   changeKind(kind) {
-    if (kind !== 'document' && kind !== 'font') return;
+    if (kind !== 'document' && kind !== 'font' && kind !== 'cellcanvas') return;
     this.workspace.kind = kind;
     this.persistWorkspace();
     this.syncControlsFromWorkspace();
@@ -1448,12 +1503,18 @@ class EditorController {
    * 按通常流程校验、渲染和保存。本方法只负责明确的本地工作区交接。
    */
   openExternalSource(kind, source, sample) {
-    const workspaceKind = kind === 'unicode-art-font' ? 'font' : 'document';
+    const workspaceKind = kind === 'unicode-art-font'
+      ? 'font'
+      : kind === 'cellcanvas'
+        ? 'cellcanvas'
+        : 'document';
     if (typeof source !== 'string' || !source.trim()) return;
     this.workspace.kind = workspaceKind;
     if (workspaceKind === 'font') {
       this.workspace.fontSource = source;
       if (typeof sample === 'string' && sample) this.workspace.fontSample = sample;
+    } else if (workspaceKind === 'cellcanvas') {
+      this.workspace.cellCanvasSource = source;
     } else {
       this.workspace.documentSource = source;
     }
@@ -1473,8 +1534,13 @@ class EditorController {
 
   updateKindUi() {
     const isFont = this.workspace.kind === 'font';
+    const isCellCanvas = this.workspace.kind === 'cellcanvas';
     $(DOM.editorFontOptions).prop('hidden', !isFont);
-    $(DOM.editorFormatLabel).text(isFont ? 'unicode-art-font@1' : 'semantic-document@1');
+    $(DOM.editorCellCanvasOptions).prop('hidden', !isCellCanvas);
+    $(DOM.editorFormatLabel).text(
+      isFont ? 'unicode-art-font@1' : isCellCanvas ? CELL_CANVAS_DRAFT_SCHEMA : 'semantic-document@1',
+    );
+    if (isCellCanvas) this.syncCellCanvasControlsFromSource();
   }
 
   populatePresetSelect() {
@@ -1512,6 +1578,7 @@ class EditorController {
     if (!template) return;
     this.updateCurrentSource(template.source);
     $(DOM.editorSource).val(template.source);
+    this.syncCellCanvasControlsFromSource();
     this.result = null;
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
   }
@@ -1524,6 +1591,16 @@ class EditorController {
         kind,
         value: font,
         summary: `${font.meta.name} · ${Object.keys(font.glyphs).length}`,
+      };
+    }
+
+    if (kind === 'cellcanvas') {
+      const draft = JSON.parse(source);
+      const summary = validateCellCanvasDocumentDraft(draft);
+      return {
+        kind,
+        value: draft,
+        summary: `${summary.width}x${summary.height} · ${summary.cells}`,
       };
     }
 
@@ -1564,7 +1641,7 @@ class EditorController {
       let result;
       if (validated.kind === 'document') {
         result = await this.getCoreAdapter().semanticDocumentToArt(validated.value, config, { grid: true });
-      } else {
+      } else if (validated.kind === 'font') {
         const rendered = this.getCoreAdapter().renderUnicodeArtFontText(
           validated.value,
           this.workspace.fontSample || '?',
@@ -1576,17 +1653,175 @@ class EditorController {
         );
         const content = config.box ? this.getCoreAdapter().boxText(rendered.content, config.box) : rendered.content;
         result = { content, rows: rendered.rows, cols: rendered.cols, duration: 0 };
+      } else {
+        const cellMap = getActiveCellMap(validated.value);
+        const content = cellCanvasDraftToPlainText(validated.value);
+        result = {
+          content,
+          rows: cellMap.height,
+          cols: cellMap.width,
+          duration: 0,
+          draft: validated.value,
+          kind: 'cellcanvas',
+        };
       }
 
       if (request !== this.renderGeneration) return;
       this.result = result;
-      $(DOM.editorPreview).text(result.content);
+      if (validated.kind === 'cellcanvas') {
+        this.renderCellCanvasPreview(validated.value);
+      } else {
+        $(DOM.editorPreview).text(result.content);
+      }
       $(DOM.editorMeta).text(this.t('editor.metaReady', { cols: result.cols, rows: result.rows }));
       this.setStatus('editor.status.rendered', {}, 'success');
     } catch (error) {
       if (request === this.renderGeneration) this.handleEditorError(error);
     } finally {
       if (request === this.renderGeneration) this.appController.showLoading(false);
+    }
+  }
+
+  /**
+   * 将 CellCanvas 草稿写回工作区与源码框。
+   *
+   * @param {object} draft 更新后的 CellCanvas 草稿。
+   */
+  commitCellCanvasDraft(draft) {
+    const source = JSON.stringify(draft, null, 2);
+    this.workspace.cellCanvasSource = source;
+    $(DOM.editorSource).val(source);
+    this.persistWorkspace();
+  }
+
+  /**
+   * 从当前 CellCanvas JSON 同步单格编辑控件。
+   */
+  syncCellCanvasControlsFromSource() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      validateCellCanvasDocumentDraft(draft);
+      const cellMap = getActiveCellMap(draft);
+      const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+      const x = Math.min(Math.max(Number(activeCell.x) || 0, 0), cellMap.width - 1);
+      const y = Math.min(Math.max(Number(activeCell.y) || 0, 0), cellMap.height - 1);
+      const cell = cellMap.cells.find((item) => item.x === x && item.y === y);
+
+      $(DOM.editorCellCanvasX).attr('max', String(cellMap.width - 1)).val(String(x));
+      $(DOM.editorCellCanvasY).attr('max', String(cellMap.height - 1)).val(String(y));
+      $(DOM.editorCellCanvasChar).val(cell?.char ?? ' ');
+      $(DOM.editorCellCanvasFg).val(cell?.fg ?? '');
+      $(DOM.editorCellCanvasBg).val(cell?.bg ?? '');
+    } catch {
+      // 源 JSON 正在编辑时可能暂时无效，控件保持上一次状态即可。
+    }
+  }
+
+  /**
+   * 渲染固定网格 CellCanvas 预览。
+   *
+   * @param {object} draft CellCanvas 草稿。
+   */
+  renderCellCanvasPreview(draft) {
+    const cellMap = getActiveCellMap(draft);
+    const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+    const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
+    const $grid = $('<span>')
+      .addClass('cellcanvas-grid')
+      .attr('role', 'grid')
+      .attr('data-cellcanvas-grid', 'true')
+      .attr('data-cellcanvas-width', String(cellMap.width))
+      .attr('data-cellcanvas-height', String(cellMap.height))
+      .css('--cellcanvas-cols', String(cellMap.width));
+
+    for (let y = 0; y < cellMap.height; y += 1) {
+      for (let x = 0; x < cellMap.width; x += 1) {
+        const cell = cellIndex.get(`${x},${y}`) ?? { char: ' ', role: 'empty' };
+        const $cell = $('<button>')
+          .addClass('cellcanvas-cell')
+          .toggleClass('is-active', x === activeCell.x && y === activeCell.y)
+          .attr('type', 'button')
+          .attr('role', 'gridcell')
+          .attr('data-cellcanvas-cell', 'true')
+          .attr('data-cellcanvas-x', String(x))
+          .attr('data-cellcanvas-y', String(y))
+          .attr('data-cellcanvas-role', cell.role ?? 'text')
+          .attr('aria-label', `CellCanvas ${x}, ${y}`)
+          .text(cell.char === ' ' ? '\u00a0' : cell.char);
+
+        if (cell.fg) $cell.css('color', cell.fg);
+        if (cell.bg) $cell.css('background-color', cell.bg);
+        $grid.append($cell);
+      }
+    }
+
+    $(DOM.editorPreview).empty().append($grid);
+    this.syncCellCanvasControlsFromSource();
+  }
+
+  /**
+   * 选择 CellCanvas 预览中的单个字素格。
+   *
+   * @param {HTMLElement} target 被点击的字素格按钮。
+   */
+  selectCellCanvasCell(target) {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const x = Number($(target).attr('data-cellcanvas-x'));
+      const y = Number($(target).attr('data-cellcanvas-y'));
+      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      validateCellCanvasDocumentDraft(draft);
+      draft.editorSession.activeCell = { x, y };
+      draft.editorSession.selection = { kind: 'single-cell', x, y, width: 1, height: 1 };
+      this.commitCellCanvasDraft(draft);
+      this.renderCellCanvasPreview(draft);
+      this.result = {
+        content: cellCanvasDraftToPlainText(draft),
+        rows: getActiveCellMap(draft).height,
+        cols: getActiveCellMap(draft).width,
+        duration: 0,
+        draft,
+        kind: 'cellcanvas',
+      };
+      this.setStatus('editor.status.cellSelected', { x, y }, 'info');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 应用 CellCanvas 单格编辑控件中的内容。
+   */
+  applyCellCanvasCellEdit() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const x = Number($(DOM.editorCellCanvasX).val());
+      const y = Number($(DOM.editorCellCanvasY).val());
+      const draft = JSON.parse(this.workspace.cellCanvasSource);
+      const nextDraft = updateCellCanvasCell(draft, x, y, {
+        char: $(DOM.editorCellCanvasChar).val(),
+        fg: $(DOM.editorCellCanvasFg).val(),
+        bg: $(DOM.editorCellCanvasBg).val(),
+      });
+      const cellMap = getActiveCellMap(nextDraft);
+      this.commitCellCanvasDraft(nextDraft);
+      this.renderCellCanvasPreview(nextDraft);
+      this.result = {
+        content: cellCanvasDraftToPlainText(nextDraft),
+        rows: cellMap.height,
+        cols: cellMap.width,
+        duration: 0,
+        draft: nextDraft,
+        kind: 'cellcanvas',
+      };
+      $(DOM.editorMeta).text(this.t('editor.metaReady', { cols: cellMap.width, rows: cellMap.height }));
+      this.setStatus('editor.status.cellUpdated', {}, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
     }
   }
 
@@ -1626,6 +1861,7 @@ class EditorController {
     this.updateCurrentSource(template.source);
     $(DOM.editorSource).val(template.source);
     $(DOM.editorTemplateName).val(template.name);
+    this.syncCellCanvasControlsFromSource();
     this.result = null;
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
   }
@@ -1650,7 +1886,11 @@ class EditorController {
     try {
       const source = await file.text();
       const parsed = JSON.parse(source);
-      const kind = parsed?.format === 'unicode-art-font' ? 'font' : 'document';
+      const kind = parsed?.format === 'unicode-art-font'
+        ? 'font'
+        : parsed?.schema === CELL_CANVAS_DRAFT_SCHEMA
+          ? 'cellcanvas'
+          : 'document';
       this.validateSource(source, kind);
       this.workspace.kind = kind;
       this.updateCurrentSource(source);
@@ -1706,7 +1946,11 @@ class EditorController {
   }
 
   exportSource() {
-    const extension = this.workspace.kind === 'font' ? 'uafont.json' : 'uadoc.json';
+    const extension = this.workspace.kind === 'font'
+      ? 'uafont.json'
+      : this.workspace.kind === 'cellcanvas'
+        ? 'cellcanvas-draft.json'
+        : 'uadoc.json';
     const blob = new Blob([this.getCurrentSource()], { type: 'application/json;charset=utf-8' });
     this.appController.downloadBlob(blob, `unicode-art-${this.workspace.kind}.${extension}`);
   }
@@ -1781,10 +2025,14 @@ class EditorController {
     try {
       const stored = JSON.parse(localStorage.getItem(EDITOR_WORKSPACE_STORAGE_KEY) || 'null');
       if (!stored || typeof stored !== 'object') return fallback;
+      const kind = ['document', 'font', 'cellcanvas'].includes(stored.kind) ? stored.kind : 'document';
       return {
-        kind: stored.kind === 'font' ? 'font' : 'document',
+        kind,
         documentSource: typeof stored.documentSource === 'string' ? stored.documentSource : fallback.documentSource,
         fontSource: typeof stored.fontSource === 'string' ? stored.fontSource : fallback.fontSource,
+        cellCanvasSource: typeof stored.cellCanvasSource === 'string'
+          ? stored.cellCanvasSource
+          : fallback.cellCanvasSource,
         fontSample: typeof stored.fontSample === 'string' ? stored.fontSample : fallback.fontSample,
       };
     } catch {
@@ -1798,7 +2046,7 @@ class EditorController {
       if (!Array.isArray(stored)) return [];
       return stored.filter((template) => (
         template
-        && (template.kind === 'document' || template.kind === 'font')
+        && (template.kind === 'document' || template.kind === 'font' || template.kind === 'cellcanvas')
         && typeof template.id === 'string'
         && typeof template.name === 'string'
         && typeof template.source === 'string'

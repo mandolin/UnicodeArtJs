@@ -10,6 +10,14 @@ import {
   isGenericFontFamily,
   parseFontFamilyList,
 } from '../src/font-availability.js';
+import {
+  CELL_CANVAS_DRAFT_SCHEMA,
+  cellCanvasDraftToPlainText,
+  createCellCanvasDraftFromPreset,
+  createDefaultCellCanvasDraft,
+  updateCellCanvasCell,
+  validateCellCanvasDocumentDraft,
+} from '../src/cellcanvas.js';
 
 //#region 🟩 测试框架
 
@@ -71,6 +79,45 @@ describe('字体可用性提示', () => {
     const summary = getFontAvailabilitySummary('monospace', () => false);
     assertEqual(summary.state, 'generic');
     assertEqual(summary.primaryFont, 'monospace');
+  });
+
+});
+
+//#endregion
+
+//#region 🟩 测试: CellCanvas 固定网格草稿
+
+describe('CellCanvas固定网格草稿', () => {
+
+  it('创建默认草稿并投影为纯文本', () => {
+    const draft = createDefaultCellCanvasDraft();
+    const summary = validateCellCanvasDocumentDraft(draft);
+
+    assertEqual(draft.schema, CELL_CANVAS_DRAFT_SCHEMA);
+    assertEqual(summary.width, 8);
+    assertEqual(summary.height, 2);
+    assertEqual(cellCanvasDraftToPlainText(draft), '|| /\\ _|\n\\/ || \\/');
+  });
+
+  it('保留特殊艺术TextFx网格的尾随空格', () => {
+    const draft = createCellCanvasDraftFromPreset('cellcanvas-shadow-textfx');
+    const summary = validateCellCanvasDocumentDraft(draft);
+    const lines = cellCanvasDraftToPlainText(draft).split('\n');
+
+    assertEqual(summary.width, 9);
+    assertEqual(summary.height, 3);
+    assertEqual(lines[0].length, 9);
+    assertEqual(lines[0].endsWith(' '), true);
+  });
+
+  it('单格更新不会修改原草稿对象', () => {
+    const draft = createDefaultCellCanvasDraft();
+    const nextDraft = updateCellCanvasCell(draft, 0, 0, { char: '#', fg: '#111827' });
+
+    assertEqual(cellCanvasDraftToPlainText(draft).startsWith('|'), true);
+    assertEqual(cellCanvasDraftToPlainText(nextDraft).startsWith('#'), true);
+    assertEqual(nextDraft.editorSession.activeCell.x, 0);
+    assertEqual(nextDraft.editorSession.activeCell.y, 0);
   });
 
 });
