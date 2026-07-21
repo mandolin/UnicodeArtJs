@@ -49,6 +49,16 @@ import {
   createCanvas2DSessionPatch,
   renderCellMapToCanvas2D,
 } from '../src/studio/canvas-renderer.js';
+import {
+  STUDIO_PROJECT_SCHEMA,
+  STUDIO_PROJECT_RESTORE_SUMMARY_SCHEMA,
+  STUDIO_PROJECT_STABILITY,
+  STUDIO_PROJECT_VERSION,
+  createStudioProjectCapsuleFromCellCanvasDraft,
+  createStudioProjectRestoreSummary,
+  readCellCanvasDraftFromStudioSource,
+  validateStudioProjectCapsule,
+} from '../src/studio/project-capsule.js';
 
 //#region 🟩 测试框架
 
@@ -273,6 +283,80 @@ describe('Studio Canvas 2D投影原型', () => {
     assertEqual(Array.isArray(patch.documents), false);
     assertEqual(Array.isArray(patch.resources), false);
     assertEqual(patch.diagnostics[0].code, 'UA_STUDIO_CANVAS_2D_PROJECTION');
+  });
+
+});
+
+//#endregion
+
+//#region 🟩 测试: Studio Project Capsule
+
+describe('Studio Project内部包络原型', () => {
+
+  it('可把CellCanvas草稿保存为studio-project@0并读回', () => {
+    const draft = createDefaultCellCanvasDraft();
+    const capsule = createStudioProjectCapsuleFromCellCanvasDraft(draft, {
+      appVersion: 'web-test-version',
+      surface: 'web-test',
+      projectId: 'studio-test',
+      documentId: 'doc-test',
+      projectTitle: 'Studio Test',
+      createdAt: '2026-07-22T00:00:00.000Z',
+      updatedAt: '2026-07-22T00:01:00.000Z',
+      sourceResource: {
+        id: 'resource-test',
+        kind: 'uaf',
+        fileName: 'demo.uaf.json',
+        sha256: '012345',
+        license: 'MIT',
+        localPath: 'K:\\secret\\demo.uaf.json',
+      },
+    });
+    const summary = validateStudioProjectCapsule(capsule);
+    const loaded = readCellCanvasDraftFromStudioSource(capsule);
+
+    assertEqual(capsule.schema, STUDIO_PROJECT_SCHEMA);
+    assertEqual(capsule.version, STUDIO_PROJECT_VERSION);
+    assertEqual(capsule.stability, STUDIO_PROJECT_STABILITY);
+    assertEqual(capsule.publicStableFormatDeclared, false);
+    assertEqual(capsule.app.version, 'web-test-version');
+    assertEqual(capsule.activeDocumentId, 'doc-test');
+    assertEqual(summary.width, 8);
+    assertEqual(capsule.resources[0].source.uri, 'demo.uaf.json');
+    assertEqual(JSON.stringify(capsule).includes('K:\\secret'), false);
+    assertEqual(cellCanvasDraftToPlainText(loaded), cellCanvasDraftToPlainText(draft));
+  });
+
+  it('继续兼容旧CellCanvas项目包络', () => {
+    const draft = createDefaultCellCanvasDraft();
+    const legacyEnvelope = createCellCanvasProjectEnvelope(draft, {
+      appVersion: 'legacy-test',
+      surface: 'web-test',
+    });
+    const loaded = readCellCanvasDraftFromStudioSource(legacyEnvelope);
+
+    assertEqual(legacyEnvelope.schema, CELL_CANVAS_PROJECT_SCHEMA);
+    assertEqual(cellCanvasDraftToPlainText(loaded), cellCanvasDraftToPlainText(draft));
+  });
+
+  it('本地恢复摘要只给出元信息和冲突提示', () => {
+    const draft = createDefaultCellCanvasDraft();
+    const capsule = createStudioProjectCapsuleFromCellCanvasDraft(draft, {
+      projectId: 'studio-restore',
+      documentId: 'doc-restore',
+      updatedAt: '2026-07-22T00:00:00.000Z',
+    });
+    const restore = createStudioProjectRestoreSummary(capsule, {
+      existingUpdatedAt: '2026-07-22T00:01:00.000Z',
+      storageKey: 'test-storage',
+    });
+
+    assertEqual(restore.schema, STUDIO_PROJECT_RESTORE_SUMMARY_SCHEMA);
+    assertEqual(restore.projectId, 'studio-restore');
+    assertEqual(restore.draft.width, 8);
+    assertEqual(restore.localRestore.preferredStorageKey, 'test-storage');
+    assertEqual(restore.localRestore.conflictHint, 'target-newer');
+    assertEqual(Object.prototype.hasOwnProperty.call(restore, 'documents'), false);
   });
 
 });

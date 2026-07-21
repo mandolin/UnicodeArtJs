@@ -41,13 +41,11 @@ import {
   copyCellCanvasSelection as copyCellCanvasSelectionDraft,
   createDefaultCellCanvasDraft,
   createCellCanvasDraftFromPreset,
-  createCellCanvasProjectEnvelope,
   createCellCanvasDraftFromSpecialArtResult,
   drawCellCanvasConnector,
   getActiveCellMap,
   getCellCanvasHistoryState,
   pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
-  readCellCanvasDraftFromProjectEnvelope,
   redoCellCanvasHistory as redoCellCanvasHistoryDraft,
   setCellCanvasSelection as setCellCanvasSelectionDraft,
   undoCellCanvasHistory as undoCellCanvasHistoryDraft,
@@ -55,6 +53,11 @@ import {
   validateCellCanvasDocumentDraft,
 } from './cellcanvas.js';
 import { renderCellMapToCanvas2D } from './studio/canvas-renderer.js';
+import {
+  STUDIO_PROJECT_SCHEMA,
+  createStudioProjectCapsuleFromCellCanvasDraft,
+  readCellCanvasDraftFromStudioSource,
+} from './studio/project-capsule.js';
 
 //#region 🟩 应用状态
 
@@ -1721,7 +1724,7 @@ class EditorController {
     }
 
     if (kind === 'cellcanvas') {
-      const draft = readCellCanvasDraftFromProjectEnvelope(JSON.parse(source));
+      const draft = readCellCanvasDraftFromStudioSource(JSON.parse(source));
       const summary = validateCellCanvasDocumentDraft(draft);
       return {
         kind,
@@ -1748,7 +1751,7 @@ class EditorController {
    * @returns {object} 可编辑 CellCanvas 草稿。
    */
   readCurrentCellCanvasDraft() {
-    return readCellCanvasDraftFromProjectEnvelope(JSON.parse(this.workspace.cellCanvasSource));
+    return readCellCanvasDraftFromStudioSource(JSON.parse(this.workspace.cellCanvasSource));
   }
 
   validateCurrentSource() {
@@ -2209,7 +2212,8 @@ class EditorController {
       const parsed = JSON.parse(source);
       const isSpecialArtResult = parsed?.schema === 'unicodeartjs-special-art-result@0'
         || parsed?.result?.schema === 'unicodeartjs-special-art-result@0';
-      const isCellCanvasProject = parsed?.schema === CELL_CANVAS_PROJECT_SCHEMA;
+      const isCellCanvasProject = parsed?.schema === CELL_CANVAS_PROJECT_SCHEMA
+        || parsed?.schema === STUDIO_PROJECT_SCHEMA;
       const kind = parsed?.format === 'unicode-art-font'
         ? 'font'
         : parsed?.schema === CELL_CANVAS_DRAFT_SCHEMA || isSpecialArtResult || isCellCanvasProject
@@ -2218,7 +2222,7 @@ class EditorController {
       const effectiveSource = isSpecialArtResult
         ? JSON.stringify(createCellCanvasDraftFromSpecialArtResult(parsed, { sourceFixture: file.name }), null, 2)
         : isCellCanvasProject
-          ? JSON.stringify(readCellCanvasDraftFromProjectEnvelope(parsed), null, 2)
+          ? JSON.stringify(readCellCanvasDraftFromStudioSource(parsed), null, 2)
           : source;
       this.validateSource(effectiveSource, kind);
       this.workspace.kind = kind;
@@ -2425,10 +2429,10 @@ class EditorController {
   }
 
   /**
-   * 保存 CellCanvas 内部项目文件候选。
+   * 保存 Studio project 内部项目文件候选。
    *
-   * 下载名使用 `.uart.json`，既能提醒这是 UnicodeArt 内部草稿，也避免
-   * Alpha 阶段过早宣称 `.uart` 已是公开稳定扩展名。
+   * 下载名使用 `.uart-project.json`，明确这是 Studio Alpha 内部项目包络。
+   * 文件仍不属于公开稳定格式，后续才会补跨宿主兼容矩阵和迁移策略。
    */
   saveCellCanvasProject() {
     if (this.workspace.kind !== 'cellcanvas') return;
@@ -2441,12 +2445,13 @@ class EditorController {
       } catch {
         appVersion = null;
       }
-      const envelope = createCellCanvasProjectEnvelope(draft, {
+      const capsule = createStudioProjectCapsuleFromCellCanvasDraft(draft, {
         appVersion,
         surface: 'web',
+        projectTitle: draft.document?.title,
       });
-      const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: 'application/json;charset=utf-8' });
-      this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.uart.json');
+      const blob = new Blob([JSON.stringify(capsule, null, 2)], { type: 'application/json;charset=utf-8' });
+      this.appController.downloadBlob(blob, 'unicode-art-studio.uart-project.json');
       this.setStatus('editor.status.projectSaved', {}, 'success');
     } catch (error) {
       this.handleEditorError(error);
@@ -2468,7 +2473,7 @@ class EditorController {
 
     try {
       const parsed = JSON.parse(await file.text());
-      const draft = readCellCanvasDraftFromProjectEnvelope(parsed);
+      const draft = readCellCanvasDraftFromStudioSource(parsed);
       const source = JSON.stringify(draft, null, 2);
       this.workspace.kind = 'cellcanvas';
       this.updateCurrentSource(source);
