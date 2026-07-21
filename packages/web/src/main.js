@@ -54,6 +54,7 @@ import {
   updateCellCanvasCell,
   validateCellCanvasDocumentDraft,
 } from './cellcanvas.js';
+import { renderCellMapToCanvas2D } from './studio/canvas-renderer.js';
 
 //#region 🟩 应用状态
 
@@ -2384,27 +2385,7 @@ class EditorController {
   }
 
   /**
-   * 把 canvas 颜色值收窄为浏览器可解析的 fillStyle。
-   *
-   * Canvas 对无效颜色会静默保留旧值，所以这里每次先写入兜底色，再尝试
-   * 用户色，避免坏值污染后续单格绘制。
-   *
-   * @param {CanvasRenderingContext2D} ctx Canvas 2D 上下文。
-   * @param {unknown} value 候选颜色。
-   * @param {string} fallback 兜底颜色。
-   * @returns {string} 可用于绘制的颜色。
-   */
-  resolveCanvasColor(ctx, value, fallback) {
-    const color = String(value ?? '').trim();
-    if (!color || color === 'transparent') return fallback;
-    if (window.CSS?.supports && !window.CSS.supports('color', color)) return fallback;
-    ctx.fillStyle = fallback || '#000000';
-    ctx.fillStyle = color;
-    return ctx.fillStyle;
-  }
-
-  /**
-   * 从 CellMap 逐格重绘 PNG 投影。
+   * 通过共享 Canvas 2D renderer 导出 CellMap PNG 投影。
    *
    * PNG 是 presentation projection，不是 canonical 文件格式。首轮用固定
    * cell 尺寸保证导出物稳定，后续可根据 glyph profile 扩展成可配置版式。
@@ -2417,52 +2398,19 @@ class EditorController {
       const cellMap = getActiveCellMap(draft);
       if (document.fonts?.ready) await document.fonts.ready.catch(() => {});
 
-      const scale = 2;
-      const fontSize = 18;
-      const cellWidth = 22;
-      const cellHeight = 24;
-      const padding = 18;
-      const logicalWidth = cellMap.width * cellWidth + padding * 2;
-      const logicalHeight = cellMap.height * cellHeight + padding * 2;
       const canvas = document.createElement('canvas');
       canvas.className = 'art-export-canvas';
-      canvas.width = Math.ceil(logicalWidth * scale);
-      canvas.height = Math.ceil(logicalHeight * scale);
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        this.setStatus('editor.status.pngExportFailed', {}, 'error');
-        return;
-      }
-
-      ctx.scale(scale, scale);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, logicalWidth, logicalHeight);
-      ctx.font = `${fontSize}px ${AppState.config.glyphFont}`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
-      for (let y = 0; y < cellMap.height; y += 1) {
-        for (let x = 0; x < cellMap.width; x += 1) {
-          const cell = cellIndex.get(`${x},${y}`) ?? { char: ' ', role: 'empty' };
-          const left = padding + x * cellWidth;
-          const top = padding + y * cellHeight;
-          const bg = this.resolveCanvasColor(ctx, cell.bg, '');
-          if (bg) {
-            ctx.fillStyle = bg;
-            ctx.fillRect(left, top, cellWidth, cellHeight);
-          }
-          if (cell.char !== ' ') {
-            ctx.fillStyle = this.resolveCanvasColor(
-              ctx,
-              cell.fg,
-              cell.role === 'effect' ? '#4a90d9' : '#111827',
-            );
-            ctx.fillText(cell.char, left + cellWidth / 2, top + cellHeight / 2);
-          }
-        }
-      }
+      renderCellMapToCanvas2D(cellMap, canvas, {
+        scale: 2,
+        fontSize: 18,
+        cellWidth: 22,
+        cellHeight: 24,
+        padding: 18,
+        fontFamily: AppState.config.glyphFont,
+        background: '#ffffff',
+        textColor: '#111827',
+        effectColor: '#4a90d9',
+      });
 
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) {

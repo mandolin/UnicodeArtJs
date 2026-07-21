@@ -42,6 +42,13 @@ import {
   hitTestVirtualGrid,
   normalizeVirtualGridViewport,
 } from '../src/studio/virtual-grid.js';
+import {
+  CANVAS_2D_PROJECTION_SCHEMA,
+  CANVAS_2D_SESSION_PATCH_SCHEMA,
+  createCanvas2DRenderPlan,
+  createCanvas2DSessionPatch,
+  renderCellMapToCanvas2D,
+} from '../src/studio/canvas-renderer.js';
 
 //#region 🟩 测试框架
 
@@ -168,6 +175,104 @@ describe('Studio Virtual Grid视口原型', () => {
     assertEqual(Array.isArray(patch.documents), false);
     assertEqual(Array.isArray(patch.resources), false);
     assertEqual(patch.diagnostics[0].code, 'UA_STUDIO_VIRTUAL_GRID_VISIBLE_WINDOW');
+  });
+
+});
+
+//#endregion
+
+//#region 🟩 测试: Studio Canvas 2D
+
+function createFakeCanvas() {
+  const calls = [];
+  const context = {
+    fillStyle: '',
+    font: '',
+    textAlign: '',
+    textBaseline: '',
+    save() { calls.push(['save']); },
+    restore() { calls.push(['restore']); },
+    scale(x, y) { calls.push(['scale', x, y]); },
+    fillRect(x, y, width, height) { calls.push(['fillRect', x, y, width, height, this.fillStyle]); },
+    fillText(text, x, y) { calls.push(['fillText', text, x, y, this.fillStyle, this.font]); },
+  };
+  return {
+    width: 0,
+    height: 0,
+    calls,
+    context,
+    getContext(type) {
+      return type === '2d' ? context : null;
+    },
+  };
+}
+
+describe('Studio Canvas 2D投影原型', () => {
+
+  it('创建Canvas 2D渲染计划并保留projection边界', () => {
+    const cellMap = createTestCellMap(8, 4);
+    const virtualGrid = createVirtualGridProjection(cellMap, { x: 2, y: 1, cols: 3, rows: 2 });
+    const plan = createCanvas2DRenderPlan(cellMap, {
+      visibleRect: virtualGrid.visibleRect,
+      cellWidth: 10,
+      cellHeight: 12,
+      padding: 2,
+      scale: 3,
+      fontSize: 9,
+      fontFamily: 'Test Mono',
+    });
+
+    assertEqual(plan.schema, CANVAS_2D_PROJECTION_SCHEMA);
+    assertEqual(plan.kind, 'canvas-2d-render-plan');
+    assertEqual(plan.sourceModel, 'CellMap');
+    assertEqual(plan.rendererIsSourceModel, false);
+    assertEqual(plan.visibleRect.x, 2);
+    assertEqual(plan.visibleRect.y, 1);
+    assertEqual(plan.metrics.renderedCells, 6);
+    assertEqual(plan.canvasSize.logicalWidth, 34);
+    assertEqual(plan.canvasSize.pixelWidth, 102);
+    assertEqual(plan.options.fontFamily, 'Test Mono');
+  });
+
+  it('可将CellMap绘制到Canvas 2D并生成投影描述', () => {
+    const cellMap = createTestCellMap(4, 2);
+    cellMap.cells[1].fg = '#123456';
+    cellMap.cells[1].bg = '#eeeeee';
+    cellMap.cells[2].role = 'effect';
+    const canvas = createFakeCanvas();
+    const projection = renderCellMapToCanvas2D(cellMap, canvas, {
+      cellWidth: 8,
+      cellHeight: 10,
+      padding: 1,
+      scale: 2,
+      fontSize: 7,
+      fontFamily: 'Unit Mono',
+    });
+
+    assertEqual(projection.schema, CANVAS_2D_PROJECTION_SCHEMA);
+    assertEqual(projection.kind, 'canvas-2d');
+    assertEqual(projection.rendererIsSourceModel, false);
+    assertEqual(canvas.width, 68);
+    assertEqual(canvas.height, 44);
+    assert(canvas.calls.some((call) => call[0] === 'scale' && call[1] === 2), '应按scale缩放');
+    assert(canvas.calls.some((call) => call[0] === 'fillRect' && call[5] === '#ffffff'), '应绘制背景');
+    assert(canvas.calls.some((call) => call[0] === 'fillRect' && call[5] === '#eeeeee'), '应绘制cell背景');
+    assert(canvas.calls.some((call) => call[0] === 'fillText' && call[1] === '1' && call[4] === '#123456'), '应绘制自定义前景色');
+  });
+
+  it('Canvas 2D session patch不写文档或资源根', () => {
+    const cellMap = createTestCellMap(3, 2);
+    const canvas = createFakeCanvas();
+    const projection = renderCellMapToCanvas2D(cellMap, canvas);
+    const patch = createCanvas2DSessionPatch(projection);
+
+    assertEqual(patch.schema, CANVAS_2D_SESSION_PATCH_SCHEMA);
+    assertEqual(patch.renderer.kind, 'canvas-2d');
+    assertEqual(patch.renderer.sourceModel, 'CellMap');
+    assertEqual(patch.renderer.rendererIsSourceModel, false);
+    assertEqual(Array.isArray(patch.documents), false);
+    assertEqual(Array.isArray(patch.resources), false);
+    assertEqual(patch.diagnostics[0].code, 'UA_STUDIO_CANVAS_2D_PROJECTION');
   });
 
 });
