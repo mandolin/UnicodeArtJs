@@ -13,6 +13,7 @@ import { createServer } from 'vite';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import os from 'os';
+import fs from 'fs/promises';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
@@ -907,8 +908,20 @@ async function main() {
       const projectDownload = page.waitForEvent('download');
       await page.click('#editorCellCanvasSaveProject');
       const projectFile = await projectDownload;
-      if (projectFile.suggestedFilename() !== 'unicode-art-cellcanvas.uart.json') {
+      if (projectFile.suggestedFilename() !== 'unicode-art-studio.uart-project.json') {
         throw new Error(`Unexpected CellCanvas project filename: ${projectFile.suggestedFilename()}`);
+      }
+      const projectPath = await projectFile.path();
+      if (!projectPath) throw new Error('Unable to inspect the downloaded Studio project capsule');
+      const projectCapsule = JSON.parse(await fs.readFile(projectPath, 'utf8'));
+      if (projectCapsule.schema !== 'unicodeartjs-studio-project') {
+        throw new Error(`Unexpected Studio project schema: ${projectCapsule.schema}`);
+      }
+      if (projectCapsule.version !== 'studio-project@0') {
+        throw new Error(`Unexpected Studio project version: ${projectCapsule.version}`);
+      }
+      if (projectCapsule.documents?.[0]?.draft?.document?.canvas?.width !== 3) {
+        throw new Error('Studio project capsule did not preserve the CellCanvas draft');
       }
 
       const draft = JSON.parse(await page.inputValue('#editorSource'));
