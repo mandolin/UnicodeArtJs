@@ -697,6 +697,51 @@ async function main() {
       );
     });
 
+    await test('previews deterministic Studio AI proposal without rewriting source', async () => {
+      await page.click('.mode-btn[data-mode="editor"]');
+      await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.waitForFunction(() => document.querySelector('#editorKind')?.value === 'cellcanvas');
+      await page.click('#editorLoadPreset');
+      await page.waitForSelector('#editorAiProposalSection:not([hidden])', { timeout: 3000 });
+      const before = await page.inputValue('#editorSource');
+      await page.fill('#editorAiPrompt', '标题强化');
+      await page.click('#editorAiGenerate');
+      await page.waitForFunction(
+        () => (document.querySelector('#editorAiProposalPreview')?.textContent || '').includes('preflightStatus: host-check-required'),
+        undefined,
+        { timeout: 5000 },
+      );
+      const proposalState = await page.evaluate(() => ({
+        status: document.querySelector('#editorAiStatus')?.textContent || '',
+        preview: document.querySelector('#editorAiProposalPreview')?.textContent || '',
+        acceptDisabled: document.querySelector('#editorAiAccept')?.disabled ?? true,
+      }));
+      if (proposalState.acceptDisabled) throw new Error('AI proposal preview did not enable accept review action');
+      if (!proposalState.preview.includes('provider: deterministic-mock')) {
+        throw new Error('AI proposal preview did not use deterministic mock provider');
+      }
+      if (!proposalState.preview.includes('sourcesContentAllowed: false')) {
+        throw new Error('AI proposal preview did not expose sourcesContent boundary');
+      }
+
+      await page.click('#editorAiAccept');
+      await page.waitForFunction(
+        () => (document.querySelector('#editorAiProposalPreview')?.textContent || '').includes('status: host-checked-apply-required'),
+        undefined,
+        { timeout: 3000 },
+      );
+      const afterAccept = await page.inputValue('#editorSource');
+      if (afterAccept !== before) throw new Error('Accepted AI proposal rewrote the CellCanvas source');
+
+      await page.click('#editorAiReject');
+      await page.waitForFunction(
+        () => (document.querySelector('#editorAiProposalPreview')?.textContent || '').includes('status: rejected'),
+        undefined,
+        { timeout: 3000 },
+      );
+    });
+
     await test('inspects a declaration-only extension manifest without loading resources', async () => {
       const manifest = {
         format: 'unicode-art-extension',

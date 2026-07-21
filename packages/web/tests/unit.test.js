@@ -66,6 +66,14 @@ import {
   createStudioResourceEntryFromDiscoveryState,
   formatStudioImportProposalSummary,
 } from '../src/studio/resource-entry.js';
+import {
+  STUDIO_AI_PROPOSAL_SCHEMA,
+  STUDIO_AI_REVIEW_PAYLOAD_SCHEMA,
+  createDeterministicStudioAiProposal,
+  createStudioAiReviewPayloadFromCellCanvasDraft,
+  formatStudioAiProposalSummary,
+  transitionStudioAiProposalReview,
+} from '../src/studio/ai-proposal.js';
 
 //#region 🟩 测试框架
 
@@ -444,6 +452,68 @@ describe('Studio 资源入口提案原型', () => {
     assertEqual(proposal.trustCheck.hash, 'fail');
     assertEqual(proposal.trustCheck.revocation, 'fail');
     assertEqual(proposal.confirmedByDefault, false);
+  });
+
+});
+
+//#endregion
+
+//#region 🟩 测试: Studio AI 提案预览
+
+describe('Studio AI提案预览原型', () => {
+
+  it('从CellCanvas摘要生成deterministic mock provider提案', () => {
+    const draft = setCellCanvasSelection(createDefaultCellCanvasDraft(), {
+      x: 1,
+      y: 0,
+      width: 2,
+      height: 1,
+    });
+    const payload = createStudioAiReviewPayloadFromCellCanvasDraft(draft, {
+      userRequest: '标题强化',
+      locale: 'zh-CN',
+      resourceEntryIds: ['review-workflow'],
+      trustSummary: 'hash=pass; signature=pass; revocation=pass',
+      licenseSummary: 'MIT; notice required',
+      provenanceSummary: 'reviewed same-origin resource',
+    });
+    const proposal = createDeterministicStudioAiProposal(payload);
+    const summary = formatStudioAiProposalSummary(payload, proposal);
+
+    assertEqual(payload.schema, STUDIO_AI_REVIEW_PAYLOAD_SCHEMA);
+    assertEqual(payload.provider.kind, 'deterministic-mock');
+    assertEqual(payload.provider.network, 'none');
+    assertEqual(payload.provider.apiKeyRequired, false);
+    assertEqual(payload.documentContext.selectionBounds.x, 1);
+    assertEqual(payload.resourceContext.resourceEntryIds[0], 'review-workflow');
+    assertEqual(Object.prototype.hasOwnProperty.call(payload, 'sourcesContent'), false);
+    assertEqual(Object.prototype.hasOwnProperty.call(payload, 'documents'), false);
+
+    assertEqual(proposal.schema, STUDIO_AI_PROPOSAL_SCHEMA);
+    assertEqual(proposal.status, 'preview-ready');
+    assertEqual(proposal.policy.providerDirectApplyAllowed, false);
+    assertEqual(proposal.policy.workspaceWriteAllowed, false);
+    assertEqual(proposal.policy.acceptedByUserStillRequiresHostCheckedApply, true);
+    assertEqual(proposal.outputs.map((output) => output.kind).includes('patch-preview'), true);
+    assertEqual(summary.includes('preflightStatus: host-check-required'), true);
+    assertEqual(summary.includes('sourcesContentAllowed: false'), true);
+  });
+
+  it('接受或拒绝提案只改变审查状态，不生成直接写入结果', () => {
+    const payload = createStudioAiReviewPayloadFromCellCanvasDraft(createDefaultCellCanvasDraft(), {
+      userRequest: '预览',
+    });
+    const proposal = createDeterministicStudioAiProposal(payload);
+    const accepted = transitionStudioAiProposalReview(proposal, 'accept');
+    const rejected = transitionStudioAiProposalReview(proposal, 'reject');
+
+    assertEqual(accepted.status, 'host-checked-apply-required');
+    assertEqual(accepted.review.acceptedByUserDoesNotWrite, true);
+    assertEqual(accepted.review.hostCheckedApplyRequired, true);
+    assertEqual(Object.prototype.hasOwnProperty.call(accepted, 'documentChanges'), false);
+    assertEqual(Object.prototype.hasOwnProperty.call(accepted, 'workspaceEdit'), false);
+    assertEqual(rejected.status, 'rejected');
+    assertEqual(rejected.review.action, 'rejected-by-user');
   });
 
 });

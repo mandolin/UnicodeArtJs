@@ -403,6 +403,22 @@
           <pre class="editor-resource-entry-proposal" id="editorResourceEntryProposal" aria-live="polite"></pre>
         </div>
 
+        <div class="editor-ai-proposal-section" id="editorAiProposalSection" aria-label="AI 提案预览" data-i18n-aria-label="editor.aiProposal" hidden>
+          <span class="editor-section-label" data-i18n="editor.aiProposal">AI 提案预览</span>
+          <label for="editorAiPrompt">
+            <span data-i18n="editor.aiPrompt">创作请求</span>
+            <textarea id="editorAiPrompt" rows="3" data-i18n-placeholder="editor.aiPromptPlaceholder" placeholder="例如：在当前选区预览一个标题强化建议"></textarea>
+          </label>
+          <div class="editor-file-actions">
+            <button class="btn" id="editorAiGenerate" type="button" data-i18n="editor.aiGenerate">生成提案</button>
+            <button class="btn primary" id="editorAiAccept" type="button" data-i18n="editor.aiAccept" disabled>接受预览</button>
+            <button class="btn danger" id="editorAiReject" type="button" data-i18n="editor.aiReject" disabled>拒绝</button>
+          </div>
+          <p class="field-help" data-i18n="editor.aiProposalHelp">使用确定性 mock provider 生成 review-only patch preview；不联网、不读取源码全文、不直接写项目。</p>
+          <p class="editor-ai-proposal-status" id="editorAiStatus" aria-live="polite" data-i18n="editor.aiReady">尚未生成 AI 提案</p>
+          <pre class="editor-ai-proposal-preview" id="editorAiProposalPreview" aria-live="polite"></pre>
+        </div>
+
         <div class="editor-source-group">
           <label for="editorSource" data-i18n="editor.source">Canonical JSON</label>
           <textarea id="editorSource" class="editor-source" spellcheck="false" aria-describedby="editorSourceHint"></textarea>

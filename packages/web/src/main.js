@@ -63,6 +63,12 @@ import {
   createStudioResourceEntryFromDiscoveryState,
   formatStudioImportProposalSummary,
 } from './studio/resource-entry.js';
+import {
+  createDeterministicStudioAiProposal,
+  createStudioAiReviewPayloadFromCellCanvasDraft,
+  formatStudioAiProposalSummary,
+  transitionStudioAiProposalReview,
+} from './studio/ai-proposal.js';
 
 //#region 🟩 应用状态
 
@@ -177,6 +183,19 @@ const UI_MESSAGES = {
     'editor.resourceEntryProposalBlocked': '导入提案被阻断：{reason}',
     'editor.resourceEntryImported': '资源已通过确认流程导入编辑器',
     'editor.resourceEntryFailed': '资源入口失败：{message}',
+    'editor.aiProposal': 'AI 提案预览',
+    'editor.aiProposalHelp': '使用确定性 mock provider 生成 review-only patch preview；不联网、不读取源码全文、不直接写项目。',
+    'editor.aiPrompt': '创作请求',
+    'editor.aiPromptPlaceholder': '例如：在当前选区预览一个标题强化建议',
+    'editor.aiGenerate': '生成提案',
+    'editor.aiAccept': '接受预览',
+    'editor.aiReject': '拒绝',
+    'editor.aiReady': '尚未生成 AI 提案',
+    'editor.aiNeedsCellCanvas': 'AI 提案预览首轮只支持 CellCanvas',
+    'editor.aiPreviewReady': 'AI 提案预览已生成：{status}',
+    'editor.aiAccepted': '已接受预览；仍需宿主 checked apply，当前源码未改写',
+    'editor.aiRejected': 'AI 提案已拒绝',
+    'editor.aiFailed': 'AI 提案失败：{message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': '保存和导入使用 Core 校验的 canonical JSON；浏览器不会上传内容。',
     'editor.fontSample': '预览文字',
@@ -578,6 +597,19 @@ const UI_MESSAGES = {
     'editor.resourceEntryProposalBlocked': 'Import proposal blocked: {reason}',
     'editor.resourceEntryImported': 'Resource imported into the editor through the confirmation flow',
     'editor.resourceEntryFailed': 'Resource entry failed: {message}',
+    'editor.aiProposal': 'AI proposal preview',
+    'editor.aiProposalHelp': 'Uses a deterministic mock provider to create a review-only patch preview. It never calls the network, reads full source text, or writes the project directly.',
+    'editor.aiPrompt': 'Creative request',
+    'editor.aiPromptPlaceholder': 'Example: preview a stronger title mark for the current selection',
+    'editor.aiGenerate': 'Generate proposal',
+    'editor.aiAccept': 'Accept preview',
+    'editor.aiReject': 'Reject',
+    'editor.aiReady': 'No AI proposal generated yet',
+    'editor.aiNeedsCellCanvas': 'AI proposal preview currently supports CellCanvas only',
+    'editor.aiPreviewReady': 'AI proposal preview ready: {status}',
+    'editor.aiAccepted': 'Preview accepted; host checked apply is still required and source was not rewritten',
+    'editor.aiRejected': 'AI proposal rejected',
+    'editor.aiFailed': 'AI proposal failed: {message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': 'Saving and importing use Core-validated canonical JSON. The browser does not upload your content.',
     'editor.fontSample': 'Sample text',
@@ -1050,6 +1082,13 @@ const DOM = {
   editorResourceEntryImport: '#editorResourceEntryImport',
   editorResourceEntryStatus: '#editorResourceEntryStatus',
   editorResourceEntryProposal: '#editorResourceEntryProposal',
+  editorAiProposalSection: '#editorAiProposalSection',
+  editorAiPrompt: '#editorAiPrompt',
+  editorAiGenerate: '#editorAiGenerate',
+  editorAiAccept: '#editorAiAccept',
+  editorAiReject: '#editorAiReject',
+  editorAiStatus: '#editorAiStatus',
+  editorAiProposalPreview: '#editorAiProposalPreview',
   editorSource: '#editorSource',
   editorFontOptions: '#editorFontOptions',
   editorFontSample: '#editorFontSample',
@@ -1567,6 +1606,8 @@ class EditorController {
     this.studioResourceEntries = [];
     this.selectedStudioResourceId = '';
     this.studioImportProposal = null;
+    this.studioAiPayload = null;
+    this.studioAiProposal = null;
   }
 
   initialize() {
@@ -1575,6 +1616,7 @@ class EditorController {
     this.applyGlyphFont();
     this.renderStudioResourceEntryOptions();
     this.setStudioResourceStatus('editor.resourceEntryReady');
+    this.setStudioAiStatus('editor.aiReady');
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
   }
 
@@ -1600,6 +1642,9 @@ class EditorController {
     $doc.on('change', DOM.editorResourceEntrySelect, (event) => this.selectStudioResourceEntry($(event.target).val()));
     $doc.on('click', DOM.editorResourceEntryInspect, () => this.inspectStudioResourceEntry());
     $doc.on('click', DOM.editorResourceEntryImport, () => void this.confirmStudioResourceImport());
+    $doc.on('click', DOM.editorAiGenerate, () => this.generateStudioAiProposalPreview());
+    $doc.on('click', DOM.editorAiAccept, () => this.acceptStudioAiProposalPreview());
+    $doc.on('click', DOM.editorAiReject, () => this.rejectStudioAiProposalPreview());
     $doc.on('click', DOM.editorEmbedFont, () => this.embedFontInDocument());
     $doc.on('click', '[data-cellcanvas-cell]', (event) => this.selectCellCanvasCell(event.currentTarget));
     $doc.on('click', DOM.editorCellCanvasApply, () => this.applyCellCanvasCellEdit());
@@ -1716,6 +1761,7 @@ class EditorController {
     $(DOM.editorCellCanvasExportPng).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasSaveProject).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasOpenProject).prop('hidden', !isCellCanvas);
+    $(DOM.editorAiProposalSection).prop('hidden', !isCellCanvas);
     $(DOM.editorFormatLabel).text(
       isFont ? 'unicode-art-font@1' : isCellCanvas ? CELL_CANVAS_DRAFT_SCHEMA : 'semantic-document@1',
     );
@@ -2562,6 +2608,13 @@ class EditorController {
       .attr('data-state', state);
   }
 
+  /** 更新 Studio AI proposal 状态，不改变主编辑器校验/渲染状态。 */
+  setStudioAiStatus(key, params = {}, state = 'info') {
+    $(DOM.editorAiStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
   /**
    * 载入同源资源发现状态，并在编辑器侧生成可选资源列表。
    *
@@ -2698,6 +2751,94 @@ class EditorController {
     if (imported) {
       this.setStudioResourceStatus('editor.resourceEntryImported', {}, 'success');
     }
+  }
+
+  /**
+   * 汇总当前资源入口状态，作为 AI proposal 的 summary-only resource context。
+   *
+   * 这里不会把资源正文、源码全文或本机路径交给 provider。它只携带资源 id
+   * 和用户已能在资源入口中看到的信任/许可摘要。
+   */
+  getStudioAiResourceContextSummary() {
+    const item = this.getSelectedStudioResourceItem();
+    if (!item || !this.studioImportProposal) {
+      return {
+        resourceEntryIds: [],
+        trustSummary: 'no resource entry selected',
+        licenseSummary: 'no new external resource introduced',
+        provenanceSummary: 'local Web editor summary only',
+      };
+    }
+
+    const resourceId = item.resource?.id ? String(item.resource.id) : '';
+    const trustCheck = this.studioImportProposal.trustCheck || {};
+    const license = item.resource?.license?.expression || item.artwork?.license?.expression || 'unknown';
+    return {
+      resourceEntryIds: resourceId ? [resourceId] : [],
+      trustSummary: [
+        `hash=${trustCheck.hash || 'unknown'}`,
+        `signature=${trustCheck.maintainerSignature || 'unknown'}`,
+        `revocation=${trustCheck.revocation || 'unknown'}`,
+      ].join('; '),
+      licenseSummary: `${license}; notice required`,
+      provenanceSummary: item.artwork?.license?.origin || item.resource?.license?.origin || 'reviewed same-origin resource',
+    };
+  }
+
+  /**
+   * 生成 deterministic mock provider 的 AI proposal preview。
+   *
+   * P18.6 首轮只支持 CellCanvas，并且只生成 patch preview，不改写 JSON 源码。
+   */
+  generateStudioAiProposalPreview() {
+    if (this.workspace.kind !== 'cellcanvas') {
+      this.setStudioAiStatus('editor.aiNeedsCellCanvas', {}, 'error');
+      return;
+    }
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const payload = createStudioAiReviewPayloadFromCellCanvasDraft(draft, {
+        ...this.getStudioAiResourceContextSummary(),
+        userRequest: $(DOM.editorAiPrompt).val(),
+        locale: AppState.config.locale,
+      });
+      const proposal = createDeterministicStudioAiProposal(payload);
+      this.studioAiPayload = payload;
+      this.studioAiProposal = proposal;
+      $(DOM.editorAiProposalPreview).text(formatStudioAiProposalSummary(payload, proposal));
+      $(DOM.editorAiAccept).prop('disabled', false);
+      $(DOM.editorAiReject).prop('disabled', false);
+      this.setStudioAiStatus('editor.aiPreviewReady', { status: proposal.status }, 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.studioAiPayload = null;
+      this.studioAiProposal = null;
+      $(DOM.editorAiProposalPreview).text('');
+      $(DOM.editorAiAccept).prop('disabled', true);
+      $(DOM.editorAiReject).prop('disabled', true);
+      this.setStudioAiStatus('editor.aiFailed', { message }, 'error');
+    }
+  }
+
+  /** 接受 AI proposal preview，但不直接应用 patch。 */
+  acceptStudioAiProposalPreview() {
+    if (!this.studioAiProposal || !this.studioAiPayload) return;
+    this.studioAiProposal = transitionStudioAiProposalReview(this.studioAiProposal, 'accept');
+    $(DOM.editorAiProposalPreview).text(formatStudioAiProposalSummary(this.studioAiPayload, this.studioAiProposal));
+    $(DOM.editorAiAccept).prop('disabled', true);
+    $(DOM.editorAiReject).prop('disabled', false);
+    this.setStudioAiStatus('editor.aiAccepted', {}, 'success');
+  }
+
+  /** 拒绝 AI proposal preview，不改变源码。 */
+  rejectStudioAiProposalPreview() {
+    if (!this.studioAiProposal || !this.studioAiPayload) return;
+    this.studioAiProposal = transitionStudioAiProposalReview(this.studioAiProposal, 'reject');
+    $(DOM.editorAiProposalPreview).text(formatStudioAiProposalSummary(this.studioAiPayload, this.studioAiProposal));
+    $(DOM.editorAiAccept).prop('disabled', true);
+    $(DOM.editorAiReject).prop('disabled', true);
+    this.setStudioAiStatus('editor.aiRejected', {}, 'info');
   }
 
   handleEditorError(error) {

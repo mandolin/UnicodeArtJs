@@ -1668,7 +1668,8 @@ details.config-details summary:hover {
 .editor-font-options,
 .editor-cellcanvas-options,
 .editor-extension-section,
-.editor-resource-entry-section {
+.editor-resource-entry-section,
+.editor-ai-proposal-section {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -1676,7 +1677,8 @@ details.config-details summary:hover {
 
 /* `hidden` 的 UA 样式会被上面的 display:flex 覆盖，需在组件层明确恢复隐藏语义。 */
 .editor-font-options[hidden],
-.editor-cellcanvas-options[hidden] {
+.editor-cellcanvas-options[hidden],
+.editor-ai-proposal-section[hidden] {
   display: none;
 }
 
@@ -1685,6 +1687,7 @@ details.config-details summary:hover {
 .editor-font-options > label,
 .editor-cellcanvas-options > label,
 .editor-resource-entry-section > label,
+.editor-ai-proposal-section > label,
 .editor-section-label {
   color: var(--text-secondary);
   font-size: 0.8rem;
@@ -1696,7 +1699,8 @@ details.config-details summary:hover {
 .editor-font-options input,
 .editor-cellcanvas-options input,
 .editor-cellcanvas-options select,
-.editor-resource-entry-section select {
+.editor-resource-entry-section select,
+.editor-ai-proposal-section textarea {
   min-width: 0;
   width: 100%;
   padding: 6px 10px;
@@ -1713,6 +1717,7 @@ details.config-details summary:hover {
 .editor-cellcanvas-options input:focus,
 .editor-cellcanvas-options select:focus,
 .editor-resource-entry-section select:focus,
+.editor-ai-proposal-section textarea:focus,
 .cellcanvas-cell:focus,
 .editor-source:focus {
   border-color: var(--color-primary);
@@ -1744,7 +1749,8 @@ details.config-details summary:hover {
 }
 
 .editor-extension-section,
-.editor-resource-entry-section {
+.editor-resource-entry-section,
+.editor-ai-proposal-section {
   padding: var(--spacing-sm);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -1785,7 +1791,8 @@ details.config-details summary:hover {
   line-height: 1.4;
 }
 
-.editor-resource-entry-section label {
+.editor-resource-entry-section label,
+.editor-ai-proposal-section label {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -1794,7 +1801,8 @@ details.config-details summary:hover {
   font-size: 0.76rem;
 }
 
-.editor-resource-entry-status {
+.editor-resource-entry-status,
+.editor-ai-proposal-status {
   margin: 0;
   color: var(--text-secondary);
   font-size: 0.76rem;
@@ -1802,16 +1810,23 @@ details.config-details summary:hover {
 }
 
 .editor-extension-status[data-state='success'],
-.editor-resource-entry-status[data-state='success'] {
+.editor-resource-entry-status[data-state='success'],
+.editor-ai-proposal-status[data-state='success'] {
   color: var(--color-success);
 }
 
 .editor-extension-status[data-state='error'],
-.editor-resource-entry-status[data-state='error'] {
+.editor-resource-entry-status[data-state='error'],
+.editor-ai-proposal-status[data-state='error'] {
   color: var(--color-danger);
 }
 
-.editor-resource-entry-proposal {
+.editor-ai-proposal-section textarea {
+  resize: vertical;
+}
+
+.editor-resource-entry-proposal,
+.editor-ai-proposal-preview {
   max-height: 160px;
   margin: 0;
   padding: var(--spacing-sm);
@@ -1825,7 +1840,8 @@ details.config-details summary:hover {
   white-space: pre-wrap;
 }
 
-.editor-resource-entry-proposal:empty {
+.editor-resource-entry-proposal:empty,
+.editor-ai-proposal-preview:empty {
   display: none;
 }
 
