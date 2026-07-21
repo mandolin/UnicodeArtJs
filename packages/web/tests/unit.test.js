@@ -34,6 +34,14 @@ import {
   updateCellCanvasCell,
   validateCellCanvasDocumentDraft,
 } from '../src/cellcanvas.js';
+import {
+  VIRTUAL_GRID_PROJECTION_SCHEMA,
+  VIRTUAL_GRID_SESSION_PATCH_SCHEMA,
+  createVirtualGridProjection,
+  createVirtualGridSessionPatch,
+  hitTestVirtualGrid,
+  normalizeVirtualGridViewport,
+} from '../src/studio/virtual-grid.js';
 
 //#region 🟩 测试框架
 
@@ -60,6 +68,109 @@ function assert(condition, msg) {
 function assertEqual(a, b) {
   if (a !== b) throw new Error(`Expected ${JSON.stringify(a)}, got ${JSON.stringify(b)}`);
 }
+
+//#endregion
+
+//#region 🟩 测试: Studio Virtual Grid
+
+function createTestCellMap(width, height) {
+  const cells = [];
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      cells.push({
+        x,
+        y,
+        char: String((x + y) % 10),
+        width: 1,
+        role: 'text',
+        sourceGlyph: `${x},${y}`,
+      });
+    }
+  }
+  return { width, height, cells };
+}
+
+describe('Studio Virtual Grid视口原型', () => {
+
+  it('规范化视口并只投影可见字素格', () => {
+    const cellMap = createTestCellMap(20, 10);
+    const viewport = normalizeVirtualGridViewport(cellMap, {
+      x: 18,
+      y: 9,
+      cols: 6,
+      rows: 4,
+      overscanCols: 1,
+      overscanRows: 1,
+    });
+    const projection = createVirtualGridProjection(cellMap, viewport);
+
+    assertEqual(viewport.x, 14);
+    assertEqual(viewport.y, 6);
+    assertEqual(projection.schema, VIRTUAL_GRID_PROJECTION_SCHEMA);
+    assertEqual(projection.visibleRect.x, 13);
+    assertEqual(projection.visibleRect.y, 5);
+    assertEqual(projection.visibleRect.width, 7);
+    assertEqual(projection.visibleRect.height, 5);
+    assertEqual(projection.metrics.totalCells, 200);
+    assertEqual(projection.metrics.visibleCells, 35);
+    assertEqual(projection.rows.length, 5);
+    assertEqual(projection.rows[0].length, 7);
+  });
+
+  it('投影使用cell副本且不修改CellMap源模型', () => {
+    const cellMap = createTestCellMap(8, 4);
+    const projection = createVirtualGridProjection(cellMap, { x: 2, y: 1, cols: 3, rows: 2 });
+
+    projection.cells[0].char = '#';
+
+    assertEqual(cellMap.cells.find((cell) => cell.x === 2 && cell.y === 1).char, '3');
+    assertEqual(projection.sourceModel, 'CellMap');
+    assertEqual(projection.rendererIsSourceModel, false);
+  });
+
+  it('基础命中测试可把屏幕坐标映射回CellMap坐标', () => {
+    const cellMap = createTestCellMap(12, 8);
+    const projection = createVirtualGridProjection(cellMap, { x: 4, y: 2, cols: 4, rows: 3 });
+    const hit = hitTestVirtualGrid(projection, {
+      originX: 10,
+      originY: 20,
+      clientX: 31,
+      clientY: 42,
+      cellWidth: 10,
+      cellHeight: 10,
+    });
+    const miss = hitTestVirtualGrid(projection, {
+      originX: 10,
+      originY: 20,
+      clientX: 200,
+      clientY: 42,
+      cellWidth: 10,
+      cellHeight: 10,
+    });
+
+    assertEqual(hit.hit, true);
+    assertEqual(hit.x, 6);
+    assertEqual(hit.y, 4);
+    assertEqual(hit.cell.sourceGlyph, '6,4');
+    assertEqual(miss.hit, false);
+  });
+
+  it('session patch只写入viewport和renderer诊断，不写CellMap内容', () => {
+    const cellMap = createTestCellMap(16, 8);
+    const projection = createVirtualGridProjection(cellMap, { x: 1, y: 2, cols: 5, rows: 3 });
+    const patch = createVirtualGridSessionPatch(projection);
+
+    assertEqual(patch.schema, VIRTUAL_GRID_SESSION_PATCH_SCHEMA);
+    assertEqual(patch.viewport.x, 1);
+    assertEqual(patch.renderer.kind, 'virtual-grid');
+    assertEqual(patch.renderer.rendererIsSourceModel, false);
+    assertEqual(patch.renderer.metrics.visibleCells, 15);
+    assertEqual(Array.isArray(patch.documents), false);
+    assertEqual(Array.isArray(patch.resources), false);
+    assertEqual(patch.diagnostics[0].code, 'UA_STUDIO_VIRTUAL_GRID_VISIBLE_WINDOW');
+  });
+
+});
 
 //#endregion
 
