@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * 等待 GitHub Pages 静态资源发现文件完成传播。
+ * 等待 GitHub Pages 静态部署文件完成传播。
  *
  * GitHub Pages 部署刚完成时，页面、gallery manifest 和 artwork 文件偶尔会
  * 短暂处在新旧资源混合状态。部署后 smoke test 前先跑这个脚本，确保远端
- * resource manifest、hash lock sidecar 和实际 artwork bytes 已经彼此一致。
+ * index、Vite assets、resource manifest、hash lock sidecar 和实际 artwork
+ * bytes 已经彼此一致。
  */
 
 const crypto = require('node:crypto');
@@ -13,6 +14,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const repositoryRoot = path.resolve(__dirname, '..');
+const localDistRoot = path.join(repositoryRoot, 'packages', 'web', 'dist');
 const localGalleryRoot = path.join(repositoryRoot, 'packages', 'web', 'public', 'gallery');
 const requiredSidecars = [
   'resource-manifest.json',
@@ -55,11 +57,39 @@ async function assertRemoteFileMatchesLocal(baseUrl, relativePath) {
   return { size: remoteBytes.length, sha256: remoteSha256 };
 }
 
+async function assertRemoteDistFileMatchesLocal(baseUrl, relativePath) {
+  const localPath = path.join(localDistRoot, relativePath);
+  const localBytes = fs.readFileSync(localPath);
+  const remoteBytes = await fetchBytes(new URL(relativePath.replaceAll(path.sep, '/'), baseUrl).href);
+  const localSha256 = sha256Hex(localBytes);
+  const remoteSha256 = sha256Hex(remoteBytes);
+  if (localSha256 !== remoteSha256) {
+    throw new Error(`${relativePath} has not propagated yet: ${remoteSha256} !== ${localSha256}`);
+  }
+  return { size: remoteBytes.length, sha256: remoteSha256 };
+}
+
+async function assertRemoteDistReady(baseUrl) {
+  const indexPath = path.join(localDistRoot, 'index.html');
+  if (!fs.existsSync(indexPath)) return;
+
+  await assertRemoteDistFileMatchesLocal(baseUrl, 'index.html');
+  const indexHtml = fs.readFileSync(indexPath, 'utf8');
+  const assetPaths = Array.from(indexHtml.matchAll(/(?:src|href)="\.\/(assets\/[^"]+)"/g))
+    .map((match) => match[1]);
+
+  for (const assetPath of assetPaths) {
+    await assertRemoteDistFileMatchesLocal(baseUrl, assetPath);
+  }
+}
+
 async function assertRemoteDiscoveryReady(baseUrl) {
   const pageBytes = await fetchBytes(baseUrl);
   if (!pageBytes.toString('utf8').includes('UnicodeArtJs')) {
     throw new Error('deployed page HTML does not contain UnicodeArtJs marker.');
   }
+
+  await assertRemoteDistReady(baseUrl);
 
   for (const relativePath of requiredSidecars) {
     await assertRemoteFileMatchesLocal(baseUrl, relativePath);
@@ -84,18 +114,18 @@ async function main() {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await assertRemoteDiscoveryReady(baseUrl);
-      process.stdout.write(`Pages resource discovery files are ready after ${attempt} attempt(s).\n`);
+      process.stdout.write(`Pages deployed files are ready after ${attempt} attempt(s).\n`);
       return;
     } catch (error) {
       lastError = error;
-      process.stdout.write(`Waiting for Pages resource discovery files (${attempt}/${maxAttempts}): ${error.message}\n`);
+      process.stdout.write(`Waiting for Pages deployed files (${attempt}/${maxAttempts}): ${error.message}\n`);
       if (attempt < maxAttempts) {
         await sleep(delayMs);
       }
     }
   }
 
-  throw lastError || new Error('Pages resource discovery files did not become ready.');
+  throw lastError || new Error('Pages deployed files did not become ready.');
 }
 
 main().catch((error) => {
