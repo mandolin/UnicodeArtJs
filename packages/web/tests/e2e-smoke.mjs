@@ -647,6 +647,56 @@ async function main() {
       await page.waitForFunction(() => document.querySelector('#editorKind option[value="document"]')?.textContent === '布局文档');
     });
 
+    await test('uses Studio resource entry proposal before editor import', async () => {
+      await page.click('.mode-btn[data-mode="editor"]');
+      await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
+      const before = await page.inputValue('#editorSource');
+      await page.click('#editorResourceEntryLoad');
+      await page.waitForFunction(
+        () => document.querySelectorAll('#editorResourceEntrySelect option').length >= 1
+          && !document.querySelector('#editorResourceEntrySelect')?.disabled,
+        undefined,
+        { timeout: 10_000 },
+      );
+      await page.selectOption('#editorResourceEntrySelect', 'review-workflow');
+      await page.click('#editorResourceEntryInspect');
+      await page.waitForFunction(
+        () => (document.querySelector('#editorResourceEntryProposal')?.textContent || '').includes('targetScope: editor-session-preview'),
+        undefined,
+        { timeout: 5000 },
+      );
+      const proposalState = await page.evaluate(() => ({
+        status: document.querySelector('#editorResourceEntryStatus')?.textContent || '',
+        proposal: document.querySelector('#editorResourceEntryProposal')?.textContent || '',
+        importDisabled: document.querySelector('#editorResourceEntryImport')?.disabled ?? true,
+      }));
+      if (proposalState.importDisabled) throw new Error('Studio resource proposal did not enable confirmed import');
+      if (!proposalState.proposal.includes('confirmedByDefault: false')) {
+        throw new Error('Studio resource proposal did not expose manual confirmation boundary');
+      }
+
+      await page.click('#editorResourceEntryImport');
+      await page.waitForSelector('#resourceImportDialog[open]', { timeout: 3000 });
+      await page.click('#resourceImportCancel');
+      await page.waitForFunction(
+        () => !document.querySelector('#resourceImportDialog')?.open,
+        undefined,
+        { timeout: 3000 },
+      );
+      const afterCancel = await page.inputValue('#editorSource');
+      if (afterCancel !== before) throw new Error('Canceled Studio resource import changed the editor source');
+
+      await page.click('#editorResourceEntryImport');
+      await page.waitForSelector('#resourceImportDialog[open]', { timeout: 3000 });
+      await page.click('#resourceImportConfirm');
+      await page.waitForFunction(
+        () => (document.querySelector('#editorSource')?.value || '').includes('Gallery Review Workflow')
+          && (document.querySelector('#editorResourceEntryStatus')?.dataset.state === 'success'),
+        undefined,
+        { timeout: 5000 },
+      );
+    });
+
     await test('inspects a declaration-only extension manifest without loading resources', async () => {
       const manifest = {
         format: 'unicode-art-extension',

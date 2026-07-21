@@ -58,6 +58,11 @@ import {
   createStudioProjectCapsuleFromCellCanvasDraft,
   readCellCanvasDraftFromStudioSource,
 } from './studio/project-capsule.js';
+import {
+  createStudioImportProposalFromResourceEntry,
+  createStudioResourceEntryFromDiscoveryState,
+  formatStudioImportProposalSummary,
+} from './studio/resource-entry.js';
 
 //#region 🟩 应用状态
 
@@ -158,6 +163,20 @@ const UI_MESSAGES = {
     'editor.extensionCompatible': 'Web 兼容',
     'editor.extensionIncompatible': 'Web 不兼容：{reasons}',
     'editor.extensionError': '清单无效：{message}',
+    'editor.resourceEntry': 'Studio 资源入口',
+    'editor.resourceEntryHelp': '复用本站已审核资源清单，只生成导入提案；不自动安装、不执行资源，确认后才写入当前编辑器。',
+    'editor.resourceEntrySelect': '资源',
+    'editor.resourceEntryLoad': '载入资源',
+    'editor.resourceEntryInspect': '检查提案',
+    'editor.resourceEntryImport': '确认导入',
+    'editor.resourceEntryReady': '尚未载入 Studio 资源入口',
+    'editor.resourceEntryLoading': '正在载入并校验资源',
+    'editor.resourceEntryLoaded': '已载入 {count} 个资源；请选择并检查导入提案',
+    'editor.resourceEntryEmpty': '没有可用于 Studio 的资源',
+    'editor.resourceEntryProposalReady': '导入提案已生成：{status}',
+    'editor.resourceEntryProposalBlocked': '导入提案被阻断：{reason}',
+    'editor.resourceEntryImported': '资源已通过确认流程导入编辑器',
+    'editor.resourceEntryFailed': '资源入口失败：{message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': '保存和导入使用 Core 校验的 canonical JSON；浏览器不会上传内容。',
     'editor.fontSample': '预览文字',
@@ -545,6 +564,20 @@ const UI_MESSAGES = {
     'editor.extensionCompatible': 'Web compatible',
     'editor.extensionIncompatible': 'Web incompatible: {reasons}',
     'editor.extensionError': 'Invalid manifest: {message}',
+    'editor.resourceEntry': 'Studio resource entry',
+    'editor.resourceEntryHelp': 'Reuses the reviewed same-origin resource manifest and only creates import proposals. It never auto-installs or executes resources; confirmed imports write to the current editor only.',
+    'editor.resourceEntrySelect': 'Resource',
+    'editor.resourceEntryLoad': 'Load resources',
+    'editor.resourceEntryInspect': 'Inspect proposal',
+    'editor.resourceEntryImport': 'Confirm import',
+    'editor.resourceEntryReady': 'No Studio resource entry loaded',
+    'editor.resourceEntryLoading': 'Loading and verifying resources',
+    'editor.resourceEntryLoaded': '{count} resources loaded; choose one and inspect its import proposal',
+    'editor.resourceEntryEmpty': 'No Studio resource is available',
+    'editor.resourceEntryProposalReady': 'Import proposal ready: {status}',
+    'editor.resourceEntryProposalBlocked': 'Import proposal blocked: {reason}',
+    'editor.resourceEntryImported': 'Resource imported into the editor through the confirmation flow',
+    'editor.resourceEntryFailed': 'Resource entry failed: {message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': 'Saving and importing use Core-validated canonical JSON. The browser does not upload your content.',
     'editor.fontSample': 'Sample text',
@@ -1010,6 +1043,13 @@ const DOM = {
   editorExtensionInspect: '#editorExtensionInspect',
   editorExtensionFile: '#editorExtensionFile',
   editorExtensionStatus: '#editorExtensionStatus',
+  editorResourceEntrySection: '#editorResourceEntrySection',
+  editorResourceEntrySelect: '#editorResourceEntrySelect',
+  editorResourceEntryLoad: '#editorResourceEntryLoad',
+  editorResourceEntryInspect: '#editorResourceEntryInspect',
+  editorResourceEntryImport: '#editorResourceEntryImport',
+  editorResourceEntryStatus: '#editorResourceEntryStatus',
+  editorResourceEntryProposal: '#editorResourceEntryProposal',
   editorSource: '#editorSource',
   editorFontOptions: '#editorFontOptions',
   editorFontSample: '#editorFontSample',
@@ -1524,12 +1564,17 @@ class EditorController {
     this.savedTemplates = this.loadSavedTemplates();
     this.result = null;
     this.renderGeneration = 0;
+    this.studioResourceEntries = [];
+    this.selectedStudioResourceId = '';
+    this.studioImportProposal = null;
   }
 
   initialize() {
     this.syncControlsFromWorkspace();
     this.refreshLocale();
     this.applyGlyphFont();
+    this.renderStudioResourceEntryOptions();
+    this.setStudioResourceStatus('editor.resourceEntryReady');
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
   }
 
@@ -1551,6 +1596,10 @@ class EditorController {
     $doc.on('click', DOM.editorExport, () => this.exportSource());
     $doc.on('click', DOM.editorExtensionInspect, () => $(DOM.editorExtensionFile).click());
     $doc.on('change', DOM.editorExtensionFile, (event) => this.inspectExtensionManifest(event));
+    $doc.on('click', DOM.editorResourceEntryLoad, () => void this.loadStudioResourceEntries(true));
+    $doc.on('change', DOM.editorResourceEntrySelect, (event) => this.selectStudioResourceEntry($(event.target).val()));
+    $doc.on('click', DOM.editorResourceEntryInspect, () => this.inspectStudioResourceEntry());
+    $doc.on('click', DOM.editorResourceEntryImport, () => void this.confirmStudioResourceImport());
     $doc.on('click', DOM.editorEmbedFont, () => this.embedFontInDocument());
     $doc.on('click', '[data-cellcanvas-cell]', (event) => this.selectCellCanvasCell(event.currentTarget));
     $doc.on('click', DOM.editorCellCanvasApply, () => this.applyCellCanvasCellEdit());
@@ -1580,6 +1629,7 @@ class EditorController {
     this.populatePresetSelect();
     this.populateSavedTemplateSelect();
     this.updateKindUi();
+    this.renderStudioResourceEntryOptions();
     if (!this.result) this.setStatus('editor.ready');
   }
 
@@ -2505,6 +2555,151 @@ class EditorController {
       .attr('data-state', state);
   }
 
+  /** 更新 Studio 资源入口状态，不改变主编辑器校验/渲染状态。 */
+  setStudioResourceStatus(key, params = {}, state = 'info') {
+    $(DOM.editorResourceEntryStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
+  /**
+   * 载入同源资源发现状态，并在编辑器侧生成可选资源列表。
+   *
+   * 这里复用 Resource Discovery 已有的 hash、签名和撤回校验；编辑器侧只展示
+   * review-only proposal，不自动安装资源，也不会绕过确认导入流程。
+   *
+   * @param {boolean} [force=false] 是否强制重新读取同源资源清单。
+   */
+  async loadStudioResourceEntries(force = false) {
+    this.setStudioResourceStatus('editor.resourceEntryLoading');
+    $(DOM.editorResourceEntryLoad).prop('disabled', true);
+
+    try {
+      const resourceController = this.appController.resourceDiscoveryController;
+      await resourceController.ensureLoaded(force);
+      this.studioResourceEntries = resourceController.getResourceStates().map((item) => ({
+        id: item.resource.id,
+        label: resourceController.getResourceDisplayTitle(item),
+        state: item.ok ? 'verified' : 'failed',
+      }));
+      if (!this.studioResourceEntries.some((entry) => entry.id === this.selectedStudioResourceId)) {
+        this.selectedStudioResourceId = this.studioResourceEntries[0]?.id || '';
+      }
+      this.renderStudioResourceEntryOptions();
+      if (this.studioResourceEntries.length === 0) {
+        this.setStudioResourceStatus('editor.resourceEntryEmpty', {}, 'error');
+        $(DOM.editorResourceEntryProposal).text('');
+        return;
+      }
+      this.setStudioResourceStatus('editor.resourceEntryLoaded', {
+        count: this.studioResourceEntries.length,
+      }, 'success');
+      this.inspectStudioResourceEntry();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.studioResourceEntries = [];
+      this.renderStudioResourceEntryOptions();
+      $(DOM.editorResourceEntryProposal).text('');
+      this.setStudioResourceStatus('editor.resourceEntryFailed', { message }, 'error');
+    } finally {
+      $(DOM.editorResourceEntryLoad).prop('disabled', false);
+    }
+  }
+
+  /** 刷新 Studio 资源入口下拉与按钮可用状态。 */
+  renderStudioResourceEntryOptions() {
+    const $select = $(DOM.editorResourceEntrySelect);
+    const selected = this.selectedStudioResourceId || $select.val();
+    $select.empty();
+
+    if (this.studioResourceEntries.length === 0) {
+      $('<option>').val('').text('—').appendTo($select);
+      $select.prop('disabled', true);
+      $(DOM.editorResourceEntryInspect).prop('disabled', true);
+      $(DOM.editorResourceEntryImport).prop('disabled', true);
+      return;
+    }
+
+    this.studioResourceEntries.forEach((entry) => {
+      $('<option>')
+        .val(entry.id)
+        .text(`${entry.label} · ${entry.id}`)
+        .appendTo($select);
+    });
+    if (selected && this.studioResourceEntries.some((entry) => entry.id === selected)) {
+      this.selectedStudioResourceId = String(selected);
+      $select.val(selected);
+    } else {
+      this.selectedStudioResourceId = this.studioResourceEntries[0].id;
+      $select.val(this.selectedStudioResourceId);
+    }
+    $select.prop('disabled', false);
+    $(DOM.editorResourceEntryInspect).prop('disabled', false);
+    $(DOM.editorResourceEntryImport).prop('disabled', this.studioImportProposal?.status !== 'confirmation-pending');
+  }
+
+  /** 切换 Studio 资源入口当前选中项。 */
+  selectStudioResourceEntry(id) {
+    this.selectedStudioResourceId = String(id || '');
+    this.studioImportProposal = null;
+    $(DOM.editorResourceEntryProposal).text('');
+    $(DOM.editorResourceEntryImport).prop('disabled', true);
+    this.inspectStudioResourceEntry();
+  }
+
+  /** 获取当前选中的已验证资源状态。 */
+  getSelectedStudioResourceItem() {
+    return this.appController.resourceDiscoveryController.getResourceState(this.selectedStudioResourceId);
+  }
+
+  /**
+   * 生成并展示当前资源的导入提案。
+   *
+   * 提案只是 preview，不写工作区；确认导入仍会调用 Resource Discovery 的二次确认。
+   */
+  inspectStudioResourceEntry() {
+    const item = this.getSelectedStudioResourceItem();
+    if (!item) {
+      this.studioImportProposal = null;
+      $(DOM.editorResourceEntryProposal).text('');
+      $(DOM.editorResourceEntryImport).prop('disabled', true);
+      this.setStudioResourceStatus('editor.resourceEntryReady');
+      return;
+    }
+
+    const entry = createStudioResourceEntryFromDiscoveryState(item, {
+      title: this.appController.resourceDiscoveryController.getResourceDisplayTitle(item),
+    });
+    const proposal = createStudioImportProposalFromResourceEntry(entry);
+    this.studioImportProposal = proposal;
+    $(DOM.editorResourceEntryProposal).text(formatStudioImportProposalSummary(entry, proposal));
+    $(DOM.editorResourceEntryImport).prop('disabled', proposal.status !== 'confirmation-pending');
+
+    if (proposal.status === 'confirmation-pending') {
+      this.setStudioResourceStatus('editor.resourceEntryProposalReady', { status: proposal.status }, 'success');
+    } else {
+      const reason = this.appController.resourceDiscoveryController.formatImportBlockReason(item);
+      this.setStudioResourceStatus('editor.resourceEntryProposalBlocked', { reason }, 'error');
+    }
+  }
+
+  /** 通过现有资源发现确认流导入当前 proposal 对应资源。 */
+  async confirmStudioResourceImport() {
+    const item = this.getSelectedStudioResourceItem();
+    if (!item) return;
+    if (!this.studioImportProposal) this.inspectStudioResourceEntry();
+    if (this.studioImportProposal?.status !== 'confirmation-pending') {
+      const reason = this.appController.resourceDiscoveryController.formatImportBlockReason(item);
+      this.setStudioResourceStatus('editor.resourceEntryProposalBlocked', { reason }, 'error');
+      return;
+    }
+
+    const imported = await this.appController.resourceDiscoveryController.importResourceItemToEditor(item);
+    if (imported) {
+      this.setStudioResourceStatus('editor.resourceEntryImported', {}, 'success');
+    }
+  }
+
   handleEditorError(error) {
     const message = error instanceof Error ? error.message : String(error);
     this.setStatus('editor.status.error', { message }, 'error');
@@ -2926,6 +3121,23 @@ class ResourceDiscoveryController {
     return this.appController.i18nManager.t(key, params);
   }
 
+  /** 获取当前资源状态副本，供 Editor 资源入口只读展示。 */
+  getResourceStates() {
+    return [...this.resourceStates];
+  }
+
+  /** 按资源 ID 获取同源资源状态。 */
+  getResourceState(id) {
+    return this.resourceStates.find((entry) => entry.resource.id === id) || null;
+  }
+
+  /** 获取资源在当前 UI 语言下的展示标题。 */
+  getResourceDisplayTitle(item) {
+    return item?.artwork
+      ? getGalleryLocalizedText(item.artwork.title, AppState.config.locale)
+      : item?.resource?.id || '';
+  }
+
   async ensureLoaded(force = false) {
     if (this.manifest && !force) {
       this.renderSummary();
@@ -3230,14 +3442,23 @@ class ResourceDiscoveryController {
   }
 
   buildImportFacts(item) {
+    const entry = createStudioResourceEntryFromDiscoveryState(item, {
+      title: this.getResourceDisplayTitle(item),
+    });
+    const proposal = createStudioImportProposalFromResourceEntry(entry);
     return [
       [this.t('resource.id'), item.resource.id],
       [this.t('resource.kind'), this.t(`resource.kind.${item.resource.kind}`)],
       [this.t('resource.license'), `${item.resource.license.expression} · ${item.resource.license.origin}`],
+      [this.t('resource.source'), item.resource.source],
+      [this.t('resource.size'), this.t('resource.sizeBytes', { size: item.resource.size })],
       [this.t('resource.sha256'), item.resource.sha256],
       [this.t('resource.trustStatus'), this.formatTrustStatus(item.trustStatus)],
       [this.t('resource.revocationStatus'), this.formatRevocationStatus(item.revocation)],
       [this.t('resource.cacheTarget'), this.t('resource.cacheTarget.editorWorkspace')],
+      ['targetAction', proposal.targetAction],
+      ['targetScope', proposal.targetScope],
+      ['effectSummary', proposal.effectSummary],
     ];
   }
 
@@ -3269,14 +3490,24 @@ class ResourceDiscoveryController {
 
   async importSelectedResourceToEditor() {
     const item = this.resourceStates.find((entry) => entry.resource.id === this.selectedResourceId);
+    await this.importResourceItemToEditor(item);
+  }
+
+  /**
+   * 通过统一确认流把已验证资源导入 source-first 编辑器。
+   *
+   * @param {Object|null} item 资源发现状态项。
+   * @returns {Promise<boolean>} 成功导入时为 true，取消或失败时为 false。
+   */
+  async importResourceItemToEditor(item) {
     if (!this.canImportResource(item)) {
       const reason = this.formatImportBlockReason(item);
       this.appController.toastManager.warning(this.t('toast.resourceImportBlocked', { reason }));
-      return;
+      return false;
     }
 
     const confirmed = await this.confirmResourceImport(item);
-    if (!confirmed) return;
+    if (!confirmed) return false;
 
     this.setStatus('resource.status.importing');
     try {
@@ -3289,10 +3520,12 @@ class ResourceDiscoveryController {
       this.appController.editorController.validateSource(resourceFile.text, workspaceKind);
       this.appController.openGalleryArtworkInEditor(item.artwork, resourceFile.text);
       this.appController.toastManager.success(this.t('toast.resourceImported'));
+      return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.appController.toastManager.error(this.t('toast.resourceImportFailed', { message }));
       this.updateLoadedStatus();
+      return false;
     }
   }
 

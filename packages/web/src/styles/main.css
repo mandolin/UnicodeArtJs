@@ -1667,7 +1667,8 @@ details.config-details summary:hover {
 .editor-source-group,
 .editor-font-options,
 .editor-cellcanvas-options,
-.editor-extension-section {
+.editor-extension-section,
+.editor-resource-entry-section {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -1683,6 +1684,7 @@ details.config-details summary:hover {
 .editor-source-group > label,
 .editor-font-options > label,
 .editor-cellcanvas-options > label,
+.editor-resource-entry-section > label,
 .editor-section-label {
   color: var(--text-secondary);
   font-size: 0.8rem;
@@ -1693,7 +1695,8 @@ details.config-details summary:hover {
 .editor-control-group input,
 .editor-font-options input,
 .editor-cellcanvas-options input,
-.editor-cellcanvas-options select {
+.editor-cellcanvas-options select,
+.editor-resource-entry-section select {
   min-width: 0;
   width: 100%;
   padding: 6px 10px;
@@ -1709,6 +1712,7 @@ details.config-details summary:hover {
 .editor-font-options input:focus,
 .editor-cellcanvas-options input:focus,
 .editor-cellcanvas-options select:focus,
+.editor-resource-entry-section select:focus,
 .cellcanvas-cell:focus,
 .editor-source:focus {
   border-color: var(--color-primary);
@@ -1739,7 +1743,8 @@ details.config-details summary:hover {
   min-width: 52px;
 }
 
-.editor-extension-section {
+.editor-extension-section,
+.editor-resource-entry-section {
   padding: var(--spacing-sm);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -1780,12 +1785,48 @@ details.config-details summary:hover {
   line-height: 1.4;
 }
 
-.editor-extension-status[data-state='success'] {
+.editor-resource-entry-section label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.editor-resource-entry-status {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.editor-extension-status[data-state='success'],
+.editor-resource-entry-status[data-state='success'] {
   color: var(--color-success);
 }
 
-.editor-extension-status[data-state='error'] {
+.editor-extension-status[data-state='error'],
+.editor-resource-entry-status[data-state='error'] {
   color: var(--color-danger);
+}
+
+.editor-resource-entry-proposal {
+  max-height: 160px;
+  margin: 0;
+  padding: var(--spacing-sm);
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.editor-resource-entry-proposal:empty {
+  display: none;
 }
 
 .btn.danger {

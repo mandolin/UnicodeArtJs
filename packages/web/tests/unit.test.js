@@ -59,6 +59,13 @@ import {
   readCellCanvasDraftFromStudioSource,
   validateStudioProjectCapsule,
 } from '../src/studio/project-capsule.js';
+import {
+  STUDIO_IMPORT_PROPOSAL_SCHEMA,
+  STUDIO_RESOURCE_ENTRY_SCHEMA,
+  createStudioImportProposalFromResourceEntry,
+  createStudioResourceEntryFromDiscoveryState,
+  formatStudioImportProposalSummary,
+} from '../src/studio/resource-entry.js';
 
 //#region 🟩 测试框架
 
@@ -357,6 +364,86 @@ describe('Studio Project内部包络原型', () => {
     assertEqual(restore.localRestore.preferredStorageKey, 'test-storage');
     assertEqual(restore.localRestore.conflictHint, 'target-newer');
     assertEqual(Object.prototype.hasOwnProperty.call(restore, 'documents'), false);
+  });
+
+});
+
+//#endregion
+
+//#region 🟩 测试: Studio 资源入口
+
+function createResourceDiscoveryState(overrides = {}) {
+  return {
+    resource: {
+      id: 'review-workflow',
+      kind: 'semantic-document',
+      source: 'artworks/review-workflow.uadoc.json',
+      size: 1024,
+      sha256: 'a'.repeat(64),
+      license: { expression: 'MIT', origin: 'original' },
+      reviewedAt: '2026-07-22',
+    },
+    artwork: {
+      title: { 'zh-CN': '审核流程', en: 'Review Workflow' },
+      license: { expression: 'MIT', origin: 'original' },
+    },
+    verification: {
+      ok: true,
+      sizeOk: true,
+      sha256Ok: true,
+      shapeOk: true,
+      actualSha256: 'a'.repeat(64),
+    },
+    trustStatus: 'maintainer-signed',
+    revocation: { status: 'not-revoked', revoked: false },
+    importAllowed: true,
+    ok: true,
+    error: '',
+    ...overrides,
+  };
+}
+
+describe('Studio 资源入口提案原型', () => {
+
+  it('可把已验证资源转换为人工确认导入提案', () => {
+    const entry = createStudioResourceEntryFromDiscoveryState(createResourceDiscoveryState());
+    const proposal = createStudioImportProposalFromResourceEntry(entry);
+    const summary = formatStudioImportProposalSummary(entry, proposal);
+
+    assertEqual(entry.schema, STUDIO_RESOURCE_ENTRY_SCHEMA);
+    assertEqual(entry.resourceKind, 'uadoc');
+    assertEqual(entry.importAllowed, true);
+    assertEqual(proposal.schema, STUDIO_IMPORT_PROPOSAL_SCHEMA);
+    assertEqual(proposal.status, 'confirmation-pending');
+    assertEqual(proposal.confirmedByDefault, false);
+    assertEqual(proposal.humanConfirmationRequired, true);
+    assertEqual(proposal.trustCheck.hash, 'pass');
+    assertEqual(summary.includes('humanConfirmationRequired: true'), true);
+  });
+
+  it('校验失败或撤回资源只能生成阻断提案', () => {
+    const entry = createStudioResourceEntryFromDiscoveryState(createResourceDiscoveryState({
+      verification: {
+        ok: false,
+        sizeOk: false,
+        sha256Ok: false,
+        shapeOk: false,
+        actualSha256: 'b'.repeat(64),
+      },
+      trustStatus: 'maintainer-signed',
+      revocation: { status: 'revoked-resource', revoked: true },
+      importAllowed: false,
+      ok: false,
+      error: 'sha256 mismatch',
+    }));
+    const proposal = createStudioImportProposalFromResourceEntry(entry);
+
+    assertEqual(entry.importAllowed, false);
+    assertEqual(entry.trustChain.revoked, true);
+    assertEqual(proposal.status, 'blocked');
+    assertEqual(proposal.trustCheck.hash, 'fail');
+    assertEqual(proposal.trustCheck.revocation, 'fail');
+    assertEqual(proposal.confirmedByDefault, false);
   });
 
 });
