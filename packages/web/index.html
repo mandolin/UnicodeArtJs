@@ -419,6 +419,23 @@
           <pre class="editor-ai-proposal-preview" id="editorAiProposalPreview" aria-live="polite"></pre>
         </div>
 
+        <div class="editor-diagnostics-section" id="editorDiagnosticsSection" aria-label="Studio 诊断" data-i18n-aria-label="editor.diagnostics" hidden>
+          <span class="editor-section-label" data-i18n="editor.diagnostics">Studio 诊断</span>
+          <label for="editorBenchmarkPreset">
+            <span data-i18n="editor.diagnosticsPreset">诊断样本</span>
+            <select id="editorBenchmarkPreset">
+              <option value="current" data-i18n="editor.diagnosticsCurrent">当前草稿</option>
+              <option value="large" data-i18n="editor.diagnosticsLarge">大型基准 CellMap</option>
+            </select>
+          </label>
+          <div class="editor-file-actions">
+            <button class="btn" id="editorBenchmarkRun" type="button" data-i18n="editor.diagnosticsRun">运行诊断</button>
+          </div>
+          <p class="field-help" data-i18n="editor.diagnosticsHelp">本地测量 Virtual Grid 与 Canvas 2D projection；只输出诊断报告，不修改 CellMap 源模型。</p>
+          <p class="editor-benchmark-status" id="editorBenchmarkStatus" aria-live="polite" data-i18n="editor.diagnosticsReady">尚未运行 Studio 诊断</p>
+          <pre class="editor-benchmark-report" id="editorBenchmarkReport" aria-live="polite"></pre>
+        </div>
+
         <div class="editor-source-group">
           <label for="editorSource" data-i18n="editor.source">Canonical JSON</label>
           <textarea id="editorSource" class="editor-source" spellcheck="false" aria-describedby="editorSourceHint"></textarea>

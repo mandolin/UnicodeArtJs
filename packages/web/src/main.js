@@ -69,6 +69,11 @@ import {
   formatStudioAiProposalSummary,
   transitionStudioAiProposalReview,
 } from './studio/ai-proposal.js';
+import {
+  createStudioBenchmarkCellMap,
+  formatStudioBenchmarkDiagnosticsReport,
+  runStudioBenchmarkDiagnostics as runStudioBenchmarkDiagnosticsReport,
+} from './studio/benchmark.js';
 
 //#region 🟩 应用状态
 
@@ -196,6 +201,16 @@ const UI_MESSAGES = {
     'editor.aiAccepted': '已接受预览；仍需宿主 checked apply，当前源码未改写',
     'editor.aiRejected': 'AI 提案已拒绝',
     'editor.aiFailed': 'AI 提案失败：{message}',
+    'editor.diagnostics': 'Studio 诊断',
+    'editor.diagnosticsHelp': '本地测量 Virtual Grid 与 Canvas 2D projection；只输出诊断报告，不修改 CellMap 源模型。',
+    'editor.diagnosticsPreset': '诊断样本',
+    'editor.diagnosticsCurrent': '当前草稿',
+    'editor.diagnosticsLarge': '大型基准 CellMap',
+    'editor.diagnosticsRun': '运行诊断',
+    'editor.diagnosticsReady': '尚未运行 Studio 诊断',
+    'editor.diagnosticsNeedsCellCanvas': 'Studio 诊断首轮只支持 CellCanvas',
+    'editor.diagnosticsDone': 'Studio 诊断完成：{status}',
+    'editor.diagnosticsFailed': 'Studio 诊断失败：{message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': '保存和导入使用 Core 校验的 canonical JSON；浏览器不会上传内容。',
     'editor.fontSample': '预览文字',
@@ -610,6 +625,16 @@ const UI_MESSAGES = {
     'editor.aiAccepted': 'Preview accepted; host checked apply is still required and source was not rewritten',
     'editor.aiRejected': 'AI proposal rejected',
     'editor.aiFailed': 'AI proposal failed: {message}',
+    'editor.diagnostics': 'Studio diagnostics',
+    'editor.diagnosticsHelp': 'Measures Virtual Grid and Canvas 2D projections locally. It only reports diagnostics and never mutates the CellMap source model.',
+    'editor.diagnosticsPreset': 'Diagnostics sample',
+    'editor.diagnosticsCurrent': 'Current draft',
+    'editor.diagnosticsLarge': 'Large benchmark CellMap',
+    'editor.diagnosticsRun': 'Run diagnostics',
+    'editor.diagnosticsReady': 'No Studio diagnostics run yet',
+    'editor.diagnosticsNeedsCellCanvas': 'Studio diagnostics currently supports CellCanvas only',
+    'editor.diagnosticsDone': 'Studio diagnostics complete: {status}',
+    'editor.diagnosticsFailed': 'Studio diagnostics failed: {message}',
     'editor.source': 'Canonical JSON',
     'editor.sourceHelp': 'Saving and importing use Core-validated canonical JSON. The browser does not upload your content.',
     'editor.fontSample': 'Sample text',
@@ -1089,6 +1114,11 @@ const DOM = {
   editorAiReject: '#editorAiReject',
   editorAiStatus: '#editorAiStatus',
   editorAiProposalPreview: '#editorAiProposalPreview',
+  editorDiagnosticsSection: '#editorDiagnosticsSection',
+  editorBenchmarkPreset: '#editorBenchmarkPreset',
+  editorBenchmarkRun: '#editorBenchmarkRun',
+  editorBenchmarkStatus: '#editorBenchmarkStatus',
+  editorBenchmarkReport: '#editorBenchmarkReport',
   editorSource: '#editorSource',
   editorFontOptions: '#editorFontOptions',
   editorFontSample: '#editorFontSample',
@@ -1608,6 +1638,7 @@ class EditorController {
     this.studioImportProposal = null;
     this.studioAiPayload = null;
     this.studioAiProposal = null;
+    this.studioBenchmarkReport = null;
   }
 
   initialize() {
@@ -1617,6 +1648,7 @@ class EditorController {
     this.renderStudioResourceEntryOptions();
     this.setStudioResourceStatus('editor.resourceEntryReady');
     this.setStudioAiStatus('editor.aiReady');
+    this.setStudioDiagnosticsStatus('editor.diagnosticsReady');
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
   }
 
@@ -1645,6 +1677,7 @@ class EditorController {
     $doc.on('click', DOM.editorAiGenerate, () => this.generateStudioAiProposalPreview());
     $doc.on('click', DOM.editorAiAccept, () => this.acceptStudioAiProposalPreview());
     $doc.on('click', DOM.editorAiReject, () => this.rejectStudioAiProposalPreview());
+    $doc.on('click', DOM.editorBenchmarkRun, () => this.runStudioBenchmarkDiagnostics());
     $doc.on('click', DOM.editorEmbedFont, () => this.embedFontInDocument());
     $doc.on('click', '[data-cellcanvas-cell]', (event) => this.selectCellCanvasCell(event.currentTarget));
     $doc.on('click', DOM.editorCellCanvasApply, () => this.applyCellCanvasCellEdit());
@@ -1762,6 +1795,7 @@ class EditorController {
     $(DOM.editorCellCanvasSaveProject).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasOpenProject).prop('hidden', !isCellCanvas);
     $(DOM.editorAiProposalSection).prop('hidden', !isCellCanvas);
+    $(DOM.editorDiagnosticsSection).prop('hidden', !isCellCanvas);
     $(DOM.editorFormatLabel).text(
       isFont ? 'unicode-art-font@1' : isCellCanvas ? CELL_CANVAS_DRAFT_SCHEMA : 'semantic-document@1',
     );
@@ -2615,6 +2649,13 @@ class EditorController {
       .attr('data-state', state);
   }
 
+  /** 更新 Studio 诊断状态，不改变主编辑器校验/渲染状态。 */
+  setStudioDiagnosticsStatus(key, params = {}, state = 'info') {
+    $(DOM.editorBenchmarkStatus)
+      .text(this.t(key, params))
+      .attr('data-state', state);
+  }
+
   /**
    * 载入同源资源发现状态，并在编辑器侧生成可选资源列表。
    *
@@ -2839,6 +2880,60 @@ class EditorController {
     $(DOM.editorAiAccept).prop('disabled', true);
     $(DOM.editorAiReject).prop('disabled', true);
     this.setStudioAiStatus('editor.aiRejected', {}, 'info');
+  }
+
+  /**
+   * 运行 P18.7 Studio benchmark 诊断。
+   *
+   * 当前阶段诊断只读取 CellCanvas draft / CellMap，并测量 Virtual Grid 与
+   * Canvas 2D projection 路径。报告显示在侧栏，不回写源码。
+   */
+  runStudioBenchmarkDiagnostics() {
+    if (this.workspace.kind !== 'cellcanvas') {
+      this.setStudioDiagnosticsStatus('editor.diagnosticsNeedsCellCanvas', {}, 'error');
+      return;
+    }
+
+    try {
+      const preset = $(DOM.editorBenchmarkPreset).val();
+      const useLargeBenchmark = preset === 'large';
+      const benchmark = useLargeBenchmark
+        ? createStudioBenchmarkCellMap({ width: 180, height: 90, layerCount: 3, frameCount: 6 })
+        : null;
+      const input = benchmark?.cellMap ?? this.readCurrentCellCanvasDraft();
+      const report = runStudioBenchmarkDiagnosticsReport(input, {
+        layerCount: benchmark?.layerCount,
+        frameCount: benchmark?.frameCount,
+        viewport: {
+          x: 0,
+          y: 0,
+          cols: useLargeBenchmark ? 120 : 80,
+          rows: useLargeBenchmark ? 40 : 24,
+          overscanCols: 3,
+          overscanRows: 2,
+        },
+        canvas: {
+          cellWidth: 14,
+          cellHeight: 18,
+          padding: 8,
+          scale: 1,
+          fontSize: 14,
+          fontFamily: AppState.config.glyphFont,
+        },
+        canvasFactory: () => document.createElement('canvas'),
+      });
+
+      this.studioBenchmarkReport = report;
+      $(DOM.editorBenchmarkReport).text(formatStudioBenchmarkDiagnosticsReport(report));
+      this.setStudioDiagnosticsStatus('editor.diagnosticsDone', {
+        status: report.thresholds.status.overall,
+      }, report.thresholds.status.overall === 'pass' ? 'success' : 'warning');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.studioBenchmarkReport = null;
+      $(DOM.editorBenchmarkReport).text('');
+      this.setStudioDiagnosticsStatus('editor.diagnosticsFailed', { message }, 'error');
+    }
   }
 
   handleEditorError(error) {

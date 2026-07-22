@@ -74,6 +74,12 @@ import {
   formatStudioAiProposalSummary,
   transitionStudioAiProposalReview,
 } from '../src/studio/ai-proposal.js';
+import {
+  STUDIO_BENCHMARK_DIAGNOSTICS_SCHEMA,
+  createStudioBenchmarkCellMap,
+  formatStudioBenchmarkDiagnosticsReport,
+  runStudioBenchmarkDiagnostics,
+} from '../src/studio/benchmark.js';
 
 //#region 🟩 测试框架
 
@@ -298,6 +304,58 @@ describe('Studio Canvas 2D投影原型', () => {
     assertEqual(Array.isArray(patch.documents), false);
     assertEqual(Array.isArray(patch.resources), false);
     assertEqual(patch.diagnostics[0].code, 'UA_STUDIO_CANVAS_2D_PROJECTION');
+  });
+
+});
+
+//#endregion
+
+//#region 🟩 测试: Studio Benchmark 诊断
+
+describe('Studio Benchmark诊断原型', () => {
+
+  it('可运行大型CellMap诊断并保持renderer projection边界', () => {
+    const benchmark = createStudioBenchmarkCellMap({
+      width: 40,
+      height: 24,
+      layerCount: 3,
+      frameCount: 6,
+    });
+    const before = JSON.stringify(benchmark.cellMap);
+    const report = runStudioBenchmarkDiagnostics(benchmark.cellMap, {
+      layerCount: benchmark.layerCount,
+      frameCount: benchmark.frameCount,
+      viewport: { cols: 20, rows: 10, overscanCols: 2, overscanRows: 1 },
+      canvas: { cellWidth: 8, cellHeight: 10, padding: 1, scale: 1, fontSize: 8 },
+    });
+    const summary = formatStudioBenchmarkDiagnosticsReport(report);
+
+    assertEqual(report.schema, STUDIO_BENCHMARK_DIAGNOSTICS_SCHEMA);
+    assertEqual(report.sourceModel, 'CellMap');
+    assertEqual(report.rendererIsSourceModel, false);
+    assertEqual(report.source.layerCount, 3);
+    assertEqual(report.source.frameCount, 6);
+    assertEqual(report.metrics.virtualGrid.rendererIsSourceModel, false);
+    assertEqual(report.metrics.canvas2d.rendererIsSourceModel, false);
+    assertEqual(report.sourceMutation.unchanged, true);
+    assertEqual(JSON.stringify(benchmark.cellMap), before);
+    assert(report.metrics.virtualGrid.visibleCells > 0, 'Virtual Grid应投影可见字素格');
+    assert(report.metrics.canvas2d.estimatedDrawCalls > 0, 'Canvas 2D应产生绘制调用估算');
+    assert(summary.includes('thresholdStatus:'), '报告应包含阈值状态');
+    assert(summary.includes('rendererIsSourceModel: false'), '报告应声明renderer不是源模型');
+  });
+
+  it('可直接读取CellCanvas草稿并报告图层帧摘要', () => {
+    const draft = createDefaultCellCanvasDraft();
+    const report = runStudioBenchmarkDiagnostics(draft, {
+      viewport: { cols: 4, rows: 2 },
+    });
+
+    assertEqual(report.source.inputKind, 'cellcanvas-draft');
+    assertEqual(report.source.layerCount, 1);
+    assertEqual(report.source.frameCount, 1);
+    assertEqual(report.metrics.canvas2d.canvasKind, 'counting-fake-canvas');
+    assertEqual(report.sourceMutation.unchanged, true);
   });
 
 });

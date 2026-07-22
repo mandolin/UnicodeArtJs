@@ -742,6 +742,38 @@ async function main() {
       );
     });
 
+    await test('runs Studio benchmark diagnostics from CellCanvas staging shell', async () => {
+      await page.click('.mode-btn[data-mode="editor"]');
+      await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.waitForSelector('#editorDiagnosticsSection:not([hidden])', { timeout: 3000 });
+      await page.selectOption('#editorBenchmarkPreset', 'large');
+      await page.click('#editorBenchmarkRun');
+      await page.waitForFunction(
+        () => (document.querySelector('#editorBenchmarkReport')?.textContent || '').includes('thresholdStatus:'),
+        undefined,
+        { timeout: 5000 },
+      );
+      const benchmarkState = await page.evaluate(() => ({
+        status: document.querySelector('#editorBenchmarkStatus')?.textContent || '',
+        state: document.querySelector('#editorBenchmarkStatus')?.dataset.state || '',
+        report: document.querySelector('#editorBenchmarkReport')?.textContent || '',
+      }));
+
+      if (!benchmarkState.report.includes('rendererIsSourceModel: false')) {
+        throw new Error('Studio benchmark did not report renderer projection boundary');
+      }
+      if (!benchmarkState.report.includes('virtualGrid:')) {
+        throw new Error('Studio benchmark did not include Virtual Grid metrics');
+      }
+      if (!benchmarkState.report.includes('canvas2d:')) {
+        throw new Error('Studio benchmark did not include Canvas 2D metrics');
+      }
+      if (!['success', 'warning'].includes(benchmarkState.state)) {
+        throw new Error(`Studio benchmark status was not completed: ${benchmarkState.status}`);
+      }
+    });
+
     await test('inspects a declaration-only extension manifest without loading resources', async () => {
       const manifest = {
         format: 'unicode-art-extension',
