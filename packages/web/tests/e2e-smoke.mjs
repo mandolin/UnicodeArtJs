@@ -89,6 +89,16 @@ async function launchBrowser() {
 }
 
 /**
+ * 导航到应用并等待核心壳体出现；避免 CI 中被字体、资源清单或开发服务器请求拖住。
+ * @param {import('playwright').Page} page Playwright 页面实例
+ * @param {string} baseUrl 应用基础地址
+ */
+async function gotoApp(page, baseUrl) {
+  await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+  await page.waitForSelector('.logo-text', { timeout: 10_000 });
+}
+
+/**
  * 等待编辑器预览满足断言；超时后附带当前工作区快照，避免只得到无上下文的超时信息。
  * @param {import('playwright').Page} page Playwright 页面实例
  * @param {string} description 失败说明
@@ -221,7 +231,7 @@ async function main() {
     console.log(`   Base URL: ${testServer.baseUrl}\n`);
 
     await test('page loads', async () => {
-      await page.goto(testServer.baseUrl, { waitUntil: 'networkidle' });
+      await gotoApp(page, testServer.baseUrl);
       const title = await page.title();
       if (!title.includes('UnicodeArtJs')) throw new Error(`Title mismatch: ${title}`);
     });
@@ -435,12 +445,13 @@ async function main() {
       const isolatedContext = await browser.newContext();
       const migrationPage = await isolatedContext.newPage();
       try {
-        await migrationPage.goto(testServer.baseUrl, { waitUntil: 'networkidle' });
+        await gotoApp(migrationPage, testServer.baseUrl);
         await migrationPage.evaluate(() => {
           localStorage.clear();
           localStorage.setItem('unicode-art-theme', 'dark');
         });
-        await migrationPage.reload({ waitUntil: 'networkidle' });
+        await migrationPage.reload({ waitUntil: 'domcontentloaded', timeout: 45_000 });
+        await migrationPage.waitForSelector('.logo-text', { timeout: 10_000 });
 
         const migrated = await migrationPage.evaluate(() => ({
           theme: document.documentElement.getAttribute('data-theme'),
@@ -748,6 +759,7 @@ async function main() {
       await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
       await page.selectOption('#editorKind', 'cellcanvas');
       await page.waitForSelector('#editorDiagnosticsSection:not([hidden])', { timeout: 3000 });
+      await page.locator('#editorBenchmarkPreset').scrollIntoViewIfNeeded();
       await page.selectOption('#editorBenchmarkPreset', 'large');
       await page.locator('#editorBenchmarkRun').scrollIntoViewIfNeeded();
       await page.click('#editorBenchmarkRun');
@@ -1109,7 +1121,7 @@ async function main() {
       const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const mobilePage = await mobileContext.newPage();
       try {
-        await mobilePage.goto(testServer.baseUrl, { waitUntil: 'networkidle' });
+        await gotoApp(mobilePage, testServer.baseUrl);
         await mobilePage.click('.mode-btn[data-mode="editor"]');
         await mobilePage.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 3000 });
         const layout = await mobilePage.evaluate(() => {
@@ -1181,7 +1193,7 @@ async function main() {
       const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const mobilePage = await mobileContext.newPage();
       try {
-        await mobilePage.goto(testServer.baseUrl, { waitUntil: 'networkidle' });
+        await gotoApp(mobilePage, testServer.baseUrl);
         await mobilePage.click('.mode-btn[data-mode="gallery"]');
         await mobilePage.waitForSelector('#galleryWorkbench:not([hidden])', { timeout: 5000 });
         await mobilePage.waitForFunction(
