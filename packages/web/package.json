@@ -41,6 +41,7 @@
   },
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "dependencies": {
+    "@unicode-art/studio-kit": "file:../studio-kit",
     "jquery": "^3.7.1",
     "unicode-art-js": "file:../core"
   },
