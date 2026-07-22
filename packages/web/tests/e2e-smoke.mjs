@@ -705,6 +705,7 @@ async function main() {
       await page.click('#editorLoadPreset');
       await page.waitForSelector('#editorAiProposalSection:not([hidden])', { timeout: 3000 });
       const before = await page.inputValue('#editorSource');
+      await page.locator('#editorAiPrompt').scrollIntoViewIfNeeded();
       await page.fill('#editorAiPrompt', '标题强化');
       await page.click('#editorAiGenerate');
       await page.waitForFunction(
@@ -748,6 +749,7 @@ async function main() {
       await page.selectOption('#editorKind', 'cellcanvas');
       await page.waitForSelector('#editorDiagnosticsSection:not([hidden])', { timeout: 3000 });
       await page.selectOption('#editorBenchmarkPreset', 'large');
+      await page.locator('#editorBenchmarkRun').scrollIntoViewIfNeeded();
       await page.click('#editorBenchmarkRun');
       await page.waitForFunction(
         () => (document.querySelector('#editorBenchmarkReport')?.textContent || '').includes('thresholdStatus:'),
