@@ -1,0 +1,25 @@
+{
+  "name": "@unicode-art/studio-kit",
+  "version": "0.0.0-alpha",
+  "description": "Internal shared Studio logic for UnicodeArtJs hosts.",
+  "type": "module",
+  "private": true,
+  "sideEffects": false,
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.js",
+    "./virtual-grid": "./src/virtual-grid.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm test"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
