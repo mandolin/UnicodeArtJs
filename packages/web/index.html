@@ -530,6 +530,21 @@
             </label>
             <button class="btn" id="editorCellCanvasDrawLine" type="button" data-i18n="cellcanvas.drawConnector">绘制连线</button>
           </div>
+          <div class="editor-tool-feedback" id="editorCellCanvasToolFeedback" data-state="info" data-tool="cellcanvas.tool.select" aria-live="polite">
+            <div class="editor-tool-feedback-row">
+              <span data-i18n="cellcanvas.feedback.tool">工具</span>
+              <strong id="editorCellCanvasActiveTool" data-i18n="cellcanvas.tool.select">选择</strong>
+            </div>
+            <div class="editor-tool-feedback-row">
+              <span data-i18n="cellcanvas.feedback.target">目标</span>
+              <strong id="editorCellCanvasTarget" data-i18n="cellcanvas.feedback.noTarget">--</strong>
+            </div>
+            <div class="editor-tool-feedback-row">
+              <span data-i18n="cellcanvas.feedback.availability">可用性</span>
+              <strong id="editorCellCanvasAvailability" data-i18n="cellcanvas.feedback.ready">可操作</strong>
+            </div>
+            <p id="editorCellCanvasHint" data-i18n="cellcanvas.feedback.hint.select">点击网格字素格以选择编辑目标。</p>
+          </div>
           <p class="field-help" data-i18n="cellcanvas.help">点击预览网格中的字素格后，可在这里修改单格内容和颜色。</p>
         </div>
       </section>

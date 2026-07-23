@@ -124,6 +124,68 @@ async function waitForEditorPreview(page, description, previewText) {
 }
 
 /**
+ * 等待 CellCanvas 工具反馈面板进入指定状态；失败时输出可读快照。
+ * @param {import('playwright').Page} page Playwright 页面实例
+ * @param {string} expectedTool 期望的 data-tool 值
+ * @param {string} expectedState 期望的 data-state 值
+ */
+async function waitForCellCanvasToolFeedback(page, expectedTool, expectedState) {
+  try {
+    await page.waitForFunction(
+      ([tool, state]) => {
+        const feedback = document.querySelector('#editorCellCanvasToolFeedback');
+        return feedback?.getAttribute('data-tool') === tool
+          && feedback?.getAttribute('data-state') === state;
+      },
+      [expectedTool, expectedState],
+      { timeout: 3_000 },
+    );
+  } catch {
+    const snapshot = await page.evaluate(() => {
+      const feedback = document.querySelector('#editorCellCanvasToolFeedback');
+      return {
+        exists: Boolean(feedback),
+        hidden: feedback?.hidden ?? null,
+        parentHidden: document.querySelector('#editorCellCanvasOptions')?.hidden ?? null,
+        tool: feedback?.getAttribute('data-tool') ?? null,
+        state: feedback?.getAttribute('data-state') ?? null,
+        text: feedback?.textContent ?? null,
+      };
+    });
+    throw new Error(`CellCanvas tool feedback did not reach ${expectedTool}/${expectedState}: ${JSON.stringify(snapshot)}`);
+  }
+}
+
+/**
+ * 等待 CellCanvas 单格文本更新；失败时输出控件和源码快照。
+ * @param {import('playwright').Page} page Playwright 页面实例
+ * @param {string} selector 单格选择器
+ * @param {string} expectedText 期望文本
+ */
+async function waitForCellCanvasCellText(page, selector, expectedText) {
+  try {
+    await page.waitForFunction(
+      ([cellSelector, text]) => document.querySelector(cellSelector)?.textContent === text,
+      [selector, expectedText],
+      { timeout: 5_000 },
+    );
+  } catch {
+    const snapshot = await page.evaluate((cellSelector) => ({
+      cellText: document.querySelector(cellSelector)?.textContent ?? null,
+      x: document.querySelector('#editorCellCanvasX')?.value ?? null,
+      y: document.querySelector('#editorCellCanvasY')?.value ?? null,
+      char: document.querySelector('#editorCellCanvasChar')?.value ?? null,
+      feedbackTool: document.querySelector('#editorCellCanvasToolFeedback')?.getAttribute('data-tool') ?? null,
+      feedbackState: document.querySelector('#editorCellCanvasToolFeedback')?.getAttribute('data-state') ?? null,
+      sourceHasHash: document.querySelector('#editorSource')?.value.includes('"char": "#"') ?? false,
+      status: document.querySelector('#editorStatus')?.textContent ?? null,
+      statusState: document.querySelector('#editorStatus')?.getAttribute('data-state') ?? null,
+    }), selector);
+    throw new Error(`CellCanvas cell ${selector} did not reach ${expectedText}: ${JSON.stringify(snapshot)}`);
+  }
+}
+
+/**
  * 切回文本转换工作台；用于失败恢复，避免某个模式测试污染后续用例。
  * @param {import('playwright').Page} page Playwright 页面实例
  */
@@ -883,6 +945,7 @@ async function main() {
       await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="8"][data-cellcanvas-height="2"]', {
         timeout: 5000,
       });
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.select', 'info');
 
       const readFirstCellCanvasLine = async () => await page.$$eval(
         '[data-cellcanvas-cell]',
@@ -893,12 +956,17 @@ async function main() {
       const before = await readFirstCellCanvasLine();
       if (before !== '|| /\\ _|') throw new Error('CellCanvas preset text was not rendered');
 
+      await page.focus('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.hover', 'info');
+      const focusedTarget = await page.textContent('#editorCellCanvasTarget');
+      if (!focusedTarget.includes('(0, 0)')) throw new Error('CellCanvas focus preview did not expose the target cell');
+
       await page.click('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.select', 'info');
       await page.fill('#editorCellCanvasChar', '#');
       await page.click('#editorCellCanvasApply');
-      await page.waitForFunction(() => (
-        document.querySelector('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]')?.textContent === '#'
-      ));
+      await waitForCellCanvasCellText(page, '[data-cellcanvas-x="0"][data-cellcanvas-y="0"]', '#');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.cellEdit', 'success');
 
       const after = await readFirstCellCanvasLine();
       const source = await page.inputValue('#editorSource');
@@ -918,8 +986,10 @@ async function main() {
       await page.fill('#editorCellCanvasSelectHeight', '1');
       await page.click('#editorCellCanvasSelect');
       await page.waitForFunction(() => document.querySelectorAll('.cellcanvas-cell.is-selected').length === 2);
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.selection', 'info');
 
       await page.click('#editorCellCanvasCopy');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.clipboard', 'success');
       await page.fill('#editorCellCanvasSelectX', '2');
       await page.fill('#editorCellCanvasSelectY', '0');
       await page.click('#editorCellCanvasSelect');
@@ -934,6 +1004,7 @@ async function main() {
         document.querySelector('[data-cellcanvas-x="2"][data-cellcanvas-y="0"]')?.textContent === '\u00a0'
         && document.querySelector('[data-cellcanvas-x="3"][data-cellcanvas-y="0"]')?.textContent === '/'
       ));
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.history', 'success');
 
       await page.click('#editorCellCanvasRedo');
       await page.waitForFunction(() => (
@@ -963,6 +1034,7 @@ async function main() {
         document.querySelector('[data-cellcanvas-x="4"][data-cellcanvas-y="0"]')?.textContent === '┐'
         && document.querySelector('[data-cellcanvas-x="4"][data-cellcanvas-y="1"]')?.textContent === '│'
       ));
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.connector', 'success');
       let source = await page.inputValue('#editorSource');
       if (!source.includes('"kind": "draw-connector"')) {
         throw new Error('CellCanvas connector history was not recorded');

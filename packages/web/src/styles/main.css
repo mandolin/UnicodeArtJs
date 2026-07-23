@@ -1801,6 +1801,48 @@ details.config-details summary:hover {
   min-height: 32px;
 }
 
+.editor-tool-feedback {
+  display: grid;
+  gap: 6px;
+  padding: var(--spacing-sm);
+  border: 1px solid rgba(74, 144, 217, 0.28);
+  border-radius: var(--border-radius);
+  background: rgba(74, 144, 217, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.editor-tool-feedback[data-state='success'] {
+  border-color: rgba(40, 167, 69, 0.35);
+  background: rgba(40, 167, 69, 0.08);
+}
+
+.editor-tool-feedback[data-state='error'] {
+  border-color: rgba(220, 53, 69, 0.35);
+  background: rgba(220, 53, 69, 0.08);
+}
+
+.editor-tool-feedback-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.editor-tool-feedback strong {
+  min-width: 0;
+  color: var(--text-primary);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.editor-tool-feedback p {
+  margin: 0;
+  line-height: 1.45;
+}
+
 .editor-extension-status {
   margin: 0;
   color: var(--text-secondary);
