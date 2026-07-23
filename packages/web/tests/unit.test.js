@@ -16,6 +16,7 @@ import {
   cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
   cellCanvasDraftToPlainTextProjection,
+  composeCellCanvasFrame,
   copyCellCanvasSelection,
   createCellCanvasDraftFromCellMap,
   createCellCanvasDraftFromPreset,
@@ -25,15 +26,18 @@ import {
   drawCellCanvasConnector,
   extendCellCanvasSelection,
   getCellCanvasHistoryState,
+  getCellCanvasLayerFrameState,
   getCellCanvasPastePreview,
   getCellCanvasSelectionCells,
   pasteCellCanvasClipboard,
   readCellCanvasDraftFromProjectEnvelope,
   redoCellCanvasHistory,
   resolveCellCanvasSingleLineChar,
+  setCellCanvasActiveLayerFrame,
   setCellCanvasSelection,
   undoCellCanvasHistory,
   updateCellCanvasCell,
+  updateCellCanvasLayerFrameSettings,
   validateCellCanvasDocumentDraft,
 } from '../src/cellcanvas.js';
 import {
@@ -625,11 +629,80 @@ describe('CellCanvas固定网格草稿', () => {
   it('创建默认草稿并投影为纯文本', () => {
     const draft = createDefaultCellCanvasDraft();
     const summary = validateCellCanvasDocumentDraft(draft);
+    const layerFrame = getCellCanvasLayerFrameState(draft);
 
     assertEqual(draft.schema, CELL_CANVAS_DRAFT_SCHEMA);
+    assertEqual(draft.editorSession.activeFrameId, 'frame-static');
+    assertEqual(layerFrame.frames.length, 1);
     assertEqual(summary.width, 8);
     assertEqual(summary.height, 2);
     assertEqual(cellCanvasDraftToPlainText(draft), '|| /\\ _|\n\\/ || \\/');
+  });
+
+  it('图层与帧合成从frame.layerRefs读取，不把活动图层当作唯一投影', () => {
+    let draft = createCellCanvasDraftFromCellMap({
+      id: 'layer-frame-test',
+      title: 'Layer Frame Test',
+      cellMap: { width: 3, height: 2, cells: [] },
+    });
+    draft = updateCellCanvasCell(draft, 0, 0, { char: 'A' });
+
+    const overlay = JSON.parse(JSON.stringify(draft.document.layers[0]));
+    overlay.id = 'layer-overlay';
+    overlay.name = 'Overlay';
+    overlay.cellMap.cells = overlay.cellMap.cells.map((cell) => ({
+      ...cell,
+      char: ' ',
+      role: 'empty',
+      sourceGlyph: null,
+    }));
+    overlay.cellMap.cells.find((cell) => cell.x === 1 && cell.y === 0).char = 'B';
+    overlay.cellMap.cells.find((cell) => cell.x === 1 && cell.y === 0).role = 'text';
+    draft.document.layers.push(overlay);
+    draft.document.frames = [
+      { id: 'frame-base', name: 'Base', durationMs: 120, layerRefs: ['layer-imported-main'] },
+      { id: 'frame-composed', name: 'Composed', durationMs: 240, layerRefs: ['layer-imported-main', 'layer-overlay'] },
+    ];
+    draft.editorSession.activeFrameId = 'frame-composed';
+    draft.editorSession.activeLayerId = 'layer-overlay';
+
+    const composition = composeCellCanvasFrame(draft);
+    const textProjection = cellCanvasDraftToPlainTextProjection(draft);
+    const htmlProjection = cellCanvasDraftToHtmlProjection(draft);
+
+    assertEqual(composition.kind, 'composed-cellmap-frame');
+    assertEqual(composition.durationMs, 240);
+    assertEqual(cellCanvasDraftToPlainText(draft).split('\n')[0], 'AB ');
+    assertEqual(textProjection.source, 'composed-cellmap-from-frame-layerRefs');
+    assertEqual(htmlProjection.frameId, 'frame-composed');
+  });
+
+  it('可切换活动帧并更新图层锁定与帧时长', () => {
+    let draft = createDefaultCellCanvasDraft();
+    draft.document.frames.push({
+      id: 'frame-second',
+      name: 'Second',
+      durationMs: 90,
+      layerRefs: ['layer-imported-main'],
+    });
+    draft = setCellCanvasActiveLayerFrame(draft, { frameId: 'frame-second' });
+    draft = updateCellCanvasLayerFrameSettings(draft, {
+      locked: true,
+      durationMs: 250,
+    });
+    const state = getCellCanvasLayerFrameState(draft);
+
+    assertEqual(state.activeFrameId, 'frame-second');
+    assertEqual(state.activeLayerLocked, true);
+    assertEqual(state.frameDurationMs, 250);
+
+    let blocked = false;
+    try {
+      updateCellCanvasCell(draft, 0, 0, { char: '#' });
+    } catch (error) {
+      blocked = String(error.message).includes('locked');
+    }
+    assertEqual(blocked, true);
   });
 
   it('保留特殊艺术TextFx网格的尾随空格', () => {

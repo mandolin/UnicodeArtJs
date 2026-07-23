@@ -641,14 +641,209 @@ function isSameCellData(left, right) {
 }
 
 /**
+ * 创建静态草稿默认帧。
+ *
+ * Frame 只保存图层引用和展示时长，不直接保存 cell 内容；这样可以确保
+ * `Layer.cellMap` 仍是唯一可编辑源模型。
+ *
+ * @param {string} layerId 默认图层 ID。
+ * @returns {{ id: string, name: string, durationMs: number, layerRefs: string[] }} 默认帧。
+ */
+function createDefaultFrame(layerId) {
+  return {
+    id: 'frame-static',
+    name: 'Static',
+    durationMs: 0,
+    layerRefs: [layerId],
+  };
+}
+
+/**
+ * 读取草稿图层列表。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {Array<object>} 图层列表。
+ */
+function getDraftLayers(draft) {
+  const layers = draft?.document?.layers;
+  if (!Array.isArray(layers) || layers.length === 0) {
+    throw new Error('CellCanvas draft must contain at least one layer.');
+  }
+  return layers;
+}
+
+/**
+ * 读取帧列表，旧草稿缺少 frames 时使用单帧兜底。
+ *
+ * 兜底帧只存在于解析结果中；只有创建新草稿或用户修改帧设置时才会
+ * 写回 `document.frames[]`。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {Array<object>} layers 图层列表。
+ * @returns {Array<object>} 帧列表。
+ */
+function getDraftFrames(draft, layers) {
+  const frames = draft?.document?.frames;
+  if (Array.isArray(frames) && frames.length > 0) return frames;
+  return [createDefaultFrame(layers[0].id)];
+}
+
+/**
+ * 确保草稿持久化 frames 数组。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {Array<object>} 可编辑帧列表。
+ */
+function ensureDocumentFrames(draft) {
+  const layers = getDraftLayers(draft);
+  if (!Array.isArray(draft.document.frames) || draft.document.frames.length === 0) {
+    draft.document.frames = [createDefaultFrame(layers[0].id)];
+  }
+  return draft.document.frames;
+}
+
+/**
+ * 规范化帧时长。
+ *
+ * @param {unknown} value 原始时长。
+ * @param {number} [fallback=0] 默认时长。
+ * @returns {number} 非负整数毫秒。
+ */
+function normalizeFrameDuration(value, fallback = 0) {
+  return Math.max(0, toInteger(value, fallback));
+}
+
+/**
+ * 判断 cell 是否应在 transparent-space 合成模式下透出下层。
+ *
+ * @param {object} cell 源 cell。
+ * @returns {boolean} 是否透明。
+ */
+function isTransparentCell(cell) {
+  return !cell || cell.role === 'empty' || cell.char === '' || cell.char === ' ';
+}
+
+/**
+ * 创建空白可合成 CellMap。
+ *
+ * @param {number} width 宽度。
+ * @param {number} height 高度。
+ * @returns {{ width: number, height: number, cells: Array<object> }} 空白 cellMap。
+ */
+function createEmptyCellMap(width, height) {
+  const cells = [];
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      cells.push({ x, y, char: ' ', width: 1, role: 'empty', sourceGlyph: null });
+    }
+  }
+  return { width, height, cells };
+}
+
+/**
+ * 读取图层合成模式。
+ *
+ * @param {object} layer 图层。
+ * @returns {'transparent-space' | 'replace'} 合成模式。
+ */
+function getLayerCompositionMode(layer) {
+  return layer?.meta?.studio?.composition?.mode === 'replace' ? 'replace' : 'transparent-space';
+}
+
+/**
+ * 解析当前活动帧和活动图层。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ frameId?: string, layerId?: string }} [options] 活动对象覆盖。
+ * @returns {object} 图层/帧状态。
+ */
+function resolveCellCanvasLayerFrameState(draft, options = {}) {
+  const layers = getDraftLayers(draft);
+  const frames = getDraftFrames(draft, layers);
+  const session = draft?.editorSession ?? {};
+  const requestedFrameId = typeof options.frameId === 'string' && options.frameId
+    ? options.frameId
+    : session.activeFrameId;
+  const activeFrame = frames.find((frame) => frame.id === requestedFrameId) ?? frames[0];
+  const frameLayerRefs = Array.isArray(activeFrame.layerRefs) && activeFrame.layerRefs.length > 0
+    ? activeFrame.layerRefs
+    : [layers[0].id];
+  const requestedLayerId = typeof options.layerId === 'string' && options.layerId
+    ? options.layerId
+    : session.activeLayerId;
+  const activeLayer = layers.find((layer) => layer.id === requestedLayerId && frameLayerRefs.includes(layer.id))
+    ?? layers.find((layer) => frameLayerRefs.includes(layer.id))
+    ?? layers[0];
+
+  return {
+    layers,
+    frames,
+    activeLayer,
+    activeFrame,
+    activeLayerId: activeLayer.id,
+    activeFrameId: activeFrame.id,
+    frameLayerRefs,
+    activeLayerLocked: activeLayer.locked === true,
+    activeLayerVisible: activeLayer.visible !== false,
+    frameDurationMs: normalizeFrameDuration(activeFrame.durationMs, 0),
+  };
+}
+
+/**
+ * 校验单个 CellMap。
+ *
+ * @param {object} cellMap CellMap。
+ * @returns {{ width: number, height: number, cells: number }} CellMap 摘要。
+ */
+function validateCellMap(cellMap) {
+  if (!cellMap || !Array.isArray(cellMap.cells)) {
+    throw new Error('CellCanvas layer must contain a valid cellMap.');
+  }
+  if (!Number.isInteger(cellMap.width) || cellMap.width <= 0) {
+    throw new Error('CellCanvas cellMap.width must be a positive integer.');
+  }
+
+  if (!Number.isInteger(cellMap.height) || cellMap.height <= 0) {
+    throw new Error('CellCanvas cellMap.height must be a positive integer.');
+  }
+
+  const expectedCells = cellMap.width * cellMap.height;
+  if (cellMap.cells.length !== expectedCells) {
+    throw new Error(`CellCanvas cell count must be ${expectedCells}.`);
+  }
+
+  for (const cell of cellMap.cells) {
+    if (!Number.isInteger(cell.x) || !Number.isInteger(cell.y)) {
+      throw new Error('CellCanvas cell coordinates must be integers.');
+    }
+    if (cell.x < 0 || cell.x >= cellMap.width || cell.y < 0 || cell.y >= cellMap.height) {
+      throw new Error('CellCanvas cell coordinates are out of bounds.');
+    }
+    if (typeof cell.char !== 'string' || Array.from(cell.char).length > 1) {
+      throw new Error('CellCanvas cell.char must contain at most one character.');
+    }
+  }
+
+  return { width: cellMap.width, height: cellMap.height, cells: cellMap.cells.length };
+}
+
+/**
  * 确保 editorSession 与 history 结构存在。
  *
  * @param {object} draft CellCanvas 草稿。
  * @returns {object} editorSession。
  */
 function ensureEditorSession(draft) {
+  const layers = Array.isArray(draft?.document?.layers) ? draft.document.layers : [];
+  const frames = Array.isArray(draft?.document?.frames) && draft.document.frames.length > 0
+    ? draft.document.frames
+    : layers[0]
+      ? [createDefaultFrame(layers[0].id)]
+      : [];
   draft.editorSession ??= {};
   draft.editorSession.viewport ??= { x: 0, y: 0, zoom: 1 };
+  draft.editorSession.activeLayerId ??= layers[0]?.id;
+  draft.editorSession.activeFrameId ??= frames[0]?.id;
   draft.editorSession.activeCell ??= { x: 0, y: 0 };
   draft.editorSession.selection ??= { kind: 'single-cell', x: 0, y: 0, width: 1, height: 1 };
   draft.editorSession.clipboard ??= { kind: 'empty' };
@@ -783,6 +978,10 @@ function applyCellCanvasPatches(draft, cellPatches, options = {}) {
   validateCellCanvasDocumentDraft(draft);
   const nextDraft = cloneJson(draft);
   const session = ensureEditorSession(nextDraft);
+  const state = resolveCellCanvasLayerFrameState(nextDraft);
+  if (state.activeLayerLocked) {
+    throw new Error('CellCanvas active layer is locked.');
+  }
   const cellMap = getActiveCellMap(nextDraft);
   const selectionBefore = normalizeSelection(session.selection, cellMap);
   const effectivePatches = [];
@@ -876,15 +1075,18 @@ export function createCellCanvasDraftFromCellMap(input) {
       layers: [
         {
           id: layerId,
+          name: 'Main',
           kind: 'cell-map',
           locked: false,
           visible: true,
           cellMap,
         },
       ],
+      frames: [createDefaultFrame(layerId)],
     },
     editorSession: {
       activeLayerId: layerId,
+      activeFrameId: 'frame-static',
       activeCell: { x: 0, y: 0 },
       selection: { kind: 'single-cell', x: 0, y: 0, width: 1, height: 1 },
       viewport: { x: 0, y: 0, zoom: 1 },
@@ -971,31 +1173,183 @@ export function createCellCanvasDraftFromSpecialArtResult(input, options = {}) {
 }
 
 /**
+ * 读取当前 CellCanvas 图层与帧状态。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {object} 图层与帧摘要。
+ */
+export function getCellCanvasLayerFrameState(draft) {
+  validateCellCanvasDocumentDraft(draft);
+  const state = resolveCellCanvasLayerFrameState(draft);
+  return {
+    activeLayerId: state.activeLayerId,
+    activeFrameId: state.activeFrameId,
+    activeLayerLocked: state.activeLayerLocked,
+    activeLayerVisible: state.activeLayerVisible,
+    frameDurationMs: state.frameDurationMs,
+    frameLayerRefs: [...state.frameLayerRefs],
+    layers: state.layers.map((layer) => ({
+      id: layer.id,
+      name: layer.name ?? layer.id,
+      visible: layer.visible !== false,
+      locked: layer.locked === true,
+      compositionMode: getLayerCompositionMode(layer),
+      width: layer.cellMap.width,
+      height: layer.cellMap.height,
+    })),
+    frames: state.frames.map((frame) => ({
+      id: frame.id,
+      name: frame.name ?? frame.id,
+      durationMs: normalizeFrameDuration(frame.durationMs, 0),
+      layerRefs: Array.isArray(frame.layerRefs) ? [...frame.layerRefs] : [],
+    })),
+  };
+}
+
+/**
+ * 切换当前活动图层或帧。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ layerId?: string, frameId?: string }} target 切换目标。
+ * @returns {object} 更新后的草稿。
+ */
+export function setCellCanvasActiveLayerFrame(draft, target = {}) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const nextDraft = cloneJson(draft);
+  const session = ensureEditorSession(nextDraft);
+  const state = resolveCellCanvasLayerFrameState(nextDraft, target);
+  session.activeFrameId = state.activeFrameId;
+  session.activeLayerId = state.activeLayerId;
+  applySelectionToSession(session, normalizeSelection(session.selection, state.activeLayer.cellMap));
+  return nextDraft;
+}
+
+/**
+ * 更新图层或帧的轻量设置。
+ *
+ * 当前阶段只允许修改可见性、锁定和帧时长；这些都是编辑会话结构设置，
+ * 不写入 cell patch history。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ layerId?: string, frameId?: string, visible?: boolean, locked?: boolean, durationMs?: number }} settings 设置。
+ * @returns {object} 更新后的草稿。
+ */
+export function updateCellCanvasLayerFrameSettings(draft, settings = {}) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const nextDraft = cloneJson(draft);
+  const frames = ensureDocumentFrames(nextDraft);
+  const session = ensureEditorSession(nextDraft);
+  const state = resolveCellCanvasLayerFrameState(nextDraft, settings);
+  const layer = state.layers.find((item) => item.id === state.activeLayerId);
+  const frame = frames.find((item) => item.id === state.activeFrameId);
+
+  if (layer && Object.prototype.hasOwnProperty.call(settings, 'visible')) {
+    layer.visible = settings.visible !== false;
+  }
+  if (layer && Object.prototype.hasOwnProperty.call(settings, 'locked')) {
+    layer.locked = settings.locked === true;
+  }
+  if (frame && Object.prototype.hasOwnProperty.call(settings, 'durationMs')) {
+    frame.durationMs = normalizeFrameDuration(settings.durationMs, frame.durationMs);
+  }
+
+  session.activeFrameId = state.activeFrameId;
+  session.activeLayerId = state.activeLayerId;
+  applySelectionToSession(session, normalizeSelection(session.selection, state.activeLayer.cellMap));
+  return nextDraft;
+}
+
+/**
  * 读取草稿当前活动图层的 cellMap。
+ *
+ * 该函数返回的是可编辑源图层；导出和展示投影应使用
+ * `composeCellCanvasFrame()`，避免把图层合成结果误写回源模型。
  *
  * @param {object} draft CellCanvas 草稿。
  * @returns {{ width: number, height: number, cells: Array<object> }} cellMap。
  */
 export function getActiveCellMap(draft) {
-  const layers = draft?.document?.layers;
-  if (!Array.isArray(layers) || layers.length === 0) {
-    throw new Error('CellCanvas draft must contain at least one layer.');
-  }
-
-  const activeLayerId = draft?.editorSession?.activeLayerId;
-  const layer = layers.find((item) => item.id === activeLayerId) ?? layers[0];
-  if (!layer?.cellMap || !Array.isArray(layer.cellMap.cells)) {
+  const state = resolveCellCanvasLayerFrameState(draft);
+  if (!state.activeLayer?.cellMap || !Array.isArray(state.activeLayer.cellMap.cells)) {
     throw new Error('CellCanvas active layer must contain a valid cellMap.');
   }
+  return state.activeLayer.cellMap;
+}
 
-  return layer.cellMap;
+/**
+ * 将指定帧合成为一个只读 CellMap 投影。
+ *
+ * 合成只读取 `document.layers[]` 与 `frame.layerRefs[]`；DOM grid、Canvas、
+ * PNG 等展示结果都不能反向参与源模型。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {string} [frameId] 帧 ID；缺省使用活动帧。
+ * @returns {{ schema: string, kind: string, source: string, canonical: boolean, frameId: string, durationMs: number, rows: number, cols: number, cellMap: object, diagnostics: Array<object> }} 合成投影。
+ */
+export function composeCellCanvasFrame(draft, frameId) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const state = resolveCellCanvasLayerFrameState(draft, { frameId });
+  const canvas = draft.document?.canvas ?? {};
+  const width = Number.isInteger(canvas.width) && canvas.width > 0
+    ? canvas.width
+    : state.activeLayer.cellMap.width;
+  const height = Number.isInteger(canvas.height) && canvas.height > 0
+    ? canvas.height
+    : state.activeLayer.cellMap.height;
+  const cellMap = createEmptyCellMap(width, height);
+  const targetByPosition = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
+  const diagnostics = [];
+
+  for (const layerId of state.frameLayerRefs) {
+    const layer = state.layers.find((item) => item.id === layerId);
+    if (!layer) {
+      diagnostics.push({ code: 'UA_CELLCANVAS_FRAME_LAYER_MISSING', severity: 'warning', layerId });
+      continue;
+    }
+    if (layer.visible === false) {
+      diagnostics.push({ code: 'UA_CELLCANVAS_LAYER_SKIPPED_HIDDEN', severity: 'info', layerId });
+      continue;
+    }
+
+    const mode = getLayerCompositionMode(layer);
+    const offset = {
+      x: toInteger(layer.offset?.x, 0),
+      y: toInteger(layer.offset?.y, 0),
+    };
+
+    for (const sourceCell of layer.cellMap.cells) {
+      if (mode === 'transparent-space' && isTransparentCell(sourceCell)) continue;
+      const x = sourceCell.x + offset.x;
+      const y = sourceCell.y + offset.y;
+      if (x < 0 || x >= width || y < 0 || y >= height) continue;
+      const targetCell = targetByPosition.get(`${x},${y}`);
+      if (!targetCell) continue;
+      Object.assign(targetCell, cloneJson(sourceCell), { x, y });
+    }
+  }
+
+  return {
+    schema: CELL_CANVAS_PROJECTION_SCHEMA,
+    kind: 'composed-cellmap-frame',
+    source: 'composed-cellmap-from-frame-layerRefs',
+    canonical: false,
+    frameId: state.activeFrameId,
+    durationMs: state.frameDurationMs,
+    rows: cellMap.height,
+    cols: cellMap.width,
+    cellMap,
+    diagnostics,
+  };
 }
 
 /**
  * 校验 CellCanvas 草稿并返回摘要。
  *
  * @param {object} draft CellCanvas 草稿。
- * @returns {{ schema: string, width: number, height: number, cells: number }} 校验摘要。
+ * @returns {{ schema: string, width: number, height: number, cells: number, layerCount: number, frameCount: number, activeLayerId: string, activeFrameId: string }} 校验摘要。
  */
 export function validateCellCanvasDocumentDraft(draft) {
   if (!draft || draft.schema !== CELL_CANVAS_DRAFT_SCHEMA) {
@@ -1006,37 +1360,57 @@ export function validateCellCanvasDocumentDraft(draft) {
     throw new Error(`CellCanvas draft stability must be ${CELL_CANVAS_DRAFT_STABILITY}.`);
   }
 
-  const cellMap = getActiveCellMap(draft);
-  if (!Number.isInteger(cellMap.width) || cellMap.width <= 0) {
-    throw new Error('CellCanvas cellMap.width must be a positive integer.');
-  }
-
-  if (!Number.isInteger(cellMap.height) || cellMap.height <= 0) {
-    throw new Error('CellCanvas cellMap.height must be a positive integer.');
-  }
-
-  const expectedCells = cellMap.width * cellMap.height;
-  if (cellMap.cells.length !== expectedCells) {
-    throw new Error(`CellCanvas cell count must be ${expectedCells}.`);
-  }
-
-  for (const cell of cellMap.cells) {
-    if (!Number.isInteger(cell.x) || !Number.isInteger(cell.y)) {
-      throw new Error('CellCanvas cell coordinates must be integers.');
+  const layers = getDraftLayers(draft);
+  const layerIds = new Set();
+  for (const layer of layers) {
+    if (!layer || typeof layer.id !== 'string' || layer.id.length === 0) {
+      throw new Error('CellCanvas layer.id must be a non-empty string.');
     }
-    if (cell.x < 0 || cell.x >= cellMap.width || cell.y < 0 || cell.y >= cellMap.height) {
-      throw new Error('CellCanvas cell coordinates are out of bounds.');
+    if (layerIds.has(layer.id)) {
+      throw new Error(`CellCanvas layer.id must be unique: ${layer.id}.`);
     }
-    if (typeof cell.char !== 'string' || Array.from(cell.char).length !== 1) {
-      throw new Error('CellCanvas cell.char must contain exactly one character.');
+    layerIds.add(layer.id);
+    validateCellMap(layer.cellMap);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(draft.document ?? {}, 'frames')) {
+    if (!Array.isArray(draft.document.frames) || draft.document.frames.length === 0) {
+      throw new Error('CellCanvas document.frames must be a non-empty array when provided.');
+    }
+    const frameIds = new Set();
+    for (const frame of draft.document.frames) {
+      if (!frame || typeof frame.id !== 'string' || frame.id.length === 0) {
+        throw new Error('CellCanvas frame.id must be a non-empty string.');
+      }
+      if (frameIds.has(frame.id)) {
+        throw new Error(`CellCanvas frame.id must be unique: ${frame.id}.`);
+      }
+      frameIds.add(frame.id);
+      if (!Number.isInteger(frame.durationMs) || frame.durationMs < 0) {
+        throw new Error('CellCanvas frame.durationMs must be a non-negative integer.');
+      }
+      if (!Array.isArray(frame.layerRefs) || frame.layerRefs.length === 0) {
+        throw new Error('CellCanvas frame.layerRefs must contain at least one layer id.');
+      }
+      for (const layerId of frame.layerRefs) {
+        if (!layerIds.has(layerId)) {
+          throw new Error(`CellCanvas frame references unknown layer: ${layerId}.`);
+        }
+      }
     }
   }
 
+  const state = resolveCellCanvasLayerFrameState(draft);
+  const cellMap = state.activeLayer.cellMap;
   return {
     schema: draft.schema,
     width: cellMap.width,
     height: cellMap.height,
     cells: cellMap.cells.length,
+    layerCount: layers.length,
+    frameCount: getDraftFrames(draft, layers).length,
+    activeLayerId: state.activeLayerId,
+    activeFrameId: state.activeFrameId,
   };
 }
 
@@ -1141,8 +1515,7 @@ export function readCellCanvasDraftFromProjectEnvelope(input) {
  * @returns {string} 普通字符画文本。
  */
 export function cellCanvasDraftToPlainText(draft) {
-  validateCellCanvasDocumentDraft(draft);
-  const cellMap = getActiveCellMap(draft);
+  const { cellMap } = composeCellCanvasFrame(draft);
   const lines = [];
 
   for (let y = 0; y < cellMap.height; y += 1) {
@@ -1163,13 +1536,15 @@ export function cellCanvasDraftToPlainText(draft) {
  * @returns {{ schema: string, kind: string, source: string, canonical: boolean, rows: number, cols: number, content: string }} 投影结果。
  */
 export function cellCanvasDraftToPlainTextProjection(draft) {
-  validateCellCanvasDocumentDraft(draft);
-  const cellMap = getActiveCellMap(draft);
+  const composition = composeCellCanvasFrame(draft);
+  const cellMap = composition.cellMap;
   return {
     schema: CELL_CANVAS_PROJECTION_SCHEMA,
     kind: 'plain-text',
-    source: 'CellCanvasDocumentDraft.document.layers[].cellMap',
+    source: composition.source,
     canonical: false,
+    frameId: composition.frameId,
+    durationMs: composition.durationMs,
     rows: cellMap.height,
     cols: cellMap.width,
     content: cellCanvasDraftToPlainText(draft),
@@ -1187,8 +1562,8 @@ export function cellCanvasDraftToPlainTextProjection(draft) {
  * @returns {{ schema: string, kind: string, source: string, canonical: boolean, rows: number, cols: number, content: string }} 投影结果。
  */
 export function cellCanvasDraftToHtmlProjection(draft, options = {}) {
-  validateCellCanvasDocumentDraft(draft);
-  const cellMap = getActiveCellMap(draft);
+  const composition = composeCellCanvasFrame(draft);
+  const cellMap = composition.cellMap;
   const className = options.className || 'unicode-art-cellcanvas';
   const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
   const lines = [];
@@ -1213,8 +1588,10 @@ export function cellCanvasDraftToHtmlProjection(draft, options = {}) {
   return {
     schema: CELL_CANVAS_PROJECTION_SCHEMA,
     kind: 'html',
-    source: 'CellCanvasDocumentDraft.document.layers[].cellMap',
+    source: composition.source,
     canonical: false,
+    frameId: composition.frameId,
+    durationMs: composition.durationMs,
     rows: cellMap.height,
     cols: cellMap.width,
     content: `<pre class="${escapeHtml(className)}" data-cellcanvas-projection="html" data-cols="${cellMap.width}" data-rows="${cellMap.height}">${lines.join('\n')}</pre>`,

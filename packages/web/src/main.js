@@ -38,6 +38,7 @@ import {
   cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
   cellCanvasDraftToPlainTextProjection,
+  composeCellCanvasFrame,
   copyCellCanvasSelection as copyCellCanvasSelectionDraft,
   createDefaultCellCanvasDraft,
   createCellCanvasDraftFromPreset,
@@ -46,12 +47,15 @@ import {
   extendCellCanvasSelection as extendCellCanvasSelectionDraft,
   getActiveCellMap,
   getCellCanvasHistoryState,
+  getCellCanvasLayerFrameState,
   getCellCanvasPastePreview,
   pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
   redoCellCanvasHistory as redoCellCanvasHistoryDraft,
   setCellCanvasSelection as setCellCanvasSelectionDraft,
+  setCellCanvasActiveLayerFrame,
   undoCellCanvasHistory as undoCellCanvasHistoryDraft,
   updateCellCanvasCell,
+  updateCellCanvasLayerFrameSettings,
   validateCellCanvasDocumentDraft,
 } from './cellcanvas.js';
 import { renderCellMapToCanvas2D } from './studio/canvas-renderer.js';
@@ -253,9 +257,17 @@ const UI_MESSAGES = {
     'editor.status.pngExported': 'CellCanvas PNG 投影已导出',
     'editor.status.pngExportFailed': 'CellCanvas PNG 导出失败',
     'editor.status.connectorDrawn': '连线已绘制 · {cells} 格',
+    'editor.status.layerFrameUpdated': '图层与帧设置已更新',
     'cellcanvas.section': 'CellCanvas 单格编辑',
     'cellcanvas.selection': '选区',
     'cellcanvas.connector': '连线',
+    'cellcanvas.layerFrame': '图层与帧',
+    'cellcanvas.layer': '图层',
+    'cellcanvas.frame': '帧',
+    'cellcanvas.layerVisible': '可见',
+    'cellcanvas.layerLocked': '锁定',
+    'cellcanvas.durationMs': '时长 ms',
+    'cellcanvas.applyLayerFrame': '应用图层/帧',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
     'cellcanvas.fromX': '起点 X',
@@ -314,12 +326,15 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.undoDetailed': '已撤销 {kind}：{cells} 格。',
     'cellcanvas.feedback.hint.redoDetailed': '已重做 {kind}：{cells} 格。',
     'cellcanvas.feedback.hint.connector': '连线 {route}：({fromX}, {fromY}) -> ({toX}, {toY})',
+    'cellcanvas.feedback.hint.layerFrame': '当前帧 {frame} · 活动图层 {layer} · 合成 {cols}x{rows}。',
+    'cellcanvas.feedback.hint.layerLocked': '当前图层已锁定；请先取消锁定再写入字素格。',
     'cellcanvas.feedback.hint.sourceInvalid': 'Canonical JSON 暂时无效，先修复源码后再编辑网格。',
     'cellcanvas.tool.select': '选择',
     'cellcanvas.tool.hover': '悬停',
     'cellcanvas.tool.cellEdit': '单格编辑',
     'cellcanvas.tool.selection': '选区',
     'cellcanvas.tool.connector': '连线',
+    'cellcanvas.tool.layerFrame': '图层/帧',
     'cellcanvas.tool.clipboard': '剪贴板',
     'cellcanvas.tool.history': '历史',
     'cellcanvas.tool.source': '源码',
@@ -720,9 +735,17 @@ const UI_MESSAGES = {
     'editor.status.pngExported': 'CellCanvas PNG projection exported',
     'editor.status.pngExportFailed': 'CellCanvas PNG export failed',
     'editor.status.connectorDrawn': 'Connector drawn · {cells} cells',
+    'editor.status.layerFrameUpdated': 'Layer and frame settings updated',
     'cellcanvas.section': 'CellCanvas single-cell editing',
     'cellcanvas.selection': 'Selection',
     'cellcanvas.connector': 'Connector',
+    'cellcanvas.layerFrame': 'Layers and frames',
+    'cellcanvas.layer': 'Layer',
+    'cellcanvas.frame': 'Frame',
+    'cellcanvas.layerVisible': 'Visible',
+    'cellcanvas.layerLocked': 'Locked',
+    'cellcanvas.durationMs': 'Duration ms',
+    'cellcanvas.applyLayerFrame': 'Apply layer/frame',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
     'cellcanvas.fromX': 'From X',
@@ -781,12 +804,15 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.undoDetailed': 'Undone {kind}: {cells} cells.',
     'cellcanvas.feedback.hint.redoDetailed': 'Redone {kind}: {cells} cells.',
     'cellcanvas.feedback.hint.connector': 'Connector {route}: ({fromX}, {fromY}) -> ({toX}, {toY})',
+    'cellcanvas.feedback.hint.layerFrame': 'Current frame {frame} · active layer {layer} · composed {cols}x{rows}.',
+    'cellcanvas.feedback.hint.layerLocked': 'The active layer is locked. Unlock it before writing glyph cells.',
     'cellcanvas.feedback.hint.sourceInvalid': 'Canonical JSON is temporarily invalid; fix the source before editing the grid.',
     'cellcanvas.tool.select': 'Select',
     'cellcanvas.tool.hover': 'Hover',
     'cellcanvas.tool.cellEdit': 'Cell edit',
     'cellcanvas.tool.selection': 'Selection',
     'cellcanvas.tool.connector': 'Connector',
+    'cellcanvas.tool.layerFrame': 'Layer/frame',
     'cellcanvas.tool.clipboard': 'Clipboard',
     'cellcanvas.tool.history': 'History',
     'cellcanvas.tool.source': 'Source',
@@ -1233,6 +1259,13 @@ const DOM = {
   editorCellCanvasLineToY: '#editorCellCanvasLineToY',
   editorCellCanvasLineRoute: '#editorCellCanvasLineRoute',
   editorCellCanvasDrawLine: '#editorCellCanvasDrawLine',
+  editorCellCanvasLayer: '#editorCellCanvasLayer',
+  editorCellCanvasLayerVisible: '#editorCellCanvasLayerVisible',
+  editorCellCanvasLayerLocked: '#editorCellCanvasLayerLocked',
+  editorCellCanvasFrame: '#editorCellCanvasFrame',
+  editorCellCanvasFrameDuration: '#editorCellCanvasFrameDuration',
+  editorCellCanvasApplyLayerFrame: '#editorCellCanvasApplyLayerFrame',
+  editorCellCanvasLayerFrameSummary: '#editorCellCanvasLayerFrameSummary',
   editorCellCanvasToolFeedback: '#editorCellCanvasToolFeedback',
   editorCellCanvasActiveTool: '#editorCellCanvasActiveTool',
   editorCellCanvasTarget: '#editorCellCanvasTarget',
@@ -1804,6 +1837,10 @@ class EditorController {
       DOM.editorCellCanvasLineToY,
       DOM.editorCellCanvasLineRoute,
     ].join(', '), () => this.previewCellCanvasConnectorFeedback());
+    $doc.on('change', [
+      DOM.editorCellCanvasLayer,
+      DOM.editorCellCanvasFrame,
+    ].join(', '), () => this.changeCellCanvasActiveLayerFrame());
     $doc.on('click', DOM.editorCellCanvasApply, () => this.applyCellCanvasCellEdit());
     $doc.on('click', DOM.editorCellCanvasSelect, () => this.applyCellCanvasSelection());
     $doc.on('click', DOM.editorCellCanvasCopy, () => this.copyCellCanvasSelection());
@@ -1811,6 +1848,7 @@ class EditorController {
     $doc.on('click', DOM.editorCellCanvasUndo, () => this.undoCellCanvasHistory());
     $doc.on('click', DOM.editorCellCanvasRedo, () => this.redoCellCanvasHistory());
     $doc.on('click', DOM.editorCellCanvasDrawLine, () => this.drawCellCanvasConnectorFromControls());
+    $doc.on('click', DOM.editorCellCanvasApplyLayerFrame, () => this.applyCellCanvasLayerFrameSettings());
     $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
     $doc.on('click', DOM.editorCellCanvasExportHtml, () => this.exportCellCanvasHtml());
     $doc.on('click', DOM.editorCellCanvasExportPng, () => void this.exportCellCanvasPng());
@@ -2109,12 +2147,44 @@ class EditorController {
   }
 
   /**
+   * 格式化当前图层 / 帧目标摘要。
+   *
+   * @param {object} state CellCanvas 图层与帧状态。
+   * @returns {string} 目标摘要。
+   */
+  formatCellCanvasLayerFrameTarget(state) {
+    return `${state.activeLayerId} @ ${state.activeFrameId}`;
+  }
+
+  /**
+   * 当前活动图层锁定时给出统一写入阻断反馈。
+   *
+   * @param {object} draft CellCanvas 草稿。
+   * @param {string} toolKey 当前写入工具。
+   * @returns {boolean} 是否已阻断。
+   */
+  blockIfCellCanvasActiveLayerLocked(draft, toolKey) {
+    const state = getCellCanvasLayerFrameState(draft);
+    if (!state.activeLayerLocked) return false;
+
+    this.setCellCanvasToolFeedback({
+      toolKey,
+      targetText: this.formatCellCanvasLayerFrameTarget(state),
+      availabilityKey: 'cellcanvas.feedback.disabled',
+      availabilityState: 'error',
+      hintKey: 'cellcanvas.feedback.hint.layerLocked',
+    });
+    return true;
+  }
+
+  /**
    * 从合法 draft 刷新默认“当前选择”反馈。
    *
    * @param {object} draft CellCanvas 草稿。
    */
   setCellCanvasFeedbackFromDraft(draft) {
     const cellMap = getActiveCellMap(draft);
+    const state = getCellCanvasLayerFrameState(draft);
     const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
     const x = Math.min(Math.max(Number(activeCell.x) || 0, 0), cellMap.width - 1);
     const y = Math.min(Math.max(Number(activeCell.y) || 0, 0), cellMap.height - 1);
@@ -2124,9 +2194,9 @@ class EditorController {
     this.setCellCanvasToolFeedback({
       toolKey: 'cellcanvas.tool.select',
       targetText: this.formatCellCanvasCellTarget(x, y, cell),
-      availabilityKey: 'cellcanvas.feedback.ready',
-      availabilityState: 'info',
-      hintKey: 'cellcanvas.feedback.hint.active',
+      availabilityKey: state.activeLayerLocked ? 'cellcanvas.feedback.warning' : 'cellcanvas.feedback.ready',
+      availabilityState: state.activeLayerLocked ? 'warning' : 'info',
+      hintKey: state.activeLayerLocked ? 'cellcanvas.feedback.hint.layerLocked' : 'cellcanvas.feedback.hint.active',
       hintParams: { x, y, char },
     });
   }
@@ -2411,6 +2481,8 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
+      const draft = this.readCurrentCellCanvasDraft();
+      if (this.blockIfCellCanvasActiveLayerLocked(draft, 'cellcanvas.tool.cellEdit')) return;
       const x = Number($(DOM.editorCellCanvasX).val());
       const y = Number($(DOM.editorCellCanvasY).val());
       const cell = { char: $(DOM.editorCellCanvasChar).val() || ' ' };
@@ -2470,6 +2542,7 @@ class EditorController {
 
     try {
       const draft = this.readCurrentCellCanvasDraft();
+      if (this.blockIfCellCanvasActiveLayerLocked(draft, 'cellcanvas.tool.clipboard')) return;
       const selection = draft.editorSession?.selection ?? draft.editorSession?.activeCell ?? { x: 0, y: 0 };
       const preview = getCellCanvasPastePreview(draft, selection.x, selection.y);
       this.clearCellCanvasPastePreview();
@@ -2520,6 +2593,19 @@ class EditorController {
   previewCellCanvasConnectorFeedback() {
     if (this.workspace.kind !== 'cellcanvas') return;
 
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      if (this.blockIfCellCanvasActiveLayerLocked(draft, 'cellcanvas.tool.connector')) return;
+    } catch {
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.source',
+        availabilityKey: 'cellcanvas.feedback.disabled',
+        availabilityState: 'error',
+        hintKey: 'cellcanvas.feedback.hint.sourceInvalid',
+      });
+      return;
+    }
+
     const fromX = Number($(DOM.editorCellCanvasLineFromX).val()) || 0;
     const fromY = Number($(DOM.editorCellCanvasLineFromY).val()) || 0;
     const toX = Number($(DOM.editorCellCanvasLineToX).val()) || 0;
@@ -2533,6 +2619,78 @@ class EditorController {
       hintKey: 'cellcanvas.feedback.hint.connector',
       hintParams: { fromX, fromY, toX, toY, route },
     });
+  }
+
+  /**
+   * 切换活动图层或活动帧。
+   */
+  changeCellCanvasActiveLayerFrame() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const nextDraft = setCellCanvasActiveLayerFrame(this.readCurrentCellCanvasDraft(), {
+        layerId: $(DOM.editorCellCanvasLayer).val(),
+        frameId: $(DOM.editorCellCanvasFrame).val(),
+      });
+      const composition = composeCellCanvasFrame(nextDraft);
+      const state = getCellCanvasLayerFrameState(nextDraft);
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.layerFrame',
+        targetText: this.formatCellCanvasLayerFrameTarget(state),
+        availabilityKey: 'cellcanvas.feedback.ready',
+        availabilityState: 'info',
+        hintKey: 'cellcanvas.feedback.hint.layerFrame',
+        hintParams: {
+          layer: state.activeLayerId,
+          frame: state.activeFrameId,
+          cols: composition.cols,
+          rows: composition.rows,
+        },
+      });
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 应用图层可见/锁定与帧时长设置。
+   */
+  applyCellCanvasLayerFrameSettings() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const nextDraft = updateCellCanvasLayerFrameSettings(this.readCurrentCellCanvasDraft(), {
+        layerId: $(DOM.editorCellCanvasLayer).val(),
+        frameId: $(DOM.editorCellCanvasFrame).val(),
+        visible: $(DOM.editorCellCanvasLayerVisible).prop('checked'),
+        locked: $(DOM.editorCellCanvasLayerLocked).prop('checked'),
+        durationMs: Number($(DOM.editorCellCanvasFrameDuration).val()),
+      });
+      const composition = composeCellCanvasFrame(nextDraft);
+      const state = getCellCanvasLayerFrameState(nextDraft);
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.layerFrame',
+        targetText: this.formatCellCanvasLayerFrameTarget(state),
+        availabilityKey: state.activeLayerLocked ? 'cellcanvas.feedback.warning' : 'cellcanvas.feedback.ready',
+        availabilityState: state.activeLayerLocked ? 'warning' : 'success',
+        hintKey: state.activeLayerLocked
+          ? 'cellcanvas.feedback.hint.layerLocked'
+          : 'cellcanvas.feedback.hint.layerFrame',
+        hintParams: {
+          layer: state.activeLayerId,
+          frame: state.activeFrameId,
+          cols: composition.cols,
+          rows: composition.rows,
+        },
+      });
+      this.setStatus('editor.status.layerFrameUpdated', {}, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
   }
 
   validateCurrentSource() {
@@ -2576,13 +2734,13 @@ class EditorController {
         const content = config.box ? this.getCoreAdapter().boxText(rendered.content, config.box) : rendered.content;
         result = { content, rows: rendered.rows, cols: rendered.cols, duration: 0 };
       } else {
-        const cellMap = getActiveCellMap(validated.value);
+        const composition = composeCellCanvasFrame(validated.value);
         const content = cellCanvasDraftToPlainText(validated.value);
         result = {
           content,
-          rows: cellMap.height,
-          cols: cellMap.width,
-          duration: 0,
+          rows: composition.rows,
+          cols: composition.cols,
+          duration: composition.durationMs,
           draft: validated.value,
           kind: 'cellcanvas',
         };
@@ -2617,6 +2775,47 @@ class EditorController {
   }
 
   /**
+   * 同步图层与帧控件。
+   *
+   * 图层列表展示当前文档图层；当前帧未引用的图层先禁用，避免用户误以为
+   * 切换后会自动改变 frame.layerRefs。
+   *
+   * @param {object} draft CellCanvas 草稿。
+   * @param {object} composition 当前帧合成投影。
+   */
+  syncCellCanvasLayerFrameControls(draft, composition) {
+    const state = getCellCanvasLayerFrameState(draft);
+    const $layer = $(DOM.editorCellCanvasLayer).empty();
+    for (const layer of state.layers) {
+      $('<option>')
+        .val(layer.id)
+        .text(layer.name)
+        .prop('disabled', !state.frameLayerRefs.includes(layer.id))
+        .appendTo($layer);
+    }
+    $layer.val(state.activeLayerId);
+
+    const $frame = $(DOM.editorCellCanvasFrame).empty();
+    for (const frame of state.frames) {
+      $('<option>')
+        .val(frame.id)
+        .text(frame.name)
+        .appendTo($frame);
+    }
+    $frame.val(state.activeFrameId);
+
+    $(DOM.editorCellCanvasLayerVisible).prop('checked', state.activeLayerVisible);
+    $(DOM.editorCellCanvasLayerLocked).prop('checked', state.activeLayerLocked);
+    $(DOM.editorCellCanvasFrameDuration).val(String(state.frameDurationMs));
+    $(DOM.editorCellCanvasLayerFrameSummary).text(this.t('cellcanvas.feedback.hint.layerFrame', {
+      layer: state.activeLayerId,
+      frame: state.activeFrameId,
+      cols: composition.cols,
+      rows: composition.rows,
+    }));
+  }
+
+  /**
    * 从当前 CellCanvas JSON 同步单格编辑控件。
    */
   syncCellCanvasControlsFromSource() {
@@ -2626,6 +2825,8 @@ class EditorController {
       const draft = this.readCurrentCellCanvasDraft();
       validateCellCanvasDocumentDraft(draft);
       const cellMap = getActiveCellMap(draft);
+      const composition = composeCellCanvasFrame(draft);
+      const layerFrameState = getCellCanvasLayerFrameState(draft);
       const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
       const x = Math.min(Math.max(Number(activeCell.x) || 0, 0), cellMap.width - 1);
       const y = Math.min(Math.max(Number(activeCell.y) || 0, 0), cellMap.height - 1);
@@ -2661,7 +2862,10 @@ class EditorController {
       if (!['auto', 'horizontal-first', 'vertical-first'].includes($(DOM.editorCellCanvasLineRoute).val())) {
         $(DOM.editorCellCanvasLineRoute).val('auto');
       }
-      $(DOM.editorCellCanvasPaste).prop('disabled', !clipboardReady);
+      this.syncCellCanvasLayerFrameControls(draft, composition);
+      $(DOM.editorCellCanvasApply).prop('disabled', layerFrameState.activeLayerLocked);
+      $(DOM.editorCellCanvasPaste).prop('disabled', layerFrameState.activeLayerLocked || !clipboardReady);
+      $(DOM.editorCellCanvasDrawLine).prop('disabled', layerFrameState.activeLayerLocked);
       $(DOM.editorCellCanvasUndo).prop('disabled', !historyState.canUndo);
       $(DOM.editorCellCanvasRedo).prop('disabled', !historyState.canRedo);
       this.setCellCanvasFeedbackFromDraft(draft);
@@ -2734,12 +2938,13 @@ class EditorController {
    * @param {object} draft CellCanvas 草稿。
    */
   refreshCellCanvasDraft(draft) {
-    const cellMap = getActiveCellMap(draft);
+    const composition = composeCellCanvasFrame(draft);
+    const cellMap = composition.cellMap;
     this.result = {
       content: cellCanvasDraftToPlainText(draft),
       rows: cellMap.height,
       cols: cellMap.width,
-      duration: 0,
+      duration: composition.durationMs,
       draft,
       kind: 'cellcanvas',
     };
@@ -2791,6 +2996,10 @@ class EditorController {
       const x = Number($(DOM.editorCellCanvasX).val());
       const y = Number($(DOM.editorCellCanvasY).val());
       const draft = this.readCurrentCellCanvasDraft();
+      if (this.blockIfCellCanvasActiveLayerLocked(draft, 'cellcanvas.tool.cellEdit')) {
+        this.setStatus('editor.status.error', { message: this.t('cellcanvas.feedback.hint.layerLocked') }, 'error');
+        return;
+      }
       const nextDraft = updateCellCanvasCell(draft, x, y, {
         char: $(DOM.editorCellCanvasChar).val(),
         fg: $(DOM.editorCellCanvasFg).val(),
@@ -2864,6 +3073,10 @@ class EditorController {
 
     try {
       const draft = this.readCurrentCellCanvasDraft();
+      if (this.blockIfCellCanvasActiveLayerLocked(draft, 'cellcanvas.tool.connector')) {
+        this.setStatus('editor.status.error', { message: this.t('cellcanvas.feedback.hint.layerLocked') }, 'error');
+        return;
+      }
       const nextDraft = drawCellCanvasConnector(
         draft,
         {
@@ -2953,6 +3166,10 @@ class EditorController {
 
     try {
       const draft = this.readCurrentCellCanvasDraft();
+      if (this.blockIfCellCanvasActiveLayerLocked(draft, 'cellcanvas.tool.clipboard')) {
+        this.setStatus('editor.status.error', { message: this.t('cellcanvas.feedback.hint.layerLocked') }, 'error');
+        return;
+      }
       const selection = draft.editorSession?.selection ?? draft.editorSession?.activeCell ?? { x: 0, y: 0 };
       const preview = getCellCanvasPastePreview(draft, selection.x, selection.y);
       const nextDraft = pasteCellCanvasClipboardDraft(draft, selection.x, selection.y);
@@ -3321,7 +3538,7 @@ class EditorController {
 
     try {
       const draft = this.readCurrentCellCanvasDraft();
-      const cellMap = getActiveCellMap(draft);
+      const cellMap = composeCellCanvasFrame(draft).cellMap;
       if (document.fonts?.ready) await document.fonts.ready.catch(() => {});
 
       const canvas = document.createElement('canvas');

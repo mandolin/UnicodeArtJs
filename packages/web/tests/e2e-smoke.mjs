@@ -286,6 +286,79 @@ function createBlankCellCanvasDraftSource(width, height) {
 }
 
 /**
+ * 创建一份用于 E2E 的双图层双帧 CellCanvas draft JSON。
+ *
+ * 活动帧使用 base + overlay 合成；网格编辑目标仍是活动 overlay 图层。
+ *
+ * @returns {string} 可直接写入编辑器源码框的 JSON。
+ */
+function createLayerFrameCellCanvasDraftSource() {
+  const createCells = (chars) => {
+    const lines = chars.split('\n');
+    const height = lines.length;
+    const width = Math.max(...lines.map((line) => Array.from(line).length));
+    const cells = [];
+    for (let y = 0; y < height; y += 1) {
+      const row = Array.from(lines[y]);
+      for (let x = 0; x < width; x += 1) {
+        const char = row[x] ?? ' ';
+        cells.push({
+          x,
+          y,
+          char,
+          width: 1,
+          role: char === ' ' ? 'empty' : 'text',
+          sourceGlyph: char === ' ' ? null : char,
+        });
+      }
+    }
+    return { width, height, cells };
+  };
+
+  return JSON.stringify({
+    schema: 'unicodeartjs-cellcanvas-document-draft@0',
+    stability: 'internal-draft',
+    document: {
+      schema: 'unicode-art-document',
+      version: 'uadm-0',
+      id: 'cellcanvas-e2e-layer-frame',
+      title: 'CellCanvas E2E Layer Frame',
+      canvas: { width: 3, height: 2, unit: 'glyph-cell' },
+      layers: [
+        {
+          id: 'layer-base',
+          name: 'Base',
+          kind: 'cell-map',
+          locked: false,
+          visible: true,
+          cellMap: createCells('A  \n   '),
+        },
+        {
+          id: 'layer-overlay',
+          name: 'Overlay',
+          kind: 'cell-map',
+          locked: false,
+          visible: true,
+          cellMap: createCells(' B \n   '),
+        },
+      ],
+      frames: [
+        { id: 'frame-base', name: 'Base Frame', durationMs: 0, layerRefs: ['layer-base'] },
+        { id: 'frame-composed', name: 'Composed Frame', durationMs: 180, layerRefs: ['layer-base', 'layer-overlay'] },
+      ],
+    },
+    editorSession: {
+      activeLayerId: 'layer-overlay',
+      activeFrameId: 'frame-composed',
+      activeCell: { x: 1, y: 0 },
+      selection: { kind: 'single-cell', x: 1, y: 0, width: 1, height: 1 },
+      clipboard: { kind: 'empty' },
+      history: { cursor: 0, entries: [] },
+    },
+  }, null, 2);
+}
+
+/**
  * 读取资源发现页的调试快照，方便定位远端 Pages 的短暂传播状态。
  * @param {import('playwright').Page} page Playwright 页面实例
  */
@@ -1161,6 +1234,52 @@ async function main() {
       ));
       source = await page.inputValue('#editorSource');
       if (!source.includes('"char": "┐"')) throw new Error('CellCanvas connector corner was not persisted');
+    });
+
+    await test('edits CellCanvas layer and frame controls with locked-layer feedback', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.fill('#editorSource', createLayerFrameCellCanvasDraftSource());
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="3"][data-cellcanvas-height="2"]', {
+        timeout: 5000,
+      });
+      await page.waitForSelector('#editorCellCanvasLayer option[value="layer-overlay"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+      await page.waitForSelector('#editorCellCanvasFrame option[value="frame-composed"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+
+      const summaryBefore = await page.textContent('#editorCellCanvasLayerFrameSummary');
+      if (!summaryBefore.includes('frame-composed') || !summaryBefore.includes('layer-overlay')) {
+        throw new Error(`Layer/frame summary was not synchronized: ${summaryBefore}`);
+      }
+
+      await page.fill('#editorCellCanvasFrameDuration', '333');
+      await page.check('#editorCellCanvasLayerLocked');
+      await page.click('#editorCellCanvasApplyLayerFrame');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.layerFrame', 'warning');
+
+      const lockedSource = await page.inputValue('#editorSource');
+      if (!lockedSource.includes('"durationMs": 333')) {
+        throw new Error('CellCanvas frame duration was not persisted');
+      }
+      if (!lockedSource.includes('"locked": true')) {
+        throw new Error('CellCanvas layer locked state was not persisted');
+      }
+
+      await page.fill('#editorCellCanvasChar', '#');
+      const editDisabled = await page.isDisabled('#editorCellCanvasApply');
+      if (!editDisabled) {
+        throw new Error('Locked CellCanvas layer did not disable the cell edit button');
+      }
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.cellEdit', 'error');
+      const afterBlockedEdit = await page.inputValue('#editorSource');
+      if (afterBlockedEdit.includes('"char": "#"')) {
+        throw new Error('Locked CellCanvas layer still accepted a cell edit');
+      }
     });
 
     await test('imports SpecialArtResult into CellCanvas and exports projections', async () => {

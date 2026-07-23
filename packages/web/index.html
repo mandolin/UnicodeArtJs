@@ -530,6 +530,31 @@
             </label>
             <button class="btn" id="editorCellCanvasDrawLine" type="button" data-i18n="cellcanvas.drawConnector">绘制连线</button>
           </div>
+          <span class="editor-section-label" data-i18n="cellcanvas.layerFrame">图层与帧</span>
+          <div class="editor-cellcanvas-controls editor-cellcanvas-layerframe-controls">
+            <label for="editorCellCanvasLayer">
+              <span data-i18n="cellcanvas.layer">图层</span>
+              <select id="editorCellCanvasLayer"></select>
+            </label>
+            <label class="editor-checkbox-label" for="editorCellCanvasLayerVisible">
+              <input id="editorCellCanvasLayerVisible" type="checkbox" checked>
+              <span data-i18n="cellcanvas.layerVisible">可见</span>
+            </label>
+            <label class="editor-checkbox-label" for="editorCellCanvasLayerLocked">
+              <input id="editorCellCanvasLayerLocked" type="checkbox">
+              <span data-i18n="cellcanvas.layerLocked">锁定</span>
+            </label>
+            <label for="editorCellCanvasFrame">
+              <span data-i18n="cellcanvas.frame">帧</span>
+              <select id="editorCellCanvasFrame"></select>
+            </label>
+            <label for="editorCellCanvasFrameDuration">
+              <span data-i18n="cellcanvas.durationMs">时长 ms</span>
+              <input id="editorCellCanvasFrameDuration" type="number" min="0" step="1" value="0">
+            </label>
+            <button class="btn" id="editorCellCanvasApplyLayerFrame" type="button" data-i18n="cellcanvas.applyLayerFrame">应用图层/帧</button>
+          </div>
+          <p class="field-help" id="editorCellCanvasLayerFrameSummary"></p>
           <div class="editor-tool-feedback" id="editorCellCanvasToolFeedback" data-state="info" data-tool="cellcanvas.tool.select" aria-live="polite">
             <div class="editor-tool-feedback-row">
               <span data-i18n="cellcanvas.feedback.tool">工具</span>

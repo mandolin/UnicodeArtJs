@@ -1796,6 +1796,21 @@ details.config-details summary:hover {
   font-size: 0.76rem;
 }
 
+.editor-cellcanvas-controls .editor-checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  min-height: 32px;
+}
+
+.editor-cellcanvas-controls .editor-checkbox-label input {
+  width: auto;
+  margin: 0;
+}
+
+.editor-cellcanvas-layerframe-controls {
+  align-items: end;
+}
+
 .editor-cellcanvas-controls .btn {
   align-self: end;
   min-height: 32px;
