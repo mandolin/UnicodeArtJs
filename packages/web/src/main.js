@@ -43,8 +43,10 @@ import {
   createCellCanvasDraftFromPreset,
   createCellCanvasDraftFromSpecialArtResult,
   drawCellCanvasConnector,
+  extendCellCanvasSelection as extendCellCanvasSelectionDraft,
   getActiveCellMap,
   getCellCanvasHistoryState,
+  getCellCanvasPastePreview,
   pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
   redoCellCanvasHistory as redoCellCanvasHistoryDraft,
   setCellCanvasSelection as setCellCanvasSelectionDraft,
@@ -238,6 +240,8 @@ const UI_MESSAGES = {
     'editor.status.selectionApplied': '选区已更新 · {width}x{height}',
     'editor.status.selectionCopied': '选区已复制 · {width}x{height}',
     'editor.status.selectionPasted': '选区已粘贴',
+    'editor.status.selectionPastedDetailed': '选区已粘贴 · 修改 {changed} 格 / 覆盖 {overwritten} 格',
+    'editor.status.selectionExtended': '选区已扩展 · {width}x{height}',
     'editor.status.undoDone': '已撤销',
     'editor.status.redoDone': '已重做',
     'editor.status.clipboardEmpty': '剪贴板没有可粘贴的字素选区',
@@ -285,6 +289,7 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.ready': '可操作',
     'cellcanvas.feedback.preview': '预览中',
     'cellcanvas.feedback.disabled': '不可用',
+    'cellcanvas.feedback.warning': '需确认',
     'cellcanvas.feedback.noTarget': '--',
     'cellcanvas.feedback.spaceGlyph': '空格',
     'cellcanvas.feedback.emptyGlyph': '空',
@@ -297,12 +302,17 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.cellEdit': '准备编辑字素格：({x}, {y}) · {char}',
     'cellcanvas.feedback.hint.cellUpdated': '已更新字素格：({x}, {y}) · {char}',
     'cellcanvas.feedback.hint.selection': '当前选区：{width}x{height} @ ({x}, {y})',
+    'cellcanvas.feedback.hint.selectionExtended': '扩展选区：{width}x{height} @ ({x}, {y})，焦点 ({focusX}, {focusY})',
     'cellcanvas.feedback.hint.selectionCopied': '已复制选区：{width}x{height}',
     'cellcanvas.feedback.hint.selectionPasted': '已从选区起点粘贴。',
+    'cellcanvas.feedback.hint.selectionPastedDetailed': '已粘贴：修改 {changed} 格，覆盖 {overwritten} 格，裁剪 {clipped} 格。',
+    'cellcanvas.feedback.hint.pastePreview': '粘贴预览：将修改 {changed} 格，其中覆盖 {overwritten} 格，裁剪 {clipped} 格。',
     'cellcanvas.feedback.hint.clipboardEmpty': '剪贴板没有可粘贴的字素选区。',
     'cellcanvas.feedback.hint.historyEmpty': '没有可撤销或重做的历史操作。',
     'cellcanvas.feedback.hint.undo': '已回退到上一份 CellCanvas 草稿。',
     'cellcanvas.feedback.hint.redo': '已恢复下一份 CellCanvas 草稿。',
+    'cellcanvas.feedback.hint.undoDetailed': '已撤销 {kind}：{cells} 格。',
+    'cellcanvas.feedback.hint.redoDetailed': '已重做 {kind}：{cells} 格。',
     'cellcanvas.feedback.hint.connector': '连线 {route}：({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.sourceInvalid': 'Canonical JSON 暂时无效，先修复源码后再编辑网格。',
     'cellcanvas.tool.select': '选择',
@@ -697,6 +707,8 @@ const UI_MESSAGES = {
     'editor.status.selectionApplied': 'Selection updated · {width}x{height}',
     'editor.status.selectionCopied': 'Selection copied · {width}x{height}',
     'editor.status.selectionPasted': 'Selection pasted',
+    'editor.status.selectionPastedDetailed': 'Selection pasted · {changed} changed / {overwritten} overwritten',
+    'editor.status.selectionExtended': 'Selection extended · {width}x{height}',
     'editor.status.undoDone': 'Undone',
     'editor.status.redoDone': 'Redone',
     'editor.status.clipboardEmpty': 'No glyph-cell selection to paste',
@@ -744,6 +756,7 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.ready': 'Ready',
     'cellcanvas.feedback.preview': 'Previewing',
     'cellcanvas.feedback.disabled': 'Unavailable',
+    'cellcanvas.feedback.warning': 'Needs review',
     'cellcanvas.feedback.noTarget': '--',
     'cellcanvas.feedback.spaceGlyph': 'space',
     'cellcanvas.feedback.emptyGlyph': 'empty',
@@ -756,12 +769,17 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.cellEdit': 'Ready to edit glyph cell: ({x}, {y}) · {char}',
     'cellcanvas.feedback.hint.cellUpdated': 'Glyph cell updated: ({x}, {y}) · {char}',
     'cellcanvas.feedback.hint.selection': 'Current selection: {width}x{height} @ ({x}, {y})',
+    'cellcanvas.feedback.hint.selectionExtended': 'Selection extended: {width}x{height} @ ({x}, {y}); focus ({focusX}, {focusY})',
     'cellcanvas.feedback.hint.selectionCopied': 'Selection copied: {width}x{height}',
     'cellcanvas.feedback.hint.selectionPasted': 'Pasted from the selection origin.',
+    'cellcanvas.feedback.hint.selectionPastedDetailed': 'Pasted: {changed} changed, {overwritten} overwritten, {clipped} clipped.',
+    'cellcanvas.feedback.hint.pastePreview': 'Paste preview: {changed} cells will change, {overwritten} overwritten, {clipped} clipped.',
     'cellcanvas.feedback.hint.clipboardEmpty': 'No glyph-cell selection is available to paste.',
     'cellcanvas.feedback.hint.historyEmpty': 'No undo or redo operation is available.',
     'cellcanvas.feedback.hint.undo': 'Returned to the previous CellCanvas draft.',
     'cellcanvas.feedback.hint.redo': 'Restored the next CellCanvas draft.',
+    'cellcanvas.feedback.hint.undoDetailed': 'Undone {kind}: {cells} cells.',
+    'cellcanvas.feedback.hint.redoDetailed': 'Redone {kind}: {cells} cells.',
     'cellcanvas.feedback.hint.connector': 'Connector {route}: ({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.sourceInvalid': 'Canonical JSON is temporarily invalid; fix the source before editing the grid.',
     'cellcanvas.tool.select': 'Select',
@@ -1777,6 +1795,8 @@ class EditorController {
       DOM.editorCellCanvasSelectWidth,
       DOM.editorCellCanvasSelectHeight,
     ].join(', '), () => this.previewCellCanvasSelectionFeedback());
+    $doc.on('mouseenter focusin', DOM.editorCellCanvasPaste, () => this.previewCellCanvasPasteTarget());
+    $doc.on('mouseleave focusout', DOM.editorCellCanvasPaste, () => this.clearCellCanvasPastePreview());
     $doc.on('focusin input change', [
       DOM.editorCellCanvasLineFromX,
       DOM.editorCellCanvasLineFromY,
@@ -2253,6 +2273,55 @@ class EditorController {
   }
 
   /**
+   * 使用 Shift+方向键扩展 CellCanvas 选区。
+   *
+   * @param {number} dx 横向移动量。
+   * @param {number} dy 纵向移动量。
+   */
+  extendCellCanvasSelectionByDelta(dx, dy) {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const cellMap = getActiveCellMap(draft);
+      const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+      const focusX = Math.min(Math.max((Number(activeCell.x) || 0) + dx, 0), cellMap.width - 1);
+      const focusY = Math.min(Math.max((Number(activeCell.y) || 0) + dy, 0), cellMap.height - 1);
+      const nextDraft = extendCellCanvasSelectionDraft(draft, { x: focusX, y: focusY });
+      const selection = nextDraft.editorSession.selection;
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      const setSelectionFeedback = () => this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.selection',
+        targetText: this.t('cellcanvas.feedback.targetSelection', {
+          x: selection.x,
+          y: selection.y,
+          width: selection.width,
+          height: selection.height,
+        }),
+        availabilityKey: 'cellcanvas.feedback.ready',
+        availabilityState: 'info',
+        hintKey: 'cellcanvas.feedback.hint.selectionExtended',
+        hintParams: {
+          x: selection.x,
+          y: selection.y,
+          width: selection.width,
+          height: selection.height,
+          focusX,
+          focusY,
+        },
+      });
+      this.focusCellCanvasCell(focusX, focusY, setSelectionFeedback);
+      this.setStatus('editor.status.selectionExtended', {
+        width: selection.width,
+        height: selection.height,
+      }, 'info');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
    * 处理 CellCanvas 网格内的方向键和 Enter。
    *
    * @param {JQuery.KeyDownEvent} event 键盘事件。
@@ -2269,7 +2338,8 @@ class EditorController {
     const delta = deltaByKey[event.key];
     if (delta) {
       event.preventDefault();
-      this.moveCellCanvasActiveCell(delta[0], delta[1]);
+      if (event.shiftKey) this.extendCellCanvasSelectionByDelta(delta[0], delta[1]);
+      else this.moveCellCanvasActiveCell(delta[0], delta[1]);
       return;
     }
 
@@ -2381,6 +2451,67 @@ class EditorController {
       hintKey: 'cellcanvas.feedback.hint.selection',
       hintParams: { x, y, width, height },
     });
+  }
+
+  /**
+   * 清除粘贴预览格子的临时视觉状态。
+   */
+  clearCellCanvasPastePreview() {
+    $('[data-cellcanvas-cell]')
+      .removeClass('is-paste-preview is-paste-conflict')
+      .removeAttr('data-cellcanvas-paste-preview');
+  }
+
+  /**
+   * 在当前选区起点预览剪贴板粘贴影响。
+   */
+  previewCellCanvasPasteTarget() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const selection = draft.editorSession?.selection ?? draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+      const preview = getCellCanvasPastePreview(draft, selection.x, selection.y);
+      this.clearCellCanvasPastePreview();
+      for (const cell of preview.cells) {
+        const selector = `[data-cellcanvas-x="${cell.x}"][data-cellcanvas-y="${cell.y}"]`;
+        $(selector)
+          .addClass(`is-paste-preview${cell.wouldOverwrite ? ' is-paste-conflict' : ''}`)
+          .attr('data-cellcanvas-paste-preview', cell.wouldOverwrite ? 'conflict' : 'change');
+      }
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.clipboard',
+        targetText: this.t('cellcanvas.feedback.targetSelection', {
+          x: preview.selection.x,
+          y: preview.selection.y,
+          width: preview.selection.width,
+          height: preview.selection.height,
+        }),
+        availabilityKey: preview.overwrittenCells > 0
+          ? 'cellcanvas.feedback.warning'
+          : 'cellcanvas.feedback.preview',
+        availabilityState: preview.overwrittenCells > 0 ? 'warning' : 'info',
+        hintKey: 'cellcanvas.feedback.hint.pastePreview',
+        hintParams: {
+          changed: preview.changedCells,
+          overwritten: preview.overwrittenCells,
+          clipped: preview.clippedCells,
+        },
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('clipboard')) {
+        this.clearCellCanvasPastePreview();
+        this.setCellCanvasToolFeedback({
+          toolKey: 'cellcanvas.tool.clipboard',
+          availabilityKey: 'cellcanvas.feedback.disabled',
+          availabilityState: 'error',
+          hintKey: 'cellcanvas.feedback.hint.clipboardEmpty',
+        });
+        return;
+      }
+      this.handleEditorError(error);
+    }
   }
 
   /**
@@ -2634,7 +2765,7 @@ class EditorController {
       this.commitCellCanvasDraft(draft);
       this.refreshCellCanvasDraft(draft);
       const cell = this.getCellCanvasCellForFeedback(draft, x, y);
-      this.setCellCanvasToolFeedback({
+      const setSelectFeedback = () => this.setCellCanvasToolFeedback({
         toolKey: 'cellcanvas.tool.select',
         targetText: this.formatCellCanvasCellTarget(x, y, cell),
         availabilityKey: 'cellcanvas.feedback.ready',
@@ -2642,6 +2773,8 @@ class EditorController {
         hintKey: 'cellcanvas.feedback.hint.active',
         hintParams: { x, y, char: this.formatCellCanvasGlyphForFeedback(cell.char) },
       });
+      setSelectFeedback();
+      this.focusCellCanvasCell(x, y, setSelectFeedback);
       this.setStatus('editor.status.cellSelected', { x, y }, 'info');
     } catch (error) {
       this.handleEditorError(error);
@@ -2821,6 +2954,7 @@ class EditorController {
     try {
       const draft = this.readCurrentCellCanvasDraft();
       const selection = draft.editorSession?.selection ?? draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+      const preview = getCellCanvasPastePreview(draft, selection.x, selection.y);
       const nextDraft = pasteCellCanvasClipboardDraft(draft, selection.x, selection.y);
       this.commitCellCanvasDraft(nextDraft);
       this.refreshCellCanvasDraft(nextDraft);
@@ -2834,9 +2968,17 @@ class EditorController {
         }),
         availabilityKey: 'cellcanvas.feedback.ready',
         availabilityState: 'success',
-        hintKey: 'cellcanvas.feedback.hint.selectionPasted',
+        hintKey: 'cellcanvas.feedback.hint.selectionPastedDetailed',
+        hintParams: {
+          changed: preview.changedCells,
+          overwritten: preview.overwrittenCells,
+          clipped: preview.clippedCells,
+        },
       });
-      this.setStatus('editor.status.selectionPasted', {}, 'success');
+      this.setStatus('editor.status.selectionPastedDetailed', {
+        changed: preview.changedCells,
+        overwritten: preview.overwrittenCells,
+      }, 'success');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (message.includes('clipboard')) {
@@ -2861,13 +3003,18 @@ class EditorController {
 
     try {
       const nextDraft = undoCellCanvasHistoryDraft(this.readCurrentCellCanvasDraft());
+      const historyState = getCellCanvasHistoryState(nextDraft);
       this.commitCellCanvasDraft(nextDraft);
       this.refreshCellCanvasDraft(nextDraft);
       this.setCellCanvasToolFeedback({
         toolKey: 'cellcanvas.tool.history',
         availabilityKey: 'cellcanvas.feedback.ready',
         availabilityState: 'success',
-        hintKey: 'cellcanvas.feedback.hint.undo',
+        hintKey: 'cellcanvas.feedback.hint.undoDetailed',
+        hintParams: {
+          kind: historyState.nextRedoKind ?? 'history',
+          cells: historyState.nextRedoCells,
+        },
       });
       this.setStatus('editor.status.undoDone', {}, 'success');
     } catch (error) {
@@ -2894,13 +3041,18 @@ class EditorController {
 
     try {
       const nextDraft = redoCellCanvasHistoryDraft(this.readCurrentCellCanvasDraft());
+      const historyState = getCellCanvasHistoryState(nextDraft);
       this.commitCellCanvasDraft(nextDraft);
       this.refreshCellCanvasDraft(nextDraft);
       this.setCellCanvasToolFeedback({
         toolKey: 'cellcanvas.tool.history',
         availabilityKey: 'cellcanvas.feedback.ready',
         availabilityState: 'success',
-        hintKey: 'cellcanvas.feedback.hint.redo',
+        hintKey: 'cellcanvas.feedback.hint.redoDetailed',
+        hintParams: {
+          kind: historyState.nextUndoKind ?? 'history',
+          cells: historyState.nextUndoCells,
+        },
       });
       this.setStatus('editor.status.redoDone', {}, 'success');
     } catch (error) {

@@ -1817,6 +1817,11 @@ details.config-details summary:hover {
   background: rgba(40, 167, 69, 0.08);
 }
 
+.editor-tool-feedback[data-state='warning'] {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.1);
+}
+
 .editor-tool-feedback[data-state='error'] {
   border-color: rgba(220, 53, 69, 0.35);
   background: rgba(220, 53, 69, 0.08);
@@ -2014,6 +2019,16 @@ details.config-details summary:hover {
 .cellcanvas-cell.is-selected {
   border-color: rgba(74, 144, 217, 0.55);
   background: rgba(74, 144, 217, 0.1);
+}
+
+.cellcanvas-cell.is-paste-preview {
+  border-color: rgba(245, 158, 11, 0.7);
+  background: rgba(245, 158, 11, 0.16);
+}
+
+.cellcanvas-cell.is-paste-conflict {
+  border-color: rgba(220, 53, 69, 0.75);
+  background: rgba(220, 53, 69, 0.16);
 }
 
 .cellcanvas-cell.is-active {

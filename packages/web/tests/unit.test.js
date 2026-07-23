@@ -23,7 +23,9 @@ import {
   createCellCanvasProjectEnvelope,
   createCellCanvasDraftFromSpecialArtResult,
   drawCellCanvasConnector,
+  extendCellCanvasSelection,
   getCellCanvasHistoryState,
+  getCellCanvasPastePreview,
   getCellCanvasSelectionCells,
   pasteCellCanvasClipboard,
   readCellCanvasDraftFromProjectEnvelope,
@@ -669,13 +671,39 @@ describe('CellCanvas固定网格草稿', () => {
     assertEqual(getCellCanvasHistoryState(pasted).canUndo, true);
   });
 
+  it('可用锚点扩展矩形选区并预览粘贴影响', () => {
+    let draft = createDefaultCellCanvasDraft();
+    draft = setCellCanvasSelection(draft, { x: 0, y: 0, width: 1, height: 1 });
+    draft = extendCellCanvasSelection(draft, { x: 2, y: 1 });
+
+    const selected = getCellCanvasSelectionCells(draft);
+    assertEqual(selected.selection.kind, 'rectangle');
+    assertEqual(selected.selection.width, 3);
+    assertEqual(selected.selection.height, 2);
+    assertEqual(draft.editorSession.activeCell.x, 2);
+    assertEqual(draft.editorSession.activeCell.y, 1);
+    assertEqual(draft.editorSession.selectionAnchor.x, 0);
+
+    draft = copyCellCanvasSelection(draft);
+    const preview = getCellCanvasPastePreview(draft, 6, 0);
+    assertEqual(preview.totalCells, 4);
+    assertEqual(preview.clippedCells, 2);
+    assertEqual(preview.changedCells > 0, true);
+    assertEqual(preview.overwrittenCells > 0, true);
+  });
+
   it('撤销和重做可恢复CellCanvas历史操作', () => {
     let draft = createDefaultCellCanvasDraft();
     draft = updateCellCanvasCell(draft, 0, 0, { char: '#' });
 
+    const historyBeforeUndo = getCellCanvasHistoryState(draft);
+    assertEqual(historyBeforeUndo.nextUndoKind, 'update-cell');
+    assertEqual(historyBeforeUndo.nextUndoCells, 1);
+
     const undone = undoCellCanvasHistory(draft);
     assertEqual(cellCanvasDraftToPlainText(undone).startsWith('|'), true);
     assertEqual(getCellCanvasHistoryState(undone).canRedo, true);
+    assertEqual(getCellCanvasHistoryState(undone).nextRedoKind, 'update-cell');
 
     const redone = redoCellCanvasHistory(undone);
     assertEqual(cellCanvasDraftToPlainText(redone).startsWith('#'), true);

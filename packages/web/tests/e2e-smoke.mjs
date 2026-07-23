@@ -974,6 +974,7 @@ async function main() {
       await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="8"][data-cellcanvas-height="2"]', {
         timeout: 5000,
       });
+      await page.click('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
       await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.select', 'info');
 
       const readFirstCellCanvasLine = async () => await page.$$eval(
@@ -985,7 +986,8 @@ async function main() {
       const before = await readFirstCellCanvasLine();
       if (before !== '|| /\\ _|') throw new Error('CellCanvas preset text was not rendered');
 
-      await page.focus('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
+      await page.hover('#editorMeta');
+      await page.hover('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
       await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.hover', 'info');
       const focusedTarget = await page.textContent('#editorCellCanvasTarget');
       if (!focusedTarget.includes('(0, 0)')) throw new Error('CellCanvas focus preview did not expose the target cell');
@@ -1022,6 +1024,11 @@ async function main() {
       await page.fill('#editorCellCanvasSelectX', '2');
       await page.fill('#editorCellCanvasSelectY', '0');
       await page.click('#editorCellCanvasSelect');
+      await page.hover('#editorCellCanvasPaste');
+      await page.waitForFunction(() => document.querySelectorAll('.cellcanvas-cell.is-paste-preview').length === 2);
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.clipboard', 'warning');
+      const pasteConflictCount = await page.$$eval('.cellcanvas-cell.is-paste-conflict', (cells) => cells.length);
+      if (pasteConflictCount < 1) throw new Error('CellCanvas paste preview did not flag overwrite conflicts');
       await page.click('#editorCellCanvasPaste');
       await page.waitForFunction(() => (
         document.querySelector('[data-cellcanvas-x="2"][data-cellcanvas-y="0"]')?.textContent === '|'
@@ -1043,6 +1050,40 @@ async function main() {
 
       const source = await page.inputValue('#editorSource');
       if (!source.includes('"kind": "paste-selection"')) throw new Error('CellCanvas history did not record paste operation');
+    });
+
+    await test('extends CellCanvas selection with keyboard anchor', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.click('#editorLoadPreset');
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid]', { timeout: 5000 });
+
+      await page.focus('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
+      await page.keyboard.down('Shift');
+      await page.keyboard.press('ArrowRight');
+      await waitForFocusedCellCanvasCell(page, 1, 0);
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.up('Shift');
+      await waitForFocusedCellCanvasCell(page, 1, 1);
+      await page.waitForFunction(() => document.querySelectorAll('.cellcanvas-cell.is-selected').length === 4);
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.selection', 'info');
+
+      const selectionMetrics = await page.evaluate(() => ({
+        x: document.querySelector('#editorCellCanvasSelectX')?.value,
+        y: document.querySelector('#editorCellCanvasSelectY')?.value,
+        width: document.querySelector('#editorCellCanvasSelectWidth')?.value,
+        height: document.querySelector('#editorCellCanvasSelectHeight')?.value,
+        source: document.querySelector('#editorSource')?.value,
+      }));
+      if (selectionMetrics.x !== '0' || selectionMetrics.y !== '0') {
+        throw new Error(`Keyboard selection anchor was not preserved: ${JSON.stringify(selectionMetrics)}`);
+      }
+      if (selectionMetrics.width !== '2' || selectionMetrics.height !== '2') {
+        throw new Error(`Keyboard selection size was not extended to 2x2: ${JSON.stringify(selectionMetrics)}`);
+      }
+      if (!selectionMetrics.source.includes('"selectionAnchor"')) {
+        throw new Error('CellCanvas source did not persist keyboard selection anchor');
+      }
     });
 
     await test('supports CellCanvas keyboard commands without entering text fields', async () => {

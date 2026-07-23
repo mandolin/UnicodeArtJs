@@ -695,6 +695,43 @@ function normalizeSelection(selection, cellMap) {
 function applySelectionToSession(session, selection) {
   session.selection = { ...selection };
   session.activeCell = { x: selection.x, y: selection.y };
+  session.selectionAnchor = { x: selection.x, y: selection.y };
+}
+
+/**
+ * 规范化选区锚点或活动焦点坐标。
+ *
+ * @param {object} point 原始坐标点。
+ * @param {{ width: number, height: number }} cellMap cellMap。
+ * @param {{ x: number, y: number }} fallback 兜底坐标。
+ * @returns {{ x: number, y: number }} 规范化坐标。
+ */
+function normalizeSelectionPoint(point, cellMap, fallback) {
+  return {
+    x: clamp(toInteger(point?.x, fallback.x), 0, cellMap.width - 1),
+    y: clamp(toInteger(point?.y, fallback.y), 0, cellMap.height - 1),
+  };
+}
+
+/**
+ * 根据固定锚点和移动焦点生成矩形选区。
+ *
+ * @param {{ x: number, y: number }} anchor 固定锚点。
+ * @param {{ x: number, y: number }} focus 移动焦点。
+ * @returns {{ kind: string, x: number, y: number, width: number, height: number }} 选区矩形。
+ */
+function createSelectionFromAnchor(anchor, focus) {
+  const x = Math.min(anchor.x, focus.x);
+  const y = Math.min(anchor.y, focus.y);
+  const width = Math.abs(anchor.x - focus.x) + 1;
+  const height = Math.abs(anchor.y - focus.y) + 1;
+  return {
+    kind: width === 1 && height === 1 ? 'single-cell' : 'rectangle',
+    x,
+    y,
+    width,
+    height,
+  };
 }
 
 /**
@@ -1202,6 +1239,33 @@ export function setCellCanvasSelection(draft, selection) {
 }
 
 /**
+ * 从当前选择锚点扩展 CellCanvas 矩形选区。
+ *
+ * 该函数只更新 editorSession，不写入 history；选择本身是编辑会话状态，
+ * 不是对 CellMap 内容的修改。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ x: number, y: number }} focus 扩展后的活动焦点。
+ * @returns {object} 更新后的新草稿。
+ */
+export function extendCellCanvasSelection(draft, focus) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const nextDraft = cloneJson(draft);
+  const session = ensureEditorSession(nextDraft);
+  const cellMap = getActiveCellMap(nextDraft);
+  const selection = normalizeSelection(session.selection, cellMap);
+  const fallbackAnchor = { x: selection.x, y: selection.y };
+  const anchor = normalizeSelectionPoint(session.selectionAnchor, cellMap, fallbackAnchor);
+  const nextFocus = normalizeSelectionPoint(focus, cellMap, session.activeCell ?? fallbackAnchor);
+
+  session.selectionAnchor = anchor;
+  session.activeCell = nextFocus;
+  session.selection = createSelectionFromAnchor(anchor, nextFocus);
+  return nextDraft;
+}
+
+/**
  * 读取当前选区覆盖的字素格。
  *
  * @param {object} draft CellCanvas 草稿。
@@ -1262,6 +1326,74 @@ export function copyCellCanvasSelection(draft) {
     sourceSelection: selection,
   };
   return nextDraft;
+}
+
+/**
+ * 预览剪贴板粘贴会影响哪些字素格。
+ *
+ * 返回值只用于 UI 预览和冲突提示，不会修改 CellMap，也不会写 history。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {number} targetX 目标横坐标。
+ * @param {number} targetY 目标纵坐标。
+ * @returns {{
+ *   selection: object,
+ *   cells: Array<{ x: number, y: number, dx: number, dy: number, changed: boolean, wouldOverwrite: boolean }>,
+ *   totalCells: number,
+ *   changedCells: number,
+ *   overwrittenCells: number,
+ *   clippedCells: number
+ * }} 粘贴预览摘要。
+ */
+export function getCellCanvasPastePreview(draft, targetX, targetY) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const session = ensureEditorSession(cloneJson(draft));
+  const clipboard = session.clipboard;
+  if (clipboard?.kind !== 'cell-rectangle' || !Array.isArray(clipboard.cells)) {
+    throw new Error('CellCanvas clipboard does not contain a cell rectangle.');
+  }
+
+  const cellMap = getActiveCellMap(draft);
+  const x = clamp(toInteger(targetX, 0), 0, cellMap.width - 1);
+  const y = clamp(toInteger(targetY, 0), 0, cellMap.height - 1);
+  const width = clamp(toInteger(clipboard.width, 1), 1, cellMap.width - x);
+  const height = clamp(toInteger(clipboard.height, 1), 1, cellMap.height - y);
+  const cells = [];
+  let clippedCells = 0;
+  let changedCells = 0;
+  let overwrittenCells = 0;
+
+  for (const sourceCell of clipboard.cells) {
+    const targetCell = {
+      x: x + toInteger(sourceCell.dx, 0),
+      y: y + toInteger(sourceCell.dy, 0),
+      dx: toInteger(sourceCell.dx, 0),
+      dy: toInteger(sourceCell.dy, 0),
+    };
+    if (targetCell.x >= cellMap.width || targetCell.y >= cellMap.height) {
+      clippedCells += 1;
+      continue;
+    }
+
+    const existing = findCell(cellMap, targetCell.x, targetCell.y);
+    const before = snapshotCellData(existing);
+    const after = snapshotCellData(sourceCell);
+    const changed = !isSameCellData(before, after);
+    const wouldOverwrite = changed && before.char !== ' ';
+    if (changed) changedCells += 1;
+    if (wouldOverwrite) overwrittenCells += 1;
+    cells.push({ ...targetCell, changed, wouldOverwrite });
+  }
+
+  return {
+    selection: { kind: width === 1 && height === 1 ? 'single-cell' : 'rectangle', x, y, width, height },
+    cells,
+    totalCells: cells.length,
+    changedCells,
+    overwrittenCells,
+    clippedCells,
+  };
 }
 
 /**
@@ -1410,11 +1542,17 @@ export function drawCellCanvasConnector(draft, from, to, options = {}) {
  */
 export function getCellCanvasHistoryState(draft) {
   const history = ensureEditorSession(cloneJson(draft)).history;
+  const nextUndo = history.entries[history.cursor - 1] ?? null;
+  const nextRedo = history.entries[history.cursor] ?? null;
   return {
     cursor: history.cursor,
     entries: history.entries.length,
     canUndo: history.cursor > 0,
     canRedo: history.cursor < history.entries.length,
+    nextUndoKind: nextUndo?.kind ?? null,
+    nextUndoCells: Array.isArray(nextUndo?.patches) ? nextUndo.patches.length : 0,
+    nextRedoKind: nextRedo?.kind ?? null,
+    nextRedoCells: Array.isArray(nextRedo?.patches) ? nextRedo.patches.length : 0,
   };
 }
 
