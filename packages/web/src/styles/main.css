@@ -1663,6 +1663,17 @@ details.config-details summary:hover {
   font-size: 0.7rem;
 }
 
+.editor-experimental-notice {
+  margin: calc(-1 * var(--spacing-xs)) 0 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--border-radius);
+  background: rgba(255, 193, 7, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 .editor-control-group,
 .editor-source-group,
 .editor-font-options,

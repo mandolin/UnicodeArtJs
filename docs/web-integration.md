@@ -7,6 +7,8 @@ UnicodeArtJs Web 是基于浏览器的字符画工作台，不是一个向页面
 | 范围 | 用途 | 对外状态 |
 | --- | --- | --- |
 | `unicode-art-js/browser` | 浏览器中的图片、文字、能力查询与进度/取消入口 | Core 公开入口；高层图片/文字转换目前为 experimental。 |
+| `@unicode-art/studio-kit` | Studio 纯逻辑候选包，当前只承载 Virtual Grid 等宿主无关逻辑 | 主仓内部 private 包，不发布 npm，不承诺稳定 API。 |
+| `packages/web/src/studio/*` | Web Studio staging 模块，包括 project capsule、resource proposal、AI proposal 和 benchmark | 页面内部 experimental 模块；不构成第三方 SDK。 |
 | `packages/web/src/gallery-index.js` | 审核静态画廊索引的解析、双语文本读取与同源资源 URL 校验 | 可独立导入的 Web 模块，提供 HIA JSDoc 文档。 |
 | `packages/web/src/main.js` | DOM 绑定、页面状态、导入导出、主题、编辑器、画廊和资源发现控制器 | 工具站内部实现，不构成稳定 SDK。 |
 | `packages/web/src/resource-trust.js` | 浏览器端 resource-lock、撤回列表和维护者签名复核 | experimental Web 模块；只用于同源随站资源的导入确认。 |
@@ -53,6 +55,20 @@ preview.textContent = result.content;
 - `charSpace`、四向视觉字体纠偏和 `outputTarget` 是 reserved 配置入口；在当前能力状态下可能不改变输出。
 
 更多字体回退、Brave 差异和自建站网络字体建议见[字体行为与浏览器回退](font-behavior.md)。宿主在显示设置时应通过 `getCoreCapabilities()` 读取 stable、experimental、reserved 与 legacy 边界，不要把页面中的某个控件存在误说成全部行为已稳定。
+
+## Web Studio Experimental 入口
+
+GitHub Pages 顶部的 **Studio 实验** 是公开可见的 experimental 创作入口。它用于验证 source-first Studio 工作流：语义布局文档、UAF 艺术字字体、CellCanvas 字素画、本地模板、JSON 导入导出、资源导入提案、AI 提案预览和本地 benchmark 诊断。
+
+该入口有以下边界：
+
+- `studio-project@0` 和 `.uart-project.json` 仍是内部项目包络，不是 stable public format。
+- `@unicode-art/studio-kit` 继续保持 private；Web 当前只通过主仓内部依赖消费共享逻辑。
+- 草稿和模板只保存在当前浏览器内存或 `localStorage`，不会自动上传。
+- 下载和上传只由用户显式触发；浏览器不会访问本机绝对路径或相邻目录。
+- 资源入口只读取同源、已审核资源清单，并在导入前执行 hash、撤回和维护者签名检查。
+- AI 提案预览当前使用 deterministic mock provider；不会联网、不会读取源码全文、不会直接写项目。
+- 运行时证据若来自手工确认或观察性记录，只能称为 manual verification / observation-only，不能写成发布级 captured archive。
 
 ## 本地数据与安全边界
 

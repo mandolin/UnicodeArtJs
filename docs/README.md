@@ -32,6 +32,7 @@
 - [常见使用 Recipes](recipes.md)
 - [字体行为与浏览器回退](font-behavior.md)
 - [Web 集成与数据边界](web-integration.md)
+- [Web Studio experimental 入口边界](web-integration.md#web-studio-experimental-入口)
 - [VS Code Extension 集成与数据边界](vscode-extension-integration.md)
 - [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)
 - [静态作品画廊](gallery.md)

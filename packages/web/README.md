@@ -12,23 +12,24 @@ UnicodeArtJs Web 是一个浏览器端字符画工具站，可以把图片或文
 - 裱框、标题、留白和阴影。
 - 中英文界面切换，并将语言同步给 Core 的 `locale`。
 - TXT、HTML、PNG 导出和剪贴板复制。
-- 实验性的艺术字与布局编辑器：使用 canonical JSON 编辑、校验和预览语义文档或 UAF 艺术字字体。
+- 实验性的 Studio 工作台：使用 canonical JSON 编辑、校验和预览语义文档、UAF 艺术字字体或 CellCanvas 字素画。
 - 编辑器支持本地模板、JSON 导入导出，以及将 UAF 艺术字嵌入语义文档。
 - 编辑器可检查用户显式选择的 UAEM 声明式扩展清单，并显示当前 Web 兼容性。
 - 静态作品画廊收录项目审核通过的原创 UAF 与语义布局 JSON，可预览、复制、下载或送入编辑器继续修改。
 - 开发文档页汇总 Core、CLI、Web 和 VS Code Extension 的公开 API 文档入口、包版本和检查命令。
 - 亮色、暗色、高对比度、Solarized Light、Nord 主题。
 
-## 艺术字与布局编辑器
+## Studio 实验工作台
 
-在线页面顶部的“编辑器”用于创建两类 experimental JSON：
+在线页面顶部的“Studio 实验”是一个公开可见但仍处在 experimental 阶段的创作入口。它适合试用布局文档、UAF 艺术字字体和 CellCanvas 字素画的本地编辑、校验与预览，但不代表 UnicodeArt Studio 已进入 stable，也不承诺当前项目文件格式长期不变。
 
 - **布局文档**：以 `semantic-document@1` 的 canonical JSON 描述表格、标题、页脚与文本块。
 - **UAF 艺术字字体**：以 `unicode-art-font@1` JSON 描述字形，并可即时渲染样本文字，或嵌入布局文档的 `art-font-text` 块。
+- **CellCanvas 字素画**：以内部草稿 JSON 描述单格字素、颜色、选区和基础工具状态，可导出 TXT、HTML、PNG projection，或保存为内部项目包络。
 
 选择内置示例后可直接校验或渲染。模板只保存在当前浏览器的 `localStorage` 中，不会上传到服务器；需要跨设备保存时，请使用“导出 JSON”。导入文件会先经过 Core 校验，格式无效时不会替换当前编辑内容。
 
-该编辑器是 source-first 工作台：JSON 是唯一的可交换格式。目前不提供拖拽网格、云同步、远程字体或第三方艺术字素材市场。
+该工作台是 source-first 工作台：JSON 是唯一的可交换格式。目前不提供云同步、远程字体、第三方艺术字素材市场或自动文件写入。`.uart-project.json` / `studio-project@0` 只作为 Web Studio Alpha 的内部项目包络使用，暂不作为公开稳定格式宣传。
 
 编辑器中的“扩展清单（开发者）”只读取用户选择的一份 UAEM JSON，并调用 Core 判断
 格式、声明能力和 Web 兼容性。浏览器不会因此读取同目录资源，也不会安装或执行扩展代码；

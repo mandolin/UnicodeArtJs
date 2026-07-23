@@ -257,8 +257,12 @@ async function main() {
       await page.waitForFunction(() => document.documentElement.lang === 'en-US');
       const englishLabel = await page.textContent('.mode-btn[data-mode="image"] .mode-text');
       if (!englishLabel.includes('Image to Art')) throw new Error('English UI label not applied');
+      const englishStudioLabel = await page.textContent('.mode-btn[data-mode="editor"] .mode-text');
+      if (!englishStudioLabel.includes('Studio Lab')) throw new Error('English Studio experimental label not applied');
       await page.selectOption('#languageSelect', 'zh-CN');
       await page.waitForFunction(() => document.documentElement.lang === 'zh-CN');
+      const chineseStudioLabel = await page.textContent('.mode-btn[data-mode="editor"] .mode-text');
+      if (!chineseStudioLabel.includes('Studio 实验')) throw new Error('Chinese Studio experimental label not applied');
     });
 
     await test('preview exists', async () => {
@@ -642,10 +646,14 @@ async function main() {
         active: document.querySelector('.mode-btn[data-mode="editor"]')?.classList.contains('active'),
         converterHidden: document.querySelector('#converterWorkbench')?.hidden,
         converterDisplay: getComputedStyle(document.querySelector('#converterWorkbench')).display,
+        notice: document.querySelector('#editorExperimentalNotice')?.textContent || '',
         source: document.querySelector('#editorSource')?.value,
       }));
       if (!state.active || !state.converterHidden || state.converterDisplay !== 'none' || !state.source?.includes('"version": 1')) {
         throw new Error('Editor workspace did not become active with a canonical source');
+      }
+      if (!state.notice.includes('experimental') || !state.notice.includes('不会自动联网')) {
+        throw new Error('Editor experimental boundary notice was not visible');
       }
     });
 

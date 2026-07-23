@@ -33,6 +33,7 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 | 能力 ID | 当前范围 | 稳定化去向 | 进入下一状态前需要完成 |
 | --- | --- | --- | --- |
 | `web.gallery.staticIndex` | GitHub Pages 静态画廊索引、审核作品和投稿流程。 | Stable 候选 | 冻结索引字段、审核 checklist、作品类型扩展策略和内容政策边界。 |
+| `web.studio.experimentalWorkbench` | GitHub Pages 的 **Studio 实验**入口、source-first 编辑、CellCanvas 投影、资源导入提案、AI mock proposal 和本地 benchmark 诊断。 | 继续 experimental | 完成多宿主消费 smoke、真实创作人工验证、项目包络迁移策略、provider/checked apply 宿主责任和 public docs 边界复核；当前不承诺 stable project format。 |
 
 ## 资源发现公开试点
 
