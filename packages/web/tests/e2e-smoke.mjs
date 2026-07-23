@@ -186,6 +186,35 @@ async function waitForCellCanvasCellText(page, selector, expectedText) {
 }
 
 /**
+ * 等待 CellCanvas 网格焦点移动到指定单格。
+ * @param {import('playwright').Page} page Playwright 页面实例
+ * @param {number} x 期望 X 坐标
+ * @param {number} y 期望 Y 坐标
+ */
+async function waitForFocusedCellCanvasCell(page, x, y) {
+  try {
+    await page.waitForFunction(
+      ([expectedX, expectedY]) => (
+        document.activeElement?.getAttribute('data-cellcanvas-x') === String(expectedX)
+        && document.activeElement?.getAttribute('data-cellcanvas-y') === String(expectedY)
+      ),
+      [x, y],
+      { timeout: 3_000 },
+    );
+  } catch {
+    const snapshot = await page.evaluate(() => ({
+      activeTag: document.activeElement?.tagName ?? null,
+      activeX: document.activeElement?.getAttribute('data-cellcanvas-x') ?? null,
+      activeY: document.activeElement?.getAttribute('data-cellcanvas-y') ?? null,
+      feedbackTool: document.querySelector('#editorCellCanvasToolFeedback')?.getAttribute('data-tool') ?? null,
+      feedbackState: document.querySelector('#editorCellCanvasToolFeedback')?.getAttribute('data-state') ?? null,
+      feedbackText: document.querySelector('#editorCellCanvasToolFeedback')?.textContent ?? null,
+    }));
+    throw new Error(`CellCanvas focus did not reach (${x}, ${y}): ${JSON.stringify(snapshot)}`);
+  }
+}
+
+/**
  * 切回文本转换工作台；用于失败恢复，避免某个模式测试污染后续用例。
  * @param {import('playwright').Page} page Playwright 页面实例
  */
@@ -1014,6 +1043,47 @@ async function main() {
 
       const source = await page.inputValue('#editorSource');
       if (!source.includes('"kind": "paste-selection"')) throw new Error('CellCanvas history did not record paste operation');
+    });
+
+    await test('supports CellCanvas keyboard commands without entering text fields', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.click('#editorLoadPreset');
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid]', { timeout: 5000 });
+
+      await page.focus('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
+      await page.keyboard.press('ArrowRight');
+      await waitForFocusedCellCanvasCell(page, 1, 0);
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.select', 'info');
+      const movedTarget = await page.textContent('#editorCellCanvasTarget');
+      if (!movedTarget.includes('(1, 0)')) throw new Error('ArrowRight did not move the active CellCanvas target');
+
+      await page.keyboard.press('Control+C');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.clipboard', 'success');
+      await page.keyboard.press('ArrowRight');
+      await waitForFocusedCellCanvasCell(page, 2, 0);
+      await page.keyboard.press('Control+V');
+      await waitForCellCanvasCellText(page, '[data-cellcanvas-x="2"][data-cellcanvas-y="0"]', '|');
+
+      await page.keyboard.press('Control+Z');
+      await waitForCellCanvasCellText(page, '[data-cellcanvas-x="2"][data-cellcanvas-y="0"]', '\u00a0');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.history', 'success');
+
+      await page.keyboard.press('Control+Y');
+      await waitForCellCanvasCellText(page, '[data-cellcanvas-x="2"][data-cellcanvas-y="0"]', '|');
+      await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.history', 'success');
+
+      const sourceBeforeTextShortcut = await page.inputValue('#editorSource');
+      await page.fill('#editorCellCanvasChar', '#');
+      await page.keyboard.press('Control+Z');
+      const sourceAfterTextShortcut = await page.inputValue('#editorSource');
+      const feedbackAfterTextShortcut = await page.getAttribute('#editorCellCanvasToolFeedback', 'data-tool');
+      if (sourceAfterTextShortcut !== sourceBeforeTextShortcut) {
+        throw new Error('CellCanvas command model rewrote source while focus was in a text field');
+      }
+      if (feedbackAfterTextShortcut === 'cellcanvas.tool.history') {
+        throw new Error('CellCanvas command model intercepted a text-field shortcut');
+      }
     });
 
     await test('draws a CellCanvas connector and keeps history reversible', async () => {

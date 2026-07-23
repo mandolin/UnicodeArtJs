@@ -1761,6 +1761,8 @@ class EditorController {
     $doc.on('mouseenter focusin', '[data-cellcanvas-cell]', (event) => this.previewCellCanvasHoverFeedback(event.currentTarget));
     $doc.on('mouseleave', '[data-cellcanvas-cell]', () => this.restoreCellCanvasFeedbackAfterCellMouseLeave());
     $doc.on('focusout', '[data-cellcanvas-cell]', (event) => this.restoreCellCanvasFeedbackAfterCellBlur(event));
+    $doc.on('keydown', '[data-cellcanvas-cell]', (event) => this.handleCellCanvasGridKeydown(event));
+    $doc.on('keydown', (event) => this.handleEditorCommandKeydown(event));
     $doc.on('click', '[data-cellcanvas-cell]', (event) => this.selectCellCanvasCell(event.currentTarget));
     $doc.on('focusin input change', [
       DOM.editorCellCanvasX,
@@ -2163,6 +2165,173 @@ class EditorController {
     const activeElement = document.activeElement;
     if (activeElement && $(activeElement).closest(DOM.editorCellCanvasOptions).length > 0) return;
     this.syncCellCanvasControlsFromSource();
+  }
+
+  /**
+   * 判断键盘事件是否发生在用户正在输入文本的控件中。
+   *
+   * @param {EventTarget | null} target 事件目标。
+   * @returns {boolean} 是否应保护原生输入快捷键。
+   */
+  isTextEntryTarget(target) {
+    if (!(target instanceof HTMLElement)) return false;
+    if (target.isContentEditable) return true;
+    if (target.getAttribute('role') === 'textbox') return true;
+    return ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+  }
+
+  /**
+   * 在下一帧把焦点恢复到指定 CellCanvas 单格。
+   *
+   * 预览网格每次刷新都会重建按钮节点，所以键盘命令执行后需要重新定位焦点。
+   *
+   * @param {number} x X 坐标。
+   * @param {number} y Y 坐标。
+   * @param {Function} [onFocused] 聚焦完成后的回调。
+   */
+  focusCellCanvasCell(x, y, onFocused) {
+    window.requestAnimationFrame(() => {
+      const selector = `[data-cellcanvas-x="${x}"][data-cellcanvas-y="${y}"]`;
+      document.querySelector(selector)?.focus({ preventScroll: true });
+      if (typeof onFocused === 'function') onFocused();
+    });
+  }
+
+  /**
+   * 将焦点恢复到当前活动字素格。
+   */
+  focusActiveCellCanvasCell(onFocused) {
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+      this.focusCellCanvasCell(Number(activeCell.x) || 0, Number(activeCell.y) || 0, onFocused);
+    } catch {
+      // 无效源码时命令会给出错误反馈，这里不再额外打断用户。
+    }
+  }
+
+  /**
+   * 命令执行后恢复网格焦点，同时保留命令刚刚产生的反馈。
+   */
+  restoreCellCanvasCommandFocus() {
+    const feedback = this.cellCanvasToolFeedback;
+    this.focusActiveCellCanvasCell(() => this.setCellCanvasToolFeedback(feedback));
+  }
+
+  /**
+   * 使用方向键移动 CellCanvas 活动字素格。
+   *
+   * @param {number} dx 横向移动量。
+   * @param {number} dy 纵向移动量。
+   */
+  moveCellCanvasActiveCell(dx, dy) {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const cellMap = getActiveCellMap(draft);
+      const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
+      const x = Math.min(Math.max((Number(activeCell.x) || 0) + dx, 0), cellMap.width - 1);
+      const y = Math.min(Math.max((Number(activeCell.y) || 0) + dy, 0), cellMap.height - 1);
+      const nextDraft = setCellCanvasSelectionDraft(draft, { x, y, width: 1, height: 1 });
+      const cell = this.getCellCanvasCellForFeedback(nextDraft, x, y);
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      const setKeyboardMoveFeedback = () => this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.select',
+        targetText: this.formatCellCanvasCellTarget(x, y, cell),
+        availabilityKey: 'cellcanvas.feedback.ready',
+        availabilityState: 'info',
+        hintKey: 'cellcanvas.feedback.hint.active',
+        hintParams: { x, y, char: this.formatCellCanvasGlyphForFeedback(cell.char) },
+      });
+      this.focusCellCanvasCell(x, y, setKeyboardMoveFeedback);
+      this.setStatus('editor.status.cellSelected', { x, y }, 'info');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 处理 CellCanvas 网格内的方向键和 Enter。
+   *
+   * @param {JQuery.KeyDownEvent} event 键盘事件。
+   */
+  handleCellCanvasGridKeydown(event) {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    const deltaByKey = {
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+    };
+    const delta = deltaByKey[event.key];
+    if (delta) {
+      event.preventDefault();
+      this.moveCellCanvasActiveCell(delta[0], delta[1]);
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const charInput = document.querySelector(DOM.editorCellCanvasChar);
+      charInput?.focus();
+      charInput?.select?.();
+    }
+  }
+
+  /**
+   * 处理 Web-first Studio 的跨控件命令快捷键。
+   *
+   * @param {JQuery.KeyDownEvent} event 键盘事件。
+   */
+  handleEditorCommandKeydown(event) {
+    if (this.workspace.kind !== 'cellcanvas') return;
+    if (!event.ctrlKey && !event.metaKey) return;
+    if (this.isTextEntryTarget(event.target)) return;
+
+    const key = String(event.key || '').toLowerCase();
+    const commandId = key === 'c'
+      ? 'cellcanvas.copySelection'
+      : key === 'v'
+        ? 'cellcanvas.pasteClipboard'
+        : key === 'z'
+          ? event.shiftKey ? 'cellcanvas.redoHistory' : 'cellcanvas.undoHistory'
+          : key === 'y'
+            ? 'cellcanvas.redoHistory'
+            : null;
+    if (!commandId) return;
+
+    event.preventDefault();
+    this.executeCellCanvasCommand(commandId);
+  }
+
+  /**
+   * 执行 CellCanvas 命令模型中的一个命令。
+   *
+   * @param {string} commandId 命令标识。
+   */
+  executeCellCanvasCommand(commandId) {
+    if (commandId === 'cellcanvas.copySelection') {
+      this.copyCellCanvasSelection();
+      this.restoreCellCanvasCommandFocus();
+      return;
+    }
+    if (commandId === 'cellcanvas.pasteClipboard') {
+      this.pasteCellCanvasClipboard();
+      this.restoreCellCanvasCommandFocus();
+      return;
+    }
+    if (commandId === 'cellcanvas.undoHistory') {
+      this.undoCellCanvasHistory();
+      this.restoreCellCanvasCommandFocus();
+      return;
+    }
+    if (commandId === 'cellcanvas.redoHistory') {
+      this.redoCellCanvasHistory();
+      this.restoreCellCanvasCommandFocus();
+    }
   }
 
   /**
