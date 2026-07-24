@@ -1534,6 +1534,19 @@ async function main() {
         throw new Error(`Unexpected CellCanvas PNG filename: ${pngFile.suggestedFilename()}`);
       }
 
+      const animationDownload = page.waitForEvent('download');
+      await page.click('#editorCellCanvasExportAnimationHtml');
+      const animationFile = await animationDownload;
+      if (animationFile.suggestedFilename() !== 'unicode-art-cellcanvas-animation.experimental.html') {
+        throw new Error(`Unexpected CellCanvas animation filename: ${animationFile.suggestedFilename()}`);
+      }
+      const animationPath = await animationFile.path();
+      if (!animationPath) throw new Error('Unable to inspect the downloaded CellCanvas animation HTML');
+      const animationHtml = await fs.readFile(animationPath, 'utf8');
+      if (!animationHtml.includes('experimental-html-animation') || !animationHtml.includes('not a stable animation format')) {
+        throw new Error('CellCanvas animation export did not preserve the experimental format boundary');
+      }
+
       const projectDownload = page.waitForEvent('download');
       await page.click('#editorCellCanvasSaveProject');
       const projectFile = await projectDownload;

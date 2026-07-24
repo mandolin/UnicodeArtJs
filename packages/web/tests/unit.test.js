@@ -13,6 +13,7 @@ import {
 import {
   CELL_CANVAS_DRAFT_SCHEMA,
   CELL_CANVAS_PROJECT_SCHEMA,
+  cellCanvasDraftToAnimationHtmlProjection,
   cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
   cellCanvasDraftToPlainTextProjection,
@@ -823,6 +824,67 @@ describe('CellCanvas固定网格草稿', () => {
     assert(htmlProjection.content.includes('&lt;'), 'HTML投影应转义特殊字符');
     assert(htmlProjection.content.includes('color:#123456'), 'HTML投影应保留安全前景色');
     assert(htmlProjection.content.includes('background-color:white'), 'HTML投影应保留安全背景色');
+  });
+
+  it('CellCanvas实验动画HTML投影按帧序列生成且不宣称稳定格式', () => {
+    const draft = {
+      schema: CELL_CANVAS_DRAFT_SCHEMA,
+      stability: 'internal-draft',
+      document: {
+        id: 'animation-test',
+        title: 'Animation Test',
+        canvas: { width: 2, height: 1 },
+        layers: [
+          {
+            id: 'layer-a',
+            name: 'A',
+            visible: true,
+            locked: false,
+            cellMap: {
+              width: 2,
+              height: 1,
+              cells: [
+                { x: 0, y: 0, char: 'A', width: 1, role: 'text' },
+                { x: 1, y: 0, char: ' ', width: 1, role: 'empty' },
+              ],
+            },
+          },
+          {
+            id: 'layer-b',
+            name: 'B',
+            visible: true,
+            locked: false,
+            cellMap: {
+              width: 2,
+              height: 1,
+              cells: [
+                { x: 0, y: 0, char: ' ', width: 1, role: 'empty' },
+                { x: 1, y: 0, char: 'B', width: 1, role: 'text' },
+              ],
+            },
+          },
+        ],
+        frames: [
+          { id: 'frame-a', name: 'Frame A', durationMs: 120, layerRefs: ['layer-a'] },
+          { id: 'frame-b', name: 'Frame B', durationMs: 180, layerRefs: ['layer-b'] },
+        ],
+      },
+      editorSession: {
+        activeLayerId: 'layer-a',
+        activeFrameId: 'frame-a',
+      },
+    };
+
+    const projection = cellCanvasDraftToAnimationHtmlProjection(draft, { fontFamily: 'monospace' });
+    assertEqual(projection.kind, 'experimental-html-animation');
+    assertEqual(projection.canonical, false);
+    assertEqual(projection.stableAnimationFormat, false);
+    assertEqual(projection.frameCount, 2);
+    assertEqual(projection.totalDurationMs, 300);
+    assertEqual(projection.frames[0].content, 'A ');
+    assertEqual(projection.frames[1].content, ' B');
+    assert(projection.content.includes('data-uaj-animation="experimental-html-animation"'), 'HTML应声明实验动画投影');
+    assert(projection.content.includes('This is not a stable animation format'), 'HTML应提示不是稳定动画格式');
   });
 
   it('CellCanvas内部项目包络可保存并读回活动草稿', () => {

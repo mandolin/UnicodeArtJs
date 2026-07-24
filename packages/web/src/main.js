@@ -35,6 +35,7 @@ import {
   CELL_CANVAS_DRAFT_SCHEMA,
   CELL_CANVAS_PROJECT_SCHEMA,
   CELL_CANVAS_PRESETS,
+  cellCanvasDraftToAnimationHtmlProjection,
   cellCanvasDraftToHtmlProjection,
   cellCanvasDraftToPlainText,
   cellCanvasDraftToPlainTextProjection,
@@ -260,6 +261,7 @@ const UI_MESSAGES = {
     'editor.status.projectLoaded': 'CellCanvas 内部项目已加载',
     'editor.status.pngExported': 'CellCanvas PNG 投影已导出',
     'editor.status.pngExportFailed': 'CellCanvas PNG 导出失败',
+    'editor.status.animationExported': 'CellCanvas 实验动画已导出：{frames} 帧',
     'editor.status.connectorDrawn': '连线已绘制 · {cells} 格',
     'editor.status.layerFrameUpdated': '图层与帧设置已更新',
     'editor.status.frameChanged': '已切换到帧 {frame}',
@@ -323,6 +325,7 @@ const UI_MESSAGES = {
     'cellcanvas.exportTxt': '导出 TXT 投影',
     'cellcanvas.exportHtml': '导出 HTML 投影',
     'cellcanvas.exportPng': '导出 PNG 投影',
+    'cellcanvas.exportAnimationHtml': '导出动画 HTML 实验',
     'cellcanvas.saveProject': '保存内部项目',
     'cellcanvas.openProject': '加载内部项目',
     'cellcanvas.feedback.tool': '工具',
@@ -771,6 +774,7 @@ const UI_MESSAGES = {
     'editor.status.projectLoaded': 'CellCanvas internal project loaded',
     'editor.status.pngExported': 'CellCanvas PNG projection exported',
     'editor.status.pngExportFailed': 'CellCanvas PNG export failed',
+    'editor.status.animationExported': 'CellCanvas experimental animation exported: {frames} frames',
     'editor.status.connectorDrawn': 'Connector drawn · {cells} cells',
     'editor.status.layerFrameUpdated': 'Layer and frame settings updated',
     'editor.status.frameChanged': 'Switched to frame {frame}',
@@ -834,6 +838,7 @@ const UI_MESSAGES = {
     'cellcanvas.exportTxt': 'Export TXT projection',
     'cellcanvas.exportHtml': 'Export HTML projection',
     'cellcanvas.exportPng': 'Export PNG projection',
+    'cellcanvas.exportAnimationHtml': 'Export animation HTML experiment',
     'cellcanvas.saveProject': 'Save internal project',
     'cellcanvas.openProject': 'Open internal project',
     'cellcanvas.feedback.tool': 'Tool',
@@ -1363,6 +1368,7 @@ const DOM = {
   editorCellCanvasExportTxt: '#editorCellCanvasExportTxt',
   editorCellCanvasExportHtml: '#editorCellCanvasExportHtml',
   editorCellCanvasExportPng: '#editorCellCanvasExportPng',
+  editorCellCanvasExportAnimationHtml: '#editorCellCanvasExportAnimationHtml',
   editorCellCanvasSaveProject: '#editorCellCanvasSaveProject',
   editorCellCanvasOpenProject: '#editorCellCanvasOpenProject',
   editorCellCanvasProjectFile: '#editorCellCanvasProjectFile',
@@ -1964,6 +1970,7 @@ class EditorController {
     $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
     $doc.on('click', DOM.editorCellCanvasExportHtml, () => this.exportCellCanvasHtml());
     $doc.on('click', DOM.editorCellCanvasExportPng, () => void this.exportCellCanvasPng());
+    $doc.on('click', DOM.editorCellCanvasExportAnimationHtml, () => this.exportCellCanvasAnimationHtml());
     $doc.on('click', DOM.editorCellCanvasSaveProject, () => this.saveCellCanvasProject());
     $doc.on('click', DOM.editorCellCanvasOpenProject, () => $(DOM.editorCellCanvasProjectFile).click());
     $doc.on('change', DOM.editorCellCanvasProjectFile, (event) => this.openCellCanvasProjectFile(event));
@@ -2068,6 +2075,7 @@ class EditorController {
     $(DOM.editorCellCanvasExportTxt).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasExportHtml).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasExportPng).prop('hidden', !isCellCanvas);
+    $(DOM.editorCellCanvasExportAnimationHtml).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasSaveProject).prop('hidden', !isCellCanvas);
     $(DOM.editorCellCanvasOpenProject).prop('hidden', !isCellCanvas);
     $(DOM.editorAiProposalSection).prop('hidden', !isCellCanvas);
@@ -4293,6 +4301,27 @@ class EditorController {
       }
       this.appController.downloadBlob(blob, 'unicode-art-cellcanvas.png');
       this.setStatus('editor.status.pngExported', {}, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 导出 CellCanvas 实验性 HTML 动画投影。
+   *
+   * 该文件可直接用浏览器人工打开验证帧播放，但不作为稳定动画格式。
+   */
+  exportCellCanvasAnimationHtml() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const projection = cellCanvasDraftToAnimationHtmlProjection(draft, {
+        fontFamily: AppState.config.glyphFont,
+      });
+      const blob = new Blob([projection.content], { type: 'text/html;charset=utf-8' });
+      this.appController.downloadBlob(blob, 'unicode-art-cellcanvas-animation.experimental.html');
+      this.setStatus('editor.status.animationExported', { frames: projection.frameCount }, 'success');
     } catch (error) {
       this.handleEditorError(error);
     }

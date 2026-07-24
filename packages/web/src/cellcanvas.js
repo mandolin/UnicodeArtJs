@@ -1599,6 +1599,123 @@ export function cellCanvasDraftToHtmlProjection(draft, options = {}) {
 }
 
 /**
+ * 将 CellCanvas 草稿导出为实验性 HTML 动画投影。
+ *
+ * 该函数只生成 presentation projection，方便用户下载后在浏览器中人工打开
+ * 检查帧播放效果；它不创建稳定动画格式，也不写回 `document.frames[]`。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @param {{ className?: string, fontFamily?: string }} [options] HTML 选项。
+ * @returns {{
+ *   schema: string,
+ *   kind: string,
+ *   source: string,
+ *   canonical: boolean,
+ *   stableAnimationFormat: boolean,
+ *   rows: number,
+ *   cols: number,
+ *   frameCount: number,
+ *   totalDurationMs: number,
+ *   frames: Array<{ id: string, name: string, durationMs: number, content: string }>,
+ *   content: string
+ * }} 实验性动画 HTML 投影结果。
+ */
+export function cellCanvasDraftToAnimationHtmlProjection(draft, options = {}) {
+  validateCellCanvasDocumentDraft(draft);
+
+  const state = resolveCellCanvasLayerFrameState(draft);
+  const className = options.className || 'unicode-art-cellcanvas-animation';
+  const fontFamily = typeof options.fontFamily === 'string' && options.fontFamily.trim()
+    ? options.fontFamily.trim()
+    : 'monospace';
+  const frames = state.frames.map((frame) => {
+    const composition = composeCellCanvasFrame(draft, frame.id);
+    const cellMap = composition.cellMap;
+    const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
+    const lines = [];
+    for (let y = 0; y < cellMap.height; y += 1) {
+      let line = '';
+      for (let x = 0; x < cellMap.width; x += 1) {
+        line += cellIndex.get(`${x},${y}`)?.char ?? ' ';
+      }
+      lines.push(line);
+    }
+    return {
+      id: frame.id,
+      name: frame.name ?? frame.id,
+      durationMs: normalizeFrameDuration(frame.durationMs, 0),
+      content: lines.join('\n'),
+    };
+  });
+  const totalDurationMs = frames.reduce((total, frame) => total + frame.durationMs, 0);
+  const safeFontFamily = escapeHtml(fontFamily);
+  const frameMarkup = frames.map((frame, index) => [
+    `<pre class="${escapeHtml(className)}__frame" data-uaj-frame="${escapeHtml(frame.id)}" data-duration-ms="${frame.durationMs}"${index === 0 ? '' : ' hidden'}>`,
+    escapeHtml(frame.content),
+    '</pre>',
+  ].join('')).join('\n');
+  const frameMeta = JSON.stringify(frames.map((frame) => ({
+    id: frame.id,
+    name: frame.name,
+    durationMs: frame.durationMs || 240,
+  })));
+
+  const content = [
+    '<!doctype html>',
+    '<html lang="zh-CN">',
+    '<head>',
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1">',
+    '<title>UnicodeArtJs CellCanvas Animation Experimental</title>',
+    '<style>',
+    'body{margin:24px;background:#f8fafc;color:#111827;font-family:system-ui,sans-serif;}',
+    `.${className}{font-family:${safeFontFamily};white-space:pre;line-height:1.2;font-size:16px;}`,
+    `.${className}__stage{border:1px solid #d0d7de;padding:16px;display:inline-block;background:#fff;}`,
+    `.${className}__meta{font-size:13px;color:#57606a;margin:0 0 12px;}`,
+    `.${className}__frame[hidden]{display:none;}`,
+    '</style>',
+    '</head>',
+    '<body>',
+    `<main data-uaj-animation="experimental-html-animation" data-stability="experimental" data-frame-count="${frames.length}">`,
+    '<p class="unicode-art-cellcanvas-animation__meta">UnicodeArtJs experimental animation projection. This is not a stable animation format.</p>',
+    '<button type="button" data-uaj-play>Play / Pause</button>',
+    '<span data-uaj-status></span>',
+    '<section class="unicode-art-cellcanvas-animation__stage">',
+    frameMarkup,
+    '</section>',
+    '</main>',
+    '<script>',
+    `const frames=${frameMeta};`,
+    'const nodes=[...document.querySelectorAll("[data-uaj-frame]")];',
+    'const status=document.querySelector("[data-uaj-status]");',
+    'let index=0;let timer=0;let playing=false;',
+    'function show(next){index=next;nodes.forEach((node,i)=>{node.hidden=i!==index;});if(status)status.textContent=` frame ${index+1}/${nodes.length}: ${frames[index]?.id ?? ""}`;}',
+    'function delay(){return Math.max(16,Number(frames[index]?.durationMs)||240);}',
+    'function stop(){playing=false;clearTimeout(timer);timer=0;}',
+    'function loop(){timer=setTimeout(()=>{show((index+1)%nodes.length);if(playing)loop();},delay());}',
+    'document.querySelector("[data-uaj-play]")?.addEventListener("click",()=>{if(playing){stop();return;}playing=true;loop();});',
+    'show(0);',
+    '</script>',
+    '</body>',
+    '</html>',
+  ].join('\n');
+
+  return {
+    schema: CELL_CANVAS_PROJECTION_SCHEMA,
+    kind: 'experimental-html-animation',
+    source: 'composed-cellmap-frame-sequence',
+    canonical: false,
+    stableAnimationFormat: false,
+    rows: state.activeLayer.cellMap.height,
+    cols: state.activeLayer.cellMap.width,
+    frameCount: frames.length,
+    totalDurationMs,
+    frames,
+    content,
+  };
+}
+
+/**
  * 设置 CellCanvas 当前矩形选区。
  *
  * @param {object} draft CellCanvas 草稿。
