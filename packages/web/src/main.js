@@ -50,6 +50,7 @@ import {
   getCellCanvasHistoryState,
   getCellCanvasLayerFrameState,
   getCellCanvasPastePreview,
+  getCellCanvasSpecialArtImportSummary,
   pasteCellCanvasClipboard as pasteCellCanvasClipboardDraft,
   redoCellCanvasHistory as redoCellCanvasHistoryDraft,
   setCellCanvasSelection as setCellCanvasSelectionDraft,
@@ -326,6 +327,9 @@ const UI_MESSAGES = {
     'cellcanvas.exportHtml': '导出 HTML 投影',
     'cellcanvas.exportPng': '导出 PNG 投影',
     'cellcanvas.exportAnimationHtml': '导出动画 HTML 实验',
+    'cellcanvas.importIntake': 'Special Art / TextFX 导入',
+    'cellcanvas.importSummaryEmpty': '当前草稿没有结构化 Special Art / TextFX 导入记录。',
+    'cellcanvas.importSummary': '已接入 {count} 条结构化记录 · 引擎 {engines} · 来源 {fixtures} · 诊断 {diagnostics} · plainTextPreviewUsed={plainTextPreviewUsed}',
     'cellcanvas.saveProject': '保存内部项目',
     'cellcanvas.openProject': '加载内部项目',
     'cellcanvas.feedback.tool': '工具',
@@ -839,6 +843,9 @@ const UI_MESSAGES = {
     'cellcanvas.exportHtml': 'Export HTML projection',
     'cellcanvas.exportPng': 'Export PNG projection',
     'cellcanvas.exportAnimationHtml': 'Export animation HTML experiment',
+    'cellcanvas.importIntake': 'Special Art / TextFX import',
+    'cellcanvas.importSummaryEmpty': 'No structured Special Art / TextFX import record is present in this draft.',
+    'cellcanvas.importSummary': '{count} structured record(s) · engines {engines} · sources {fixtures} · diagnostics {diagnostics} · plainTextPreviewUsed={plainTextPreviewUsed}',
     'cellcanvas.saveProject': 'Save internal project',
     'cellcanvas.openProject': 'Open internal project',
     'cellcanvas.feedback.tool': 'Tool',
@@ -1313,6 +1320,7 @@ const DOM = {
   editorFontSample: '#editorFontSample',
   editorEmbedFont: '#editorEmbedFont',
   editorCellCanvasOptions: '#editorCellCanvasOptions',
+  editorCellCanvasImportSummary: '#editorCellCanvasImportSummary',
   editorCellCanvasX: '#editorCellCanvasX',
   editorCellCanvasY: '#editorCellCanvasY',
   editorCellCanvasChar: '#editorCellCanvasChar',
@@ -3525,6 +3533,49 @@ class EditorController {
   }
 
   /**
+   * 同步 Special Art / TextFX 结构化导入摘要。
+   *
+   * 摘要只面向 Studio 用户解释来源链路：真正的事实输入仍是 CellMap，
+   * `plainTextPreview` 即使存在也不会参与导入。
+   *
+   * @param {object | null} draft CellCanvas 草稿，传空时显示无导入记录。
+   */
+  syncCellCanvasImportSummary(draft) {
+    const $summary = $(DOM.editorCellCanvasImportSummary);
+    if (!draft) {
+      $summary
+        .text(this.t('cellcanvas.importSummaryEmpty'))
+        .attr('data-state', 'empty')
+        .attr('data-special-art-import', 'false')
+        .attr('data-plain-text-preview-used', 'false');
+      return;
+    }
+
+    const summary = getCellCanvasSpecialArtImportSummary(draft);
+    if (!summary.hasSpecialArtImport) {
+      $summary
+        .text(this.t('cellcanvas.importSummaryEmpty'))
+        .attr('data-state', 'empty')
+        .attr('data-special-art-import', 'false')
+        .attr('data-plain-text-preview-used', String(summary.plainTextPreviewUsed));
+      return;
+    }
+
+    const formatList = (items) => (items.length > 0 ? items.join(', ') : '-');
+    $summary
+      .text(this.t('cellcanvas.importSummary', {
+        count: summary.count,
+        engines: formatList(summary.sourceEngines),
+        fixtures: formatList(summary.sourceFixtures),
+        diagnostics: formatList(summary.diagnosticCodes),
+        plainTextPreviewUsed: String(summary.plainTextPreviewUsed),
+      }))
+      .attr('data-state', summary.plainTextPreviewUsed ? 'warning' : 'success')
+      .attr('data-special-art-import', 'true')
+      .attr('data-plain-text-preview-used', String(summary.plainTextPreviewUsed));
+  }
+
+  /**
    * 从当前 CellCanvas JSON 同步单格编辑控件。
    */
   syncCellCanvasControlsFromSource() {
@@ -3575,6 +3626,7 @@ class EditorController {
       this.syncCellCanvasLayerFrameControls(draft, composition);
       this.renderCellCanvasFrameTimeline(draft);
       this.syncCellCanvasOnionSkinControls(draft);
+      this.syncCellCanvasImportSummary(draft);
       this.syncCellCanvasViewportControls(previewState);
       $(DOM.editorCellCanvasApply).prop('disabled', layerFrameState.activeLayerLocked);
       $(DOM.editorCellCanvasPaste).prop('disabled', layerFrameState.activeLayerLocked || !clipboardReady);
@@ -3587,6 +3639,7 @@ class EditorController {
       this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
       this.renderCellCanvasFrameTimeline(null);
       this.syncCellCanvasOnionSkinControls(null);
+      this.syncCellCanvasImportSummary(null);
       this.setCellCanvasToolFeedback({
         toolKey: 'cellcanvas.tool.source',
         availabilityKey: 'cellcanvas.feedback.disabled',

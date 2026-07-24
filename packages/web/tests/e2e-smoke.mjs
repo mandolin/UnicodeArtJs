@@ -1512,6 +1512,18 @@ async function main() {
       if (!source.includes('UA_CELLCANVAS_SPECIAL_ART_IMPORTED')) {
         throw new Error('SpecialArt import diagnostic was not recorded');
       }
+      const importSummary = await page.textContent('#editorCellCanvasImportSummary');
+      const importSummaryState = await page.getAttribute('#editorCellCanvasImportSummary', 'data-state');
+      const importPlainTextUsed = await page.getAttribute('#editorCellCanvasImportSummary', 'data-plain-text-preview-used');
+      if (importSummaryState !== 'success') {
+        throw new Error(`SpecialArt intake summary did not report success: ${importSummaryState}`);
+      }
+      if (importPlainTextUsed !== 'false') {
+        throw new Error('SpecialArt intake summary reported plainTextPreview as canonical input');
+      }
+      if (!importSummary.includes('special-art-e2e') || !importSummary.includes('UA_E2E_SPECIAL_ART')) {
+        throw new Error(`SpecialArt intake summary missed engine or diagnostic context: ${importSummary}`);
+      }
 
       const txtDownload = page.waitForEvent('download');
       await page.click('#editorCellCanvasExportTxt');

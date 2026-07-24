@@ -30,6 +30,7 @@ import {
   getCellCanvasLayerFrameState,
   getCellCanvasPastePreview,
   getCellCanvasSelectionCells,
+  getCellCanvasSpecialArtImportSummary,
   pasteCellCanvasClipboard,
   readCellCanvasDraftFromProjectEnvelope,
   redoCellCanvasHistory,
@@ -809,6 +810,40 @@ describe('CellCanvas固定网格草稿', () => {
     assertEqual(cellCanvasDraftToPlainText(draft), 'UA');
     assertEqual(draft.importRecords[0].plainTextPreviewUsed, false);
     assertEqual(draft.importRecords[0].diagnosticCodes.includes('UA_TEST'), true);
+  });
+
+  it('可汇总SpecialArt和TextFX进入Studio的结构化导入摘要', () => {
+    const specialArtFixture = {
+      stage: 'W-art-P15.summary',
+      result: {
+        schema: 'unicodeartjs-special-art-result@0',
+        status: 'ok',
+        cellMap: {
+          width: 2,
+          height: 1,
+          cells: [[
+            { char: 'T', width: 1, role: 'text', sourceGlyph: 'glyph:T' },
+            { char: 'X', width: 1, role: 'effect', sourceEffect: 'shadow-textfx' },
+          ]],
+        },
+        plainTextPreview: 'TEXT_PREVIEW_ONLY',
+        specialArt: { engineId: 'summary-textfx', inputText: 'TX' },
+        diagnostics: [{ code: 'UA_SUMMARY_TEXTFX', severity: 'info', message: 'ok' }],
+      },
+    };
+
+    const draft = createCellCanvasDraftFromSpecialArtResult(specialArtFixture, {
+      sourceFixture: 'summary-textfx.json',
+    });
+    const summary = getCellCanvasSpecialArtImportSummary(draft);
+
+    assertEqual(summary.hasSpecialArtImport, true);
+    assertEqual(summary.count, 1);
+    assertEqual(summary.sourceEngines.includes('summary-textfx'), true);
+    assertEqual(summary.sourceFixtures.includes('summary-textfx.json'), true);
+    assertEqual(summary.diagnosticCodes.includes('UA_SUMMARY_TEXTFX'), true);
+    assertEqual(summary.plainTextPreviewPresent, true);
+    assertEqual(summary.plainTextPreviewUsed, false);
   });
 
   it('CellCanvas TXT和HTML投影都从CellMap生成', () => {

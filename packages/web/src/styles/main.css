@@ -536,6 +536,14 @@ details.config-details summary:hover {
   color: var(--text-muted);
 }
 
+.field-help[data-state='success'] {
+  color: var(--color-success);
+}
+
+.field-help[data-state='warning'] {
+  color: var(--color-warning);
+}
+
 .font-status {
   margin: 2px 0 0;
   font-size: 0.72rem;

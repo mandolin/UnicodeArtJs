@@ -1173,6 +1173,58 @@ export function createCellCanvasDraftFromSpecialArtResult(input, options = {}) {
 }
 
 /**
+ * 汇总 CellCanvas 草稿中的 Special Art / TextFX 结构化导入记录。
+ *
+ * 这个摘要只读取 `importRecords[]`，用于 Studio UI 暴露“从 CellMap 进入”的
+ * 来源边界；它不会从 `plainTextPreview` 反推内容，也不会修改草稿。
+ *
+ * @param {object} draft CellCanvas 草稿。
+ * @returns {{
+ *   hasSpecialArtImport: boolean,
+ *   count: number,
+ *   sourceSchemas: string[],
+ *   sourceStages: string[],
+ *   sourceFixtures: string[],
+ *   sourceEngines: string[],
+ *   canonicalInputs: string[],
+ *   importKinds: string[],
+ *   diagnosticCodes: string[],
+ *   plainTextPreviewPresent: boolean,
+ *   plainTextPreviewUsed: boolean
+ * }} 导入摘要。
+ */
+export function getCellCanvasSpecialArtImportSummary(draft) {
+  validateCellCanvasDocumentDraft(draft);
+  const records = Array.isArray(draft.importRecords)
+    ? draft.importRecords.filter((record) => (
+      record?.importKind === 'structured-special-art-result'
+      || record?.canonicalInput === 'SpecialArtRenderResult.cellMap'
+    ))
+    : [];
+
+  const collect = (field) => [...new Set(records
+    .map((record) => record?.[field])
+    .filter((value) => typeof value === 'string' && value.trim()))];
+  const diagnosticCodes = [...new Set(records.flatMap((record) => (
+    Array.isArray(record?.diagnosticCodes) ? record.diagnosticCodes : []
+  )).filter((value) => typeof value === 'string' && value.trim()))];
+
+  return {
+    hasSpecialArtImport: records.length > 0,
+    count: records.length,
+    sourceSchemas: collect('sourceSchema'),
+    sourceStages: collect('sourceStage'),
+    sourceFixtures: collect('sourceFixture'),
+    sourceEngines: collect('sourceEngine'),
+    canonicalInputs: collect('canonicalInput'),
+    importKinds: collect('importKind'),
+    diagnosticCodes,
+    plainTextPreviewPresent: records.some((record) => record?.plainTextPreviewPresent === true),
+    plainTextPreviewUsed: records.some((record) => record?.plainTextPreviewUsed === true),
+  };
+}
+
+/**
  * 读取当前 CellCanvas 图层与帧状态。
  *
  * @param {object} draft CellCanvas 草稿。
