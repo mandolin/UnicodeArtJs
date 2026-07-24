@@ -555,6 +555,16 @@
             <button class="btn" id="editorCellCanvasApplyLayerFrame" type="button" data-i18n="cellcanvas.applyLayerFrame">应用图层/帧</button>
           </div>
           <p class="field-help" id="editorCellCanvasLayerFrameSummary"></p>
+          <span class="editor-section-label" data-i18n="cellcanvas.timeline">帧时间轴</span>
+          <div class="editor-cellcanvas-timeline" id="editorCellCanvasTimeline" data-state="paused">
+            <div class="editor-cellcanvas-timeline-actions">
+              <button class="btn" id="editorCellCanvasFramePrev" type="button" data-i18n="cellcanvas.framePrev">上一帧</button>
+              <button class="btn" id="editorCellCanvasFramePlay" type="button" data-i18n="cellcanvas.framePlay" aria-pressed="false">播放</button>
+              <button class="btn" id="editorCellCanvasFrameNext" type="button" data-i18n="cellcanvas.frameNext">下一帧</button>
+            </div>
+            <div class="editor-cellcanvas-frame-list" id="editorCellCanvasFrameList" role="list"></div>
+            <p class="field-help" id="editorCellCanvasTimelineSummary"></p>
+          </div>
           <span class="editor-section-label" data-i18n="cellcanvas.viewport">Virtual Grid 视口</span>
           <div class="editor-cellcanvas-controls editor-cellcanvas-viewport-controls">
             <label class="editor-checkbox-label" for="editorCellCanvasVirtualGrid">

@@ -1811,6 +1811,64 @@ details.config-details summary:hover {
   align-items: end;
 }
 
+.editor-cellcanvas-timeline {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.editor-cellcanvas-timeline-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-xs);
+}
+
+.editor-cellcanvas-timeline-actions .btn {
+  min-height: 32px;
+  padding-right: var(--spacing-xs);
+  padding-left: var(--spacing-xs);
+}
+
+.editor-cellcanvas-frame-list {
+  display: grid;
+  max-height: 128px;
+  gap: 4px;
+  overflow: auto;
+}
+
+.cellcanvas-frame-chip {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.cellcanvas-frame-chip:hover,
+.cellcanvas-frame-chip:focus {
+  border-color: var(--color-primary);
+  color: var(--text-primary);
+}
+
+.cellcanvas-frame-chip.active,
+.cellcanvas-frame-chip[aria-current='true'] {
+  border-color: var(--color-primary);
+  background: rgba(74, 144, 217, 0.12);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.editor-cellcanvas-timeline[data-state='playing'] .cellcanvas-frame-chip[aria-current='true'] {
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
 .editor-cellcanvas-viewport-controls {
   align-items: end;
 }

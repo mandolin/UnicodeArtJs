@@ -262,6 +262,9 @@ const UI_MESSAGES = {
     'editor.status.pngExportFailed': 'CellCanvas PNG 导出失败',
     'editor.status.connectorDrawn': '连线已绘制 · {cells} 格',
     'editor.status.layerFrameUpdated': '图层与帧设置已更新',
+    'editor.status.frameChanged': '已切换到帧 {frame}',
+    'editor.status.framePlaybackStarted': '帧预览播放已开始',
+    'editor.status.framePlaybackPaused': '帧预览播放已暂停',
     'cellcanvas.section': 'CellCanvas 单格编辑',
     'cellcanvas.selection': '选区',
     'cellcanvas.connector': '连线',
@@ -272,6 +275,13 @@ const UI_MESSAGES = {
     'cellcanvas.layerLocked': '锁定',
     'cellcanvas.durationMs': '时长 ms',
     'cellcanvas.applyLayerFrame': '应用图层/帧',
+    'cellcanvas.timeline': '帧时间轴',
+    'cellcanvas.framePrev': '上一帧',
+    'cellcanvas.framePlay': '播放',
+    'cellcanvas.framePause': '暂停',
+    'cellcanvas.frameNext': '下一帧',
+    'cellcanvas.timelineSummary': '第 {current}/{total} 帧 · {frame} · {duration}ms · 总时长 {totalDuration}ms',
+    'cellcanvas.timelineUnavailable': '当前 CellCanvas 草稿暂无可用帧。',
     'cellcanvas.viewport': 'Virtual Grid 视口',
     'cellcanvas.virtualGrid': '启用 Virtual Grid',
     'cellcanvas.viewportX': '视口 X',
@@ -340,6 +350,7 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.redoDetailed': '已重做 {kind}：{cells} 格。',
     'cellcanvas.feedback.hint.connector': '连线 {route}：({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.layerFrame': '当前帧 {frame} · 活动图层 {layer} · 合成 {cols}x{rows}。',
+    'cellcanvas.feedback.hint.timeline': '时间轴帧 {current}/{total}：{frame} · {duration}ms。',
     'cellcanvas.feedback.hint.layerLocked': '当前图层已锁定；请先取消锁定再写入字素格。',
     'cellcanvas.feedback.hint.viewport': 'Virtual Grid：可见 {visible}/{total} 格 · 窗口 ({x}, {y}) {cols}x{rows} · 跳过 {skipped} 格。',
     'cellcanvas.feedback.hint.domGridFallback': 'DOM Grid fallback：正在渲染完整 {cols}x{rows} 网格。',
@@ -350,6 +361,7 @@ const UI_MESSAGES = {
     'cellcanvas.tool.selection': '选区',
     'cellcanvas.tool.connector': '连线',
     'cellcanvas.tool.layerFrame': '图层/帧',
+    'cellcanvas.tool.timeline': '时间轴',
     'cellcanvas.tool.viewport': '视口',
     'cellcanvas.tool.clipboard': '剪贴板',
     'cellcanvas.tool.history': '历史',
@@ -752,6 +764,9 @@ const UI_MESSAGES = {
     'editor.status.pngExportFailed': 'CellCanvas PNG export failed',
     'editor.status.connectorDrawn': 'Connector drawn · {cells} cells',
     'editor.status.layerFrameUpdated': 'Layer and frame settings updated',
+    'editor.status.frameChanged': 'Switched to frame {frame}',
+    'editor.status.framePlaybackStarted': 'Frame preview playback started',
+    'editor.status.framePlaybackPaused': 'Frame preview playback paused',
     'cellcanvas.section': 'CellCanvas single-cell editing',
     'cellcanvas.selection': 'Selection',
     'cellcanvas.connector': 'Connector',
@@ -762,6 +777,13 @@ const UI_MESSAGES = {
     'cellcanvas.layerLocked': 'Locked',
     'cellcanvas.durationMs': 'Duration ms',
     'cellcanvas.applyLayerFrame': 'Apply layer/frame',
+    'cellcanvas.timeline': 'Frame timeline',
+    'cellcanvas.framePrev': 'Previous',
+    'cellcanvas.framePlay': 'Play',
+    'cellcanvas.framePause': 'Pause',
+    'cellcanvas.frameNext': 'Next',
+    'cellcanvas.timelineSummary': 'Frame {current}/{total} · {frame} · {duration}ms · total {totalDuration}ms',
+    'cellcanvas.timelineUnavailable': 'No usable frame is available in the current CellCanvas draft.',
     'cellcanvas.viewport': 'Virtual Grid viewport',
     'cellcanvas.virtualGrid': 'Enable Virtual Grid',
     'cellcanvas.viewportX': 'Viewport X',
@@ -830,6 +852,7 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.redoDetailed': 'Redone {kind}: {cells} cells.',
     'cellcanvas.feedback.hint.connector': 'Connector {route}: ({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.layerFrame': 'Current frame {frame} · active layer {layer} · composed {cols}x{rows}.',
+    'cellcanvas.feedback.hint.timeline': 'Timeline frame {current}/{total}: {frame} · {duration}ms.',
     'cellcanvas.feedback.hint.layerLocked': 'The active layer is locked. Unlock it before writing glyph cells.',
     'cellcanvas.feedback.hint.viewport': 'Virtual Grid: {visible}/{total} cells visible · window ({x}, {y}) {cols}x{rows} · {skipped} skipped.',
     'cellcanvas.feedback.hint.domGridFallback': 'DOM Grid fallback: rendering the full {cols}x{rows} grid.',
@@ -840,6 +863,7 @@ const UI_MESSAGES = {
     'cellcanvas.tool.selection': 'Selection',
     'cellcanvas.tool.connector': 'Connector',
     'cellcanvas.tool.layerFrame': 'Layer/frame',
+    'cellcanvas.tool.timeline': 'Timeline',
     'cellcanvas.tool.viewport': 'Viewport',
     'cellcanvas.tool.clipboard': 'Clipboard',
     'cellcanvas.tool.history': 'History',
@@ -1294,6 +1318,12 @@ const DOM = {
   editorCellCanvasFrameDuration: '#editorCellCanvasFrameDuration',
   editorCellCanvasApplyLayerFrame: '#editorCellCanvasApplyLayerFrame',
   editorCellCanvasLayerFrameSummary: '#editorCellCanvasLayerFrameSummary',
+  editorCellCanvasTimeline: '#editorCellCanvasTimeline',
+  editorCellCanvasFramePrev: '#editorCellCanvasFramePrev',
+  editorCellCanvasFramePlay: '#editorCellCanvasFramePlay',
+  editorCellCanvasFrameNext: '#editorCellCanvasFrameNext',
+  editorCellCanvasFrameList: '#editorCellCanvasFrameList',
+  editorCellCanvasTimelineSummary: '#editorCellCanvasTimelineSummary',
   editorCellCanvasVirtualGrid: '#editorCellCanvasVirtualGrid',
   editorCellCanvasViewportX: '#editorCellCanvasViewportX',
   editorCellCanvasViewportY: '#editorCellCanvasViewportY',
@@ -1394,6 +1424,8 @@ const DOM = {
   docsGuideLink: '#docsGuideLink',
   docsRepoLink: '#docsRepoLink',
 };
+
+const CELL_CANVAS_FRAME_PLAYBACK_FALLBACK_MS = 240;
 
 //#endregion
 
@@ -1803,6 +1835,8 @@ class EditorController {
     this.studioAiProposal = null;
     this.studioBenchmarkReport = null;
     this.cellCanvasToolFeedback = this.createCellCanvasToolFeedback();
+    this.cellCanvasPlaybackTimer = null;
+    this.cellCanvasPlaybackActive = false;
   }
 
   initialize() {
@@ -1820,6 +1854,7 @@ class EditorController {
     $doc.on('change', DOM.editorKind, (event) => this.changeKind($(event.target).val()));
     $doc.on('click', DOM.editorLoadPreset, () => this.loadPreset());
     $doc.on('input', DOM.editorSource, (event) => {
+      this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
       this.updateCurrentSource($(event.target).val());
       if (this.workspace.kind === 'cellcanvas') this.syncCellCanvasControlsFromSource();
     });
@@ -1886,6 +1921,12 @@ class EditorController {
     $doc.on('click', DOM.editorCellCanvasRedo, () => this.redoCellCanvasHistory());
     $doc.on('click', DOM.editorCellCanvasDrawLine, () => this.drawCellCanvasConnectorFromControls());
     $doc.on('click', DOM.editorCellCanvasApplyLayerFrame, () => this.applyCellCanvasLayerFrameSettings());
+    $doc.on('click', DOM.editorCellCanvasFramePrev, () => this.stepCellCanvasTimelineFrame(-1));
+    $doc.on('click', DOM.editorCellCanvasFramePlay, () => this.toggleCellCanvasFramePlayback());
+    $doc.on('click', DOM.editorCellCanvasFrameNext, () => this.stepCellCanvasTimelineFrame(1));
+    $doc.on('click', '[data-cellcanvas-frame-id]', (event) => {
+      this.switchCellCanvasTimelineFrame($(event.currentTarget).attr('data-cellcanvas-frame-id'));
+    });
     $doc.on('click', DOM.editorCellCanvasApplyViewport, () => this.applyCellCanvasViewportSettings());
     $doc.on('click', DOM.editorCellCanvasResetViewport, () => this.resetCellCanvasViewportSettings());
     $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
@@ -1940,6 +1981,7 @@ class EditorController {
 
   changeKind(kind) {
     if (kind !== 'document' && kind !== 'font' && kind !== 'cellcanvas') return;
+    this.stopCellCanvasFramePlayback({ silent: true });
     this.workspace.kind = kind;
     this.persistWorkspace();
     this.syncControlsFromWorkspace();
@@ -2193,6 +2235,111 @@ class EditorController {
    */
   formatCellCanvasLayerFrameTarget(state) {
     return `${state.activeLayerId} @ ${state.activeFrameId}`;
+  }
+
+  /**
+   * 计算时间轴总时长。
+   *
+   * `durationMs=0` 是合法源数据；它表示尚未为该帧设定动画时长。播放预览
+   * 会使用兜底延迟，但源模型和摘要仍保留真实的 0ms。
+   *
+   * @param {Array<{ durationMs?: number }>} frames 帧列表。
+   * @returns {number} 源数据中的总时长。
+   */
+  getCellCanvasTimelineTotalDuration(frames) {
+    return frames.reduce((total, frame) => total + (Number.isFinite(frame.durationMs) ? frame.durationMs : 0), 0);
+  }
+
+  /**
+   * 读取时间轴播放延迟。
+   *
+   * @param {number} durationMs 当前帧时长。
+   * @returns {number} 用于 setTimeout 的安全延迟。
+   */
+  getCellCanvasFramePlaybackDelay(durationMs) {
+    return Number.isFinite(durationMs) && durationMs > 0
+      ? durationMs
+      : CELL_CANVAS_FRAME_PLAYBACK_FALLBACK_MS;
+  }
+
+  /**
+   * 格式化时间轴当前帧摘要。
+   *
+   * @param {object} state CellCanvas 图层与帧状态。
+   * @returns {{ activeIndex: number, totalDuration: number, text: string }} 摘要对象。
+   */
+  formatCellCanvasTimelineSummary(state) {
+    const activeIndex = Math.max(0, state.frames.findIndex((frame) => frame.id === state.activeFrameId));
+    const totalDuration = this.getCellCanvasTimelineTotalDuration(state.frames);
+    return {
+      activeIndex,
+      totalDuration,
+      text: this.t('cellcanvas.timelineSummary', {
+        current: activeIndex + 1,
+        total: state.frames.length,
+        frame: state.activeFrameId,
+        duration: state.frameDurationMs,
+        totalDuration,
+      }),
+    };
+  }
+
+  /**
+   * 刷新 CellCanvas 帧时间轴。
+   *
+   * 第一版时间轴只管理 `editorSession.activeFrameId` 与预览播放，不增删帧、
+   * 不重排帧，也不把合成投影反写回 `document.layers[]`。
+   *
+   * @param {object | null} draft CellCanvas 草稿；为空时禁用时间轴。
+   */
+  renderCellCanvasFrameTimeline(draft) {
+    const $timeline = $(DOM.editorCellCanvasTimeline);
+    const $list = $(DOM.editorCellCanvasFrameList).empty();
+    const $prev = $(DOM.editorCellCanvasFramePrev);
+    const $play = $(DOM.editorCellCanvasFramePlay);
+    const $next = $(DOM.editorCellCanvasFrameNext);
+    const $summary = $(DOM.editorCellCanvasTimelineSummary);
+
+    if (!draft) {
+      $timeline.attr('data-state', 'disabled');
+      $prev.prop('disabled', true);
+      $play
+        .prop('disabled', true)
+        .attr('aria-pressed', 'false')
+        .text(this.t('cellcanvas.framePlay'));
+      $next.prop('disabled', true);
+      $summary.text(this.t('cellcanvas.timelineUnavailable'));
+      return;
+    }
+
+    const state = getCellCanvasLayerFrameState(draft);
+    const { activeIndex, text } = this.formatCellCanvasTimelineSummary(state);
+    const hasMultipleFrames = state.frames.length > 1;
+    $timeline.attr('data-state', this.cellCanvasPlaybackActive ? 'playing' : 'paused');
+    $prev.prop('disabled', !hasMultipleFrames);
+    $play
+      .prop('disabled', !hasMultipleFrames)
+      .attr('aria-pressed', this.cellCanvasPlaybackActive ? 'true' : 'false')
+      .text(this.t(this.cellCanvasPlaybackActive ? 'cellcanvas.framePause' : 'cellcanvas.framePlay'));
+    $next.prop('disabled', !hasMultipleFrames);
+
+    state.frames.forEach((frame, index) => {
+      const isActive = frame.id === state.activeFrameId;
+      $('<button>')
+        .addClass('cellcanvas-frame-chip')
+        .toggleClass('active', isActive)
+        .attr('type', 'button')
+        .attr('role', 'listitem')
+        .attr('data-cellcanvas-frame-id', frame.id)
+        .attr('aria-current', isActive ? 'true' : 'false')
+        .text(`${index + 1}. ${frame.name || frame.id} · ${frame.durationMs}ms`)
+        .appendTo($list);
+    });
+
+    $summary.text(text);
+    if (activeIndex >= 0) {
+      $list.children().eq(activeIndex).attr('data-active-index', String(activeIndex));
+    }
   }
 
   /**
@@ -2855,6 +3002,7 @@ class EditorController {
     if (this.workspace.kind !== 'cellcanvas') return;
 
     try {
+      this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
       const nextDraft = setCellCanvasActiveLayerFrame(this.readCurrentCellCanvasDraft(), {
         layerId: $(DOM.editorCellCanvasLayer).val(),
         frameId: $(DOM.editorCellCanvasFrame).val(),
@@ -2877,6 +3025,165 @@ class EditorController {
         },
       });
     } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 通过时间轴切换当前帧。
+   *
+   * 时间轴只改变活动帧和随帧兜底后的活动图层；它不修改 frame.layerRefs，
+   * 也不修改任何字素格内容。
+   *
+   * @param {string | undefined} frameId 目标帧 ID。
+   * @param {{ fromPlayback?: boolean }} [options] 是否来自自动播放。
+   */
+  switchCellCanvasTimelineFrame(frameId, options = {}) {
+    if (this.workspace.kind !== 'cellcanvas' || !frameId) return;
+
+    try {
+      const currentDraft = this.readCurrentCellCanvasDraft();
+      const currentState = getCellCanvasLayerFrameState(currentDraft);
+      const nextDraft = setCellCanvasActiveLayerFrame(currentDraft, {
+        frameId,
+        layerId: currentState.activeLayerId,
+      });
+      const state = getCellCanvasLayerFrameState(nextDraft);
+      const timeline = this.formatCellCanvasTimelineSummary(state);
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.timeline',
+        targetText: state.activeFrameId,
+        availabilityKey: 'cellcanvas.feedback.ready',
+        availabilityState: options.fromPlayback ? 'info' : 'success',
+        hintKey: 'cellcanvas.feedback.hint.timeline',
+        hintParams: {
+          current: timeline.activeIndex + 1,
+          total: state.frames.length,
+          frame: state.activeFrameId,
+          duration: state.frameDurationMs,
+        },
+      });
+      if (!options.fromPlayback) {
+        this.setStatus('editor.status.frameChanged', { frame: state.activeFrameId }, 'success');
+      }
+    } catch (error) {
+      this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 按时间轴顺序前进或后退一帧。
+   *
+   * @param {1 | -1 | number} direction 方向；正数下一帧，负数上一帧。
+   * @param {{ fromPlayback?: boolean }} [options] 是否来自自动播放。
+   */
+  stepCellCanvasTimelineFrame(direction, options = {}) {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const state = getCellCanvasLayerFrameState(draft);
+      if (state.frames.length <= 1) return;
+      const activeIndex = Math.max(0, state.frames.findIndex((frame) => frame.id === state.activeFrameId));
+      const offset = direction >= 0 ? 1 : -1;
+      const nextIndex = (activeIndex + offset + state.frames.length) % state.frames.length;
+      this.switchCellCanvasTimelineFrame(state.frames[nextIndex].id, options);
+    } catch (error) {
+      this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 切换 CellCanvas 帧预览播放状态。
+   */
+  toggleCellCanvasFramePlayback() {
+    if (this.cellCanvasPlaybackActive) {
+      this.stopCellCanvasFramePlayback();
+      return;
+    }
+    this.startCellCanvasFramePlayback();
+  }
+
+  /**
+   * 开始 CellCanvas 帧预览播放。
+   */
+  startCellCanvasFramePlayback() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      const state = getCellCanvasLayerFrameState(draft);
+      if (state.frames.length <= 1) return;
+      this.cellCanvasPlaybackActive = true;
+      this.renderCellCanvasFrameTimeline(draft);
+      this.scheduleCellCanvasFramePlayback();
+      this.setStatus('editor.status.framePlaybackStarted', {}, 'success');
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.timeline',
+        targetText: state.activeFrameId,
+        availabilityKey: 'cellcanvas.feedback.ready',
+        availabilityState: 'success',
+        hintKey: 'cellcanvas.feedback.hint.timeline',
+        hintParams: {
+          current: this.formatCellCanvasTimelineSummary(state).activeIndex + 1,
+          total: state.frames.length,
+          frame: state.activeFrameId,
+          duration: state.frameDurationMs,
+        },
+      });
+    } catch (error) {
+      this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 停止 CellCanvas 帧预览播放。
+   *
+   * @param {{ silent?: boolean, skipRender?: boolean }} [options] 停止选项。
+   */
+  stopCellCanvasFramePlayback(options = {}) {
+    const wasActive = this.cellCanvasPlaybackActive;
+    if (this.cellCanvasPlaybackTimer) {
+      window.clearTimeout(this.cellCanvasPlaybackTimer);
+      this.cellCanvasPlaybackTimer = null;
+    }
+    this.cellCanvasPlaybackActive = false;
+
+    if (!options.skipRender && this.workspace.kind === 'cellcanvas') {
+      try {
+        this.renderCellCanvasFrameTimeline(this.readCurrentCellCanvasDraft());
+      } catch {
+        this.renderCellCanvasFrameTimeline(null);
+      }
+    }
+
+    if (wasActive && !options.silent) {
+      this.setStatus('editor.status.framePlaybackPaused', {}, 'info');
+    }
+  }
+
+  /**
+   * 安排下一次播放跳帧。
+   */
+  scheduleCellCanvasFramePlayback() {
+    if (!this.cellCanvasPlaybackActive) return;
+
+    try {
+      const state = getCellCanvasLayerFrameState(this.readCurrentCellCanvasDraft());
+      const delay = this.getCellCanvasFramePlaybackDelay(state.frameDurationMs);
+      this.cellCanvasPlaybackTimer = window.setTimeout(() => {
+        this.cellCanvasPlaybackTimer = null;
+        if (!this.cellCanvasPlaybackActive) return;
+        this.stepCellCanvasTimelineFrame(1, { fromPlayback: true });
+        this.scheduleCellCanvasFramePlayback();
+      }, delay);
+    } catch (error) {
+      this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
       this.handleEditorError(error);
     }
   }
@@ -3051,31 +3358,31 @@ class EditorController {
     try {
       const draft = this.readCurrentCellCanvasDraft();
       validateCellCanvasDocumentDraft(draft);
-      const cellMap = getActiveCellMap(draft);
+      const editCellMap = getActiveCellMap(draft);
       const composition = composeCellCanvasFrame(draft);
       const layerFrameState = getCellCanvasLayerFrameState(draft);
-      const previewState = this.createCellCanvasPreviewProjection(draft, cellMap);
+      const previewState = this.createCellCanvasPreviewProjection(draft, composition.cellMap);
       const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
-      const x = Math.min(Math.max(Number(activeCell.x) || 0, 0), cellMap.width - 1);
-      const y = Math.min(Math.max(Number(activeCell.y) || 0, 0), cellMap.height - 1);
-      const cell = cellMap.cells.find((item) => item.x === x && item.y === y);
+      const x = Math.min(Math.max(Number(activeCell.x) || 0, 0), editCellMap.width - 1);
+      const y = Math.min(Math.max(Number(activeCell.y) || 0, 0), editCellMap.height - 1);
+      const cell = editCellMap.cells.find((item) => item.x === x && item.y === y);
       const selection = draft.editorSession?.selection ?? { x, y, width: 1, height: 1 };
-      const selectX = Math.min(Math.max(Number(selection.x) || 0, 0), cellMap.width - 1);
-      const selectY = Math.min(Math.max(Number(selection.y) || 0, 0), cellMap.height - 1);
-      const selectWidth = Math.min(Math.max(Number(selection.width) || 1, 1), cellMap.width - selectX);
-      const selectHeight = Math.min(Math.max(Number(selection.height) || 1, 1), cellMap.height - selectY);
+      const selectX = Math.min(Math.max(Number(selection.x) || 0, 0), editCellMap.width - 1);
+      const selectY = Math.min(Math.max(Number(selection.y) || 0, 0), editCellMap.height - 1);
+      const selectWidth = Math.min(Math.max(Number(selection.width) || 1, 1), editCellMap.width - selectX);
+      const selectHeight = Math.min(Math.max(Number(selection.height) || 1, 1), editCellMap.height - selectY);
       const historyState = getCellCanvasHistoryState(draft);
       const clipboardReady = draft.editorSession?.clipboard?.kind === 'cell-rectangle';
 
-      $(DOM.editorCellCanvasX).attr('max', String(cellMap.width - 1)).val(String(x));
-      $(DOM.editorCellCanvasY).attr('max', String(cellMap.height - 1)).val(String(y));
+      $(DOM.editorCellCanvasX).attr('max', String(editCellMap.width - 1)).val(String(x));
+      $(DOM.editorCellCanvasY).attr('max', String(editCellMap.height - 1)).val(String(y));
       $(DOM.editorCellCanvasChar).val(cell?.char ?? ' ');
       $(DOM.editorCellCanvasFg).val(cell?.fg ?? '');
       $(DOM.editorCellCanvasBg).val(cell?.bg ?? '');
-      $(DOM.editorCellCanvasSelectX).attr('max', String(cellMap.width - 1)).val(String(selectX));
-      $(DOM.editorCellCanvasSelectY).attr('max', String(cellMap.height - 1)).val(String(selectY));
-      $(DOM.editorCellCanvasSelectWidth).attr('max', String(cellMap.width - selectX)).val(String(selectWidth));
-      $(DOM.editorCellCanvasSelectHeight).attr('max', String(cellMap.height - selectY)).val(String(selectHeight));
+      $(DOM.editorCellCanvasSelectX).attr('max', String(editCellMap.width - 1)).val(String(selectX));
+      $(DOM.editorCellCanvasSelectY).attr('max', String(editCellMap.height - 1)).val(String(selectY));
+      $(DOM.editorCellCanvasSelectWidth).attr('max', String(editCellMap.width - selectX)).val(String(selectWidth));
+      $(DOM.editorCellCanvasSelectHeight).attr('max', String(editCellMap.height - selectY)).val(String(selectHeight));
       const syncLinePointControl = (selector, max, fallback) => {
         const raw = $(selector).val();
         const number = raw === '' ? Number.NaN : Number(raw);
@@ -3083,14 +3390,15 @@ class EditorController {
         const clamped = Math.min(Math.max(value, 0), max);
         $(selector).attr('max', String(max)).val(String(clamped));
       };
-      syncLinePointControl(DOM.editorCellCanvasLineFromX, cellMap.width - 1, selectX);
-      syncLinePointControl(DOM.editorCellCanvasLineFromY, cellMap.height - 1, selectY);
-      syncLinePointControl(DOM.editorCellCanvasLineToX, cellMap.width - 1, Math.min(selectX + 4, cellMap.width - 1));
-      syncLinePointControl(DOM.editorCellCanvasLineToY, cellMap.height - 1, selectY);
+      syncLinePointControl(DOM.editorCellCanvasLineFromX, editCellMap.width - 1, selectX);
+      syncLinePointControl(DOM.editorCellCanvasLineFromY, editCellMap.height - 1, selectY);
+      syncLinePointControl(DOM.editorCellCanvasLineToX, editCellMap.width - 1, Math.min(selectX + 4, editCellMap.width - 1));
+      syncLinePointControl(DOM.editorCellCanvasLineToY, editCellMap.height - 1, selectY);
       if (!['auto', 'horizontal-first', 'vertical-first'].includes($(DOM.editorCellCanvasLineRoute).val())) {
         $(DOM.editorCellCanvasLineRoute).val('auto');
       }
       this.syncCellCanvasLayerFrameControls(draft, composition);
+      this.renderCellCanvasFrameTimeline(draft);
       this.syncCellCanvasViewportControls(previewState);
       $(DOM.editorCellCanvasApply).prop('disabled', layerFrameState.activeLayerLocked);
       $(DOM.editorCellCanvasPaste).prop('disabled', layerFrameState.activeLayerLocked || !clipboardReady);
@@ -3100,6 +3408,8 @@ class EditorController {
       this.setCellCanvasFeedbackFromDraft(draft);
     } catch {
       // 源 JSON 正在编辑时可能暂时无效，控件保持上一次状态，并明确禁用原因。
+      this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
+      this.renderCellCanvasFrameTimeline(null);
       this.setCellCanvasToolFeedback({
         toolKey: 'cellcanvas.tool.source',
         availabilityKey: 'cellcanvas.feedback.disabled',
@@ -3115,7 +3425,8 @@ class EditorController {
    * @param {object} draft CellCanvas 草稿。
    */
   renderCellCanvasPreview(draft) {
-    const cellMap = getActiveCellMap(draft);
+    // 预览显示当前活动帧的合成结果；实际写入仍由活动图层控制。
+    const cellMap = composeCellCanvasFrame(draft).cellMap;
     const previewState = this.createCellCanvasPreviewProjection(draft, cellMap);
     const { rendererKind, projection } = previewState;
     const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };

@@ -1282,6 +1282,56 @@ async function main() {
       }
     });
 
+    await test('previews CellCanvas frames through the timeline controls', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.fill('#editorSource', createLayerFrameCellCanvasDraftSource());
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-frame-id="frame-base"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+      await page.waitForSelector('[data-cellcanvas-frame-id="frame-composed"][aria-current="true"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+
+      await page.click('[data-cellcanvas-frame-id="frame-base"]');
+      await page.waitForSelector('[data-cellcanvas-frame-id="frame-base"][aria-current="true"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+      await page.waitForFunction(() => document.querySelector('#editorSource')?.value.includes('"activeFrameId": "frame-base"'));
+      const baseOverlayCell = await page.textContent('[data-cellcanvas-x="1"][data-cellcanvas-y="0"]');
+      if (baseOverlayCell !== '\u00a0') {
+        throw new Error(`Base-only frame unexpectedly rendered overlay glyph: ${baseOverlayCell}`);
+      }
+
+      await page.click('#editorCellCanvasFrameNext');
+      await page.waitForSelector('[data-cellcanvas-frame-id="frame-composed"][aria-current="true"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+      await page.waitForFunction(() => document.querySelector('#editorSource')?.value.includes('"activeFrameId": "frame-composed"'));
+      const composedOverlayCell = await page.textContent('[data-cellcanvas-x="1"][data-cellcanvas-y="0"]');
+      if (composedOverlayCell !== 'B') {
+        throw new Error(`Composed frame did not render overlay glyph: ${composedOverlayCell}`);
+      }
+
+      const summary = await page.textContent('#editorCellCanvasTimelineSummary');
+      if (!summary.includes('frame-composed')) {
+        throw new Error(`Timeline summary did not track the active frame: ${summary}`);
+      }
+
+      await page.click('#editorCellCanvasFramePlay');
+      await page.waitForFunction(() => document.querySelector('#editorCellCanvasFramePlay')?.getAttribute('aria-pressed') === 'true');
+      await page.waitForSelector('[data-cellcanvas-frame-id="frame-base"][aria-current="true"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+      await page.click('#editorCellCanvasFramePlay');
+      await page.waitForFunction(() => document.querySelector('#editorCellCanvasFramePlay')?.getAttribute('aria-pressed') === 'false');
+    });
+
     await test('shows CellCanvas Virtual Grid viewport and DOM fallback controls', async () => {
       await page.selectOption('#editorKind', 'cellcanvas');
       await page.fill('#editorSource', createBlankCellCanvasDraftSource(20, 10));
