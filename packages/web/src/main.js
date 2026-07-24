@@ -71,9 +71,11 @@ import {
   readCellCanvasDraftFromStudioSource,
 } from './studio/project-capsule.js';
 import {
+  createStudioResourcePipelineSummary,
   createStudioImportProposalFromResourceEntry,
   createStudioResourceEntryFromDiscoveryState,
   formatStudioImportProposalSummary,
+  formatStudioResourcePipelineSummary,
 } from './studio/resource-entry.js';
 import {
   createDeterministicStudioAiProposal,
@@ -201,6 +203,9 @@ const UI_MESSAGES = {
     'editor.resourceEntryProposalBlocked': '导入提案被阻断：{reason}',
     'editor.resourceEntryImported': '资源已通过确认流程导入编辑器',
     'editor.resourceEntryFailed': '资源入口失败：{message}',
+    'editor.resourcePipelineEmpty': '尚未生成官方素材生产线摘要。',
+    'editor.resourcePipelineReady': '官方素材生产线就绪：{verified}/{total} 已验证 · 可导入 {importable} · P23Ready={p23Ready}',
+    'editor.resourcePipelineBlocked': '官方素材生产线需复核：{verified}/{total} 已验证 · 可导入 {importable} · 撤回 {revoked}',
     'editor.aiProposal': 'AI 提案预览',
     'editor.aiProposalHelp': '使用确定性 mock provider 生成 review-only patch preview；不联网、不读取源码全文、不直接写项目。',
     'editor.aiPrompt': '创作请求',
@@ -439,6 +444,10 @@ const UI_MESSAGES = {
     'resource.network': '联网',
     'resource.automaticInstall': '自动安装',
     'resource.reviewedAt': '清单审核',
+    'resource.pipeline': '生产线',
+    'resource.pipelineState.empty': '未生成',
+    'resource.pipelineState.ready': '就绪',
+    'resource.pipelineState.blocked': '需复核',
     'resource.network.none': '无',
     'resource.automaticInstall.false': '关闭',
     'resource.refresh': '重新校验',
@@ -488,6 +497,9 @@ const UI_MESSAGES = {
     'resource.sizeBytes': '{size} 字节',
     'resource.checkOk': 'size 与 sha256 匹配',
     'resource.checkFail': '{reason}',
+    'resource.pipeline.empty': '尚未生成官方素材生产线摘要。',
+    'resource.pipeline.ready': '官方素材生产线已就绪，可作为 P23 画廊 / 作者采用 pilot 的 metadata-only 输入。',
+    'resource.pipeline.blocked': '官方素材生产线仍需复核；请先确认 hash、签名、撤回或画廊匹配状态。',
     'docs.region': 'UnicodeArtJs 开发文档',
     'docs.previewRegion': '文档详情',
     'docs.title': 'UnicodeArtJs 开发文档',
@@ -955,6 +967,10 @@ const UI_MESSAGES = {
     'resource.network': 'Network',
     'resource.automaticInstall': 'Automatic install',
     'resource.reviewedAt': 'Manifest reviewed',
+    'resource.pipeline': 'Pipeline',
+    'resource.pipelineState.empty': 'Not generated',
+    'resource.pipelineState.ready': 'Ready',
+    'resource.pipelineState.blocked': 'Needs review',
     'resource.network.none': 'None',
     'resource.automaticInstall.false': 'Off',
     'resource.refresh': 'Re-verify',
@@ -1004,6 +1020,12 @@ const UI_MESSAGES = {
     'resource.sizeBytes': '{size} bytes',
     'resource.checkOk': 'size and sha256 match',
     'resource.checkFail': '{reason}',
+    'resource.pipeline.empty': 'No official material pipeline summary has been generated yet.',
+    'resource.pipeline.ready': 'Official material pipeline is ready as metadata-only input for the P23 gallery / author adoption pilot.',
+    'resource.pipeline.blocked': 'Official material pipeline needs review; check hash, signature, revocation, or gallery matching status first.',
+    'editor.resourcePipelineEmpty': 'No official material pipeline summary has been generated yet.',
+    'editor.resourcePipelineReady': 'Official material pipeline ready: {verified}/{total} verified · {importable} importable · P23Ready={p23Ready}',
+    'editor.resourcePipelineBlocked': 'Official material pipeline needs review: {verified}/{total} verified · {importable} importable · {revoked} revoked',
     'docs.region': 'UnicodeArtJs developer documentation',
     'docs.previewRegion': 'Documentation detail',
     'docs.title': 'UnicodeArtJs Developer Docs',
@@ -1303,6 +1325,7 @@ const DOM = {
   editorResourceEntryImport: '#editorResourceEntryImport',
   editorResourceEntryStatus: '#editorResourceEntryStatus',
   editorResourceEntryProposal: '#editorResourceEntryProposal',
+  editorResourcePipelineSummary: '#editorResourcePipelineSummary',
   editorAiProposalSection: '#editorAiProposalSection',
   editorAiPrompt: '#editorAiPrompt',
   editorAiGenerate: '#editorAiGenerate',
@@ -1414,6 +1437,8 @@ const DOM = {
   resourceNetwork: '#resourceNetwork',
   resourceAutomaticInstall: '#resourceAutomaticInstall',
   resourceReviewedAt: '#resourceReviewedAt',
+  resourcePipelineState: '#resourcePipelineState',
+  resourcePipelineSummary: '#resourcePipelineSummary',
   resourceRefresh: '#resourceRefresh',
   resourceGrid: '#resourceGrid',
   resourceKind: '#resourceKind',
@@ -1867,6 +1892,7 @@ class EditorController {
     this.studioResourceEntries = [];
     this.selectedStudioResourceId = '';
     this.studioImportProposal = null;
+    this.studioResourcePipelineSummary = null;
     this.studioAiPayload = null;
     this.studioAiProposal = null;
     this.studioBenchmarkReport = null;
@@ -1885,6 +1911,7 @@ class EditorController {
     this.refreshLocale();
     this.applyGlyphFont();
     this.renderStudioResourceEntryOptions();
+    this.renderStudioResourcePipelineSummary();
     this.setStudioResourceStatus('editor.resourceEntryReady');
     this.setStudioAiStatus('editor.aiReady');
     this.setStudioDiagnosticsStatus('editor.diagnosticsReady');
@@ -1997,6 +2024,7 @@ class EditorController {
     this.populateSavedTemplateSelect();
     this.updateKindUi();
     this.renderStudioResourceEntryOptions();
+    this.renderStudioResourcePipelineSummary();
     this.renderCellCanvasToolFeedback();
     if (!this.result) this.setStatus('editor.ready');
   }
@@ -4464,6 +4492,30 @@ class EditorController {
       .attr('data-state', state);
   }
 
+  /** 在 Editor 侧展示同源官方素材生产线摘要，不泄露资源正文或本机路径。 */
+  renderStudioResourcePipelineSummary() {
+    const summary = this.studioResourcePipelineSummary;
+    if (!summary) {
+      $(DOM.editorResourcePipelineSummary)
+        .text(this.t('editor.resourcePipelineEmpty'))
+        .attr('data-state', 'empty');
+      return;
+    }
+
+    const statusKey = summary.productionLine.p23Ready
+      ? 'editor.resourcePipelineReady'
+      : 'editor.resourcePipelineBlocked';
+    $(DOM.editorResourcePipelineSummary)
+      .text(this.t(statusKey, {
+        verified: summary.officialMaterials.verified,
+        total: summary.officialMaterials.total,
+        importable: summary.officialMaterials.importable,
+        revoked: summary.officialMaterials.revoked,
+        p23Ready: summary.productionLine.p23Ready,
+      }))
+      .attr('data-state', summary.productionLine.p23Ready ? 'success' : 'warning');
+  }
+
   /** 更新 Studio AI proposal 状态，不改变主编辑器校验/渲染状态。 */
   setStudioAiStatus(key, params = {}, state = 'info') {
     $(DOM.editorAiStatus)
@@ -4493,6 +4545,8 @@ class EditorController {
     try {
       const resourceController = this.appController.resourceDiscoveryController;
       await resourceController.ensureLoaded(force);
+      this.studioResourcePipelineSummary = resourceController.createPipelineSummary();
+      this.renderStudioResourcePipelineSummary();
       this.studioResourceEntries = resourceController.getResourceStates().map((item) => ({
         id: item.resource.id,
         label: resourceController.getResourceDisplayTitle(item),
@@ -4514,6 +4568,8 @@ class EditorController {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.studioResourceEntries = [];
+      this.studioResourcePipelineSummary = null;
+      this.renderStudioResourcePipelineSummary();
       this.renderStudioResourceEntryOptions();
       $(DOM.editorResourceEntryProposal).text('');
       this.setStudioResourceStatus('editor.resourceEntryFailed', { message }, 'error');
@@ -5143,6 +5199,7 @@ class ResourceDiscoveryController {
     this.trustSummary = null;
     this.revocations = null;
     this.resourceStates = [];
+    this.resourcePipelineSummary = null;
     this.selectedResourceId = '';
     this.statusState = 'info';
     this.loadGeneration = 0;
@@ -5222,6 +5279,7 @@ class ResourceDiscoveryController {
       this.trustSummary = state.trustSummary;
       this.revocations = state.revocations;
       this.resourceStates = state.resourceStates;
+      this.resourcePipelineSummary = this.createPipelineSummary();
       if (!this.resourceStates.some((item) => item.resource.id === this.selectedResourceId)) {
         this.selectedResourceId = this.resourceStates[0]?.resource.id || '';
       }
@@ -5237,6 +5295,7 @@ class ResourceDiscoveryController {
       this.trustSummary = null;
       this.revocations = null;
       this.resourceStates = [];
+      this.resourcePipelineSummary = null;
       this.setStatus('resource.status.error', { message }, 'error');
       this.renderSummary();
       this.renderGrid();
@@ -5335,6 +5394,36 @@ class ResourceDiscoveryController {
     });
   }
 
+  /** 生成官方素材生产线摘要，供资源页、Editor 入口和后续 evidence 共用。 */
+  createPipelineSummary() {
+    if (!this.manifest) return null;
+    return createStudioResourcePipelineSummary({
+      manifest: this.manifest,
+      trustSummary: this.trustSummary,
+      revocations: this.revocations,
+      resourceStates: this.resourceStates,
+    });
+  }
+
+  /** 把官方素材生产线摘要渲染为 metadata-only 文本。 */
+  renderPipelineSummary() {
+    const summary = this.resourcePipelineSummary;
+    if (!summary) {
+      $(DOM.resourcePipelineState).text('--');
+      $(DOM.resourcePipelineSummary)
+        .text(this.t('resource.pipeline.empty'))
+        .attr('data-state', 'empty');
+      return;
+    }
+
+    const stateKey = `resource.pipeline.${summary.productionLine.state}`;
+    const stateLabelKey = `resource.pipelineState.${summary.productionLine.state}`;
+    $(DOM.resourcePipelineState).text(this.t(stateLabelKey));
+    $(DOM.resourcePipelineSummary)
+      .text(`${this.t(stateKey)}\n${formatStudioResourcePipelineSummary(summary)}`)
+      .attr('data-state', summary.productionLine.p23Ready ? 'success' : 'warning');
+  }
+
   renderSummary() {
     const total = this.manifest?.resources.length || 0;
     const verified = this.resourceStates.filter((item) => item.ok).length;
@@ -5343,6 +5432,7 @@ class ResourceDiscoveryController {
     $(DOM.resourceNetwork).text(this.manifest ? this.formatNetwork(this.manifest.network) : '--');
     $(DOM.resourceAutomaticInstall).text(this.manifest ? this.formatAutomaticInstall(this.manifest.automaticInstall) : '--');
     $(DOM.resourceReviewedAt).text(this.manifest?.reviewedAt || '--');
+    this.renderPipelineSummary();
   }
 
   renderGrid() {

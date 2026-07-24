@@ -26,6 +26,9 @@ export const STUDIO_RESOURCE_ENTRY_SCHEMA = 'unicodeartjs-studio-resource-entry'
 /** Studio 资源导入提案 UI 原型的内部 schema。 */
 export const STUDIO_IMPORT_PROPOSAL_SCHEMA = 'unicodeartjs-studio-import-proposal';
 
+/** Studio 官方资源生产线摘要的内部 schema。 */
+export const STUDIO_RESOURCE_PIPELINE_SUMMARY_SCHEMA = 'unicodeartjs-studio-resource-pipeline-summary@0';
+
 /** P18.5 首轮实现仍是内部实验能力。 */
 export const STUDIO_RESOURCE_ENTRY_STABILITY = 'internal-experimental';
 
@@ -93,6 +96,35 @@ function normalizeTrustCheck(entry) {
     coreValidation: entry.verification?.shapeOk ? 'pass' : 'fail',
     licenseReview: entry.license.expression ? 'pass' : 'needs-review',
   });
+}
+
+function toResourceStates(value) {
+  return Array.isArray(value) ? value.filter((item) => item && typeof item === 'object') : [];
+}
+
+function pushUnique(list, value) {
+  const text = String(value || '').trim();
+  if (text && !list.includes(text)) list.push(text);
+}
+
+function countByResourceKind(states) {
+  const counts = {};
+  states.forEach((item) => {
+    const kind = mapResourceKind(item.resource?.kind);
+    counts[kind] = (counts[kind] || 0) + 1;
+  });
+  return Object.freeze(counts);
+}
+
+function determinePipelineState(summary) {
+  if (summary.officialMaterials.total === 0) return 'empty';
+  if (
+    summary.officialMaterials.verified === summary.officialMaterials.total
+    && summary.officialMaterials.importable > 0
+    && summary.officialMaterials.revoked === 0
+    && summary.trustChain.importAllowed
+  ) return 'ready';
+  return 'blocked';
 }
 
 //#endregion
@@ -224,6 +256,134 @@ export function formatStudioImportProposalSummary(entry, proposal) {
   ];
 
   return lines.join('\n');
+}
+
+/**
+ * 汇总同源官方资源生产线状态。
+ *
+ * @param {{
+ *   manifest?: Object,
+ *   trustSummary?: Object,
+ *   resourceStates?: Object[]
+ * }} discoveryState 已加载的 Resource Discovery 状态。
+ * @returns {Object} metadata-only 的官方素材生产线摘要。
+ */
+export function createStudioResourcePipelineSummary(discoveryState = {}) {
+  const manifest = discoveryState.manifest || {};
+  const states = toResourceStates(discoveryState.resourceStates);
+  const licenseExpressions = [];
+  const sourceTypes = [];
+  let verified = 0;
+  let importable = 0;
+  let revoked = 0;
+  let failed = 0;
+
+  states.forEach((item) => {
+    if (item.ok) verified += 1;
+    else failed += 1;
+    if (item.importAllowed && item.ok && !item.revocation?.revoked) importable += 1;
+    if (item.revocation?.revoked) revoked += 1;
+    pushUnique(licenseExpressions, item.resource?.license?.expression);
+    pushUnique(sourceTypes, item.resource?.source ? 'same-origin-gallery' : '');
+  });
+
+  const trustSummary = discoveryState.trustSummary || {};
+  const summary = {
+    schema: STUDIO_RESOURCE_PIPELINE_SUMMARY_SCHEMA,
+    stage: 'W-art-P22.6',
+    stability: STUDIO_RESOURCE_ENTRY_STABILITY,
+    resourcePack: Object.freeze({
+      format: manifest.format || '',
+      version: manifest.version ?? null,
+      reviewedAt: manifest.reviewedAt || '',
+      network: manifest.network || 'unknown',
+      automaticInstall: Boolean(manifest.automaticInstall),
+    }),
+    officialMaterials: Object.freeze({
+      total: states.length,
+      verified,
+      importable,
+      blocked: Math.max(0, states.length - importable),
+      failed,
+      revoked,
+      byKind: countByResourceKind(states),
+      licenseExpressions: Object.freeze(licenseExpressions),
+      sourceTypes: Object.freeze(sourceTypes),
+    }),
+    trustChain: Object.freeze({
+      status: trustSummary.status || 'unknown',
+      verified: Boolean(trustSummary.verified),
+      importAllowed: Boolean(trustSummary.importAllowed),
+      keyId: trustSummary.keyId || '',
+      payloadSha256: trustSummary.payloadSha256 || '',
+      expiresAt: trustSummary.expiresAt || '',
+      revocationRecords: Number.isFinite(Number(trustSummary.revocations))
+        ? Number(trustSummary.revocations)
+        : 0,
+    }),
+    evidence: Object.freeze({
+      ownerProvided: true,
+      metadataOnly: true,
+      includesSourceBody: false,
+      includesLocalPath: false,
+      allowedFields: Object.freeze([
+        'resourceId',
+        'resourceKind',
+        'license',
+        'sha256',
+        'trustStatus',
+        'revocationStatus',
+      ]),
+    }),
+    productionLine: Object.freeze({
+      actions: Object.freeze([
+        'discover',
+        'inspect',
+        'trust-check',
+        'import-proposal',
+        'human-confirmation',
+        'attach-resource-ref',
+      ]),
+      nextPilot: 'W-art-P23 gallery / author adoption input',
+    }),
+  };
+
+  const state = determinePipelineState(summary);
+  return Object.freeze({
+    ...summary,
+    productionLine: Object.freeze({
+      ...summary.productionLine,
+      state,
+      p23Ready: state === 'ready',
+    }),
+  });
+}
+
+/**
+ * 将官方资源生产线摘要格式化为稳定的多行文本。
+ *
+ * @param {Object} summary `createStudioResourcePipelineSummary()` 的输出。
+ * @returns {string} metadata-only 摘要文本。
+ */
+export function formatStudioResourcePipelineSummary(summary) {
+  const byKind = summary.officialMaterials?.byKind || {};
+  const kindText = Object.keys(byKind).sort().map((kind) => `${kind}:${byKind[kind]}`).join(', ') || '--';
+  const licenseText = summary.officialMaterials?.licenseExpressions?.join(', ') || '--';
+  return [
+    `pipelineState: ${summary.productionLine?.state || 'unknown'}`,
+    `p23Ready: ${Boolean(summary.productionLine?.p23Ready)}`,
+    `resources: ${summary.officialMaterials?.verified ?? 0}/${summary.officialMaterials?.total ?? 0} verified`,
+    `importable: ${summary.officialMaterials?.importable ?? 0}`,
+    `revoked: ${summary.officialMaterials?.revoked ?? 0}`,
+    `kinds: ${kindText}`,
+    `licenses: ${licenseText}`,
+    `trustStatus: ${summary.trustChain?.status || 'unknown'}`,
+    `keyId: ${summary.trustChain?.keyId || '--'}`,
+    `metadataOnly: ${Boolean(summary.evidence?.metadataOnly)}`,
+    `includesSourceBody: ${Boolean(summary.evidence?.includesSourceBody)}`,
+    `includesLocalPath: ${Boolean(summary.evidence?.includesLocalPath)}`,
+    `nextPilot: ${summary.productionLine?.nextPilot || '--'}`,
+  ].join('\n');
 }
 
 //#endregion

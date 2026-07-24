@@ -1079,7 +1079,26 @@ details.config-details summary:hover {
 }
 
 .resource-summary {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.resource-pipeline-summary {
+  margin: 0;
+  padding: var(--spacing-md);
+  overflow: auto;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-preview);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.resource-pipeline-summary[data-state='success'] {
+  color: var(--color-success);
+}
+
+.resource-pipeline-summary[data-state='warning'] {
+  color: var(--color-warning);
 }
 
 .resource-metadata {

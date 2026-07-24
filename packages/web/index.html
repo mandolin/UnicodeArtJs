@@ -402,6 +402,7 @@
             <button class="btn primary" id="editorResourceEntryImport" type="button" data-i18n="editor.resourceEntryImport" disabled>确认导入</button>
           </div>
           <p class="field-help" data-i18n="editor.resourceEntryHelp">复用本站已审核资源清单，只生成导入提案；不自动安装、不执行资源，确认后才写入当前编辑器。</p>
+          <p class="field-help" id="editorResourcePipelineSummary" data-state="empty" data-i18n="editor.resourcePipelineEmpty">尚未生成官方素材生产线摘要。</p>
           <p class="editor-resource-entry-status" id="editorResourceEntryStatus" aria-live="polite" data-i18n="editor.resourceEntryReady">尚未载入 Studio 资源入口</p>
           <pre class="editor-resource-entry-proposal" id="editorResourceEntryProposal" aria-live="polite"></pre>
         </div>
@@ -761,7 +762,12 @@
             <dt data-i18n="resource.reviewedAt">清单审核</dt>
             <dd id="resourceReviewedAt">--</dd>
           </div>
+          <div>
+            <dt data-i18n="resource.pipeline">生产线</dt>
+            <dd id="resourcePipelineState">--</dd>
+          </div>
         </dl>
+        <pre class="resource-pipeline-summary" id="resourcePipelineSummary" data-state="empty" aria-live="polite" data-i18n="resource.pipeline.empty">尚未生成官方素材生产线摘要。</pre>
 
         <div class="resource-toolbar">
           <button class="btn" id="resourceRefresh" type="button" data-i18n="resource.refresh">重新校验</button>

@@ -726,6 +726,8 @@ async function main() {
           revocation: document.querySelector('#resourceRevocationStatus')?.textContent,
           importDisabled: document.querySelector('#resourceImportEditor')?.disabled,
           check: document.querySelector('#resourceCheckResult')?.textContent || '',
+          pipeline: document.querySelector('#resourcePipelineSummary')?.textContent || '',
+          pipelineState: document.querySelector('#resourcePipelineSummary')?.dataset.state || '',
           pageText: document.querySelector('#resourceWorkbench')?.textContent || '',
         }));
         if (state.count < 5 || state.verified !== state.count) {
@@ -745,6 +747,9 @@ async function main() {
         }
         if (!/不自动安装|no automatic install|确认|confirmation/i.test(state.pageText)) {
           throw new Error('Resource discovery page did not expose the confirmation boundary');
+        }
+        if (state.pipelineState !== 'success' || !state.pipeline.includes('metadataOnly: true')) {
+          throw new Error('Resource discovery did not expose metadata-only production pipeline summary');
         }
 
         await page.click('[data-resource-id="review-workflow"]');
@@ -851,9 +856,14 @@ async function main() {
       const proposalState = await page.evaluate(() => ({
         status: document.querySelector('#editorResourceEntryStatus')?.textContent || '',
         proposal: document.querySelector('#editorResourceEntryProposal')?.textContent || '',
+        pipeline: document.querySelector('#editorResourcePipelineSummary')?.textContent || '',
+        pipelineState: document.querySelector('#editorResourcePipelineSummary')?.dataset.state || '',
         importDisabled: document.querySelector('#editorResourceEntryImport')?.disabled ?? true,
       }));
       if (proposalState.importDisabled) throw new Error('Studio resource proposal did not enable confirmed import');
+      if (proposalState.pipelineState !== 'success' || !/P23Ready=true/.test(proposalState.pipeline)) {
+        throw new Error('Studio resource entry did not expose official material pipeline readiness');
+      }
       if (!proposalState.proposal.includes('confirmedByDefault: false')) {
         throw new Error('Studio resource proposal did not expose manual confirmation boundary');
       }
@@ -1174,6 +1184,7 @@ async function main() {
 
       await page.keyboard.press('Control+C');
       await waitForCellCanvasToolFeedback(page, 'cellcanvas.tool.clipboard', 'success');
+      await waitForFocusedCellCanvasCell(page, 1, 0);
       await page.keyboard.press('ArrowRight');
       await waitForFocusedCellCanvasCell(page, 2, 0);
       await page.keyboard.press('Control+V');

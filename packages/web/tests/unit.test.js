@@ -69,10 +69,13 @@ import {
 } from '../src/studio/project-capsule.js';
 import {
   STUDIO_IMPORT_PROPOSAL_SCHEMA,
+  STUDIO_RESOURCE_PIPELINE_SUMMARY_SCHEMA,
   STUDIO_RESOURCE_ENTRY_SCHEMA,
   createStudioImportProposalFromResourceEntry,
+  createStudioResourcePipelineSummary,
   createStudioResourceEntryFromDiscoveryState,
   formatStudioImportProposalSummary,
+  formatStudioResourcePipelineSummary,
 } from '../src/studio/resource-entry.js';
 import {
   STUDIO_AI_PROPOSAL_SCHEMA,
@@ -518,6 +521,86 @@ describe('Studio 资源入口提案原型', () => {
     assertEqual(proposal.trustCheck.hash, 'fail');
     assertEqual(proposal.trustCheck.revocation, 'fail');
     assertEqual(proposal.confirmedByDefault, false);
+  });
+
+  it('可生成官方素材生产线 metadata-only 摘要', () => {
+    const state = createResourceDiscoveryState();
+    const summary = createStudioResourcePipelineSummary({
+      manifest: {
+        format: 'unicode-art-gallery-resource-manifest',
+        version: 1,
+        network: 'none',
+        automaticInstall: false,
+        reviewedAt: '2026-07-18',
+      },
+      trustSummary: {
+        status: 'maintainer-signed',
+        verified: true,
+        importAllowed: true,
+        keyId: 'mandolin-2026-q3',
+        payloadSha256: 'c'.repeat(64),
+        revocations: 0,
+      },
+      resourceStates: [state],
+    });
+    const text = formatStudioResourcePipelineSummary(summary);
+
+    assertEqual(summary.schema, STUDIO_RESOURCE_PIPELINE_SUMMARY_SCHEMA);
+    assertEqual(summary.stage, 'W-art-P22.6');
+    assertEqual(summary.productionLine.p23Ready, true);
+    assertEqual(summary.officialMaterials.importable, 1);
+    assertEqual(summary.evidence.metadataOnly, true);
+    assertEqual(summary.evidence.includesSourceBody, false);
+    assertEqual(summary.evidence.includesLocalPath, false);
+    assertEqual(text.includes('p23Ready: true'), true);
+    assertEqual(text.includes('includesSourceBody: false'), true);
+  });
+
+  it('资源失败或撤回时生产线摘要保持 blocked', () => {
+    const summary = createStudioResourcePipelineSummary({
+      manifest: {
+        format: 'unicode-art-gallery-resource-manifest',
+        version: 1,
+        network: 'none',
+        automaticInstall: false,
+      },
+      trustSummary: {
+        status: 'maintainer-signed',
+        verified: true,
+        importAllowed: true,
+      },
+      resourceStates: [
+        createResourceDiscoveryState(),
+        createResourceDiscoveryState({
+          resource: {
+            id: 'revoked-resource',
+            kind: 'semantic-document',
+            source: 'artworks/revoked.uadoc.json',
+            size: 512,
+            sha256: 'b'.repeat(64),
+            license: { expression: 'MIT', origin: 'original' },
+          },
+          verification: {
+            ok: false,
+            sizeOk: false,
+            sha256Ok: false,
+            shapeOk: false,
+            actualSha256: 'd'.repeat(64),
+          },
+          revocation: { status: 'revoked-resource', revoked: true },
+          importAllowed: false,
+          ok: false,
+          error: 'sha256 mismatch',
+        }),
+      ],
+    });
+
+    assertEqual(summary.productionLine.state, 'blocked');
+    assertEqual(summary.productionLine.p23Ready, false);
+    assertEqual(summary.officialMaterials.revoked, 1);
+    assertEqual(summary.officialMaterials.failed, 1);
+    assertEqual(Object.prototype.hasOwnProperty.call(summary, 'sourceText'), false);
+    assertEqual(Object.prototype.hasOwnProperty.call(summary, 'localPath'), false);
   });
 
 });
