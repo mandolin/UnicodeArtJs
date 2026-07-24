@@ -1330,6 +1330,51 @@ async function main() {
       }
     });
 
+    await test('recovers CellCanvas editor after invalid source and project files', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      const validSource = createBlankCellCanvasDraftSource(6, 3);
+      await page.fill('#editorSource', validSource);
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="6"][data-cellcanvas-height="3"]', {
+        timeout: 5000,
+      });
+
+      await page.fill('#editorSource', '{"broken":');
+      await page.click('#editorRender');
+      await page.waitForFunction(() => document.querySelector('#editorStatus')?.dataset.state === 'error');
+      const invalidSource = await page.inputValue('#editorSource');
+      if (invalidSource !== '{"broken":') throw new Error('Invalid source was unexpectedly rewritten');
+
+      await page.fill('#editorSource', validSource);
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="6"][data-cellcanvas-height="3"]', {
+        timeout: 5000,
+      });
+      await page.click('[data-cellcanvas-cell][data-cellcanvas-x="2"][data-cellcanvas-y="1"]');
+      const recoveredX = await page.inputValue('#editorCellCanvasX');
+      const recoveredY = await page.inputValue('#editorCellCanvasY');
+      if (recoveredX !== '2' || recoveredY !== '1') {
+        throw new Error(`Recovered CellCanvas grid did not accept edits: ${recoveredX},${recoveredY}`);
+      }
+
+      const beforeBadProject = await page.inputValue('#editorSource');
+      await page.setInputFiles('#editorCellCanvasProjectFile', {
+        name: 'broken.uart-project.json',
+        mimeType: 'application/json',
+        buffer: Buffer.from('{"schema":', 'utf8'),
+      });
+      await page.waitForFunction(() => document.querySelector('#editorStatus')?.dataset.state === 'error');
+      const afterBadProject = await page.inputValue('#editorSource');
+      if (afterBadProject !== beforeBadProject) {
+        throw new Error('Invalid CellCanvas project file replaced the current source');
+      }
+
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="6"][data-cellcanvas-height="3"]', {
+        timeout: 5000,
+      });
+    });
+
     await test('imports SpecialArtResult into CellCanvas and exports projections', async () => {
       const specialArtFixture = {
         schema: 'unicodeartjs-special-art-e2e-wrapper@0',
