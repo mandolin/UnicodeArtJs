@@ -265,6 +265,7 @@ const UI_MESSAGES = {
     'editor.status.frameChanged': '已切换到帧 {frame}',
     'editor.status.framePlaybackStarted': '帧预览播放已开始',
     'editor.status.framePlaybackPaused': '帧预览播放已暂停',
+    'editor.status.onionSkinUpdated': 'Onion skin 预览已更新',
     'cellcanvas.section': 'CellCanvas 单格编辑',
     'cellcanvas.selection': '选区',
     'cellcanvas.connector': '连线',
@@ -282,6 +283,12 @@ const UI_MESSAGES = {
     'cellcanvas.frameNext': '下一帧',
     'cellcanvas.timelineSummary': '第 {current}/{total} 帧 · {frame} · {duration}ms · 总时长 {totalDuration}ms',
     'cellcanvas.timelineUnavailable': '当前 CellCanvas 草稿暂无可用帧。',
+    'cellcanvas.onionSkin': 'Onion skin',
+    'cellcanvas.onionEnabled': '启用 Onion skin',
+    'cellcanvas.onionPrevious': '前一帧',
+    'cellcanvas.onionNext': '后一帧',
+    'cellcanvas.onionSummary': 'Onion skin：前一帧 {previous} · 当前 {current} · 后一帧 {next}',
+    'cellcanvas.onionDisabled': 'Onion skin 仅作为预览叠层，当前未启用。',
     'cellcanvas.viewport': 'Virtual Grid 视口',
     'cellcanvas.virtualGrid': '启用 Virtual Grid',
     'cellcanvas.viewportX': '视口 X',
@@ -351,6 +358,7 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.connector': '连线 {route}：({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.layerFrame': '当前帧 {frame} · 活动图层 {layer} · 合成 {cols}x{rows}。',
     'cellcanvas.feedback.hint.timeline': '时间轴帧 {current}/{total}：{frame} · {duration}ms。',
+    'cellcanvas.feedback.hint.onionSkin': 'Onion skin 只叠加前后帧预览，不写入 CellCanvas 源模型。',
     'cellcanvas.feedback.hint.layerLocked': '当前图层已锁定；请先取消锁定再写入字素格。',
     'cellcanvas.feedback.hint.viewport': 'Virtual Grid：可见 {visible}/{total} 格 · 窗口 ({x}, {y}) {cols}x{rows} · 跳过 {skipped} 格。',
     'cellcanvas.feedback.hint.domGridFallback': 'DOM Grid fallback：正在渲染完整 {cols}x{rows} 网格。',
@@ -362,6 +370,7 @@ const UI_MESSAGES = {
     'cellcanvas.tool.connector': '连线',
     'cellcanvas.tool.layerFrame': '图层/帧',
     'cellcanvas.tool.timeline': '时间轴',
+    'cellcanvas.tool.onionSkin': 'Onion skin',
     'cellcanvas.tool.viewport': '视口',
     'cellcanvas.tool.clipboard': '剪贴板',
     'cellcanvas.tool.history': '历史',
@@ -767,6 +776,7 @@ const UI_MESSAGES = {
     'editor.status.frameChanged': 'Switched to frame {frame}',
     'editor.status.framePlaybackStarted': 'Frame preview playback started',
     'editor.status.framePlaybackPaused': 'Frame preview playback paused',
+    'editor.status.onionSkinUpdated': 'Onion skin preview updated',
     'cellcanvas.section': 'CellCanvas single-cell editing',
     'cellcanvas.selection': 'Selection',
     'cellcanvas.connector': 'Connector',
@@ -784,6 +794,12 @@ const UI_MESSAGES = {
     'cellcanvas.frameNext': 'Next',
     'cellcanvas.timelineSummary': 'Frame {current}/{total} · {frame} · {duration}ms · total {totalDuration}ms',
     'cellcanvas.timelineUnavailable': 'No usable frame is available in the current CellCanvas draft.',
+    'cellcanvas.onionSkin': 'Onion skin',
+    'cellcanvas.onionEnabled': 'Enable onion skin',
+    'cellcanvas.onionPrevious': 'Previous frame',
+    'cellcanvas.onionNext': 'Next frame',
+    'cellcanvas.onionSummary': 'Onion skin: previous {previous} · current {current} · next {next}',
+    'cellcanvas.onionDisabled': 'Onion skin is a preview overlay only and is currently disabled.',
     'cellcanvas.viewport': 'Virtual Grid viewport',
     'cellcanvas.virtualGrid': 'Enable Virtual Grid',
     'cellcanvas.viewportX': 'Viewport X',
@@ -853,6 +869,7 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.connector': 'Connector {route}: ({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.layerFrame': 'Current frame {frame} · active layer {layer} · composed {cols}x{rows}.',
     'cellcanvas.feedback.hint.timeline': 'Timeline frame {current}/{total}: {frame} · {duration}ms.',
+    'cellcanvas.feedback.hint.onionSkin': 'Onion skin overlays adjacent frames for preview only; it does not write the CellCanvas source model.',
     'cellcanvas.feedback.hint.layerLocked': 'The active layer is locked. Unlock it before writing glyph cells.',
     'cellcanvas.feedback.hint.viewport': 'Virtual Grid: {visible}/{total} cells visible · window ({x}, {y}) {cols}x{rows} · {skipped} skipped.',
     'cellcanvas.feedback.hint.domGridFallback': 'DOM Grid fallback: rendering the full {cols}x{rows} grid.',
@@ -864,6 +881,7 @@ const UI_MESSAGES = {
     'cellcanvas.tool.connector': 'Connector',
     'cellcanvas.tool.layerFrame': 'Layer/frame',
     'cellcanvas.tool.timeline': 'Timeline',
+    'cellcanvas.tool.onionSkin': 'Onion skin',
     'cellcanvas.tool.viewport': 'Viewport',
     'cellcanvas.tool.clipboard': 'Clipboard',
     'cellcanvas.tool.history': 'History',
@@ -1324,6 +1342,10 @@ const DOM = {
   editorCellCanvasFrameNext: '#editorCellCanvasFrameNext',
   editorCellCanvasFrameList: '#editorCellCanvasFrameList',
   editorCellCanvasTimelineSummary: '#editorCellCanvasTimelineSummary',
+  editorCellCanvasOnionEnabled: '#editorCellCanvasOnionEnabled',
+  editorCellCanvasOnionPrevious: '#editorCellCanvasOnionPrevious',
+  editorCellCanvasOnionNext: '#editorCellCanvasOnionNext',
+  editorCellCanvasOnionSummary: '#editorCellCanvasOnionSummary',
   editorCellCanvasVirtualGrid: '#editorCellCanvasVirtualGrid',
   editorCellCanvasViewportX: '#editorCellCanvasViewportX',
   editorCellCanvasViewportY: '#editorCellCanvasViewportY',
@@ -1837,6 +1859,11 @@ class EditorController {
     this.cellCanvasToolFeedback = this.createCellCanvasToolFeedback();
     this.cellCanvasPlaybackTimer = null;
     this.cellCanvasPlaybackActive = false;
+    this.cellCanvasOnionSkinState = {
+      enabled: false,
+      previous: true,
+      next: true,
+    };
   }
 
   initialize() {
@@ -1927,6 +1954,11 @@ class EditorController {
     $doc.on('click', '[data-cellcanvas-frame-id]', (event) => {
       this.switchCellCanvasTimelineFrame($(event.currentTarget).attr('data-cellcanvas-frame-id'));
     });
+    $doc.on('change', [
+      DOM.editorCellCanvasOnionEnabled,
+      DOM.editorCellCanvasOnionPrevious,
+      DOM.editorCellCanvasOnionNext,
+    ].join(', '), () => this.updateCellCanvasOnionSkinStateFromControls());
     $doc.on('click', DOM.editorCellCanvasApplyViewport, () => this.applyCellCanvasViewportSettings());
     $doc.on('click', DOM.editorCellCanvasResetViewport, () => this.resetCellCanvasViewportSettings());
     $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
@@ -2340,6 +2372,141 @@ class EditorController {
     if (activeIndex >= 0) {
       $list.children().eq(activeIndex).attr('data-active-index', String(activeIndex));
     }
+  }
+
+  /**
+   * 读取当前 Onion skin 预览状态。
+   *
+   * 该状态只存在于 Web editor runtime，不进入 CellCanvas source model。
+   *
+   * @returns {{ enabled: boolean, previous: boolean, next: boolean }} Onion skin 状态。
+   */
+  getCellCanvasOnionSkinState() {
+    return {
+      enabled: this.cellCanvasOnionSkinState?.enabled === true,
+      previous: this.cellCanvasOnionSkinState?.previous !== false,
+      next: this.cellCanvasOnionSkinState?.next !== false,
+    };
+  }
+
+  /**
+   * 读取当前帧的前后帧。
+   *
+   * @param {object} state CellCanvas 图层与帧状态。
+   * @returns {{ activeIndex: number, previousFrame: object | null, nextFrame: object | null }} 前后帧。
+   */
+  getCellCanvasAdjacentFrames(state) {
+    const activeIndex = Math.max(0, state.frames.findIndex((frame) => frame.id === state.activeFrameId));
+    if (state.frames.length <= 1) {
+      return { activeIndex, previousFrame: null, nextFrame: null };
+    }
+    return {
+      activeIndex,
+      previousFrame: state.frames[(activeIndex - 1 + state.frames.length) % state.frames.length],
+      nextFrame: state.frames[(activeIndex + 1) % state.frames.length],
+    };
+  }
+
+  /**
+   * 同步 Onion skin 控件。
+   *
+   * @param {object | null} draft CellCanvas 草稿。
+   */
+  syncCellCanvasOnionSkinControls(draft) {
+    const onion = this.getCellCanvasOnionSkinState();
+    $(DOM.editorCellCanvasOnionEnabled).prop('checked', onion.enabled);
+    $(DOM.editorCellCanvasOnionPrevious).prop('checked', onion.previous);
+    $(DOM.editorCellCanvasOnionNext).prop('checked', onion.next);
+
+    if (!draft) {
+      $(DOM.editorCellCanvasOnionPrevious).prop('disabled', true);
+      $(DOM.editorCellCanvasOnionNext).prop('disabled', true);
+      $(DOM.editorCellCanvasOnionSummary).text(this.t('cellcanvas.timelineUnavailable'));
+      return;
+    }
+
+    const state = getCellCanvasLayerFrameState(draft);
+    const adjacent = this.getCellCanvasAdjacentFrames(state);
+    const disabled = !onion.enabled || state.frames.length <= 1;
+    $(DOM.editorCellCanvasOnionPrevious).prop('disabled', disabled);
+    $(DOM.editorCellCanvasOnionNext).prop('disabled', disabled);
+    $(DOM.editorCellCanvasOnionSummary).text(onion.enabled
+      ? this.t('cellcanvas.onionSummary', {
+        previous: adjacent.previousFrame?.id ?? '-',
+        current: state.activeFrameId,
+        next: adjacent.nextFrame?.id ?? '-',
+      })
+      : this.t('cellcanvas.onionDisabled'));
+  }
+
+  /**
+   * 从控件更新 Onion skin 预览状态。
+   */
+  updateCellCanvasOnionSkinStateFromControls() {
+    this.cellCanvasOnionSkinState = {
+      enabled: $(DOM.editorCellCanvasOnionEnabled).prop('checked'),
+      previous: $(DOM.editorCellCanvasOnionPrevious).prop('checked'),
+      next: $(DOM.editorCellCanvasOnionNext).prop('checked'),
+    };
+
+    try {
+      const draft = this.readCurrentCellCanvasDraft();
+      validateCellCanvasDocumentDraft(draft);
+      this.renderCellCanvasPreview(draft);
+      this.syncCellCanvasOnionSkinControls(draft);
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.onionSkin',
+        availabilityKey: 'cellcanvas.feedback.ready',
+        availabilityState: this.cellCanvasOnionSkinState.enabled ? 'success' : 'info',
+        hintKey: 'cellcanvas.feedback.hint.onionSkin',
+      });
+      this.setStatus('editor.status.onionSkinUpdated', {}, 'success');
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 将指定帧的非空字素加入 Onion skin overlay。
+   *
+   * @param {Map<string, object>} overlay 叠层表。
+   * @param {object} draft CellCanvas 草稿。
+   * @param {string | undefined} frameId 帧 ID。
+   * @param {'previous' | 'next'} key 叠层方向。
+   */
+  appendCellCanvasOnionSkinFrame(overlay, draft, frameId, key) {
+    if (!frameId) return;
+    const composition = composeCellCanvasFrame(draft, frameId);
+    for (const cell of composition.cellMap.cells) {
+      const char = String(cell.char ?? ' ');
+      if (!char || char === ' ') continue;
+      const mapKey = `${cell.x},${cell.y}`;
+      const entry = overlay.get(mapKey) ?? {};
+      entry[key] = char;
+      overlay.set(mapKey, entry);
+    }
+  }
+
+  /**
+   * 创建 Onion skin overlay map。
+   *
+   * @param {object} draft CellCanvas 草稿。
+   * @returns {Map<string, { previous?: string, next?: string }>} 按坐标索引的前后帧 ghost 字素。
+   */
+  createCellCanvasOnionSkinOverlay(draft) {
+    const onion = this.getCellCanvasOnionSkinState();
+    const overlay = new Map();
+    if (!onion.enabled) return overlay;
+
+    const state = getCellCanvasLayerFrameState(draft);
+    const adjacent = this.getCellCanvasAdjacentFrames(state);
+    if (onion.previous) {
+      this.appendCellCanvasOnionSkinFrame(overlay, draft, adjacent.previousFrame?.id, 'previous');
+    }
+    if (onion.next) {
+      this.appendCellCanvasOnionSkinFrame(overlay, draft, adjacent.nextFrame?.id, 'next');
+    }
+    return overlay;
   }
 
   /**
@@ -3399,6 +3566,7 @@ class EditorController {
       }
       this.syncCellCanvasLayerFrameControls(draft, composition);
       this.renderCellCanvasFrameTimeline(draft);
+      this.syncCellCanvasOnionSkinControls(draft);
       this.syncCellCanvasViewportControls(previewState);
       $(DOM.editorCellCanvasApply).prop('disabled', layerFrameState.activeLayerLocked);
       $(DOM.editorCellCanvasPaste).prop('disabled', layerFrameState.activeLayerLocked || !clipboardReady);
@@ -3410,6 +3578,7 @@ class EditorController {
       // 源 JSON 正在编辑时可能暂时无效，控件保持上一次状态，并明确禁用原因。
       this.stopCellCanvasFramePlayback({ silent: true, skipRender: true });
       this.renderCellCanvasFrameTimeline(null);
+      this.syncCellCanvasOnionSkinControls(null);
       this.setCellCanvasToolFeedback({
         toolKey: 'cellcanvas.tool.source',
         availabilityKey: 'cellcanvas.feedback.disabled',
@@ -3427,6 +3596,7 @@ class EditorController {
   renderCellCanvasPreview(draft) {
     // 预览显示当前活动帧的合成结果；实际写入仍由活动图层控制。
     const cellMap = composeCellCanvasFrame(draft).cellMap;
+    const onionOverlay = this.createCellCanvasOnionSkinOverlay(draft);
     const previewState = this.createCellCanvasPreviewProjection(draft, cellMap);
     const { rendererKind, projection } = previewState;
     const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
@@ -3471,6 +3641,17 @@ class EditorController {
           .attr('data-cellcanvas-role', cell.role ?? 'text')
           .attr('aria-label', `CellCanvas ${x}, ${y}`)
           .text(cell.char === ' ' ? '\u00a0' : cell.char);
+        const onionCell = onionOverlay.get(`${x},${y}`);
+        if (onionCell?.previous) {
+          $cell
+            .addClass('has-onion-prev')
+            .attr('data-onion-prev', onionCell.previous);
+        }
+        if (onionCell?.next) {
+          $cell
+            .addClass('has-onion-next')
+            .attr('data-onion-next', onionCell.next);
+        }
 
         if (cell.fg) $cell.css('color', cell.fg);
         if (cell.bg) $cell.css('background-color', cell.bg);

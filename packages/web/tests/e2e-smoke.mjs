@@ -1332,6 +1332,41 @@ async function main() {
       await page.waitForFunction(() => document.querySelector('#editorCellCanvasFramePlay')?.getAttribute('aria-pressed') === 'false');
     });
 
+    await test('shows CellCanvas onion skin preview without rewriting source', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.fill('#editorSource', createLayerFrameCellCanvasDraftSource());
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-frame-id="frame-base"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+      await page.click('[data-cellcanvas-frame-id="frame-base"]');
+      await page.waitForSelector('[data-cellcanvas-frame-id="frame-base"][aria-current="true"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+
+      const sourceBeforeOnion = await page.inputValue('#editorSource');
+      await page.check('#editorCellCanvasOnionEnabled');
+      await page.waitForSelector('[data-cellcanvas-x="1"][data-cellcanvas-y="0"][data-onion-next="B"]', {
+        state: 'attached',
+        timeout: 3000,
+      });
+      const onionSummary = await page.textContent('#editorCellCanvasOnionSummary');
+      if (!onionSummary.includes('frame-composed')) {
+        throw new Error(`Onion skin summary did not include adjacent frame id: ${onionSummary}`);
+      }
+      const sourceAfterOnion = await page.inputValue('#editorSource');
+      if (sourceAfterOnion !== sourceBeforeOnion) {
+        throw new Error('Onion skin preview rewrote the CellCanvas source');
+      }
+
+      await page.uncheck('#editorCellCanvasOnionEnabled');
+      await page.waitForFunction(() => (
+        !document.querySelector('[data-cellcanvas-x="1"][data-cellcanvas-y="0"]')?.hasAttribute('data-onion-next')
+      ));
+    });
+
     await test('shows CellCanvas Virtual Grid viewport and DOM fallback controls', async () => {
       await page.selectOption('#editorKind', 'cellcanvas');
       await page.fill('#editorSource', createBlankCellCanvasDraftSource(20, 10));
