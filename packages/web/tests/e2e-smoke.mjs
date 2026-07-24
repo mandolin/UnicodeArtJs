@@ -215,6 +215,28 @@ async function waitForFocusedCellCanvasCell(page, x, y) {
 }
 
 /**
+ * 读取 Playwright 下载文件的文本内容。
+ * @param {import('playwright').Download} download 下载句柄。
+ * @returns {Promise<string>} 文件文本。
+ */
+async function readDownloadText(download) {
+  const filePath = await download.path();
+  if (!filePath) throw new Error(`Unable to inspect downloaded file: ${download.suggestedFilename()}`);
+  return fs.readFile(filePath, 'utf8');
+}
+
+/**
+ * 读取 Playwright 下载文件的二进制内容。
+ * @param {import('playwright').Download} download 下载句柄。
+ * @returns {Promise<Buffer>} 文件内容。
+ */
+async function readDownloadBuffer(download) {
+  const filePath = await download.path();
+  if (!filePath) throw new Error(`Unable to inspect downloaded file: ${download.suggestedFilename()}`);
+  return fs.readFile(filePath);
+}
+
+/**
  * 切回文本转换工作台；用于失败恢复，避免某个模式测试污染后续用例。
  * @param {import('playwright').Page} page Playwright 页面实例
  */
@@ -1542,12 +1564,20 @@ async function main() {
       if (txtFile.suggestedFilename() !== 'unicode-art-cellcanvas.txt') {
         throw new Error(`Unexpected CellCanvas TXT filename: ${txtFile.suggestedFilename()}`);
       }
+      const txtContent = await readDownloadText(txtFile);
+      if (!txtContent.includes('UAJ') || !txtContent.includes('...')) {
+        throw new Error(`CellCanvas TXT export missed canonical projection content: ${txtContent}`);
+      }
 
       const htmlDownload = page.waitForEvent('download');
       await page.click('#editorCellCanvasExportHtml');
       const htmlFile = await htmlDownload;
       if (htmlFile.suggestedFilename() !== 'unicode-art-cellcanvas.html') {
         throw new Error(`Unexpected CellCanvas HTML filename: ${htmlFile.suggestedFilename()}`);
+      }
+      const htmlContent = await readDownloadText(htmlFile);
+      if (!htmlContent.includes('data-cellcanvas-projection="html"') || !htmlContent.includes('UAJ')) {
+        throw new Error('CellCanvas HTML export missed projection marker or content');
       }
 
       const pngDownload = page.waitForEvent('download');
@@ -1556,6 +1586,11 @@ async function main() {
       if (pngFile.suggestedFilename() !== 'unicode-art-cellcanvas.png') {
         throw new Error(`Unexpected CellCanvas PNG filename: ${pngFile.suggestedFilename()}`);
       }
+      const pngContent = await readDownloadBuffer(pngFile);
+      const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+      if (pngContent.length < 128 || !pngSignature.every((byte, index) => pngContent[index] === byte)) {
+        throw new Error(`CellCanvas PNG export was empty or invalid: ${pngContent.length} bytes`);
+      }
 
       const animationDownload = page.waitForEvent('download');
       await page.click('#editorCellCanvasExportAnimationHtml');
@@ -1563,9 +1598,7 @@ async function main() {
       if (animationFile.suggestedFilename() !== 'unicode-art-cellcanvas-animation.experimental.html') {
         throw new Error(`Unexpected CellCanvas animation filename: ${animationFile.suggestedFilename()}`);
       }
-      const animationPath = await animationFile.path();
-      if (!animationPath) throw new Error('Unable to inspect the downloaded CellCanvas animation HTML');
-      const animationHtml = await fs.readFile(animationPath, 'utf8');
+      const animationHtml = await readDownloadText(animationFile);
       if (!animationHtml.includes('experimental-html-animation') || !animationHtml.includes('not a stable animation format')) {
         throw new Error('CellCanvas animation export did not preserve the experimental format boundary');
       }
@@ -1576,9 +1609,8 @@ async function main() {
       if (projectFile.suggestedFilename() !== 'unicode-art-studio.uart-project.json') {
         throw new Error(`Unexpected CellCanvas project filename: ${projectFile.suggestedFilename()}`);
       }
-      const projectPath = await projectFile.path();
-      if (!projectPath) throw new Error('Unable to inspect the downloaded Studio project capsule');
-      const projectCapsule = JSON.parse(await fs.readFile(projectPath, 'utf8'));
+      const projectContent = await readDownloadText(projectFile);
+      const projectCapsule = JSON.parse(projectContent);
       if (projectCapsule.schema !== 'unicodeartjs-studio-project') {
         throw new Error(`Unexpected Studio project schema: ${projectCapsule.schema}`);
       }
@@ -1588,6 +1620,17 @@ async function main() {
       if (projectCapsule.documents?.[0]?.draft?.document?.canvas?.width !== 3) {
         throw new Error('Studio project capsule did not preserve the CellCanvas draft');
       }
+      await page.setInputFiles('#editorCellCanvasProjectFile', {
+        name: 'downloaded-studio-project.uart-project.json',
+        mimeType: 'application/json',
+        buffer: Buffer.from(projectContent, 'utf8'),
+      });
+      await page.waitForFunction(
+        () => document.querySelector('#editorStatus')?.dataset.state === 'success'
+          && document.querySelector('[data-cellcanvas-grid]')?.getAttribute('data-cellcanvas-width') === '3',
+        undefined,
+        { timeout: 5000 },
+      );
 
       const draft = JSON.parse(await page.inputValue('#editorSource'));
       const projectEnvelope = {
