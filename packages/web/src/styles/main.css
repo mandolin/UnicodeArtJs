@@ -1811,6 +1811,14 @@ details.config-details summary:hover {
   align-items: end;
 }
 
+.editor-cellcanvas-viewport-controls {
+  align-items: end;
+}
+
+.editor-cellcanvas-viewport-controls .editor-checkbox-label {
+  grid-column: 1 / -1;
+}
+
 .editor-cellcanvas-controls .btn {
   align-self: end;
   min-height: 32px;
@@ -2008,6 +2016,16 @@ details.config-details summary:hover {
     linear-gradient(180deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
     var(--bg-preview);
   background-size: 1.55rem 1.55rem;
+}
+
+.cellcanvas-grid.is-virtual-grid {
+  outline: 1px dashed rgba(74, 144, 217, 0.45);
+  outline-offset: 3px;
+}
+
+.cellcanvas-grid.is-dom-grid-fallback {
+  outline: 1px dashed rgba(148, 163, 184, 0.45);
+  outline-offset: 3px;
 }
 
 .cellcanvas-cell {

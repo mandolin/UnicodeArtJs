@@ -555,6 +555,36 @@
             <button class="btn" id="editorCellCanvasApplyLayerFrame" type="button" data-i18n="cellcanvas.applyLayerFrame">应用图层/帧</button>
           </div>
           <p class="field-help" id="editorCellCanvasLayerFrameSummary"></p>
+          <span class="editor-section-label" data-i18n="cellcanvas.viewport">Virtual Grid 视口</span>
+          <div class="editor-cellcanvas-controls editor-cellcanvas-viewport-controls">
+            <label class="editor-checkbox-label" for="editorCellCanvasVirtualGrid">
+              <input id="editorCellCanvasVirtualGrid" type="checkbox" checked>
+              <span data-i18n="cellcanvas.virtualGrid">启用 Virtual Grid</span>
+            </label>
+            <label for="editorCellCanvasViewportX">
+              <span data-i18n="cellcanvas.viewportX">视口 X</span>
+              <input id="editorCellCanvasViewportX" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasViewportY">
+              <span data-i18n="cellcanvas.viewportY">视口 Y</span>
+              <input id="editorCellCanvasViewportY" type="number" min="0" step="1" value="0">
+            </label>
+            <label for="editorCellCanvasViewportCols">
+              <span data-i18n="cellcanvas.viewportCols">视口列</span>
+              <input id="editorCellCanvasViewportCols" type="number" min="1" step="1" value="80">
+            </label>
+            <label for="editorCellCanvasViewportRows">
+              <span data-i18n="cellcanvas.viewportRows">视口行</span>
+              <input id="editorCellCanvasViewportRows" type="number" min="1" step="1" value="24">
+            </label>
+            <label for="editorCellCanvasViewportZoom">
+              <span data-i18n="cellcanvas.viewportZoom">缩放</span>
+              <input id="editorCellCanvasViewportZoom" type="number" min="0.25" max="4" step="0.25" value="1">
+            </label>
+            <button class="btn" id="editorCellCanvasApplyViewport" type="button" data-i18n="cellcanvas.applyViewport">应用视口</button>
+            <button class="btn" id="editorCellCanvasResetViewport" type="button" data-i18n="cellcanvas.resetViewport">重置视口</button>
+          </div>
+          <p class="field-help" id="editorCellCanvasViewportSummary"></p>
           <div class="editor-tool-feedback" id="editorCellCanvasToolFeedback" data-state="info" data-tool="cellcanvas.tool.select" aria-live="polite">
             <div class="editor-tool-feedback-row">
               <span data-i18n="cellcanvas.feedback.tool">工具</span>

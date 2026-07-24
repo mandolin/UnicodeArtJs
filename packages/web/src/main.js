@@ -60,6 +60,10 @@ import {
 } from './cellcanvas.js';
 import { renderCellMapToCanvas2D } from './studio/canvas-renderer.js';
 import {
+  createVirtualGridProjection,
+  createVirtualGridSessionPatch,
+} from './studio/virtual-grid.js';
+import {
   STUDIO_PROJECT_SCHEMA,
   createStudioProjectCapsuleFromCellCanvasDraft,
   readCellCanvasDraftFromStudioSource,
@@ -268,6 +272,15 @@ const UI_MESSAGES = {
     'cellcanvas.layerLocked': '锁定',
     'cellcanvas.durationMs': '时长 ms',
     'cellcanvas.applyLayerFrame': '应用图层/帧',
+    'cellcanvas.viewport': 'Virtual Grid 视口',
+    'cellcanvas.virtualGrid': '启用 Virtual Grid',
+    'cellcanvas.viewportX': '视口 X',
+    'cellcanvas.viewportY': '视口 Y',
+    'cellcanvas.viewportCols': '视口列',
+    'cellcanvas.viewportRows': '视口行',
+    'cellcanvas.viewportZoom': '缩放',
+    'cellcanvas.applyViewport': '应用视口',
+    'cellcanvas.resetViewport': '重置视口',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
     'cellcanvas.fromX': '起点 X',
@@ -328,6 +341,8 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.connector': '连线 {route}：({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.layerFrame': '当前帧 {frame} · 活动图层 {layer} · 合成 {cols}x{rows}。',
     'cellcanvas.feedback.hint.layerLocked': '当前图层已锁定；请先取消锁定再写入字素格。',
+    'cellcanvas.feedback.hint.viewport': 'Virtual Grid：可见 {visible}/{total} 格 · 窗口 ({x}, {y}) {cols}x{rows} · 跳过 {skipped} 格。',
+    'cellcanvas.feedback.hint.domGridFallback': 'DOM Grid fallback：正在渲染完整 {cols}x{rows} 网格。',
     'cellcanvas.feedback.hint.sourceInvalid': 'Canonical JSON 暂时无效，先修复源码后再编辑网格。',
     'cellcanvas.tool.select': '选择',
     'cellcanvas.tool.hover': '悬停',
@@ -335,6 +350,7 @@ const UI_MESSAGES = {
     'cellcanvas.tool.selection': '选区',
     'cellcanvas.tool.connector': '连线',
     'cellcanvas.tool.layerFrame': '图层/帧',
+    'cellcanvas.tool.viewport': '视口',
     'cellcanvas.tool.clipboard': '剪贴板',
     'cellcanvas.tool.history': '历史',
     'cellcanvas.tool.source': '源码',
@@ -746,6 +762,15 @@ const UI_MESSAGES = {
     'cellcanvas.layerLocked': 'Locked',
     'cellcanvas.durationMs': 'Duration ms',
     'cellcanvas.applyLayerFrame': 'Apply layer/frame',
+    'cellcanvas.viewport': 'Virtual Grid viewport',
+    'cellcanvas.virtualGrid': 'Enable Virtual Grid',
+    'cellcanvas.viewportX': 'Viewport X',
+    'cellcanvas.viewportY': 'Viewport Y',
+    'cellcanvas.viewportCols': 'Viewport cols',
+    'cellcanvas.viewportRows': 'Viewport rows',
+    'cellcanvas.viewportZoom': 'Zoom',
+    'cellcanvas.applyViewport': 'Apply viewport',
+    'cellcanvas.resetViewport': 'Reset viewport',
     'cellcanvas.x': 'X',
     'cellcanvas.y': 'Y',
     'cellcanvas.fromX': 'From X',
@@ -806,6 +831,8 @@ const UI_MESSAGES = {
     'cellcanvas.feedback.hint.connector': 'Connector {route}: ({fromX}, {fromY}) -> ({toX}, {toY})',
     'cellcanvas.feedback.hint.layerFrame': 'Current frame {frame} · active layer {layer} · composed {cols}x{rows}.',
     'cellcanvas.feedback.hint.layerLocked': 'The active layer is locked. Unlock it before writing glyph cells.',
+    'cellcanvas.feedback.hint.viewport': 'Virtual Grid: {visible}/{total} cells visible · window ({x}, {y}) {cols}x{rows} · {skipped} skipped.',
+    'cellcanvas.feedback.hint.domGridFallback': 'DOM Grid fallback: rendering the full {cols}x{rows} grid.',
     'cellcanvas.feedback.hint.sourceInvalid': 'Canonical JSON is temporarily invalid; fix the source before editing the grid.',
     'cellcanvas.tool.select': 'Select',
     'cellcanvas.tool.hover': 'Hover',
@@ -813,6 +840,7 @@ const UI_MESSAGES = {
     'cellcanvas.tool.selection': 'Selection',
     'cellcanvas.tool.connector': 'Connector',
     'cellcanvas.tool.layerFrame': 'Layer/frame',
+    'cellcanvas.tool.viewport': 'Viewport',
     'cellcanvas.tool.clipboard': 'Clipboard',
     'cellcanvas.tool.history': 'History',
     'cellcanvas.tool.source': 'Source',
@@ -1266,6 +1294,15 @@ const DOM = {
   editorCellCanvasFrameDuration: '#editorCellCanvasFrameDuration',
   editorCellCanvasApplyLayerFrame: '#editorCellCanvasApplyLayerFrame',
   editorCellCanvasLayerFrameSummary: '#editorCellCanvasLayerFrameSummary',
+  editorCellCanvasVirtualGrid: '#editorCellCanvasVirtualGrid',
+  editorCellCanvasViewportX: '#editorCellCanvasViewportX',
+  editorCellCanvasViewportY: '#editorCellCanvasViewportY',
+  editorCellCanvasViewportCols: '#editorCellCanvasViewportCols',
+  editorCellCanvasViewportRows: '#editorCellCanvasViewportRows',
+  editorCellCanvasViewportZoom: '#editorCellCanvasViewportZoom',
+  editorCellCanvasApplyViewport: '#editorCellCanvasApplyViewport',
+  editorCellCanvasResetViewport: '#editorCellCanvasResetViewport',
+  editorCellCanvasViewportSummary: '#editorCellCanvasViewportSummary',
   editorCellCanvasToolFeedback: '#editorCellCanvasToolFeedback',
   editorCellCanvasActiveTool: '#editorCellCanvasActiveTool',
   editorCellCanvasTarget: '#editorCellCanvasTarget',
@@ -1849,6 +1886,8 @@ class EditorController {
     $doc.on('click', DOM.editorCellCanvasRedo, () => this.redoCellCanvasHistory());
     $doc.on('click', DOM.editorCellCanvasDrawLine, () => this.drawCellCanvasConnectorFromControls());
     $doc.on('click', DOM.editorCellCanvasApplyLayerFrame, () => this.applyCellCanvasLayerFrameSettings());
+    $doc.on('click', DOM.editorCellCanvasApplyViewport, () => this.applyCellCanvasViewportSettings());
+    $doc.on('click', DOM.editorCellCanvasResetViewport, () => this.resetCellCanvasViewportSettings());
     $doc.on('click', DOM.editorCellCanvasExportTxt, () => this.exportCellCanvasPlainText());
     $doc.on('click', DOM.editorCellCanvasExportHtml, () => this.exportCellCanvasHtml());
     $doc.on('click', DOM.editorCellCanvasExportPng, () => void this.exportCellCanvasPng());
@@ -2154,6 +2193,194 @@ class EditorController {
    */
   formatCellCanvasLayerFrameTarget(state) {
     return `${state.activeLayerId} @ ${state.activeFrameId}`;
+  }
+
+  /**
+   * 判断当前 CellCanvas 草稿是否使用 Virtual Grid 可见窗口。
+   *
+   * 默认启用 Virtual Grid；只有用户显式切到 `dom-grid` fallback 时才渲染
+   * 完整 DOM 网格。renderer 状态只属于 editorSession，不是 CellMap 源模型。
+   *
+   * @param {object} draft CellCanvas 草稿。
+   * @returns {boolean} 是否启用 Virtual Grid。
+   */
+  isCellCanvasVirtualGridEnabled(draft) {
+    return draft?.editorSession?.renderer?.kind !== 'dom-grid';
+  }
+
+  /**
+   * 读取视口控件输入。
+   *
+   * @returns {{ enabled: boolean, x: number, y: number, cols: number, rows: number, zoom: number }} 视口设置。
+   */
+  readCellCanvasViewportControls() {
+    const zoom = Number.parseFloat(String($(DOM.editorCellCanvasViewportZoom).val() || 1));
+    return {
+      enabled: $(DOM.editorCellCanvasVirtualGrid).prop('checked') !== false,
+      x: Number($(DOM.editorCellCanvasViewportX).val()) || 0,
+      y: Number($(DOM.editorCellCanvasViewportY).val()) || 0,
+      cols: Number($(DOM.editorCellCanvasViewportCols).val()) || 80,
+      rows: Number($(DOM.editorCellCanvasViewportRows).val()) || 24,
+      zoom: Number.isFinite(zoom) && zoom > 0 ? Math.min(4, Math.max(0.25, zoom)) : 1,
+    };
+  }
+
+  /**
+   * 创建 CellCanvas 预览所需的 renderer projection。
+   *
+   * @param {object} draft CellCanvas 草稿。
+   * @param {object} cellMap 当前活动源图层 CellMap。
+   * @returns {object} 可见窗口投影。
+   */
+  createCellCanvasPreviewProjection(draft, cellMap) {
+    if (this.isCellCanvasVirtualGridEnabled(draft)) {
+      return {
+        rendererKind: 'virtual-grid',
+        projection: createVirtualGridProjection(cellMap, draft.editorSession?.viewport ?? {}),
+      };
+    }
+
+    const rows = [];
+    const cells = [];
+    const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
+    for (let y = 0; y < cellMap.height; y += 1) {
+      const row = [];
+      for (let x = 0; x < cellMap.width; x += 1) {
+        const cell = { ...(cellIndex.get(`${x},${y}`) ?? { x, y, char: ' ', role: 'empty' }) };
+        row.push(cell);
+        cells.push(cell);
+      }
+      rows.push(row);
+    }
+
+    return {
+      rendererKind: 'dom-grid',
+      projection: {
+        viewport: { x: 0, y: 0, cols: cellMap.width, rows: cellMap.height, zoom: 1 },
+        visibleRect: { x: 0, y: 0, width: cellMap.width, height: cellMap.height },
+        rows,
+        cells,
+        metrics: {
+          totalCells: cellMap.width * cellMap.height,
+          visibleCells: cells.length,
+          skippedCells: 0,
+          sourceWidth: cellMap.width,
+          sourceHeight: cellMap.height,
+        },
+      },
+    };
+  }
+
+  /**
+   * 把 Virtual Grid / DOM fallback 视口状态同步到控件。
+   *
+   * @param {object} previewState `createCellCanvasPreviewProjection()` 返回值。
+   */
+  syncCellCanvasViewportControls(previewState) {
+    const { rendererKind, projection } = previewState;
+    const isVirtualGrid = rendererKind === 'virtual-grid';
+    const viewport = projection.viewport;
+    const metrics = projection.metrics;
+    $(DOM.editorCellCanvasVirtualGrid).prop('checked', isVirtualGrid);
+    $(DOM.editorCellCanvasViewportX).val(String(viewport.x ?? 0));
+    $(DOM.editorCellCanvasViewportY).val(String(viewport.y ?? 0));
+    $(DOM.editorCellCanvasViewportCols).val(String(viewport.cols ?? metrics.sourceWidth));
+    $(DOM.editorCellCanvasViewportRows).val(String(viewport.rows ?? metrics.sourceHeight));
+    $(DOM.editorCellCanvasViewportZoom).val(String(viewport.zoom ?? 1));
+    $(DOM.editorCellCanvasViewportSummary).text(
+      isVirtualGrid
+        ? this.t('cellcanvas.feedback.hint.viewport', {
+          visible: metrics.visibleCells,
+          total: metrics.totalCells,
+          skipped: metrics.skippedCells,
+          x: projection.visibleRect.x,
+          y: projection.visibleRect.y,
+          cols: projection.visibleRect.width,
+          rows: projection.visibleRect.height,
+        })
+        : this.t('cellcanvas.feedback.hint.domGridFallback', {
+          cols: metrics.sourceWidth,
+          rows: metrics.sourceHeight,
+        }),
+    );
+  }
+
+  /**
+   * 将视口控件写回 editorSession，并刷新预览。
+   */
+  applyCellCanvasViewportSettings() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+
+    try {
+      const input = this.readCellCanvasViewportControls();
+      const nextDraft = JSON.parse(JSON.stringify(this.readCurrentCellCanvasDraft()));
+      nextDraft.editorSession ??= {};
+      const cellMap = getActiveCellMap(nextDraft);
+
+      if (input.enabled) {
+        const projection = createVirtualGridProjection(cellMap, input);
+        const patch = createVirtualGridSessionPatch(projection);
+        nextDraft.editorSession.viewport = patch.viewport;
+        nextDraft.editorSession.renderer = patch.renderer;
+      } else {
+        nextDraft.editorSession.viewport = { x: 0, y: 0, cols: cellMap.width, rows: cellMap.height, zoom: 1 };
+        nextDraft.editorSession.renderer = {
+          kind: 'dom-grid',
+          sourceModel: 'CellMap',
+          rendererIsSourceModel: false,
+          metrics: {
+            totalCells: cellMap.width * cellMap.height,
+            visibleCells: cellMap.width * cellMap.height,
+            skippedCells: 0,
+            sourceWidth: cellMap.width,
+            sourceHeight: cellMap.height,
+          },
+        };
+      }
+
+      this.commitCellCanvasDraft(nextDraft);
+      this.refreshCellCanvasDraft(nextDraft);
+      const previewState = this.createCellCanvasPreviewProjection(nextDraft, getActiveCellMap(nextDraft));
+      this.setCellCanvasToolFeedback({
+        toolKey: 'cellcanvas.tool.viewport',
+        targetText: `${previewState.projection.visibleRect.width}x${previewState.projection.visibleRect.height}`,
+        availabilityKey: 'cellcanvas.feedback.ready',
+        availabilityState: 'success',
+        hintKey: previewState.rendererKind === 'virtual-grid'
+          ? 'cellcanvas.feedback.hint.viewport'
+          : 'cellcanvas.feedback.hint.domGridFallback',
+        hintParams: previewState.rendererKind === 'virtual-grid'
+          ? {
+            visible: previewState.projection.metrics.visibleCells,
+            total: previewState.projection.metrics.totalCells,
+            skipped: previewState.projection.metrics.skippedCells,
+            x: previewState.projection.visibleRect.x,
+            y: previewState.projection.visibleRect.y,
+            cols: previewState.projection.visibleRect.width,
+            rows: previewState.projection.visibleRect.height,
+          }
+          : {
+            cols: previewState.projection.metrics.sourceWidth,
+            rows: previewState.projection.metrics.sourceHeight,
+          },
+      });
+    } catch (error) {
+      this.handleEditorError(error);
+    }
+  }
+
+  /**
+   * 重置为默认 Virtual Grid 视口。
+   */
+  resetCellCanvasViewportSettings() {
+    if (this.workspace.kind !== 'cellcanvas') return;
+    $(DOM.editorCellCanvasVirtualGrid).prop('checked', true);
+    $(DOM.editorCellCanvasViewportX).val('0');
+    $(DOM.editorCellCanvasViewportY).val('0');
+    $(DOM.editorCellCanvasViewportCols).val('80');
+    $(DOM.editorCellCanvasViewportRows).val('24');
+    $(DOM.editorCellCanvasViewportZoom).val('1');
+    this.applyCellCanvasViewportSettings();
   }
 
   /**
@@ -2827,6 +3054,7 @@ class EditorController {
       const cellMap = getActiveCellMap(draft);
       const composition = composeCellCanvasFrame(draft);
       const layerFrameState = getCellCanvasLayerFrameState(draft);
+      const previewState = this.createCellCanvasPreviewProjection(draft, cellMap);
       const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
       const x = Math.min(Math.max(Number(activeCell.x) || 0, 0), cellMap.width - 1);
       const y = Math.min(Math.max(Number(activeCell.y) || 0, 0), cellMap.height - 1);
@@ -2863,6 +3091,7 @@ class EditorController {
         $(DOM.editorCellCanvasLineRoute).val('auto');
       }
       this.syncCellCanvasLayerFrameControls(draft, composition);
+      this.syncCellCanvasViewportControls(previewState);
       $(DOM.editorCellCanvasApply).prop('disabled', layerFrameState.activeLayerLocked);
       $(DOM.editorCellCanvasPaste).prop('disabled', layerFrameState.activeLayerLocked || !clipboardReady);
       $(DOM.editorCellCanvasDrawLine).prop('disabled', layerFrameState.activeLayerLocked);
@@ -2887,24 +3116,34 @@ class EditorController {
    */
   renderCellCanvasPreview(draft) {
     const cellMap = getActiveCellMap(draft);
+    const previewState = this.createCellCanvasPreviewProjection(draft, cellMap);
+    const { rendererKind, projection } = previewState;
     const activeCell = draft.editorSession?.activeCell ?? { x: 0, y: 0 };
     const selection = draft.editorSession?.selection ?? { x: activeCell.x, y: activeCell.y, width: 1, height: 1 };
     const selectionX = Math.min(Math.max(Number(selection.x) || 0, 0), cellMap.width - 1);
     const selectionY = Math.min(Math.max(Number(selection.y) || 0, 0), cellMap.height - 1);
     const selectionWidth = Math.min(Math.max(Number(selection.width) || 1, 1), cellMap.width - selectionX);
     const selectionHeight = Math.min(Math.max(Number(selection.height) || 1, 1), cellMap.height - selectionY);
-    const cellIndex = new Map(cellMap.cells.map((cell) => [`${cell.x},${cell.y}`, cell]));
     const $grid = $('<span>')
       .addClass('cellcanvas-grid')
+      .toggleClass('is-virtual-grid', rendererKind === 'virtual-grid')
+      .toggleClass('is-dom-grid-fallback', rendererKind === 'dom-grid')
       .attr('role', 'grid')
       .attr('data-cellcanvas-grid', 'true')
+      .attr('data-cellcanvas-renderer', rendererKind)
       .attr('data-cellcanvas-width', String(cellMap.width))
       .attr('data-cellcanvas-height', String(cellMap.height))
-      .css('--cellcanvas-cols', String(cellMap.width));
+      .attr('data-cellcanvas-visible-x', String(projection.visibleRect.x))
+      .attr('data-cellcanvas-visible-y', String(projection.visibleRect.y))
+      .attr('data-cellcanvas-visible-width', String(projection.visibleRect.width))
+      .attr('data-cellcanvas-visible-height', String(projection.visibleRect.height))
+      .attr('data-cellcanvas-visible-cells', String(projection.metrics.visibleCells))
+      .css('--cellcanvas-cols', String(projection.visibleRect.width));
 
-    for (let y = 0; y < cellMap.height; y += 1) {
-      for (let x = 0; x < cellMap.width; x += 1) {
-        const cell = cellIndex.get(`${x},${y}`) ?? { char: ' ', role: 'empty' };
+    for (const row of projection.rows) {
+      for (const cell of row) {
+        const x = cell.x;
+        const y = cell.y;
         const isSelected = x >= selectionX
           && x < selectionX + selectionWidth
           && y >= selectionY

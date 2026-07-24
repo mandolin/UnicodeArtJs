@@ -1282,6 +1282,54 @@ async function main() {
       }
     });
 
+    await test('shows CellCanvas Virtual Grid viewport and DOM fallback controls', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      await page.fill('#editorSource', createBlankCellCanvasDraftSource(20, 10));
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-renderer="virtual-grid"]', {
+        timeout: 5000,
+      });
+
+      await page.fill('#editorCellCanvasViewportX', '3');
+      await page.fill('#editorCellCanvasViewportY', '2');
+      await page.fill('#editorCellCanvasViewportCols', '5');
+      await page.fill('#editorCellCanvasViewportRows', '4');
+      await page.fill('#editorCellCanvasViewportZoom', '1.5');
+      await page.click('#editorCellCanvasApplyViewport');
+      await page.waitForSelector(
+        '[data-cellcanvas-grid][data-cellcanvas-renderer="virtual-grid"][data-cellcanvas-visible-x="3"][data-cellcanvas-visible-y="2"][data-cellcanvas-visible-width="5"][data-cellcanvas-visible-height="4"]',
+        { timeout: 5000 },
+      );
+
+      const viewportSummary = await page.textContent('#editorCellCanvasViewportSummary');
+      if (!viewportSummary.includes('5x4') || !viewportSummary.includes('20')) {
+        throw new Error(`Virtual Grid viewport summary was not synchronized: ${viewportSummary}`);
+      }
+
+      await page.click('[data-cellcanvas-cell][data-cellcanvas-x="4"][data-cellcanvas-y="3"]');
+      const activeX = await page.inputValue('#editorCellCanvasX');
+      const activeY = await page.inputValue('#editorCellCanvasY');
+      if (activeX !== '4' || activeY !== '3') {
+        throw new Error(`Virtual Grid absolute coordinate selection failed: ${activeX},${activeY}`);
+      }
+
+      const virtualSource = await page.inputValue('#editorSource');
+      if (!virtualSource.includes('"kind": "virtual-grid"') || !virtualSource.includes('"cols": 5')) {
+        throw new Error('Virtual Grid viewport was not persisted to editorSession');
+      }
+
+      await page.uncheck('#editorCellCanvasVirtualGrid');
+      await page.click('#editorCellCanvasApplyViewport');
+      await page.waitForSelector(
+        '[data-cellcanvas-grid][data-cellcanvas-renderer="dom-grid"][data-cellcanvas-visible-width="20"][data-cellcanvas-visible-height="10"]',
+        { timeout: 5000 },
+      );
+      const fallbackSummary = await page.textContent('#editorCellCanvasViewportSummary');
+      if (!fallbackSummary.includes('20x10')) {
+        throw new Error(`DOM grid fallback summary was not synchronized: ${fallbackSummary}`);
+      }
+    });
+
     await test('imports SpecialArtResult into CellCanvas and exports projections', async () => {
       const specialArtFixture = {
         schema: 'unicodeartjs-special-art-e2e-wrapper@0',
