@@ -409,6 +409,14 @@ const UI_MESSAGES = {
     'gallery.loadingPreview': '正在生成作品预览',
     'gallery.previewFailed': '作品预览失败：{message}',
     'gallery.reviewed': '已审核',
+    'gallery.adoption.status.accepted': '已采用',
+    'gallery.adoption.status.needs-changes': '待补证',
+    'gallery.adoption.status.rejected': '未采用',
+    'gallery.adoption.status.revoked': '已撤回',
+    'gallery.adoption.missing': '采用证据未记录',
+    'gallery.adoption.summary': '采用：{status} · evidence: {evidence} · review: {review} · 手动确认：{manual}',
+    'gallery.adoption.manual.yes': '需要',
+    'gallery.adoption.manual.no': '不需要',
     'gallery.author': '作者',
     'gallery.license': '许可证',
     'gallery.reviewedAt': '审核日期',
@@ -471,6 +479,9 @@ const UI_MESSAGES = {
     'resource.cacheTarget': '缓存目标',
     'resource.boundary': '边界',
     'resource.boundaryText': '同源读取；不自动安装；不执行；导入前复核 hash、撤回与维护者签名。',
+    'resource.adoptionStatus': '采用状态',
+    'resource.adoptionEvidence': '采用证据',
+    'resource.adoptionManualConfirmation': '采用前人工确认',
     'resource.openGallery': '在画廊中查看',
     'resource.importEditor': '确认后导入编辑器',
     'resource.importDialogTitle': '导入已验证资源',
@@ -932,6 +943,14 @@ const UI_MESSAGES = {
     'gallery.loadingPreview': 'Rendering artwork preview',
     'gallery.previewFailed': 'Artwork preview failed: {message}',
     'gallery.reviewed': 'Reviewed',
+    'gallery.adoption.status.accepted': 'Adopted',
+    'gallery.adoption.status.needs-changes': 'Needs evidence',
+    'gallery.adoption.status.rejected': 'Not adopted',
+    'gallery.adoption.status.revoked': 'Revoked',
+    'gallery.adoption.missing': 'Adoption evidence not recorded',
+    'gallery.adoption.summary': 'Adoption: {status} · evidence: {evidence} · review: {review} · manual confirmation: {manual}',
+    'gallery.adoption.manual.yes': 'required',
+    'gallery.adoption.manual.no': 'not required',
     'gallery.author': 'Author',
     'gallery.license': 'License',
     'gallery.reviewedAt': 'Reviewed',
@@ -994,6 +1013,9 @@ const UI_MESSAGES = {
     'resource.cacheTarget': 'Cache target',
     'resource.boundary': 'Boundary',
     'resource.boundaryText': 'Same-origin read; no automatic install; no execution; hash, revocation, and maintainer signature are rechecked before import.',
+    'resource.adoptionStatus': 'Adoption status',
+    'resource.adoptionEvidence': 'Adoption evidence',
+    'resource.adoptionManualConfirmation': 'Manual confirmation before adoption',
     'resource.openGallery': 'View in gallery',
     'resource.importEditor': 'Import to editor after confirmation',
     'resource.importDialogTitle': 'Import verified resource',
@@ -1424,6 +1446,7 @@ const DOM = {
   galleryAuthor: '#galleryAuthor',
   galleryLicense: '#galleryLicense',
   galleryReviewedAt: '#galleryReviewedAt',
+  galleryAdoptionSummary: '#galleryAdoptionSummary',
   galleryDescription: '#galleryDescription',
   galleryPreview: '#galleryPreview',
   galleryPreviewMeta: '#galleryPreviewMeta',
@@ -4870,6 +4893,30 @@ class EditorController {
 
 //#region 🟩 静态作品画廊
 
+function getGalleryAdoptionStatus(artwork) {
+  return artwork?.adoption?.status || 'accepted';
+}
+
+function formatGalleryAdoptionStatus(i18n, adoption) {
+  const status = adoption?.status || 'accepted';
+  const key = `gallery.adoption.status.${status}`;
+  const label = i18n(key);
+  return label === key ? status : label;
+}
+
+function formatGalleryAdoptionSummary(i18n, artwork) {
+  const adoption = artwork?.adoption || null;
+  if (!adoption) return i18n('gallery.adoption.missing');
+  return i18n('gallery.adoption.summary', {
+    status: formatGalleryAdoptionStatus(i18n, adoption),
+    evidence: adoption.evidencePacket,
+    review: adoption.reviewRecord,
+    manual: i18n(adoption.manualConfirmationRequired
+      ? 'gallery.adoption.manual.yes'
+      : 'gallery.adoption.manual.no'),
+  });
+}
+
 /**
  * 🟢 只读静态作品画廊控制器
  *
@@ -5020,6 +5067,11 @@ class GalleryController {
         .addClass('gallery-artwork-kind')
         .text(this.t(`gallery.kind.${artwork.kind}`))
         .appendTo($button);
+      $('<span>')
+        .addClass('gallery-artwork-adoption')
+        .attr('data-state', getGalleryAdoptionStatus(artwork))
+        .text(formatGalleryAdoptionStatus(this.t.bind(this), artwork.adoption))
+        .appendTo($button);
       $('<strong>')
         .addClass('gallery-artwork-title')
         .text(getGalleryLocalizedText(artwork.title, AppState.config.locale))
@@ -5101,6 +5153,7 @@ class GalleryController {
     $(DOM.galleryDescription).text(getGalleryLocalizedText(artwork.description, AppState.config.locale));
     $(DOM.galleryMetadata).prop('hidden', true);
     $(DOM.galleryReview).prop('hidden', true);
+    $(DOM.galleryAdoptionSummary).text('');
     $(DOM.galleryPreview)
       .empty()
       .append($('<code>').addClass('preview-placeholder').text(this.t('gallery.loadingPreview')));
@@ -5120,7 +5173,11 @@ class GalleryController {
     $(DOM.galleryLicense).text(artwork.license.expression);
     $(DOM.galleryReviewedAt).text(artwork.reviewedAt);
     $(DOM.galleryMetadata).prop('hidden', false);
-    $(DOM.galleryReview).prop('hidden', false);
+    $(DOM.galleryReview)
+      .text(formatGalleryAdoptionStatus(this.t.bind(this), artwork.adoption))
+      .attr('data-state', getGalleryAdoptionStatus(artwork))
+      .prop('hidden', false);
+    $(DOM.galleryAdoptionSummary).text(formatGalleryAdoptionSummary(this.t.bind(this), artwork));
     $(DOM.galleryPreview).text(result.content);
     $(DOM.galleryPreviewMeta).text(`${result.cols} × ${result.rows}`);
     this.setActionAvailability(true);
@@ -5133,6 +5190,7 @@ class GalleryController {
     $(DOM.galleryPreviewMeta).text('');
     $(DOM.galleryMetadata).prop('hidden', true);
     $(DOM.galleryReview).prop('hidden', true);
+    $(DOM.galleryAdoptionSummary).text('');
     this.setActionAvailability(false);
   }
 
@@ -5555,6 +5613,11 @@ class ResourceDiscoveryController {
       `${this.t('resource.actualSha256')}: ${verification?.actualSha256 || '--'}`,
       `${this.t('resource.trustStatus')}: ${this.formatTrustStatus(item.trustStatus)}`,
       `${this.t('resource.revocationStatus')}: ${this.formatRevocationStatus(item.revocation)}`,
+      `${this.t('resource.adoptionStatus')}: ${formatGalleryAdoptionStatus(this.t.bind(this), item.artwork?.adoption)}`,
+      `${this.t('resource.adoptionEvidence')}: ${item.artwork?.adoption?.evidencePacket || 'legacy-reviewed-gallery-index'}`,
+      `${this.t('resource.adoptionManualConfirmation')}: ${this.t((item.artwork?.adoption?.manualConfirmationRequired ?? true)
+        ? 'gallery.adoption.manual.yes'
+        : 'gallery.adoption.manual.no')}`,
       `${this.t('resource.cacheTarget')}: ${this.t('resource.cacheTarget.editorWorkspace')}`,
       `${this.t('resource.importBlockedReason')}: ${importLine}`,
       `${this.t('resource.boundary')}: ${this.t('resource.boundaryText')}`,
@@ -5603,6 +5666,11 @@ class ResourceDiscoveryController {
       [this.t('resource.sha256'), item.resource.sha256],
       [this.t('resource.trustStatus'), this.formatTrustStatus(item.trustStatus)],
       [this.t('resource.revocationStatus'), this.formatRevocationStatus(item.revocation)],
+      [this.t('resource.adoptionStatus'), formatGalleryAdoptionStatus(this.t.bind(this), item.artwork?.adoption)],
+      [this.t('resource.adoptionEvidence'), item.artwork?.adoption?.evidencePacket || 'legacy-reviewed-gallery-index'],
+      [this.t('resource.adoptionManualConfirmation'), this.t((item.artwork?.adoption?.manualConfirmationRequired ?? true)
+        ? 'gallery.adoption.manual.yes'
+        : 'gallery.adoption.manual.no')],
       [this.t('resource.cacheTarget'), this.t('resource.cacheTarget.editorWorkspace')],
       ['targetAction', proposal.targetAction],
       ['targetScope', proposal.targetScope],

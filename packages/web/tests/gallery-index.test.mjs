@@ -33,6 +33,9 @@ test('parses the reviewed static gallery index', async () => {
   assert.ok(index.artworks.some((artwork) => artwork.id === 'review-workflow'));
   assert.ok(index.artworks.every((artwork) => artwork.license.origin === 'original'));
   assert.ok(index.artworks.every((artwork) => artwork.source.startsWith('artworks/')));
+  assert.ok(index.artworks.every((artwork) => artwork.adoption?.status === 'accepted'));
+  assert.ok(index.artworks.every((artwork) => artwork.adoption?.metadataOnly === true));
+  assert.ok(index.artworks.every((artwork) => artwork.adoption?.manualConfirmationRequired === true));
 });
 
 test('resolves artwork sources only within the gallery asset root', () => {
@@ -68,5 +71,42 @@ test('rejects an unsafe artwork source path', () => {
   assert.throws(
     () => parseUnicodeArtGalleryIndex(JSON.stringify(invalid)),
     /artworks\/ 下安全的/u,
+  );
+});
+
+test('rejects unsafe adoption evidence metadata', () => {
+  const invalid = {
+    format: 'unicode-art-gallery-index',
+    version: 1,
+    meta: {
+      name: { 'zh-CN': '测试画廊', 'en-US': 'Test Gallery' },
+      license: { expression: 'MIT', origin: 'original' },
+      reviewedAt: '2026-07-14',
+    },
+    artworks: [{
+      id: 'unsafe-adoption',
+      kind: 'semantic-document',
+      source: 'artworks/review-workflow.uadoc.json',
+      title: { 'zh-CN': '测试', 'en-US': 'Test' },
+      description: { 'zh-CN': '测试资源', 'en-US': 'Test asset' },
+      tags: ['layout'],
+      author: 'UnicodeArtJs',
+      license: { expression: 'MIT', origin: 'original' },
+      reviewedAt: '2026-07-14',
+      adoption: {
+        status: 'accepted',
+        scenario: 'web-studio-import-preview',
+        evidencePacket: 'file://unsafe',
+        reviewRecord: 'review-unsafe-adoption',
+        handoffReport: 'handoff-unsafe-adoption',
+        manualConfirmationRequired: true,
+        metadataOnly: true,
+      },
+    }],
+  };
+
+  assert.throws(
+    () => parseUnicodeArtGalleryIndex(JSON.stringify(invalid)),
+    /evidencePacket/u,
   );
 });

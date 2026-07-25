@@ -32,7 +32,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-14"
+      "reviewedAt": "2026-07-14",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-line-banner-uaj-web",
+        "reviewRecord": "review-line-banner-uaj",
+        "handoffReport": "handoff-line-banner-uaj-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "stroke-uaj",
@@ -53,7 +62,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-18"
+      "reviewedAt": "2026-07-18",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-stroke-uaj-web",
+        "reviewRecord": "review-stroke-uaj",
+        "handoffReport": "handoff-stroke-uaj-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "block-poster-uaj",
@@ -74,7 +92,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-18"
+      "reviewedAt": "2026-07-18",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-block-poster-uaj-web",
+        "reviewRecord": "review-block-poster-uaj",
+        "handoffReport": "handoff-block-poster-uaj-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "compact-mark-uaj",
@@ -95,7 +122,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-18"
+      "reviewedAt": "2026-07-18",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-compact-mark-uaj-web",
+        "reviewRecord": "review-compact-mark-uaj",
+        "handoffReport": "handoff-compact-mark-uaj-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "project-overview",
@@ -115,7 +151,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-14"
+      "reviewedAt": "2026-07-14",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-project-overview-web",
+        "reviewRecord": "review-project-overview",
+        "handoffReport": "handoff-project-overview-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "boxed-note",
@@ -135,7 +180,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-14"
+      "reviewedAt": "2026-07-14",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-boxed-note-web",
+        "reviewRecord": "review-boxed-note",
+        "handoffReport": "handoff-boxed-note-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "bilingual-grid",
@@ -155,7 +209,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-14"
+      "reviewedAt": "2026-07-14",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-bilingual-grid-web",
+        "reviewRecord": "review-bilingual-grid",
+        "handoffReport": "handoff-bilingual-grid-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "review-workflow",
@@ -175,7 +238,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-18"
+      "reviewedAt": "2026-07-18",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-review-workflow-web",
+        "reviewRecord": "review-review-workflow",
+        "handoffReport": "handoff-review-workflow-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     },
     {
       "id": "uaf-poster-suite",
@@ -195,7 +267,16 @@
         "expression": "MIT",
         "origin": "original"
       },
-      "reviewedAt": "2026-07-18"
+      "reviewedAt": "2026-07-18",
+      "adoption": {
+        "status": "accepted",
+        "scenario": "web-studio-import-preview",
+        "evidencePacket": "evidence-uaf-poster-suite-web",
+        "reviewRecord": "review-uaf-poster-suite",
+        "handoffReport": "handoff-uaf-poster-suite-web",
+        "manualConfirmationRequired": true,
+        "metadataOnly": true
+      }
     }
   ]
 }

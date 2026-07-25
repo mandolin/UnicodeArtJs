@@ -773,6 +773,9 @@ async function main() {
         if (state.pipelineState !== 'success' || !state.pipeline.includes('metadataOnly: true')) {
           throw new Error('Resource discovery did not expose metadata-only production pipeline summary');
         }
+        if (!/采用状态|Adoption status/.test(state.check) || !/evidence-/.test(state.check)) {
+          throw new Error('Resource discovery detail did not expose adoption evidence metadata');
+        }
 
         await page.click('[data-resource-id="review-workflow"]');
         await page.waitForFunction(
@@ -888,6 +891,9 @@ async function main() {
       }
       if (!proposalState.proposal.includes('confirmedByDefault: false')) {
         throw new Error('Studio resource proposal did not expose manual confirmation boundary');
+      }
+      if (!proposalState.proposal.includes('adoptionEvidence: evidence-review-workflow-web')) {
+        throw new Error('Studio resource proposal did not expose adoption evidence metadata');
       }
 
       await page.click('#editorResourceEntryImport');
@@ -1726,6 +1732,17 @@ async function main() {
         undefined,
         { timeout: 10_000 },
       );
+      const adoptionState = await page.evaluate(() => ({
+        badge: document.querySelector('#galleryReview')?.textContent || '',
+        badgeState: document.querySelector('#galleryReview')?.getAttribute('data-state') || '',
+        summary: document.querySelector('#galleryAdoptionSummary')?.textContent || '',
+      }));
+      if (adoptionState.badgeState !== 'accepted' || !/已采用|Adopted/.test(adoptionState.badge)) {
+        throw new Error('Gallery inspector did not expose accepted adoption status');
+      }
+      if (!/evidence-line-banner-uaj-web/.test(adoptionState.summary)) {
+        throw new Error('Gallery inspector did not expose adoption evidence summary');
+      }
 
       await page.fill('#gallerySearch', '双语');
       await page.waitForFunction(

@@ -939,6 +939,30 @@ details.config-details summary:hover {
   color: var(--color-success);
 }
 
+.gallery-review-badge[data-state='needs-changes'],
+.gallery-artwork-adoption[data-state='needs-changes'] {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.gallery-review-badge[data-state='rejected'],
+.gallery-review-badge[data-state='revoked'],
+.gallery-artwork-adoption[data-state='rejected'],
+.gallery-artwork-adoption[data-state='revoked'] {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.gallery-artwork-adoption {
+  justify-self: start;
+  border: 1px solid var(--color-success);
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: var(--color-success);
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
 .gallery-metadata {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -965,6 +989,16 @@ details.config-details summary:hover {
 
 .gallery-description {
   padding: 0 var(--spacing-md);
+}
+
+.gallery-adoption-summary {
+  margin: var(--spacing-md) var(--spacing-md) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--bg-preview);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
 }
 
 .gallery-preview-container {

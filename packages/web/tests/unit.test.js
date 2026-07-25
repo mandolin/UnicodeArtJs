@@ -463,6 +463,15 @@ function createResourceDiscoveryState(overrides = {}) {
     artwork: {
       title: { 'zh-CN': '审核流程', en: 'Review Workflow' },
       license: { expression: 'MIT', origin: 'original' },
+      adoption: {
+        status: 'accepted',
+        scenario: 'web-studio-import-preview',
+        evidencePacket: 'evidence-review-workflow-web',
+        reviewRecord: 'review-review-workflow',
+        handoffReport: 'handoff-review-workflow-web',
+        manualConfirmationRequired: true,
+        metadataOnly: true,
+      },
     },
     verification: {
       ok: true,
@@ -489,12 +498,16 @@ describe('Studio 资源入口提案原型', () => {
 
     assertEqual(entry.schema, STUDIO_RESOURCE_ENTRY_SCHEMA);
     assertEqual(entry.resourceKind, 'uadoc');
+    assertEqual(entry.adoption.status, 'accepted');
+    assertEqual(entry.adoption.metadataOnly, true);
     assertEqual(entry.importAllowed, true);
     assertEqual(proposal.schema, STUDIO_IMPORT_PROPOSAL_SCHEMA);
     assertEqual(proposal.status, 'confirmation-pending');
     assertEqual(proposal.confirmedByDefault, false);
     assertEqual(proposal.humanConfirmationRequired, true);
     assertEqual(proposal.trustCheck.hash, 'pass');
+    assertEqual(proposal.trustCheck.adoptionEvidence, 'pass');
+    assertEqual(summary.includes('adoptionEvidence: evidence-review-workflow-web'), true);
     assertEqual(summary.includes('humanConfirmationRequired: true'), true);
   });
 
@@ -521,6 +534,29 @@ describe('Studio 资源入口提案原型', () => {
     assertEqual(proposal.trustCheck.hash, 'fail');
     assertEqual(proposal.trustCheck.revocation, 'fail');
     assertEqual(proposal.confirmedByDefault, false);
+  });
+
+  it('采用 evidence 未通过时保持人工导入阻断', () => {
+    const entry = createStudioResourceEntryFromDiscoveryState(createResourceDiscoveryState({
+      artwork: {
+        title: { 'zh-CN': '审核流程', en: 'Review Workflow' },
+        license: { expression: 'MIT', origin: 'original' },
+        adoption: {
+          status: 'rejected',
+          scenario: 'web-studio-import-preview',
+          evidencePacket: 'evidence-review-workflow-web',
+          reviewRecord: 'review-review-workflow',
+          handoffReport: 'handoff-review-workflow-web',
+          manualConfirmationRequired: true,
+          metadataOnly: true,
+        },
+      },
+    }));
+    const proposal = createStudioImportProposalFromResourceEntry(entry);
+
+    assertEqual(entry.importAllowed, true);
+    assertEqual(proposal.status, 'blocked');
+    assertEqual(proposal.trustCheck.adoptionEvidence, 'needs-review');
   });
 
   it('可生成官方素材生产线 metadata-only 摘要', () => {

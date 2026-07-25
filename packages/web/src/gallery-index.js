@@ -55,6 +55,21 @@ export const UNICODE_ART_GALLERY_ARTWORK_KINDS = Object.freeze([
   'unicode-art-font',
 ]);
 
+/** 画廊采用审核状态，首轮只暴露只读状态，不触发自动安装或写入。 */
+export const UNICODE_ART_GALLERY_ADOPTION_STATUSES = Object.freeze([
+  'accepted',
+  'needs-changes',
+  'rejected',
+  'revoked',
+]);
+
+/** 画廊采用 evidence 首轮允许的只读场景。 */
+const ADOPTION_SCENARIOS = Object.freeze([
+  'web-gallery-resource-view',
+  'web-studio-import-preview',
+  'target-owner-handoff-report',
+]);
+
 /** 作品资源路径允许的文件扩展名。 */
 const ARTWORK_EXTENSION_BY_KIND = Object.freeze({
   'semantic-document': '.uadoc.json',
@@ -130,6 +145,60 @@ function parseTags(value, name) {
   return Object.freeze(tags);
 }
 
+function parseAdoptionSlug(value, name) {
+  const text = asNonEmptyString(value, name, 120);
+  if (!/^[a-z0-9][a-z0-9-]{1,119}$/.test(text)) {
+    throw new Error(`${name} 必须是小写 ASCII slug`);
+  }
+  return text;
+}
+
+function parseRequiredTrue(value, name) {
+  if (value !== true) throw new Error(`${name} 首版必须为 true`);
+  return true;
+}
+
+function parseAdoption(value, name) {
+  if (value === undefined) return undefined;
+  const record = asRecord(value, name);
+  hasOnlyExpectedKeys(
+    record,
+    new Set([
+      'status',
+      'scenario',
+      'evidencePacket',
+      'reviewRecord',
+      'handoffReport',
+      'manualConfirmationRequired',
+      'metadataOnly',
+    ]),
+    name,
+  );
+
+  const status = asNonEmptyString(record.status, `${name}.status`, 32);
+  if (!UNICODE_ART_GALLERY_ADOPTION_STATUSES.includes(status)) {
+    throw new Error(`${name}.status 不受支持: ${status}`);
+  }
+
+  const scenario = asNonEmptyString(record.scenario, `${name}.scenario`, 80);
+  if (!ADOPTION_SCENARIOS.includes(scenario)) {
+    throw new Error(`${name}.scenario 不受支持: ${scenario}`);
+  }
+
+  return Object.freeze({
+    status,
+    scenario,
+    evidencePacket: parseAdoptionSlug(record.evidencePacket, `${name}.evidencePacket`),
+    reviewRecord: parseAdoptionSlug(record.reviewRecord, `${name}.reviewRecord`),
+    handoffReport: parseAdoptionSlug(record.handoffReport, `${name}.handoffReport`),
+    manualConfirmationRequired: parseRequiredTrue(
+      record.manualConfirmationRequired,
+      `${name}.manualConfirmationRequired`,
+    ),
+    metadataOnly: parseRequiredTrue(record.metadataOnly, `${name}.metadataOnly`),
+  });
+}
+
 //#endregion
 
 //#region 🟩 公开 API
@@ -183,7 +252,19 @@ export function parseUnicodeArtGalleryIndex(source) {
     const artwork = asRecord(entry, `gallery index.artworks[${position}]`);
     hasOnlyExpectedKeys(
       artwork,
-      new Set(['id', 'kind', 'source', 'sample', 'title', 'description', 'tags', 'author', 'license', 'reviewedAt']),
+      new Set([
+        'id',
+        'kind',
+        'source',
+        'sample',
+        'title',
+        'description',
+        'tags',
+        'author',
+        'license',
+        'reviewedAt',
+        'adoption',
+      ]),
       `gallery index.artworks[${position}]`,
     );
     const id = asNonEmptyString(artwork.id, `gallery index.artworks[${position}].id`, 80);
@@ -218,6 +299,9 @@ export function parseUnicodeArtGalleryIndex(source) {
       author: asNonEmptyString(artwork.author, `gallery index.artworks[${position}].author`, 120),
       license: parseLicense(artwork.license, `gallery index.artworks[${position}].license`),
       reviewedAt: asNonEmptyString(artwork.reviewedAt, `gallery index.artworks[${position}].reviewedAt`, 16),
+      ...(artwork.adoption === undefined
+        ? {}
+        : { adoption: parseAdoption(artwork.adoption, `gallery index.artworks[${position}].adoption`) }),
     });
   });
 

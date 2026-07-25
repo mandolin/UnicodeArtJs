@@ -36,6 +36,8 @@ export const STUDIO_REQUIRED_CONFIRMATION_FIELDS = Object.freeze([
   'title',
   'resourceId',
   'resourceKind',
+  'adoptionStatus',
+  'adoptionEvidence',
   'license',
   'provenance',
   'source',
@@ -88,6 +90,21 @@ function buildEffectSummary(entry) {
   return `Inspect resource ${entry.id} without automatic install or execution.`;
 }
 
+function normalizeAdoption(artwork) {
+  const adoption = artwork?.adoption && typeof artwork.adoption === 'object' ? artwork.adoption : null;
+  return Object.freeze({
+    stage: 'W-art-P23.5',
+    status: adoption?.status || 'accepted',
+    scenario: adoption?.scenario || 'legacy-reviewed-gallery-index',
+    evidencePacket: adoption?.evidencePacket || 'legacy-reviewed-gallery-index',
+    reviewRecord: adoption?.reviewRecord || 'legacy-reviewed-gallery-index',
+    handoffReport: adoption?.handoffReport || 'legacy-reviewed-gallery-index',
+    manualConfirmationRequired: adoption?.manualConfirmationRequired !== false,
+    metadataOnly: adoption?.metadataOnly !== false,
+    source: adoption ? 'gallery-adoption-evidence' : 'legacy-reviewed-gallery-index',
+  });
+}
+
 function normalizeTrustCheck(entry) {
   return Object.freeze({
     hash: entry.verification?.ok ? 'pass' : 'fail',
@@ -95,6 +112,11 @@ function normalizeTrustCheck(entry) {
     revocation: entry.trustChain.revoked ? 'fail' : 'pass',
     coreValidation: entry.verification?.shapeOk ? 'pass' : 'fail',
     licenseReview: entry.license.expression ? 'pass' : 'needs-review',
+    adoptionEvidence: (
+      entry.adoption.status === 'accepted'
+      && entry.adoption.metadataOnly
+      && entry.adoption.manualConfirmationRequired
+    ) ? 'pass' : 'needs-review',
   });
 }
 
@@ -143,6 +165,7 @@ export function createStudioResourceEntryFromDiscoveryState(state, options = {})
   const artwork = state?.artwork || null;
   const title = options.title || toTitleText(artwork?.title, resource.id || 'resource');
   const resourceKind = mapResourceKind(resource.kind);
+  const adoption = normalizeAdoption(artwork);
 
   return Object.freeze({
     schema: STUDIO_RESOURCE_ENTRY_SCHEMA,
@@ -166,6 +189,7 @@ export function createStudioResourceEntryFromDiscoveryState(state, options = {})
       origin: artwork?.license?.origin || resource.license?.origin || 'original',
       summary: 'Reviewed same-origin gallery resource.',
     }),
+    adoption,
     trustChain: Object.freeze({
       status: state?.trustStatus || 'unknown',
       revoked: Boolean(state?.revocation?.revoked),
@@ -205,7 +229,8 @@ export function createStudioImportProposalFromResourceEntry(entry) {
     && trustCheck.hash === 'pass'
     && trustCheck.maintainerSignature === 'pass'
     && trustCheck.revocation === 'pass'
-    && trustCheck.coreValidation === 'pass',
+    && trustCheck.coreValidation === 'pass'
+    && trustCheck.adoptionEvidence === 'pass',
   );
 
   return Object.freeze({
@@ -241,6 +266,10 @@ export function formatStudioImportProposalSummary(entry, proposal) {
     `resourceId: ${entry.id}`,
     `title: ${entry.title}`,
     `resourceKind: ${entry.resourceKind}`,
+    `adoptionStatus: ${entry.adoption.status}`,
+    `adoptionEvidence: ${entry.adoption.evidencePacket}`,
+    `adoptionMetadataOnly: ${entry.adoption.metadataOnly}`,
+    `adoptionManualConfirmationRequired: ${entry.adoption.manualConfirmationRequired}`,
     `source: ${entry.source.uri}`,
     `license: ${entry.license.expression}`,
     `size: ${entry.size ?? '--'}`,
