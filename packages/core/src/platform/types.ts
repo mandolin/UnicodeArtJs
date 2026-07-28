@@ -16,10 +16,16 @@ import type { CoreImageData } from '../types/image';
 //#region 🟦 Text Rendering
 
 /**
- * 🟢 文本渲染选项
+ * Text rendering options for platform adapters.
  *
- * 🔹 描述把输入文本光栅化为灰度图像时所需的视觉字体、画布和行布局参数。
- * 🔹 该配置面向平台适配层，通常由高层 `ArtConfig` 标准化后生成。
+ * 描述把输入文本光栅化为灰度图像时所需的视觉字体、画布和行布局参数。该配置面向平台
+ * 适配层，通常由高层 `ArtConfig` 标准化后生成。
+ *
+ * @remarks
+ * The `font` here is the visual font used to rasterize source text, not the
+ * glyph font used to render matching templates.
+ *
+ * 这里的 `font` 是输入文字渲染用的视觉字体，不是输出字素模板使用的字素字体。
  *
  * @public
  */
@@ -47,9 +53,9 @@ export interface TextRenderOptions {
 }
 
 /**
- * 🟢 文本测量选项
+ * Text measurement options for platform adapters.
  *
- * 🔹 用于平台适配层测量文本宽度，保证渲染前的布局估算与实际绘制字体一致。
+ * 用于平台适配层测量文本宽度，保证渲染前的布局估算与实际绘制字体一致。
  *
  * @public
  */
@@ -67,9 +73,17 @@ export interface TextMeasureOptions {
 //#region 🟦 Character Rendering
 
 /**
- * 🟢 字素渲染选项
+ * Glyph-template rendering options for platform adapters.
  *
- * 🔹 描述把单个输出字素渲染为矩阵模板时需要的字体、矩阵和插值参数。
+ * 描述把单个输出字素渲染为矩阵模板时需要的字体、矩阵和插值参数。
+ *
+ * @remarks
+ * This path affects matching templates and therefore can change the generated
+ * art. It should use the glyph font resolved from `glyphFont` / legacy
+ * `glyphFontFamily`.
+ *
+ * 该路径影响匹配模板，因此可能改变生成结果；应使用由 `glyphFont` 或旧
+ * `glyphFontFamily` 解析出的字素字体。
  *
  * @public
  */
@@ -89,9 +103,9 @@ export interface CharRenderOptions {
 }
 
 /**
- * 🟢 字符集预计算选项
+ * Charset precomputation options.
  *
- * 🔹 描述批量生成字素矩阵模板时使用的字符集和字体渲染参数。
+ * 描述批量生成字素矩阵模板时使用的字符集和字体渲染参数。
  *
  * @public
  */
@@ -119,10 +133,18 @@ export interface PrecomputeCharDataOptions {
 //#region 🟦 Unified Adapter
 
 /**
- * 🟢 UnicodeArtJs 平台适配器契约
+ * UnicodeArtJs platform adapter contract.
  *
- * 🔹 把纯算法层与 Node、浏览器等宿主环境中的图像解码、文本绘制和字体加载隔离开。
- * 🔹 Core 高层入口只依赖该契约，从而在不同运行时复用同一套采样、匹配和输出逻辑。
+ * 把纯算法层与 Node、浏览器等宿主环境中的图像解码、文本绘制和字体加载隔离开。Core
+ * 高层入口只依赖该契约，从而在不同运行时复用同一套采样、匹配和输出逻辑。
+ *
+ * @remarks
+ * Implementations may differ at pixel level across rendering engines. Public
+ * Core contracts require stable option semantics and explainable output
+ * dimensions, not cross-engine pixel identity.
+ *
+ * 不同渲染引擎可能存在像素级差异。Core 公共契约要求配置语义稳定、输出尺寸可解释，
+ * 不要求跨引擎像素级完全一致。
  *
  * @public
  */

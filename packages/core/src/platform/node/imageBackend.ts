@@ -18,10 +18,23 @@ import { sharpImageBackend } from './sharpImageBackend';
 
 //#region 🟦 类型定义
 
-/** 当前内置的 Node 图像后端名称。 */
+/**
+ * Built-in Node image backend name.
+ *
+ * 当前内置的 Node 图像后端名称。`napi-rs` 是默认清洁路径；`sharp` 为 legacy opt-in。
+ *
+ * @public
+ */
 export type NodeImageBackendName = 'sharp' | 'napi-rs';
 
-/** Node 图像后端能力接口。 */
+/**
+ * Node image backend adapter contract.
+ *
+ * Node 图像后端能力接口。自定义后端必须返回 Core 灰度图像数据，不能把后端私有像素格式
+ * 泄漏到采样、匹配或输出层。
+ *
+ * @public
+ */
 export interface NodeImageBackend {
   /** 后端名称，用于诊断和测试。 */
   readonly name: string;
@@ -51,12 +64,25 @@ const DEFAULT_NODE_IMAGE_BACKEND: NodeImageBackend = napiRsImageBackend;
 
 let activeNodeImageBackend: NodeImageBackend = DEFAULT_NODE_IMAGE_BACKEND;
 
-/** 获取当前 Node 图像后端。 */
+/**
+ * Returns the active Node image backend.
+ *
+ * 获取当前 Node 图像后端。默认值为 `napi-rs`，除非调用方显式切换。
+ *
+ * @public
+ */
 export function getNodeImageBackend(): NodeImageBackend {
   return activeNodeImageBackend;
 }
 
-/** 获取指定内置 Node 图像后端。 */
+/**
+ * Resolves a built-in Node image backend by name.
+ *
+ * 按名称获取内置 Node 图像后端；未知名称会抛出普通 `Error`，因为这是后端注册表层面的
+ * 编程错误。
+ *
+ * @public
+ */
 export function resolveNodeImageBackend(name: NodeImageBackendName): NodeImageBackend {
   const backend = BUILTIN_NODE_IMAGE_BACKENDS[name];
   if (!backend) {
@@ -65,14 +91,27 @@ export function resolveNodeImageBackend(name: NodeImageBackendName): NodeImageBa
   return backend;
 }
 
-/** 设置当前 Node 图像后端。 */
+/**
+ * Sets the active Node image backend.
+ *
+ * 设置当前 Node 图像后端。传入字符串时只能选择内置后端；传入对象时调用方负责该后端的
+ * 许可证、依赖安装和输出语义。
+ *
+ * @public
+ */
 export function setNodeImageBackend(backend: NodeImageBackend | NodeImageBackendName): void {
   activeNodeImageBackend = typeof backend === 'string'
     ? resolveNodeImageBackend(backend)
     : backend;
 }
 
-/** 重置为默认 napi-rs 后端。 */
+/**
+ * Resets the active Node image backend to the default `napi-rs` implementation.
+ *
+ * 重置为默认 `napi-rs` 后端，常用于测试隔离或临时 legacy 后端使用后恢复。
+ *
+ * @public
+ */
 export function resetNodeImageBackend(): void {
   activeNodeImageBackend = DEFAULT_NODE_IMAGE_BACKEND;
 }

@@ -111,6 +111,8 @@ export enum FontStyle {
  *
  * 用于描述字符画最终展示或消费的位置。该字段当前不直接改变核心采样算法，主要供多端
  * 配置、导出、提示和后续环境差异处理使用。
+ *
+ * @public
  */
 export type OutputTarget =
   | 'plain'
@@ -126,6 +128,8 @@ export type OutputTarget =
  *
  * 视觉字体指输入文字渲染成中间图像时使用的字体。旧字段 `font` / `fontStyle` /
  * `fontReduce` 会继续保留，并映射到这里。
+ *
+ * @public
  */
 export interface VisualFontConfig {
   /** 字体名称或字体文件路径。 */
@@ -150,6 +154,8 @@ export interface VisualFontConfig {
  * 字素字体指字符画生成后，输出字素在终端、Web、VS Code、桌面应用中实际显示的字体。
  * `widthProfile` / `wideCharRegex` 会参与裱框、语义布局和输出列数计算。profile 仍为
  * experimental；`wideCharRegex` 是完整宽字素集合，优先级更高。
+ *
+ * @public
  */
 export interface GlyphFontConfig {
   /** 输出字素展示字体，例如 Sarasa Mono SC、LXGW WenKai Mono、Source Code Pro 等开源等宽字体。 */
@@ -164,6 +170,8 @@ export interface GlyphFontConfig {
  * Alignment modes for multi-line visual-text rendering.
  *
  * 多行视觉文本渲染时的对齐方式。
+ *
+ * @public
  */
 export enum TextAlign {
   /** 左对齐 */
@@ -200,6 +208,8 @@ export enum TextAlign {
  * - LINE: height表示每行的高度（像素）
  * - TOTAL: height表示整个输出的总高度（像素）
  * - 默认使用LINE模式，更符合直觉
+ *
+ * @public
  */
 export enum HeightMode {
   /** height表示每行的高度 */
@@ -255,6 +265,8 @@ export enum HeightMode {
  * **Validation / 校验：**`height` 和 `width`（如提供）必须大于零；`matrixSize` 的范围
  * 为 2 至 20（推荐 4 至 8）；`ratio` 的范围为 1 至 3（推荐 2）；`fontReduce` 的范围为
  * 0 至 10。`charSpace` 是当前不改变主路径输出的 reserved 字段。
+ *
+ * @public
  */
 export interface ArtConfig {
   //#region 🔶 尺寸配置

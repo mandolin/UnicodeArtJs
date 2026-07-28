@@ -41,12 +41,18 @@ import type { MessageKey, MessageParams, SupportedLocale } from '../i18n';
  * console.log(result.content); // 直接输出到终端
  * 
  * // HTML格式
- * const htmlResult = toHTML(result);
- * document.body.innerHTML = htmlResult;
+ * const htmlResult = await textToArt('Hello', {
+ *   ...config,
+ *   outputFormat: OutputFormat.HTML
+ * });
+ * document.body.innerHTML = htmlResult.content;
  * 
  * // ANSI格式（彩色终端）
- * const ansiResult = toANSI(result, config);
- * process.stdout.write(ansiResult);
+ * const ansiResult = await textToArt('Hello', {
+ *   ...config,
+ *   outputFormat: OutputFormat.ANSI
+ * });
+ * process.stdout.write(ansiResult.content);
  * ```
  * 
  * @remarks
@@ -54,8 +60,7 @@ import type { MessageKey, MessageParams, SupportedLocale } from '../i18n';
  * - HTML: 网页显示，保留样式
  * - ANSI: 彩色终端，视觉效果最佳
  * 
- * @see {@link toHTML} HTML格式转换函数
- * @see {@link toANSI} ANSI格式转换函数
+ * @public
  */
 export enum OutputFormat {
   /** 
@@ -110,6 +115,8 @@ export enum OutputFormat {
  * - `duration` 包含全部处理阶段；`metadata` 用于调试和性能分析。
  * - 典型耗时为 100 至 2000 ms，取决于图像大小与配置。
  * - UTF-8 文本大小并不必然等于 `rows x cols`，因为宽字素和非 ASCII 字符可占多个字节。
+ *
+ * @public
  */
 export interface ArtResult {
   /** 
@@ -152,6 +159,8 @@ export interface ArtResult {
  * Metadata collected while generating an art result.
  *
  * 包含生成过程的详细信息，用于调试、性能分析和宿主展示。
+ *
+ * @public
  */
 export interface ArtMetadata {
   /** 源图像宽度（像素），文本模式为0 */
@@ -209,6 +218,8 @@ export interface ArtMetadata {
  * - 每个错误码对应一类错误
  * - 通过error.code可精确判断错误类型
  * - details字段提供更详细的上下文
+ *
+ * @public
  */
 export enum ErrorCode {
   /** 输入参数无效 */
@@ -324,6 +335,8 @@ export enum ErrorCode {
  * - code字段用于程序化判断
  * - details字段包含原始错误信息或上下文
  * - name字段固定为'UnicodeArtError'
+ *
+ * @public
  */
 export class UnicodeArtError extends Error {
   /** 错误码 */
@@ -424,7 +437,13 @@ export class UnicodeArtError extends Error {
   }
 }
 
-/** UnicodeArtError 扩展选项。 */
+/**
+ * Optional structured fields carried by `UnicodeArtError`.
+ *
+ * `UnicodeArtError` 携带的结构化扩展字段。
+ *
+ * @public
+ */
 export interface UnicodeArtErrorOptions {
   details?: any;
   messageKey?: MessageKey;

@@ -1,14 +1,14 @@
 /**
  * ============================================================================
- * 🟦 UnicodeArtJs 核心库主入口
+ * 🟦 UnicodeArtJs Core Node entry / 核心库 Node 主入口
  * ============================================================================
  * 
  * 🔶 模块职责
- * 导出所有公共API，包括：
+ * 导出 Node 默认入口的公共 API，包括：
  * - 类型定义（Types）
  * - 常量（Constants）
- * - 核心函数（已实现）
- * - 工具函数（Utils）
+ * - 核心函数（textToArt / imageToArt / semanticDocumentToArt）
+ * - 工具函数与底层模块（高级用户）
  * 
  * 🔶 使用方式
  * 
@@ -23,11 +23,12 @@
  * import { imageToArt, textToArt } from 'unicode-art-js';
  * ```
  * 
- * **UMD (Browser)**:
+ * **Browser / UMD**:
  * ```html
  * <script src="unicode-art-js.umd.js"></script>
  * <script>
- *   const result = await UnicodeArt.imageToArt('photo.jpg', config);
+ *   // 浏览器高层入口请优先从 browser entry 使用；URL 输入受 CORS 约束。
+ *   const result = await UnicodeArt.imageToArt(fileOrBlob, config);
  * </script>
  * ```
  * 
@@ -35,7 +36,7 @@
  * 
  * **主要函数**:
  * - `textToArt(text, config)` - 文本转字符画 ✅
- * - `imageToArt(imagePath, config)` - 图片转字符画 ✅
+ * - `imageToArt(imagePath, config)` - Node 本地图像文件转字符画 ✅
  * - `validateConfig(config)` - 验证配置参数 ✅
  * 
  * **工具函数**:
@@ -56,6 +57,14 @@
  * - 所有枚举类型
  * 
  * @module unicode-art-js
+ * @remarks
+ * This file is the Node-oriented package entry. Browser consumers should prefer
+ * `unicode-art-js/browser` when they need DOM/Canvas inputs, progress callbacks
+ * or browser capability checks.
+ *
+ * 本文件是面向 Node 的包入口。浏览器使用者如需 DOM/Canvas 输入、进度回调或浏览器
+ * 能力查询，应优先使用 `unicode-art-js/browser`。
+ *
  * @since 1.0.0
  * @license MIT
  * @see {@link https://github.com/mandolin/UnicodeArtJs}
@@ -205,7 +214,8 @@ export type {
   CoreCapabilities,
   CoreCapabilityDescriptor,
   CoreCapabilityStability,
-  NodeImageBackendCapabilities
+  NodeImageBackendCapabilities,
+  NodeTextRendererCapabilities
 } from './capabilities';
 
 export {
@@ -484,6 +494,14 @@ export {
  * @remarks
  * 多行文本、对齐和行间距在视觉字体栅格化阶段生效；随后采用与 {@link imageToArt} 相同的
  * 采样、SAD 匹配和输出组装路径。配置 layout-stage 裱框时，改由语义布局渲染路径处理。
+ *
+ * Node text rendering uses the configured visual font and the default Skia
+ * canvas runtime. Matching templates use `glyphFont` / `glyphFontFamily` when
+ * available, so changing the display glyph font can affect matching and box
+ * width calculation.
+ *
+ * Node 文本渲染使用配置中的视觉字体和默认 Skia Canvas 运行时。匹配模板会优先使用
+ * `glyphFont` / `glyphFontFamily`，因此字素字体会影响匹配结果和裱框宽度计算。
  *
  * @param text - Text to rasterize. 要栅格化的输入文本。
  * @param config - Partial conversion configuration. 部分转换配置。
@@ -959,6 +977,14 @@ function normalizeOptionalNonNegativeInteger(
  * 将本地图像文件转换为 Unicode 字符画。完整流程为：加载、灰度化、采样、匹配与组装。
  *
  * @public
+ * @remarks
+ * The default Node image backend is `napi-rs`; `sharp` is retained only as a
+ * legacy opt-in backend. Alpha pixels are composited over white before grayscale
+ * conversion in the default path.
+ *
+ * 默认 Node 图像后端为 `napi-rs`；`sharp` 仅作为 legacy opt-in 后端保留。默认路径在
+ * 灰度化前会把透明像素合成到白色背景上。
+ *
  * @param imagePath - Local image path. 本地图像路径。
  * @param config - Conversion options. 转换配置。
  * @returns The generated art result. 生成后的字符画结果。
@@ -1076,6 +1102,16 @@ export async function imageToArt(
  * 校验不完整的转换配置并补齐默认值，返回完整的配置对象。
  *
  * @public
+ * @remarks
+ * This function normalizes legacy aliases such as `font`, `fontStyle`,
+ * `fontReduce` and `glyphFontFamily`, then validates dimensions, sampling,
+ * glyph-width rules and box options. Reserved fields may be preserved in the
+ * returned object even when they do not yet affect conversion output.
+ *
+ * 本函数会先归一化 `font`、`fontStyle`、`fontReduce`、`glyphFontFamily` 等旧字段，
+ * 再校验尺寸、采样、字素宽度规则和裱框选项。reserved 字段即使暂不影响输出，也会保留
+ * 在返回对象中，供宿主和后续版本使用。
+ *
  * @param config - User-supplied partial configuration. 用户提供的部分配置。
  * @returns The normalized complete configuration. 规范化后的完整配置。
  * 

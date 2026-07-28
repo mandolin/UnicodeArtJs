@@ -19,10 +19,22 @@ import { createRequire } from 'node:module';
 
 //#region 🟦 Runtime module loading
 
-/** npm 包提供的 node-canvas API 兼容层。 */
+/**
+ * npm module path for the node-canvas-compatible Skia runtime.
+ *
+ * npm 包提供的 node-canvas API 兼容层路径。
+ *
+ * @public
+ */
 export const NODE_TEXT_CANVAS_MODULE = '@napi-rs/canvas/node-canvas';
 
-/** 当前 Core 实际需要的最小兼容接口。 */
+/**
+ * Minimal Canvas API surface required by Core.
+ *
+ * 当前 Core 实际需要的最小兼容接口；不要把完整 node-canvas API 当作稳定公共契约。
+ *
+ * @public
+ */
 export interface NodeTextCanvasModule {
   createCanvas(width: number, height: number, type?: 'image' | 'svg'): any;
   registerFont(path: string, fontFace: { family: string; weight?: string; style?: string }): void;
@@ -31,10 +43,12 @@ export interface NodeTextCanvasModule {
 let cachedCanvasModule: NodeTextCanvasModule | undefined;
 
 /**
- * 获取默认的 Node 文本 Canvas 运行时。
+ * Returns the default Node text Canvas runtime.
  *
  * 中文说明：使用 `createRequire()` 让 Node ESM 入口也能同步加载原生 Canvas，
  * 同时继续避免浏览器构建静态追踪 `@napi-rs/canvas`。
+ *
+ * @public
  */
 export function getNodeTextCanvas(): NodeTextCanvasModule {
   if (!cachedCanvasModule) {
@@ -48,11 +62,13 @@ export function getNodeTextCanvas(): NodeTextCanvasModule {
 }
 
 /**
- * 获取能解析 Core 自身依赖的同步 require。
+ * Returns a synchronous require anchored to the installed Core package.
  *
  * CJS 入口直接使用宿主 `require`；ESM 入口没有 `require`，因此先从当前工作目录
  * 创建一个解析器，定位 `unicode-art-js/package.json` 后再创建以 Core 包为锚点的
  * require，避免要求用户把 `@napi-rs/canvas` 声明为自己的直接依赖。
+ *
+ * @public
  */
 export function getNodeRuntimeRequire(): NodeJS.Require {
   if (typeof require === 'function') return require;
@@ -62,7 +78,13 @@ export function getNodeRuntimeRequire(): NodeJS.Require {
   return createRequire(packageManifest);
 }
 
-/** 判断异常是否来自默认 Skia Canvas 运行时无法加载。 */
+/**
+ * Tests whether an error means the default Skia Canvas runtime is unavailable.
+ *
+ * 判断异常是否来自默认 Skia Canvas 运行时无法加载。
+ *
+ * @public
+ */
 export function isNodeTextCanvasUnavailable(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
 
@@ -75,7 +97,13 @@ export function isNodeTextCanvasUnavailable(error: unknown): boolean {
     candidate.message.includes('@napi-rs/canvas');
 }
 
-/** 仅供测试隔离与未来 host adapter 注入使用。 */
+/**
+ * Clears the cached Canvas runtime.
+ *
+ * 清理 Canvas 运行时缓存；仅供测试隔离与未来 host adapter 注入使用。
+ *
+ * @public
+ */
 export function resetNodeTextCanvasCache(): void {
   cachedCanvasModule = undefined;
 }
