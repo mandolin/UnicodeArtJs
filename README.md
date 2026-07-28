@@ -1,16 +1,16 @@
 # UnicodeArtJs
 
-把文字和图片转换成字符画的 TypeScript / JavaScript 工具集。
+把文字和图片转换成字符画的 TypeScript / JavaScript 工具集。它包含可直接调用的 Core 库、命令行工具、浏览器工具站和 VS Code 插件。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/unicode-art-js.svg)](https://www.npmjs.com/package/unicode-art-js)
 [![CLI](https://img.shields.io/npm/v/unicode-art-cli.svg?label=unicode-art-cli)](https://www.npmjs.com/package/unicode-art-cli)
 
-UnicodeArtJs 面向几种常见使用场景：在网页里生成字符画、在命令行里处理图片或文本、在 VS Code 编辑器中把选中文本转换成 Banner。核心库以 MIT 协议发布，可作为普通 npm 包集成到自己的项目中。
+你可以用它在网页里生成字符画，在终端里批处理图片或文本，也可以在 VS Code 里把选中文本转换成 Banner。核心库以 MIT 协议发布，可作为普通 npm 包集成到自己的项目中。
 
 在线体验：<https://mandolin.github.io/UnicodeArtJs/>
 
-第一次使用可以从 [Quickstart](docs/quickstart.md) 开始；需要更多可复制场景时看 [Recipes](docs/recipes.md)。
+第一次使用建议从 [Quickstart](docs/quickstart.md) 开始；需要更多可复制场景时看 [Recipes](docs/recipes.md)。
 
 ## 选择入口
 
@@ -126,7 +126,7 @@ unicode-art document banner.json --height 12 --box false
 
 更短的上手路径见 [docs/quickstart.md](docs/quickstart.md)，更多可运行示例见 [docs/recipes.md](docs/recipes.md) 和 [examples/](examples/)。
 
-## 包和应用
+## 项目组成
 
 | 位置 | 说明 |
 | --- | --- |
@@ -137,7 +137,7 @@ unicode-art document banner.json --height 12 --box false
 
 ## 本地开发
 
-仓库根目录是私有编排包，不发布到 npm。开发环境建议使用 Node.js 22 和 npm 10：
+仓库根目录是 monorepo 编排包，不发布到 npm。开发环境建议使用 Node.js 22 和 npm 10：
 
 ```bash
 npm run install:packages

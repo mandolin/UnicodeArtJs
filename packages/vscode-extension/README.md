@@ -1,6 +1,6 @@
 # UnicodeArtJs
 
-Convert selected text or image files to Unicode character art inside VSCode.
+Convert selected text or image files to Unicode character art inside VS Code.
 
 This extension is built on the MIT-licensed `unicode-art-js` core package. UnicodeArtJs is an independent TypeScript / JavaScript implementation whose feature goals reference the public behavior and user experience of UnicodeArt without copying GPL source code or line-by-line implementation structure.
 
@@ -18,8 +18,8 @@ Marketplace: <https://marketplace.visualstudio.com/items?itemName=mandolin.unico
 - Save generated output as `.txt` or `.html`.
 - Remember the most recent configuration.
 - Save a default template and three custom template slots for editor context menu generation.
-- Open the converter from the VSCode status bar.
-- Pass VSCode language into Core locale for localized Core errors.
+- Open the converter from the VS Code status bar.
+- Pass VS Code language into Core locale for localized Core errors.
 - Choose a separate glyph font in the Converter preview and HTML export.
 
 ## Commands
@@ -47,7 +47,7 @@ Context menus:
 2. Right-click and choose `UnicodeArtJs: Generate Unicode Art: Default Template`.
 3. Use `UnicodeArtJs: Open Converter` for full controls, image conversion, previews, exports, and template saving.
 4. Adjust `Visual Font` for how source text is rendered before conversion.
-5. Adjust `Glyph Font` for how generated art is previewed, exported to HTML, and displayed in VSCode.
+5. Adjust `Glyph Font` for how generated art is previewed, exported to HTML, and displayed in VS Code.
 
 After installing or reinstalling a local VSIX, run `Developer: Reload Window` if commands or menus do not appear immediately.
 
@@ -80,7 +80,7 @@ Visual font notes:
 - Localized Chinese system-font names such as `黑体`, `宋体`, `新宋体`, and `微软雅黑` are still normalized for old user presets, but they are compatibility inputs only. UnicodeArtJs does not redistribute these fonts.
 - `Glyph Font` only controls how the generated art is displayed in preview/export. It does not change the source text rasterization.
 - For best display, prefer a strict mixed-width monospace font, for example `Sarasa Mono SC` / `等距更纱黑体 SC` or `LXGW WenKai Mono` / `霞鹜文楷等宽`.
-- In VSCode, some locally installed system fonts may show unexpected spacing because of editor font metrics or fallback behavior. Try changing `editor.fontFamily`, trying another glyph font, or toggling `editor.disableMonospaceOptimizations`.
+- In VS Code, some locally installed system fonts may show unexpected spacing because of editor font metrics or fallback behavior. Try changing `editor.fontFamily`, trying another glyph font, or toggling `editor.disableMonospaceOptimizations`.
 
 Box settings:
 
@@ -154,24 +154,24 @@ For issue routing, known font/editor behavior, and safe report details, see the 
 After packaging, install the VSIX locally:
 
 ```bash
-code --install-extension .\unicode-art-js-vscode-0.3.0.vsix --force
+code --install-extension .\unicode-art-js-vscode-<version>.vsix --force
 ```
 
 For profile-specific testing:
 
 ```bash
-code --profile WebDev --install-extension .\unicode-art-js-vscode-0.3.0.vsix --force
+code --profile WebDev --install-extension .\unicode-art-js-vscode-<version>.vsix --force
 ```
 
-Then run `Developer: Reload Window` in that VSCode window.
+Then run `Developer: Reload Window` in that VS Code window.
 
 ## Marketplace Publish
 
-Publishing requires a valid VSCode Marketplace publisher and PAT configured for `vsce`.
+Publishing requires a valid VS Code Marketplace publisher and PAT configured for `vsce`.
 
 ```bash
 npm run check
 npm run package
 npm run inspect:vsix
-vsce publish --packagePath .\unicode-art-js-vscode-0.3.0.vsix
+vsce publish --packagePath .\unicode-art-js-vscode-<version>.vsix
 ```

@@ -1,10 +1,10 @@
 # unicode-art-cli
 
-Unicode Art CLI - 将文本和图片转换为 Unicode 字符画的命令行工具。
+将文本、图片和实验性布局文档转换为 Unicode 字符画的命令行工具。
 
-本工具基于 MIT 许可的 `unicode-art-js` Core 独立实现构建。项目功能目标参考 UnicodeArt 的公开行为和使用体验，并通过兼容性测试尽量对齐常用参数下的输出效果；公开文档不将本项目描述为 GPL 源码的直接移植或逐行翻译。
+本工具基于 MIT 许可的 `unicode-art-js` Core 构建。UnicodeArtJs 是 TypeScript / JavaScript 的独立实现，功能目标参考 UnicodeArt 的公开行为和使用体验，但不复制 GPL 源码、注释或逐行结构。
 
-## 📦 安装
+## 安装
 
 ### 全局安装
 
@@ -18,7 +18,7 @@ npm install -g unicode-art-cli
 npm install unicode-art-cli
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 图片转字符画
 
@@ -72,7 +72,7 @@ JSON 使用 `rowSpan` / `colSpan`；轻量 DSL 使用 `{rowspan:2}` / `{colspan:
 `{c:2}` / `{r:2}`。`{t:原字}` 表示原字直接输出，不经过字符画转换。DSL 的 `{h}` 和 `{f}`
 分别表示表头和页脚，默认单元格分隔符为 `|`，行分隔符可选换行、`{n}` 或二者配对。
 
-## 📖 命令参考
+## 命令参考
 
 ### 通用选项
 
@@ -211,7 +211,7 @@ unicode-art resource validate packages/web/public/gallery/resource-manifest.json
 unicode-art resource inspect packages/web/public/gallery/resource-manifest.json --json
 ```
 
-## 📝 配置文件
+## 配置文件
 
 支持以下格式的配置文件：
 
@@ -313,7 +313,7 @@ npm --workspace packages/cli run smoke:pack-install
 npm --workspace packages/cli run core:dep:local
 ```
 
-## 🎨 字符集说明
+## 字符集说明
 
 ### ASCII
 基础ASCII字符集，适合英文文本和简单图像。
@@ -330,7 +330,7 @@ npm --workspace packages/cli run core:dep:local
 ### CHINESE_SIMPLE
 简化中文字符集，包含3500+常用汉字。
 
-## 💡 使用技巧
+## 使用技巧
 
 ### 1. 调整输出质量
 
@@ -375,7 +375,7 @@ unicode-art text "AB" --box '{\"renderStage\":\"layout\",\"mode\":\"grid\",\"sty
 unicode-art image photo.jpg --format ansi
 ```
 
-## 🔧 故障排除
+## 故障排除
 
 ### 文本渲染运行时加载失败
 
@@ -400,7 +400,7 @@ unicode-art text "Hello" -f "/path/to/font.ttf"
 unicode-art image photo.jpg --no-config
 ```
 
-## 📊 性能基准
+## 性能参考
 
 | 图像尺寸 | 预计耗时 | 内存占用 |
 |---------|---------|---------|
@@ -411,11 +411,11 @@ unicode-art image photo.jpg --no-config
 
 *实际性能取决于硬件配置和字符集大小*
 
-## 🤝 贡献
+## 贡献
 
 欢迎提交 Issue 和 Pull Request。提交前建议先查看仓库的 [支持与反馈](../../docs/support.md)
 和 [已知限制](../../docs/known-limitations.md)，以便选择正确组件并提供最小复现命令。
 
-## 📄 许可证
+## 许可证
 
 MIT License
