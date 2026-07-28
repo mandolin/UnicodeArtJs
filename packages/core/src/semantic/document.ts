@@ -88,11 +88,17 @@ export function validateSemanticDocument(
 /**
  * 解析受限 DSL。
  *
+ * 该 DSL 是给 CLI/Web 表单和未来编辑器的轻量输入格式，不是模板执行语言。
+ * 解析阶段只产生 canonical JSON AST；所有视觉渲染都交给 `renderSemanticDocumentWithAdapter()`。
+ *
  * DSL 规则：
  * - `{h}` / `{f}` 仅可位于行首，分别代表表头与页脚。
  * - `{rowspan:n}` / `{colspan:n}` 为推荐跨度标签；`{c:n}` / `{r:n}` 为兼容别名。
  * - `{t:...}` 为原字块，不能嵌套其它标签。
  * - `\\`、`\{`、`\}`、`\|` 或自定义分隔符首字符可用于字面量转义。
+ *
+ * The parser is deliberately non-executable: raw-text blocks preserve literal
+ * text, but they never inject markup, scripts, or renderer options.
  */
 export function parseSemanticDsl(
   source: string,

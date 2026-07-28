@@ -88,6 +88,8 @@ export function measureUnicodeArtFontText(
     glyphs.forEach((glyphKey, index) => {
       const resolved = resolveUnicodeArtFontGlyph(font, glyphKey);
       // 宿主覆盖宽度 profile 时，图案视觉宽度可能大于字体原始 advance。
+      // Measurement therefore uses max(advance, visualWidth), matching the
+      // renderer and preventing previews from clipping wide glyph patterns.
       const visualWidth = resolved.glyph
         ? Math.max(0, ...resolved.glyph.lines.map((line) => calculator.getTextWidth(line)))
         : 0;

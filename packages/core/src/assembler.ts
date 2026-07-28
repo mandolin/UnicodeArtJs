@@ -64,6 +64,10 @@ import { createGlyphWidthCalculatorFromConfig, type GlyphWidthCalculator } from 
  * - 每行使用 LF 或 CRLF 换行符
  * - trimTrailingSpaces可减少文件大小
  * - 宽字符已正确处理显示宽度
+ * - Box 渲染发生在纯文本内容生成之后，并使用 `GlyphWidthCalculator`
+ *   计算显示列宽；因此这里的尺寸语义是“字素显示列”，不是 JS 字符串长度。
+ * - Box rendering is intentionally post-processing for this entry. Layout-stage
+ *   grid/cell framing is routed through semantic rendering instead.
  * 
  * @performance
  * - 时间复杂度: O(R × C)，R为行数，C为列数

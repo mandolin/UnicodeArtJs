@@ -190,6 +190,10 @@ function alignInnerWidthToFrame(
   options: NormalizedBoxOptions,
   calculator?: GlyphWidthCalculator
 ): number {
+  // 横线字素可能不是 1 列宽。先把内宽调整到边框水平字素宽度的整数倍，
+  // 再绘制上下边，避免 mixed monospace 字体中圆角或双线框出现一列偏移。
+  // Horizontal border glyphs can be wider than one display column, so inner
+  // width is aligned before padding and borders are materialized.
   const horizontalWidth = Math.max(
     1,
     getGlyphWidth(options.chars.top, calculator),
@@ -345,6 +349,7 @@ function renderTitleBorder(
   const titleSpace = titleWidth + title.padding * 2;
 
   if (titleSpace > width) {
+    // 标题太宽时保持边框连续性优先，不强行截断标题；截断策略后续可作为标题 overflow 选项扩展。
     return repeatToWidth(options.chars.top, width, calculator);
   }
 
@@ -407,6 +412,8 @@ function applyShadow(
     return lines;
   }
 
+  // 阴影在最终框体之后追加。先按显示宽度补齐每一行，再附加右侧/底部阴影，
+  // 否则宽字素内容会让阴影边缘呈阶梯状。
   const lineWidth = lines.reduce((max, line) => Math.max(max, getGlyphWidth(line, calculator)), 0);
   const rightShadow = shadow.char.repeat(shadow.offsetX);
   const result = lines.map((line) => `${padToWidth(line, lineWidth, 'left', calculator)}${rightShadow}`);

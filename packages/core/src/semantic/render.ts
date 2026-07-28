@@ -124,6 +124,9 @@ function placeDocumentCells(document: SemanticDocument, locale: SupportedLocale)
   const slots: Array<Array<PlacedCell | undefined>> = Array.from({ length: rowCount }, () => []);
   const cells: PlacedCell[] = [];
 
+  // 用 slot table 先落位所有显式 cell，再补隐式空 cell。这样 rowspan/colspan 的冲突
+  // 可以在渲染前确定性失败，而不是在边框连接阶段产生错位。
+  // The slot table is the source of truth for joins and separators.
   document.rows.forEach((row, rowIndex) => {
     let column = 0;
     row.cells.forEach((cell, cellIndex) => {
@@ -237,6 +240,7 @@ async function renderBlock(
   locale: SupportedLocale
 ): Promise<string[]> {
   if (block.kind === 'raw-text') {
+    // 原字输出只做换行归一化，不走字素化转换；用于 `{t:...}` 语义和脚注/标签类文本。
     return block.text.replace(/\r\n|\r/gu, '\n').split('\n');
   }
 
@@ -383,6 +387,8 @@ function calculateColumnWidths(
   const widths = Array.from({ length: grid.columnCount }, () => options.minCellWidth);
   const cells = [...grid.cells].sort((left, right) => left.colSpan - right.colSpan);
 
+  // 先处理跨度小的 cell，再把不足宽度分摊到对应列。这样单列约束会先稳定下来，
+  // 多列 cell 只补足剩余 deficit，避免宽单元格过早把所有列撑开。
   for (const placed of cells) {
     const renderedCell = rendered.get(placed);
     if (!renderedCell) {
@@ -505,6 +511,8 @@ function renderJunction(
   options: LayoutOptions,
   calculator: GlyphWidthCalculator
 ): string {
+  // 交叉点只看 slot table 中相邻 cell 是否相同，不猜测原始 row/cell 下标。
+  // This keeps rowSpan/colSpan boundaries and hidden separator lines consistent.
   const left = hasHorizontalEdge(grid, boundary, column - 1);
   const right = hasHorizontalEdge(grid, boundary, column);
   const up = hasVerticalEdge(grid, boundary - 1, column);

@@ -315,6 +315,10 @@ function splitCharsByType(
  * @remarks
  * - 返回二维数组: charMatrix[row][col]
  * - 宽字符占用2列，但只在第一列存储字符，第二列为空字符串
+ * - 这个空字符串不是“缺字”，而是宽字素的右半占位；assembler 和 box width
+ *   计算会按最终字符串显示宽度处理，不能在匹配阶段填入空格。
+ * - The placeholder keeps the sampling grid and matched glyph stream aligned
+ *   without pretending the right half / second half is an independently matched glyph.
  * - wideCharRatio控制宽字符优先级：
  *   - ratio below 1.0: 倾向使用宽字符
  *   - ratio = 1.5: 默认值，平衡选择
@@ -373,6 +377,9 @@ export async function batchMatch(
       const block = samplingArray[row][col];
       
       // 🔹 步骤1: 在普通字符集中找到最佳匹配
+      // 普通字符始终按单块矩阵匹配，作为宽字符判定的基准分数。
+      // Normal glyph matching is the baseline score used by wide-glyph
+      // arbitration; it must be computed before merging neighbor blocks.
       let bestNormalChar: CharMatrix | null = null;
       let bestNormalSAD = Infinity;
       
@@ -394,6 +401,8 @@ export async function batchMatch(
       }
       
       // 🔹 步骤2: 如果有下一列，尝试宽字符匹配
+      // 宽字符候选把当前块和右侧块合并成 2 倍宽矩阵。行尾只有在普通字符集为空时
+      // 才允许用空白右半边兜底，避免正常混合字符集把最后一列过度吞并。
       let bestWideChar: CharMatrix | null = null;
       let bestWideSAD = Infinity;
       let useWideChar = false;

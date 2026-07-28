@@ -109,6 +109,9 @@ export function calculateOutputSize(
  * - 公式: blockW = ceil(sourceWidth / (outputWidth × ratio))
  * - 向上取整确保所有像素都被采样
  * - 边缘块可能包含填充像素
+ * - 高度优先模式用 `round(blockH / ratio)` 推导列块宽，宽度优先模式反向推导行块高。
+ *   This keeps historical text/image output compatible with the original row-first sizing model.
+ * - 最小块高为 2、最小块宽为 1；这是防止极小图像或极端参数触发零尺寸采样的保护线。
  * 
  * @performance
  * - 时间复杂度: O(1)
@@ -265,7 +268,15 @@ export function resizeAndNormalizeBlock(
 }
 
 /**
- * 🔹 按OpenCV resize坐标规则采样一个目标像素。
+ * 🔹 按 OpenCV resize 坐标规则采样一个目标像素。
+ *
+ * 这里是采样一致性的关键点：最近邻使用整数比例映射，线性/三次/Lanczos 使用
+ * half-pixel center 对齐公式 `(dst + 0.5) * source / target - 0.5`。边界采用
+ * replicate，而不是白色填充；白色填充只发生在 `extractBlock()` 抽取源块阶段。
+ *
+ * This function intentionally separates block extraction padding from resize
+ * border handling. Doing so keeps edge blocks deterministic while letting all
+ * interpolation kernels sample near-border pixels with replicate semantics.
  */
 export function resizeInterpolate(
   data: Uint8Array,
@@ -401,6 +412,9 @@ function separableInterpolate(
   let yWeightSum = 0;
 
   for (let k = 0; k < taps; k++) {
+    // 三次和 Lanczos 都是可分离核：先为 X/Y 两个方向分别计算权重，再做外积累加。
+    // The weight arrays are normalized independently to avoid brightness drift
+    // near image borders where replicated samples can otherwise bias the sum.
     xWeights[k] = weightFn(x - (baseX + startOffset + k));
     yWeights[k] = weightFn(y - (baseY + startOffset + k));
     xWeightSum += xWeights[k];

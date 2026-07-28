@@ -90,6 +90,8 @@ function renderInputLine(
     const advance = Math.max(resolved.advance, visualWidth);
 
     for (let row = 0; row < font.metrics.height; row++) {
+      // advance 是艺术字字体的列步进，不等同于图案字符串长度。每行都按相同 advance
+      // 补齐，才能让后续字形在固定网格上对齐；行尾空格因此必须保留到上层决定是否裁剪。
       outputLines[row] += padToWidth(glyphLines[row] ?? '', advance, 'left', calculator);
       if (glyphIndex < glyphKeys.length - 1 && letterSpacing > 0) {
         outputLines[row] += ' '.repeat(letterSpacing);
