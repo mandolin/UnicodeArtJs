@@ -16,7 +16,7 @@ export interface ResolveArtConfigOptions {
 /**
  * 🟢 解析 VS Code 扩展当前有效配置
  *
- * 🔹 配置优先级固定为：内置默认值 -> VS Code 用户/工作区设置 -> 默认模板 -> 最近 Converter 配置。
+ * 🔹 配置优先级固定为：内置默认值 → VS Code 用户/工作区设置 → 默认模板 → 最近 Converter 配置。
  * 🔹 返回值会补齐 Core 需要的 locale 与 `outputTarget: "vscode"`。
  * 🔹 模板与最近配置来自扩展 `globalState`，不会反写到用户设置或工作区设置。
  *
