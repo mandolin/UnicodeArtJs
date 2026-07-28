@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-18T15:19:34.297Z",
+  "generatedAt": "2026-07-28T02:46:20.832Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -232,7 +232,7 @@
   "apiReference": {
     "contract": "unicodeartjs-public-api-reference",
     "version": 1,
-    "symbolCount": 168,
+    "symbolCount": 170,
     "sourceFileCount": 44,
     "entries": [
       {
@@ -326,8 +326,8 @@
             "summary": "获取字形图案的最大视觉宽度，用于编辑器与 future renderer 预检。",
             "source": {
               "path": "packages/core/src/artFont/metrics.ts",
-              "line": 113,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/artFont/metrics.ts#L113"
+              "line": 115,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/artFont/metrics.ts#L115"
             }
           },
           {
@@ -350,8 +350,8 @@
             "summary": "🟢 将字符矩阵组装为纯文本 🔹 将二维字符数组转换为多行文本字符串。 🔹 支持去除行尾空格和自定义换行符。",
             "source": {
               "path": "packages/core/src/assembler.ts",
-              "line": 73,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L73"
+              "line": 77,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L77"
             }
           },
           {
@@ -362,8 +362,8 @@
             "summary": "🟢 去除行尾空格 🔹 删除字符串末尾的所有空格字符。 🔹 保留行首和中间的空格。",
             "source": {
               "path": "packages/core/src/assembler.ts",
-              "line": 120,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L120"
+              "line": 124,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L124"
             }
           },
           {
@@ -374,8 +374,8 @@
             "summary": "🟢 将字符矩阵组装为HTML文档 🔹 生成完整的HTML页面，使用 preformatted block 保持字符画格式。 🔹 支持自定义字体、颜色和样式。",
             "source": {
               "path": "packages/core/src/assembler.ts",
-              "line": 161,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L161"
+              "line": 165,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L165"
             }
           },
           {
@@ -386,8 +386,8 @@
             "summary": "🟢 转义HTML特殊字符 🔹 将 angle brackets、ampersand 等字符转义为HTML实体。 🔹 防止XSS攻击和显示错误。",
             "source": {
               "path": "packages/core/src/assembler.ts",
-              "line": 239,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L239"
+              "line": 243,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L243"
             }
           },
           {
@@ -398,8 +398,8 @@
             "summary": "🟢 将字符矩阵组装为ANSI转义码格式 🔹 生成带颜色的终端输出，使用ANSI转义码。 🔹 支持256色模式和真彩色模式。 ⚠️ **注意**: 仅在支持ANSI的终端中有效。",
             "source": {
               "path": "packages/core/src/assembler.ts",
-              "line": 316,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L316"
+              "line": 320,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L320"
             }
           },
           {
@@ -410,8 +410,8 @@
             "summary": "🟢 根据格式组装最终输出 🔹 统一的入口函数，根据配置的输出格式调用相应的组装函数。 🔹 返回ArtResult对象，包含内容和元数据。",
             "source": {
               "path": "packages/core/src/assembler.ts",
-              "line": 368,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L368"
+              "line": 372,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L372"
             }
           },
           {
@@ -422,8 +422,8 @@
             "summary": "🟢 将已有字符画文本组装为标准输出结果 🔹 适用于语义文档、艺术字字体或外部扩展已经生成纯文本字符画的场景。 🔹 该函数只负责格式包装、HTML/ANSI 转换和输出尺寸统计，不重新执行采样或匹配。",
             "source": {
               "path": "packages/core/src/assembler.ts",
-              "line": 437,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L437"
+              "line": 441,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/assembler.ts#L441"
             }
           },
           {
@@ -866,8 +866,8 @@
             "summary": "Renders text through the Node visual-font adapter, then converts it to Unicode art. 使用 Node 视觉字体 adapter 将输入文本先栅格化，再转换为 Unicode 字符画；这不是逐字符 匹配。字素模板由 `glyphFont`（或兼容字段）控制，视觉字体与字素字体的职责不同。",
             "source": {
               "path": "packages/core/src/index.ts",
-              "line": 494,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L494"
+              "line": 512,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L512"
             }
           },
           {
@@ -878,8 +878,8 @@
             "summary": "Renders a versioned semantic document into Unicode art. 消费版本化 JSON AST，支持标题、页脚、跨行跨列与 `{t:...}` 对应的原字输出块。",
             "source": {
               "path": "packages/core/src/index.ts",
-              "line": 680,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L680"
+              "line": 698,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L698"
             }
           },
           {
@@ -890,8 +890,8 @@
             "summary": "Converts a local image file into Unicode art. 将本地图像文件转换为 Unicode 字符画。完整流程为：加载、灰度化、采样、匹配与组装。",
             "source": {
               "path": "packages/core/src/index.ts",
-              "line": 984,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L984"
+              "line": 1010,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1010"
             }
           },
           {
@@ -902,8 +902,8 @@
             "summary": "Validates a partial conversion configuration and applies defaults. 校验不完整的转换配置并补齐默认值，返回完整的配置对象。",
             "source": {
               "path": "packages/core/src/index.ts",
-              "line": 1094,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1094"
+              "line": 1130,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1130"
             }
           },
           {
@@ -914,8 +914,8 @@
             "summary": "Tests whether a glyph is wide under the historical Unicode reference rule. 按历史 Unicode 参考规则判断字素是否为宽字素。它不读取 `glyphWidthProfile` 或自定义 `wideCharRegex`；需要按配置计算显示宽度时请使用 `GlyphWidthCalculator`。",
             "source": {
               "path": "packages/core/src/index.ts",
-              "line": 1262,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1262"
+              "line": 1298,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1298"
             }
           },
           {
@@ -926,8 +926,8 @@
             "summary": "Gets the characters for a built-in matching charset. 根据类型返回内置匹配字符集的字符串。字符顺序会影响匹配遍历顺序，不应由调用方原地修改 或假设其为稳定的视觉密度排序之外的语义数据。",
             "source": {
               "path": "packages/core/src/index.ts",
-              "line": 1285,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1285"
+              "line": 1321,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1321"
             }
           },
           {
@@ -938,8 +938,8 @@
             "summary": "Calculates display width using the historical Unicode reference rule. 考虑宽字素影响，计算文本在严格混合等宽显示环境中的列宽。它不应用配置化 profile 或自定义 正则；裱框、语义布局和输出列数使用 `GlyphWidthCalculator`。",
             "source": {
               "path": "packages/core/src/index.ts",
-              "line": 1325,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1325"
+              "line": 1361,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/index.ts#L1361"
             }
           },
           {
@@ -974,8 +974,8 @@
             "summary": "🟢 批量匹配整个采样数组 🔹 对采样数组中的每个块进行字符匹配，生成字符矩阵。 🔹 支持宽字符：合并当前块+下一块后与宽字符比较，根据SAD得分和wideCharRatio决定是否使用。 🔹 使用宽字符后跳过下一列，避免重复匹配。",
             "source": {
               "path": "packages/core/src/matcher.ts",
-              "line": 339,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/matcher.ts#L339"
+              "line": 343,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/matcher.ts#L343"
             }
           },
           {
@@ -986,8 +986,8 @@
             "summary": "🟢 并行批量匹配（实验性功能） 🔹 使用Web Workers（浏览器）或worker_threads（Node.js）并行处理。 🔹 将采样数组分片，分配到多个worker中并行匹配。 ⚠️ **注意**: 此功能尚未实现，仅作为接口预留。",
             "source": {
               "path": "packages/core/src/matcher.ts",
-              "line": 486,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/matcher.ts#L486"
+              "line": 495,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/matcher.ts#L495"
             }
           },
           {
@@ -1043,11 +1043,11 @@
             "name": "getNodeImageBackend",
             "kind": "function",
             "signature": "getNodeImageBackend()",
-            "summary": "获取当前 Node 图像后端。",
+            "summary": "Returns the active Node image backend. 获取当前 Node 图像后端。默认值为 `napi-rs`，除非调用方显式切换。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 55,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L55"
+              "line": 74,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L74"
             }
           },
           {
@@ -1055,11 +1055,11 @@
             "name": "resolveNodeImageBackend",
             "kind": "function",
             "signature": "resolveNodeImageBackend(name: NodeImageBackendName)",
-            "summary": "获取指定内置 Node 图像后端。",
+            "summary": "Resolves a built-in Node image backend by name. 按名称获取内置 Node 图像后端；未知名称会抛出普通 `Error`，因为这是后端注册表层面的 编程错误。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 60,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L60"
+              "line": 86,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L86"
             }
           },
           {
@@ -1067,11 +1067,11 @@
             "name": "setNodeImageBackend",
             "kind": "function",
             "signature": "setNodeImageBackend(backend: NodeImageBackend | NodeImageBackendName)",
-            "summary": "设置当前 Node 图像后端。",
+            "summary": "Sets the active Node image backend. 设置当前 Node 图像后端。传入字符串时只能选择内置后端；传入对象时调用方负责该后端的 许可证、依赖安装和输出语义。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 69,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L69"
+              "line": 102,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L102"
             }
           },
           {
@@ -1079,11 +1079,11 @@
             "name": "resetNodeImageBackend",
             "kind": "function",
             "signature": "resetNodeImageBackend()",
-            "summary": "重置为默认 napi-rs 后端。",
+            "summary": "Resets the active Node image backend to the default `napi-rs` implementation. 重置为默认 `napi-rs` 后端，常用于测试隔离或临时 legacy 后端使用后恢复。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 76,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L76"
+              "line": 115,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L115"
             }
           },
           {
@@ -1202,8 +1202,8 @@
             "summary": "🟢 计算采样块尺寸 🔹 根据源图像尺寸和输出尺寸计算每个采样块的大小。 🔹 使用向上取整确保覆盖整个图像。",
             "source": {
               "path": "packages/core/src/sampler.ts",
-              "line": 116,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L116"
+              "line": 119,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L119"
             }
           },
           {
@@ -1214,8 +1214,8 @@
             "summary": "🟢 从源图像提取指定区域的块 🔹 提取矩形区域的像素数据，超出边界的部分用白色(255)填充。 🔹 返回固定尺寸的块，便于后续统一处理。",
             "source": {
               "path": "packages/core/src/sampler.ts",
-              "line": 180,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L180"
+              "line": 183,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L183"
             }
           },
           {
@@ -1226,8 +1226,8 @@
             "summary": "🟢 将图像块缩放到目标尺寸并归一化 🔹 使用双线性插值将块缩放到matrixSize×matrixSize，然后归一化到[0, 1]。 🔹 这是字符匹配前的关键预处理步骤。",
             "source": {
               "path": "packages/core/src/sampler.ts",
-              "line": 248,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L248"
+              "line": 251,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L251"
             }
           },
           {
@@ -1235,11 +1235,11 @@
             "name": "resizeInterpolate",
             "kind": "function",
             "signature": "resizeInterpolate(data: Uint8Array, sourceWidth: number, sourceHeight: number, targetWidth: number, targetHeight: number, dstX: number, dstY: number, interpolation: Interpolation)",
-            "summary": "🔹 按OpenCV resize坐标规则采样一个目标像素。",
+            "summary": "🔹 按 OpenCV resize 坐标规则采样一个目标像素。 这里是采样一致性的关键点：最近邻使用整数比例映射，线性/三次/Lanczos 使用 half-pixel center 对齐公式 `(dst + 0.5) * source / target - 0.5`。边界采用 replicate，而不是白色填充；白色填充只发生在 `extractBlock()` 抽取源块阶段。 This function intentionally separates block extraction padding fro…",
             "source": {
               "path": "packages/core/src/sampler.ts",
-              "line": 270,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L270"
+              "line": 281,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L281"
             }
           },
           {
@@ -1250,8 +1250,8 @@
             "summary": "🟢 最近邻插值 🔹 选择离目标采样点最近的源像素，适合需要硬边缘和最快速度的场景。",
             "source": {
               "path": "packages/core/src/sampler.ts",
-              "line": 305,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L305"
+              "line": 316,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L316"
             }
           },
           {
@@ -1262,8 +1262,8 @@
             "summary": "🟢 双线性插值 🔹 在四个相邻像素之间进行线性插值，得到平滑的采样值。 🔹 处理边界情况（超出范围时钳制坐标）。",
             "source": {
               "path": "packages/core/src/sampler.ts",
-              "line": 347,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L347"
+              "line": 358,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L358"
             }
           },
           {
@@ -1274,8 +1274,8 @@
             "summary": "🟢 生成完整的采样数组 🔹 将源图像划分为多个矩形块，对每个块进行缩放和归一化处理， 🔹 生成用于字符匹配的二维采样数组。",
             "source": {
               "path": "packages/core/src/sampler.ts",
-              "line": 512,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L512"
+              "line": 526,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/sampler.ts#L526"
             }
           },
           {
@@ -1307,11 +1307,11 @@
             "name": "parseSemanticDsl",
             "kind": "function",
             "signature": "parseSemanticDsl(source: string, options: SemanticDslParseOptions = {})",
-            "summary": "解析受限 DSL。 DSL 规则： - `{h}` / `{f}` 仅可位于行首，分别代表表头与页脚。 - `{rowspan:n}` / `{colspan:n}` 为推荐跨度标签；`{c:n}` / `{r:n}` 为兼容别名。 - `{t:...}` 为原字块，不能嵌套其它标签。 - `\\\\`、`\\{`、`\\}`、`\\|` 或自定义分隔符首字符可用于字面量转义。",
+            "summary": "解析受限 DSL。 该 DSL 是给 CLI/Web 表单和未来编辑器的轻量输入格式，不是模板执行语言。 解析阶段只产生 canonical JSON AST；所有视觉渲染都交给 `renderSemanticDocumentWithAdapter()`。 DSL 规则： - `{h}` / `{f}` 仅可位于行首，分别代表表头与页脚。 - `{rowspan:n}` / `{colspan:n}` 为推荐跨度标签；`{c:n}` / `{r:n}` 为兼容别名。 - `{t:...}` 为原字块，不能嵌套其它…",
             "source": {
               "path": "packages/core/src/semantic/document.ts",
-              "line": 97,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/semantic/document.ts#L97"
+              "line": 103,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/semantic/document.ts#L103"
             }
           },
           {
@@ -1334,8 +1334,8 @@
             "summary": "🟢 归一化统一配置模型别名 🔹 旧 API 仍然可以继续传 `font` / `fontStyle` / `fontReduce`。 🔹 新 API 推荐传 `visualFont` / `glyphFont` / `outputTarget`。 🔹 返回对象会同时补齐旧字段和新字段，方便当前算法与后续多端 UI 共用。",
             "source": {
               "path": "packages/core/src/types/config.ts",
-              "line": 682,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/types/config.ts#L682"
+              "line": 694,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/types/config.ts#L694"
             }
           },
           {
@@ -1346,8 +1346,8 @@
             "summary": "Error object emitted by UnicodeArtJs public APIs. 继承标准 `Error`，并提供机器可读的 `code`、可选 `details`，以及可用于多语言重渲染的 `messageKey`、`messageParams` 与 `locale`。调用方应优先使用 `code` 分支，不应解析 面向用户的 `message` 文本。",
             "source": {
               "path": "packages/core/src/types/output.ts",
-              "line": 328,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/types/output.ts#L328"
+              "line": 341,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/types/output.ts#L341"
             }
           },
           {
@@ -1437,8 +1437,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 123,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L123"
+              "line": 126,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L126"
             }
           },
           {
@@ -1452,8 +1452,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 150,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L150"
+              "line": 153,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L153"
             }
           },
           {
@@ -1467,8 +1467,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 387,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L387"
+              "line": 391,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L391"
             }
           },
           {
@@ -1482,8 +1482,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 430,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L430"
+              "line": 434,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L434"
             }
           },
           {
@@ -1497,8 +1497,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 473,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L473"
+              "line": 477,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L477"
             }
           },
           {
@@ -1512,8 +1512,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 522,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L522"
+              "line": 526,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L526"
             }
           },
           {
@@ -1522,13 +1522,13 @@
             "kind": "function",
             "signature": "handleImageCommand(input: string, options: Object)",
             "summary": {
-              "zh-CN": "读取图片输入、合并配置、应用 Node 图片后端选择，并将 Core 转换结果输出到文件或终端。",
+              "zh-CN": "读取用户显式指定的本地图片输入、合并配置、应用 Node 图片后端选择，并将 Core 转换结果输出到显式文件或终端。",
               "en-US": "Reads image input, merges configuration, applies the Node image-backend choice, and writes the Core conversion result to a file or terminal."
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 540,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L540"
+              "line": 544,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L544"
             }
           },
           {
@@ -1537,13 +1537,13 @@
             "kind": "function",
             "signature": "handleTextCommand(text: string, options: Object)",
             "summary": {
-              "zh-CN": "读取文本或标准输入、合并配置，并将 Core 文本转换结果输出到文件或终端。",
+              "zh-CN": "读取文本或标准输入、合并配置，并将 Core 文本转换结果输出到显式文件或终端；输入文本永远只作为待渲染内容。",
               "en-US": "Reads text or standard input, merges configuration, and writes the Core text-conversion result to a file or terminal."
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 587,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L587"
+              "line": 591,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L591"
             }
           },
           {
@@ -1557,8 +1557,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 632,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L632"
+              "line": 636,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L636"
             }
           },
           {
@@ -1572,8 +1572,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 680,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L680"
+              "line": 684,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L684"
             }
           },
           {
@@ -1587,8 +1587,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 723,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L723"
+              "line": 727,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L727"
             }
           },
           {
@@ -1602,8 +1602,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 795,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L795"
+              "line": 799,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L799"
             }
           },
           {
@@ -1617,8 +1617,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 837,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L837"
+              "line": 841,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L841"
             }
           },
           {
@@ -1632,8 +1632,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 856,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L856"
+              "line": 860,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L860"
             }
           },
           {
@@ -1647,8 +1647,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 901,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L901"
+              "line": 905,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L905"
             }
           },
           {
@@ -1662,8 +1662,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1006,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1006"
+              "line": 1010,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1010"
             }
           },
           {
@@ -1677,8 +1677,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1105,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1105"
+              "line": 1109,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1109"
             }
           },
           {
@@ -1692,8 +1692,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1133,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1133"
+              "line": 1137,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1137"
             }
           },
           {
@@ -1707,8 +1707,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1151,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1151"
+              "line": 1155,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1155"
             }
           },
           {
@@ -1717,13 +1717,13 @@
             "kind": "function",
             "signature": "loadConfig(configPath: string|false|undefined)",
             "summary": {
-              "zh-CN": "按显式路径或 cosmiconfig 规则读取 CLI 配置；`false` 禁用自动发现并返回空对象。",
+              "zh-CN": "按显式路径或 cosmiconfig 规则读取本地 CLI 配置；`false` 禁用自动发现并返回空对象。",
               "en-US": "Loads CLI configuration from an explicit path or cosmiconfig discovery; `false` disables discovery and returns an empty object."
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1175,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1175"
+              "line": 1179,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1179"
             }
           },
           {
@@ -1737,8 +1737,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1215,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1215"
+              "line": 1219,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1219"
             }
           },
           {
@@ -1752,8 +1752,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1291,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1291"
+              "line": 1295,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1295"
             }
           },
           {
@@ -1767,8 +1767,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1392,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1392"
+              "line": 1396,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1396"
             }
           },
           {
@@ -1782,8 +1782,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1411,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1411"
+              "line": 1415,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1415"
             }
           },
           {
@@ -1797,8 +1797,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1430,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1430"
+              "line": 1434,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1434"
             }
           },
           {
@@ -1812,8 +1812,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1451,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1451"
+              "line": 1455,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1455"
             }
           },
           {
@@ -1827,8 +1827,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1483,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1483"
+              "line": 1487,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1487"
             }
           },
           {
@@ -1842,8 +1842,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1532,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1532"
+              "line": 1536,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1536"
             }
           },
           {
@@ -1857,8 +1857,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1562,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1562"
+              "line": 1566,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1566"
             }
           },
           {
@@ -1872,8 +1872,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1584,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1584"
+              "line": 1588,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1588"
             }
           },
           {
@@ -1887,8 +1887,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1599,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1599"
+              "line": 1603,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1603"
             }
           },
           {
@@ -1902,8 +1902,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1615,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1615"
+              "line": 1619,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1619"
             }
           },
           {
@@ -1917,8 +1917,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1628,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1628"
+              "line": 1632,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1632"
             }
           },
           {
@@ -1932,8 +1932,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1643,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1643"
+              "line": 1647,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1647"
             }
           },
           {
@@ -1947,8 +1947,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1666,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1666"
+              "line": 1670,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1670"
             }
           },
           {
@@ -1962,8 +1962,8 @@
             },
             "source": {
               "path": "packages/cli/src/console.js",
-              "line": 1698,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1698"
+              "line": 1702,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/cli/src/console.js#L1702"
             }
           }
         ]
@@ -1976,7 +1976,7 @@
         "surface": "web",
         "documentationKind": "hia-jsdoc",
         "stability": "pilot",
-        "symbolCount": 8,
+        "symbolCount": 10,
         "sourceFileCount": 1,
         "symbols": [
           {
@@ -2040,6 +2040,36 @@
             }
           },
           {
+            "id": "web-jsdoc:jsdoc:constant:module:@unicode-art/web/gallery-index.UNICODE_ART_GALLERY_ADOPTION_STATUSES",
+            "name": "UNICODE_ART_GALLERY_ADOPTION_STATUSES",
+            "kind": "constant",
+            "signature": "UNICODE_ART_GALLERY_ADOPTION_STATUSES",
+            "summary": {
+              "zh-CN": "画廊采用审核状态，首轮只暴露只读状态，不触发自动安装或写入。",
+              "en-US": "画廊采用审核状态，首轮只暴露只读状态，不触发自动安装或写入。"
+            },
+            "source": {
+              "path": "packages/web/src/gallery-index.js",
+              "line": 59,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L59"
+            }
+          },
+          {
+            "id": "web-jsdoc:jsdoc:constant:module:@unicode-art/web/gallery-index~ADOPTION_SCENARIOS",
+            "name": "ADOPTION_SCENARIOS",
+            "kind": "constant",
+            "signature": "ADOPTION_SCENARIOS",
+            "summary": {
+              "zh-CN": "画廊采用 evidence 首轮允许的只读场景。",
+              "en-US": "画廊采用 evidence 首轮允许的只读场景。"
+            },
+            "source": {
+              "path": "packages/web/src/gallery-index.js",
+              "line": 67,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L67"
+            }
+          },
+          {
             "id": "web-jsdoc:jsdoc:constant:module:@unicode-art/web/gallery-index~ARTWORK_EXTENSION_BY_KIND",
             "name": "ARTWORK_EXTENSION_BY_KIND",
             "kind": "constant",
@@ -2050,8 +2080,8 @@
             },
             "source": {
               "path": "packages/web/src/gallery-index.js",
-              "line": 59,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L59"
+              "line": 74,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L74"
             }
           },
           {
@@ -2065,8 +2095,8 @@
             },
             "source": {
               "path": "packages/web/src/gallery-index.js",
-              "line": 152,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L152"
+              "line": 221,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L221"
             }
           },
           {
@@ -2080,8 +2110,8 @@
             },
             "source": {
               "path": "packages/web/src/gallery-index.js",
-              "line": 242,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L242"
+              "line": 326,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L326"
             }
           },
           {
@@ -2095,8 +2125,8 @@
             },
             "source": {
               "path": "packages/web/src/gallery-index.js",
-              "line": 260,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L260"
+              "line": 344,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/web/src/gallery-index.js#L344"
             }
           }
         ]
@@ -2117,11 +2147,11 @@
             "name": "convertImageFile",
             "kind": "function",
             "signature": "convertImageFile(context: vscode.ExtensionContext, logger: ExtensionLogger, resource?: vscode.Uri)",
-            "summary": "🟢 转换本地图片文件为字符画 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。 🔹 当前版本只接受本地 `file` URI，远程工作区资源需要后续独立适配。",
+            "summary": "🟢 转换本地图片文件为字符画 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。 🔹 当前版本只接受本地 `file` URI，远程工作区资源需要后续独立适配，避免远程 URI 权限与路径信任边界混淆。 🔹 结果写入仍复用 `writeResult`；没有活动编辑器时只打开未保存的新文本文档。",
             "source": {
               "path": "packages/vscode-extension/src/commands/convertImageFile.ts",
-              "line": 23,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertImageFile.ts#L23"
+              "line": 24,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertImageFile.ts#L24"
             }
           },
           {
@@ -2129,11 +2159,11 @@
             "name": "convertSelection",
             "kind": "function",
             "signature": "convertSelection(context: vscode.ExtensionContext, logger: ExtensionLogger)",
-            "summary": "🟢 使用当前有效配置转换编辑器选中文本",
+            "summary": "🟢 使用当前有效配置转换编辑器选中文本 🔹 选中文本仅在本地扩展宿主中读取并传给 Core，不上传、不写入配置；结果写入统一交给 `writeResult`。",
             "source": {
               "path": "packages/vscode-extension/src/commands/convertSelection.ts",
-              "line": 16,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L16"
+              "line": 18,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L18"
             }
           },
           {
@@ -2141,11 +2171,11 @@
             "name": "generateWithDefaultTemplate",
             "kind": "function",
             "signature": "generateWithDefaultTemplate(context: vscode.ExtensionContext, logger: ExtensionLogger)",
-            "summary": "🟢 使用默认模板转换编辑器选中文本 🔹 不叠加最近一次 Converter 配置，适合右键菜单的稳定默认入口。",
+            "summary": "🟢 使用默认模板转换编辑器选中文本 🔹 不叠加最近一次 Converter 配置，适合右键菜单的稳定默认入口；执行转换时不修改 VS Code 设置。",
             "source": {
               "path": "packages/vscode-extension/src/commands/convertSelection.ts",
-              "line": 28,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L28"
+              "line": 30,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L30"
             }
           },
           {
@@ -2156,8 +2186,8 @@
             "summary": "🟢 使用指定自定义模板槽转换编辑器选中文本 🔹 未配置的模板槽会提示用户打开 Converter 面板。",
             "source": {
               "path": "packages/vscode-extension/src/commands/convertSelection.ts",
-              "line": 45,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L45"
+              "line": 47,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L47"
             }
           },
           {
@@ -2165,11 +2195,11 @@
             "name": "convertSelectionWithOptions",
             "kind": "function",
             "signature": "convertSelectionWithOptions(context: vscode.ExtensionContext, logger: ExtensionLogger)",
-            "summary": "🟢 转换选中文本并临时选择插入方式 🔹 仅覆盖本次插入方式，并保存到最近配置，便于下次 Converter 或命令复用。",
+            "summary": "🟢 转换选中文本并临时选择插入方式 🔹 仅覆盖本次插入方式，并保存到最近配置；最近配置写入扩展 `globalState`，不写用户/工作区设置。",
             "source": {
               "path": "packages/vscode-extension/src/commands/convertSelection.ts",
-              "line": 110,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L110"
+              "line": 114,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertSelection.ts#L114"
             }
           },
           {
@@ -2177,11 +2207,11 @@
             "name": "registerCommands",
             "kind": "function",
             "signature": "registerCommands(context: vscode.ExtensionContext, logger: ExtensionLogger)",
-            "summary": "🟢 注册 UnicodeArtJs VS Code 命令 🔹 将 package.json 中声明的命令绑定到实际处理函数。 🔹 所有 disposable 都加入 `context.subscriptions`，由 VS Code 生命周期统一释放。",
+            "summary": "🟢 注册 UnicodeArtJs VS Code 命令 🔹 将 package.json 中声明的命令绑定到实际处理函数。 🔹 所有 disposable 都加入 `context.subscriptions`，由 VS Code 生命周期统一释放。 🔹 注册命令本身不执行转换、不写入文档；具体处理函数负责读取选区、弹窗确认、调用 Core 和集中写入。",
             "source": {
               "path": "packages/vscode-extension/src/commands/index.ts",
-              "line": 23,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/index.ts#L23"
+              "line": 24,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/index.ts#L24"
             }
           },
           {
@@ -2189,11 +2219,11 @@
             "name": "resolveArtConfig",
             "kind": "function",
             "signature": "resolveArtConfig(context?: vscode.ExtensionContext, options: ResolveArtConfigOptions = {})",
-            "summary": "🟢 解析 VS Code 扩展当前有效配置 🔹 合并顺序为内置默认值、工作区/用户设置、默认模板和最近配置。 🔹 返回值会补齐 Core 需要的 locale 与 `outputTarget: \"vscode\"`。",
+            "summary": "🟢 解析 VS Code 扩展当前有效配置 🔹 配置优先级固定为：内置默认值 → VS Code 用户/工作区设置 → 默认模板 → 最近 Converter 配置。 🔹 返回值会补齐 Core 需要的 locale 与 `outputTarget: \"vscode\"`。 🔹 模板与最近配置来自扩展 `globalState`，不会反写到用户设置或工作区设置。",
             "source": {
               "path": "packages/vscode-extension/src/config/configResolver.ts",
-              "line": 26,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/configResolver.ts#L26"
+              "line": 27,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/configResolver.ts#L27"
             }
           },
           {
@@ -2204,8 +2234,8 @@
             "summary": "🟢 读取最近一次 Converter 配置",
             "source": {
               "path": "packages/vscode-extension/src/config/presetStore.ts",
-              "line": 28,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L28"
+              "line": 30,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L30"
             }
           },
           {
@@ -2216,8 +2246,8 @@
             "summary": "🟢 读取默认模板配置",
             "source": {
               "path": "packages/vscode-extension/src/config/presetStore.ts",
-              "line": 35,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L35"
+              "line": 37,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L37"
             }
           },
           {
@@ -2228,8 +2258,8 @@
             "summary": "🟢 读取指定模板槽配置",
             "source": {
               "path": "packages/vscode-extension/src/config/presetStore.ts",
-              "line": 45,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L45"
+              "line": 47,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L47"
             }
           },
           {
@@ -2240,8 +2270,8 @@
             "summary": "🟢 获取模板槽摘要列表",
             "source": {
               "path": "packages/vscode-extension/src/config/presetStore.ts",
-              "line": 55,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L55"
+              "line": 57,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L57"
             }
           },
           {
@@ -2252,8 +2282,8 @@
             "summary": "🟢 保存最近一次 Converter 配置",
             "source": {
               "path": "packages/vscode-extension/src/config/presetStore.ts",
-              "line": 71,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L71"
+              "line": 73,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L73"
             }
           },
           {
@@ -2264,8 +2294,8 @@
             "summary": "🟢 保存默认模板",
             "source": {
               "path": "packages/vscode-extension/src/config/presetStore.ts",
-              "line": 81,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L81"
+              "line": 83,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L83"
             }
           },
           {
@@ -2276,8 +2306,8 @@
             "summary": "🟢 保存指定模板槽",
             "source": {
               "path": "packages/vscode-extension/src/config/presetStore.ts",
-              "line": 95,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L95"
+              "line": 97,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/config/presetStore.ts#L97"
             }
           },
           {
@@ -2288,8 +2318,8 @@
             "summary": "🟢 创建 Core 适配器",
             "source": {
               "path": "packages/vscode-extension/src/core/coreAdapter.ts",
-              "line": 48,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/core/coreAdapter.ts#L48"
+              "line": 49,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/core/coreAdapter.ts#L49"
             }
           },
           {
@@ -2297,11 +2327,11 @@
             "name": "activate",
             "kind": "function",
             "signature": "activate(context: vscode.ExtensionContext)",
-            "summary": "🟢 激活 UnicodeArtJs VS Code 扩展 🔹 注册命令、状态栏入口和输出日志通道。 🔹 VS Code 只在声明的命令触发时加载扩展，因此这里保持轻量同步初始化。",
+            "summary": "🟢 激活 UnicodeArtJs VS Code 扩展 🔹 注册命令、状态栏入口和输出日志通道。 🔹 VS Code 只在声明的命令触发时加载扩展，因此这里保持轻量同步初始化。 🔹 激活阶段不启动 WebView、不调用 Core、不读取图片文件，也不修改编辑器或工作区内容；这些动作都由用户命令触发。",
             "source": {
               "path": "packages/vscode-extension/src/extension.ts",
-              "line": 14,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/extension.ts#L14"
+              "line": 15,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/extension.ts#L15"
             }
           },
           {
@@ -2312,8 +2342,8 @@
             "summary": "🟢 停用扩展 🔹 当前没有额外异步资源需要释放；一次性资源已通过 `context.subscriptions` 托管。",
             "source": {
               "path": "packages/vscode-extension/src/extension.ts",
-              "line": 27,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/extension.ts#L27"
+              "line": 28,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/extension.ts#L28"
             }
           },
           {
@@ -2357,11 +2387,11 @@
             "name": "writeResult",
             "kind": "function",
             "signature": "writeResult(editor: vscode.TextEditor, content: string, mode: InsertMode)",
-            "summary": "🟢 将字符画结果写入 VS Code 🔹 根据插入模式替换选区、插入到相邻位置、打开新文档或复制到剪贴板。",
+            "summary": "🟢 将字符画结果写入 VS Code 🔹 根据插入模式替换选区、插入到相邻位置、打开新文档或复制到剪贴板。 🔹 这是命令与 WebView 共用的单一写入边界；除 `newDocument` 和 `clipboardOnly` 外，所有编辑器变更都通过 `TextEditor.edit` 完成，不直接写工作区文件。",
             "source": {
               "path": "packages/vscode-extension/src/output/resultWriter.ts",
-              "line": 27,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/output/resultWriter.ts#L27"
+              "line": 28,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/output/resultWriter.ts#L28"
             }
           },
           {
@@ -2393,11 +2423,11 @@
             "name": "getConverterHtml",
             "kind": "function",
             "signature": "getConverterHtml(webview: vscode.Webview, extensionUri: vscode.Uri)",
-            "summary": "🟢 生成 Converter WebView HTML 🔹 只引用扩展本地 bundled 资源，并通过 nonce + CSP 限制脚本执行。 🔹 不加载 CDN 或远程脚本，避免把 Marketplace 扩展暴露到不可控网络依赖。",
+            "summary": "🟢 生成 Converter WebView HTML 🔹 只引用扩展本地 bundled 资源，并通过 nonce + CSP 限制脚本执行。 🔹 不加载 CDN 或远程脚本，避免把 Marketplace 扩展暴露到不可控网络依赖。 🔹 字体名称和转换配置只作为表单数据发送给扩展宿主，不能绕过消息协议直接访问文件系统。",
             "source": {
               "path": "packages/vscode-extension/src/webview/html.ts",
-              "line": 14,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/html.ts#L14"
+              "line": 15,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/html.ts#L15"
             }
           },
           {
@@ -2405,11 +2435,11 @@
             "name": "handleWebviewMessage",
             "kind": "function",
             "signature": "handleWebviewMessage(panel: vscode.WebviewPanel, message: unknown, context: vscode.ExtensionContext, logger: ExtensionLogger)",
-            "summary": "🟢 处理 Converter WebView 发来的消息 🔹 入口先执行协议校验，再按消息类型分派到转换、模板、复制、插入和保存流程。 🔹 图片数据先写入扩展 globalStorage 下的临时文件，再交给 Core Node 图像路径处理。",
+            "summary": "🟢 处理 Converter WebView 发来的消息 🔹 入口先执行协议校验，再按消息类型分派到转换、模板、复制、插入和保存流程。 🔹 图片数据先写入扩展 globalStorage 下的临时文件，再交给 Core Node 图像路径处理。 🔹 WebView payload 不被当成本机任意路径或可信配置；路径选择、保存位置和编辑器写入都由扩展宿主 API gate。",
             "source": {
               "path": "packages/vscode-extension/src/webview/messaging.ts",
-              "line": 43,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/messaging.ts#L43"
+              "line": 44,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/messaging.ts#L44"
             }
           },
           {
@@ -2417,11 +2447,11 @@
             "name": "createConverterPanel",
             "kind": "function",
             "signature": "createConverterPanel(context: vscode.ExtensionContext, logger: ExtensionLogger)",
-            "summary": "🟢 创建 Converter WebView 面板 🔹 限制本地资源根目录为扩展 `media` 目录，并把所有 WebView 消息交给协议处理器。",
+            "summary": "🟢 创建 Converter WebView 面板 🔹 限制本地资源根目录为扩展 `media` 目录，并把所有 WebView 消息交给协议处理器。 🔹 WebView 允许脚本仅用于本地 UI；脚本来源受 `localResourceRoots`、nonce 和 CSP 共同限制。",
             "source": {
               "path": "packages/vscode-extension/src/webview/panel.ts",
-              "line": 15,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/panel.ts#L15"
+              "line": 16,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/panel.ts#L16"
             }
           },
           {
@@ -2429,11 +2459,11 @@
             "name": "isWebviewMessage",
             "kind": "function",
             "signature": "isWebviewMessage(value: unknown)",
-            "summary": "🟢 校验 WebView 消息 🔹 只校验协议结构和必要字段；配置字段继续由后续合并和 Core 校验处理。",
+            "summary": "🟢 校验 WebView 消息 🔹 只校验协议结构和必要字段；配置字段继续由后续合并和 Core 校验处理。 🔹 WebView 消息即使来自扩展 bundled HTML 也按不可信输入处理，不能直接作为文件路径、CSS 或编辑器写入指令。",
             "source": {
               "path": "packages/vscode-extension/src/webview/protocol.ts",
-              "line": 118,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/protocol.ts#L118"
+              "line": 119,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/protocol.ts#L119"
             }
           }
         ]
@@ -2494,7 +2524,7 @@
       "guideUrl": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/web-integration.md",
       "checkCommand": "npm run docs:web:check",
       "metrics": {
-        "nodeCount": 8,
+        "nodeCount": 10,
         "requiredFiles": [
           "index.html",
           "index.zh-CN.html",
