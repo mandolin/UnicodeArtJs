@@ -1,6 +1,6 @@
 # 开发说明
 
-UnicodeArtJs 的根目录是私有编排包，不发布到 npm。公开包仍位于 `packages/*`，并各自保留独立版本号。
+UnicodeArtJs 的根目录是 monorepo 编排包，不发布到 npm。公开包仍位于 `packages/*`，并各自保留独立版本号。
 
 ## 环境
 
@@ -126,7 +126,7 @@ npm run docs:architecture:check
 
 ## 改动提示
 
-修改 Core 行为时，需要同时关注 CLI、Web 和 VSCode Extension 是否共享同一契约。Node 图像解码后端单独规划，因为它影响 Core、CLI 和 VSCode，但不直接影响浏览器运行时。
+修改 Core 行为时，需要同时关注 CLI、Web 和 VS Code Extension 是否共享同一契约。Node 图像解码后端单独治理，因为它影响 Core、CLI 和 VS Code，但不直接影响浏览器运行时。
 
 ## 配置模型一致性
 

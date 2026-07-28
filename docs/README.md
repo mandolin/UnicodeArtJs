@@ -2,46 +2,62 @@
 
 这里存放面向使用者、二次开发者和发布维护者的公开文档。
 
-- [公开路线](roadmap.md)
+## 入门与支持
+
 - [快速上手](quickstart.md)
-- [依赖与许可证政策](license-audit.md)
+- [常见使用 Recipes](recipes.md)
 - [支持与反馈](support.md)
 - [已知限制](known-limitations.md)
 - [迁移指南](migration-guide.md)
-- [实验能力稳定性矩阵](experimental-stability.md)
+- [公开路线](roadmap.md)
+
+## 配置、兼容与宿主接入
+
 - [配置模型 vNext](config-model-vnext.md)
 - [字素宽度与布局一致性](glyph-width-layout.md)
-- [UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)
-- [UAF 字体作者指南](uaf-authoring.md)
-- [语义布局作者指南](semantic-document-authoring.md)
-- [创作生态总览](creative-ecosystem.md)
-- [实验性静态资源发现](resource-discovery-experimental.md)
-- [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
 - [生态兼容性与升级说明](ecosystem-compatibility.md)
 - [宿主接入指南](host-integration.md)
 - [宿主侧载与资源读取边界](host-sideload-boundary.md)
 - [桌面宿主基线](desktop-host-baseline.md)
+- [Compatible 应用与 Adapter 指南](compatible-project-guide.md)
 - [可选输入格式与 Adapter 策略](optional-input-adapters.md)
-- [性能基线与发布计划](performance-and-release-plan.md)
-- [发布门禁与版本图](release-gate.md)
-- [发布材料与发布后核验](release-materials.md)
-- [代码注释与 API 文档约定](code-documentation.md)
-- [文档质量与注释抽查](documentation-quality.md)
-- [文档生成流水线](documentation-pipeline.md)
-- [开发者文档站信息架构](developer-documentation-architecture.md)
-- [常见使用 Recipes](recipes.md)
+- [实验能力稳定性矩阵](experimental-stability.md)
+
+## 创作格式与资源
+
+- [创作生态总览](creative-ecosystem.md)
+- [UAF 与语义布局 Beta 契约](semantic-uaf-beta.md)
+- [UAF 字体作者指南](uaf-authoring.md)
+- [语义布局作者指南](semantic-document-authoring.md)
+- [声明式扩展清单（UAEM v1）](extension-manifest.md)
+- [声明式扩展作者指南](extension-authoring.md)
+- [声明式扩展 SDK](extension-sdk.md)
+- [静态作品画廊](gallery.md)
+- [静态画廊投稿指南](gallery-submission.md)
+- [静态画廊审核指南](gallery-review.md)
+- [实验性静态资源发现](resource-discovery-experimental.md)
+
+## Web、字体与编辑器
+
 - [字体行为与浏览器回退](font-behavior.md)
 - [Web 集成与数据边界](web-integration.md)
 - [Web Studio experimental 入口边界](web-integration.md#web-studio-experimental-入口)
 - [VS Code Extension 集成与数据边界](vscode-extension-integration.md)
 - [浏览器 Adapter 最小示例](browser-adapter-minimal-example.md)
-- [静态作品画廊](gallery.md)
-- [静态画廊投稿指南](gallery-submission.md)
-- [静态画廊审核指南](gallery-review.md)
-- [声明式扩展清单（UAEM v1）](extension-manifest.md)
-- [声明式扩展作者指南](extension-authoring.md)
-- [声明式扩展 SDK](extension-sdk.md)
 - [VS Code Extension 发布检查](vscode-extension-release-checklist.md)
+
+## 开发、文档与发布维护
+
+- [依赖与许可证政策](license-audit.md)
+- [运行时组件清单](runtime-sbom.md)
+- [性能基线与发布计划](performance-and-release-plan.md)
+- [发布门禁与版本图](release-gate.md)
+- [发布材料与发布后核验](release-materials.md)
+- [开发说明](development.md)
+- [代码注释与 API 文档约定](code-documentation.md)
+- [文档质量与注释抽查](documentation-quality.md)
+- [文档生成流水线](documentation-pipeline.md)
+- [开发者文档站信息架构](developer-documentation-architecture.md)
 
 各子项目还有独立文档：
 
