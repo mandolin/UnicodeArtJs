@@ -3,6 +3,10 @@
  *
  * 该模块把 CellMap 投影到 Canvas 2D，供 Web Studio preview、thumbnail
  * 和 PNG 导出复用。Canvas bitmap 只是展示结果，不是 source model。
+ *
+ * Render plans are serializable diagnostics, while real drawing happens only
+ * when a host provides a canvas-like object. Neither the plan nor the bitmap may
+ * replace the canonical CellMap.
  */
 
 // #region 常量
@@ -218,6 +222,8 @@ export function createCanvas2DRenderPlan(cellMap, options = {}) {
   const cells = [];
   const rows = [];
 
+  // Render plan 只收集即将绘制的 cell 副本和尺寸指标；真实 Canvas API 调用
+  // 被延后到 `renderCanvas2DPlanToCanvas()`，方便测试和宿主预检。
   for (let y = rect.y; y < rect.y + rect.height; y += 1) {
     const row = [];
     for (let x = rect.x; x < rect.x + rect.width; x += 1) {
@@ -309,6 +315,8 @@ export function renderCanvas2DPlanToCanvas(plan, canvas) {
     const drawWidth = plan.options.cellWidth * cellSpan;
     const bg = normalizeCanvasColor(cell.bg, '');
 
+    // cell.width 是字素列跨度。Canvas 绘制按列宽扩展背景和文字居中位置，
+    // 但不会把宽 cell 展开成多个可编辑 source cell。
     if (bg) {
       ctx.fillStyle = bg;
       ctx.fillRect(left, top, drawWidth, plan.options.cellHeight);
@@ -364,6 +372,7 @@ export function createCanvas2DSessionPatch(projection) {
   return {
     schema: CANVAS_2D_SESSION_PATCH_SCHEMA,
     stability: 'internal-alpha',
+    // 与 Virtual Grid patch 一样，这里只记录 renderer 状态，不能作为保存格式或编辑补丁。
     renderer: {
       kind: 'canvas-2d',
       projectionSchema: projection.schema,

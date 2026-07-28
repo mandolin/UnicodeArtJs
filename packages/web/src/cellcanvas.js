@@ -11,6 +11,10 @@
  *
  * 真实的拖拽选择、图层叠加和插件式导入会在后续 W-art-P16.x
  * 阶段继续扩展。这里先避免把编辑器交互和数据结构绑死。
+ *
+ * CellMap / CellCanvas draft 是 source model；TXT、HTML、PNG、Canvas 和
+ * animation HTML 都只是 projection。任何 UI 预览或下载结果都不能反向
+ * 覆盖 draft，除非通过明确的 patch/history API。
  */
 
 // #region 常量与内置样例
@@ -958,6 +962,7 @@ function createHistoryEntry(kind, patches, selectionBefore, selectionAfter) {
 function pushHistoryEntry(draft, entry) {
   const session = ensureEditorSession(draft);
   const history = session.history;
+  // 如果用户撤销后继续编辑，redo 分支必须被截断；否则后续重做会应用到错误的 source model。
   const preservedEntries = history.entries.slice(0, history.cursor);
   preservedEntries.push(entry);
   session.history = {
@@ -986,6 +991,8 @@ function applyCellCanvasPatches(draft, cellPatches, options = {}) {
   const selectionBefore = normalizeSelection(session.selection, cellMap);
   const effectivePatches = [];
 
+  // patch 只记录真正改变的 cell，history 中保存 before/after 快照，供 undo/redo 和
+  // 后续 checked apply 审计复用。
   for (const patch of cellPatches) {
     const x = toInteger(patch.x, -1);
     const y = toInteger(patch.y, -1);
@@ -1059,6 +1066,8 @@ export function createCellCanvasDraftFromCellMap(input) {
   const layerId = 'layer-imported-main';
   const cellMap = normalizeCellMapForDraft(input.cellMap);
 
+  // 导入层把外部 CellMap 规范化为单一主图层。多图层/多帧会在 draft 内部继续演进，
+  // 但 canonical input 仍是结构化 CellMap，不是 plain text preview。
   return {
     schema: CELL_CANVAS_DRAFT_SCHEMA,
     stability: CELL_CANVAS_DRAFT_STABILITY,
@@ -1494,6 +1503,7 @@ export function createCellCanvasProjectEnvelope(draft, options = {}) {
   const surface = typeof options.surface === 'string' && options.surface.trim()
     ? options.surface.trim()
     : 'web';
+  // 这是 Web 本地保存 envelope，不是公开稳定项目格式；只保存脱敏元数据和 draft 深拷贝。
   const envelope = {
     schema: CELL_CANVAS_PROJECT_SCHEMA,
     stability: CELL_CANVAS_DRAFT_STABILITY,
@@ -1594,6 +1604,7 @@ export function cellCanvasDraftToPlainTextProjection(draft) {
     schema: CELL_CANVAS_PROJECTION_SCHEMA,
     kind: 'plain-text',
     source: composition.source,
+    // projection 方便下载和预览，但不是 canonical draft。
     canonical: false,
     frameId: composition.frameId,
     durationMs: composition.durationMs,

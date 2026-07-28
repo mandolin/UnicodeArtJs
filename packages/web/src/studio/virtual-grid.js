@@ -5,6 +5,10 @@
  * 路径，是为了让现有 UI、测试和其它 staging 模块无需在同一阶段
  * 大规模改 import。DOM 滚动、键盘/鼠标事件、焦点、可访问性和渲染
  * 调度仍由 Web 宿主拥有。
+ *
+ * This facade exists only as a migration seam for Web Studio. New shared logic
+ * should live in `@unicode-art/studio-kit`; Web-only behavior stays in `src/main.js`
+ * or other browser-owned modules.
  */
 
 export {

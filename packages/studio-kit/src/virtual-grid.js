@@ -4,6 +4,10 @@
  * 该模块只负责把完整 CellMap 投影成可见窗口、命中测试结果和
  * editorSession patch。它不修改 CellMap，不保存 DOM 或 Canvas 状态，
  * 也不声明公开稳定 renderer API。
+ *
+ * The projection is deliberately read-only. Hosts may cache it for scrolling or
+ * hit testing, but all edits must go through their own tool/history/checked-apply
+ * pipeline against the canonical CellMap.
  */
 
 // #region 常量
@@ -197,6 +201,8 @@ export function createVirtualGridProjection(cellMap, viewport = {}) {
   const visibleCells = [];
   const rect = normalized.visibleRect;
 
+  // 这里只复制可见窗口。overscan 会多取边缘 cell 方便宿主滚动/预绘制，
+  // 但 projection 仍不能回写成 source model。
   for (let y = rect.y; y < rect.y + rect.height; y += 1) {
     const row = [];
     for (let x = rect.x; x < rect.x + rect.width; x += 1) {
@@ -297,6 +303,9 @@ export function createVirtualGridSessionPatch(projection) {
   return {
     schema: VIRTUAL_GRID_SESSION_PATCH_SCHEMA,
     stability: 'internal-alpha',
+    // patch 只描述 renderer/session 状态。它没有 CellMap edits，也没有文件写入意图。
+    // Host shells are responsible for deciding whether and how to persist this
+    // diagnostic state.
     viewport: { ...projection.viewport },
     renderer: {
       kind: 'virtual-grid',

@@ -12,6 +12,7 @@
  * - 只消费调用方已经完成 hash / trust / revocation 校验的资源状态。
  * - import proposal 默认不确认，必须由宿主 UI 二次确认。
  * - Web Alpha 首轮只把资源导入当前 source-first editor，不写稳定项目格式。
+ * - Proposal 只说明“可以导入什么”和“会影响哪里”，不执行安装、缓存写入或工作区写入。
  *
  * @module @unicode-art/web/studio/resource-entry
  * @license MIT
@@ -233,6 +234,8 @@ export function createStudioImportProposalFromResourceEntry(entry) {
     && trustCheck.adoptionEvidence === 'pass',
   );
 
+  // importAllowed 只是进入确认 UI 的条件；真正导入仍由 Web 宿主在人类确认后执行。
+  // This object is review-only metadata and must not be treated as an automatic action.
   return Object.freeze({
     schema: STUDIO_IMPORT_PROPOSAL_SCHEMA,
     stage: 'W-art-P18.5',
@@ -316,6 +319,7 @@ export function createStudioResourcePipelineSummary(discoveryState = {}) {
     pushUnique(sourceTypes, item.resource?.source ? 'same-origin-gallery' : '');
   });
 
+  // 生产线摘要是 metadata-only evidence，面向 UI 和 gate，不携带资源正文。
   const trustSummary = discoveryState.trustSummary || {};
   const summary = {
     schema: STUDIO_RESOURCE_PIPELINE_SUMMARY_SCHEMA,

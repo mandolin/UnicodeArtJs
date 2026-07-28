@@ -3,6 +3,10 @@
  *
  * 该模块把现有 CellCanvas 草稿包进 `studio-project@0` 项目级 envelope，
  * 供 P18.4 的保存、加载和本地恢复边界复用。它不声明公开稳定文件格式。
+ *
+ * The capsule is an internal envelope, not a public `.uart` contract. It stores
+ * sanitized metadata and a draft copy so Web can recover local work without
+ * leaking absolute paths or implying long-term compatibility.
  */
 
 import {
@@ -125,6 +129,7 @@ function sanitizeStudioResourceRef(value) {
 
   const uri = sanitizeResourceUri(value.uri ?? value.source ?? value.fileName);
   if (uri) {
+    // 只保存低敏 URI / 文件名，避免把用户本机绝对路径写入可分享的项目草稿。
     resource.source = {
       type: normalizeString(value.sourceType ?? value.type, 'imported'),
       uri,
@@ -255,6 +260,8 @@ export function createStudioProjectCapsuleFromCellCanvasDraft(draft, options = {
     draft: cloneJson(draft),
   };
 
+  // 项目 capsule 保存 draft 副本，而不是保存 renderer projection。这样重开项目时
+  // 可以重新按当前宿主能力生成 Virtual Grid / Canvas / export 状态。
   if (sourceResourceIds.length > 0) {
     documentEntry.sourceResourceIds = sourceResourceIds;
     documentEntry.provenanceRef = 'provenance-main';
@@ -327,6 +334,8 @@ export function validateStudioProjectCapsule(capsule) {
     throw new Error(`Studio project stability must be ${STUDIO_PROJECT_STABILITY}.`);
   }
   if (capsule.publicStableFormatDeclared === true) {
+    // 这个保护防止内部保存格式被误标为公开稳定格式后流入文档或第三方生态；
+    // 换句话说，project capsule 不等于公开稳定格式。
     throw new Error('Studio project must not declare a public stable format.');
   }
   if (!isObject(capsule.project) || typeof capsule.project.id !== 'string' || !capsule.project.id.trim()) {

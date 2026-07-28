@@ -11,6 +11,7 @@
  * - 输入只包含 CellCanvas 的摘要级上下文和用户请求。
  * - 输出只包含 draft / diagnostic / review-metadata / patch-preview。
  * - accepted-by-user 只代表用户认可预览，仍需宿主 checked apply。
+ * - deterministic mock provider 不接网络、不持有 token，也不能直接生成 WorkspaceEdit。
  *
  * @module @unicode-art/web/studio/ai-proposal
  * @license MIT
@@ -120,6 +121,7 @@ export function createStudioAiReviewPayloadFromCellCanvasDraft(draft, options = 
     ? options.resourceEntryIds.map((id) => String(id)).filter(Boolean)
     : [];
 
+  // Payload 只携带摘要级上下文。不要把完整 CellMap、源码正文、local path 或密钥放入 provider 输入。
   return freezeDeep({
     schema: STUDIO_AI_REVIEW_PAYLOAD_SCHEMA,
     stage: 'W-art-P18.6',
@@ -174,6 +176,7 @@ export function createDeterministicStudioAiProposal(payload) {
   const resourceEntryIds = payload.resourceContext?.resourceEntryIds ?? [];
   const proposalId = createProposalId(payload);
 
+  // 首轮 provider 只生成单格 patch preview，用于验证审查链路；不尝试自动修改 draft。
   return freezeDeep({
     schema: STUDIO_AI_PROPOSAL_SCHEMA,
     stage: 'W-art-P18.6',
@@ -254,6 +257,7 @@ export function transitionStudioAiProposalReview(proposal, action) {
     status: nextStatus,
     review: {
       action: action === 'accept' ? 'accepted-by-user' : 'rejected-by-user',
+      // 接受只改变 proposal 状态，不写 CellMap。宿主需要另外创建 history/rollback 记录。
       acceptedByUserDoesNotWrite: action === 'accept',
       hostCheckedApplyRequired: action === 'accept',
     },

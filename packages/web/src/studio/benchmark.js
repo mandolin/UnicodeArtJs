@@ -5,6 +5,10 @@
  * CellMap / CellCanvas draft，测量 Virtual Grid 与 Canvas 2D projection
  * 路径，并输出可审计报告；不会修改 CellMap，也不会把 renderer 状态当成
  * source model 保存。
+ *
+ * Benchmark reports are diagnostics, not performance guarantees. Thresholds are
+ * warning levels for local smoke and can be tuned without changing Studio file
+ * formats or renderer contracts.
  */
 
 import { createVirtualGridProjection } from './virtual-grid.js';
@@ -108,6 +112,7 @@ function cloneJson(value) {
  * @returns {string} 可比较指纹。
  */
 function createCellMapFingerprint(cellMap) {
+  // 指纹只覆盖会影响可见输出的低敏字段，用来验证 benchmark 前后 source model 未变。
   return JSON.stringify({
     width: cellMap.width,
     height: cellMap.height,
@@ -384,6 +389,7 @@ export function createStudioBenchmarkCellMap(options = {}) {
   const height = toIntegerInRange(options.height, 80, 1, 800);
   const cells = [];
 
+  // 使用固定公式生成字符，保证不同机器上 benchmark 输入相同；这不是随机压力测试。
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const paletteIndex = (x * 13 + y * 7 + (x % 5) * (y % 3)) % BENCHMARK_CHAR_PALETTE.length;
