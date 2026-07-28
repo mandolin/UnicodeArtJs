@@ -111,6 +111,7 @@ export type ExtensionMessage =
  * 🟢 校验 WebView 消息
  *
  * 🔹 只校验协议结构和必要字段；配置字段继续由后续合并和 Core 校验处理。
+ * 🔹 WebView 消息即使来自扩展 bundled HTML 也按不可信输入处理，不能直接作为文件路径、CSS 或编辑器写入指令。
  *
  * @param value - 任意 WebView 输入。
  * @returns `true` 表示可按 `WebviewMessage` 处理。

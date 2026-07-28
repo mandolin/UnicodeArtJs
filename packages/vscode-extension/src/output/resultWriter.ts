@@ -19,6 +19,7 @@ export type InsertMode =
  * 🟢 将字符画结果写入 VS Code
  *
  * 🔹 根据插入模式替换选区、插入到相邻位置、打开新文档或复制到剪贴板。
+ * 🔹 这是命令与 WebView 共用的单一写入边界；除 `newDocument` 和 `clipboardOnly` 外，所有编辑器变更都通过 `TextEditor.edit` 完成，不直接写工作区文件。
  *
  * @param editor - 当前活动文本编辑器。
  * @param content - 已生成的字符画文本。

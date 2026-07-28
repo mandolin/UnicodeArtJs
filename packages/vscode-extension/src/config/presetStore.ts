@@ -6,6 +6,8 @@ const DEFAULT_TEMPLATE_KEY = 'unicodeArtJs.defaultTemplate';
 const TEMPLATE_SLOT_KEY_PREFIX = 'unicodeArtJs.templateSlot.';
 export const TEMPLATE_SLOT_COUNT = 3;
 
+// 模板和最近配置保存在 VS Code 扩展 globalState 中，只服务当前用户的扩展体验，不写入用户 settings.json 或工作区文件。
+
 /**
  * 🟢 模板槽摘要
  *
@@ -117,6 +119,7 @@ function validateTemplateSlot(slot: number): void {
 
 function sanitizeConfig(config: ExtensionArtConfig): ExtensionArtConfig {
   const visualFont = config.visualFont || config.font || 'Noto Sans SC';
+  // 归一化历史 font 别名和字素字体默认值，避免 WebView、命令和 Core adapter 各自处理旧字段。
   return {
     ...config,
     width: typeof config.width === 'number' ? config.width : undefined,

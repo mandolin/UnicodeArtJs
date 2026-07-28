@@ -6,6 +6,7 @@ import { getNonce } from '../utils/nonce';
  *
  * 🔹 只引用扩展本地 bundled 资源，并通过 nonce + CSP 限制脚本执行。
  * 🔹 不加载 CDN 或远程脚本，避免把 Marketplace 扩展暴露到不可控网络依赖。
+ * 🔹 字体名称和转换配置只作为表单数据发送给扩展宿主，不能绕过消息协议直接访问文件系统。
  *
  * @param webview - VS Code WebView 实例。
  * @param extensionUri - 扩展安装根 URI。

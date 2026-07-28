@@ -10,6 +10,8 @@ import type { ExtensionLogger } from '../utils/logger';
 /**
  * 🟢 使用当前有效配置转换编辑器选中文本
  *
+ * 🔹 选中文本仅在本地扩展宿主中读取并传给 Core，不上传、不写入配置；结果写入统一交给 `writeResult`。
+ *
  * @param context - VS Code 扩展上下文。
  * @param logger - 扩展输出日志器。
  */
@@ -23,7 +25,7 @@ export async function convertSelection(
 /**
  * 🟢 使用默认模板转换编辑器选中文本
  *
- * 🔹 不叠加最近一次 Converter 配置，适合右键菜单的稳定默认入口。
+ * 🔹 不叠加最近一次 Converter 配置，适合右键菜单的稳定默认入口；执行转换时不修改 VS Code 设置。
  */
 export async function generateWithDefaultTemplate(
   context: vscode.ExtensionContext,
@@ -76,6 +78,7 @@ async function convertSelectedText(
   }
 
   const selectedText = editor.document.getText(editor.selection);
+  // 这里是 selection flow 的唯一输入读取点；后续只把纯文本交给 Core 和集中写入边界。
   logger.info(
     `Selection conversion requested. flow=${flowLabel}, chars=${selectedText.length}, preset=${config.preset}`
   );
@@ -89,6 +92,7 @@ async function convertSelectedText(
       },
       async () => {
         const result = await createCoreAdapter().convertText(selectedText, config);
+        // 所有编辑器修改都经过 writeResult，避免各命令散落 WorkspaceEdit 或文件写入逻辑。
         await writeResult(editor, result.content, config.insertMode);
         if (saveRecent) {
           await saveRecentConfig(context, config);
@@ -105,7 +109,7 @@ async function convertSelectedText(
 /**
  * 🟢 转换选中文本并临时选择插入方式
  *
- * 🔹 仅覆盖本次插入方式，并保存到最近配置，便于下次 Converter 或命令复用。
+ * 🔹 仅覆盖本次插入方式，并保存到最近配置；最近配置写入扩展 `globalState`，不写用户/工作区设置。
  */
 export async function convertSelectionWithOptions(
   context: vscode.ExtensionContext,

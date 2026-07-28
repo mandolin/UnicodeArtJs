@@ -7,6 +7,7 @@ import type { ExtensionLogger } from '../utils/logger';
  * 🟢 创建 Converter WebView 面板
  *
  * 🔹 限制本地资源根目录为扩展 `media` 目录，并把所有 WebView 消息交给协议处理器。
+ * 🔹 WebView 允许脚本仅用于本地 UI；脚本来源受 `localResourceRoots`、nonce 和 CSP 共同限制。
  *
  * @param context - VS Code 扩展上下文。
  * @param logger - 扩展输出日志器。

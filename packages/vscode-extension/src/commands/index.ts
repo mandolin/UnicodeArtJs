@@ -16,6 +16,7 @@ import type { ExtensionLogger } from '../utils/logger';
  *
  * 🔹 将 package.json 中声明的命令绑定到实际处理函数。
  * 🔹 所有 disposable 都加入 `context.subscriptions`，由 VS Code 生命周期统一释放。
+ * 🔹 注册命令本身不执行转换、不写入文档；具体处理函数负责读取选区、弹窗确认、调用 Core 和集中写入。
  *
  * @param context - VS Code 扩展上下文。
  * @param logger - 扩展输出日志器。

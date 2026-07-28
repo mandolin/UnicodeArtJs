@@ -16,8 +16,9 @@ export interface ResolveArtConfigOptions {
 /**
  * 🟢 解析 VS Code 扩展当前有效配置
  *
- * 🔹 合并顺序为内置默认值、工作区/用户设置、默认模板和最近配置。
+ * 🔹 配置优先级固定为：内置默认值 -> VS Code 用户/工作区设置 -> 默认模板 -> 最近 Converter 配置。
  * 🔹 返回值会补齐 Core 需要的 locale 与 `outputTarget: "vscode"`。
+ * 🔹 模板与最近配置来自扩展 `globalState`，不会反写到用户设置或工作区设置。
  *
  * @param context - 可选扩展上下文；存在时读取模板与最近配置。
  * @param options - 解析行为选项。
@@ -67,6 +68,7 @@ export function resolveArtConfig(
 
   const defaultTemplate = context ? loadDefaultTemplate(context) : undefined;
   const baseWithTemplate = mergeExtensionConfig(fromSettings, defaultTemplate);
+  // 右键“默认模板”入口会关闭 includeRecent，保证模板输出不会被最近一次 Converter 调整意外污染。
   const recent = context && includeRecent ? loadRecentConfig(context) : undefined;
   if (!recent) {
     return baseWithTemplate;

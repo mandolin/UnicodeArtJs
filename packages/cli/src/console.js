@@ -68,6 +68,9 @@
  * @lang zh-CN UnicodeArtJs 的命令行入口，负责将命令行参数、配置文件和本地输入安全地归一化为 Core 可消费的转换请求。
  * @lang en UnicodeArtJs command-line entry point that normalizes command arguments, configuration files, and local input into conversion requests consumable by Core.
  *
+ * @security zh-CN CLI 只读取用户显式传入的本地路径、标准输入和配置文件；不会下载远程资源、执行输入文本或把清单资源安装到系统中。文件写入仅发生在显式 `--output`、保存/检查类命令的明确目标路径或 stdout 打印路径。
+ * @security en The CLI reads only explicitly supplied local paths, standard input, and configuration files; it does not download remote resources, execute input text, or install manifest resources. File writes happen only for explicit `--output`, explicit save/inspection targets, or stdout printing.
+ *
  * @module @unicode-art/cli
  * @since 1.0.0
  * @license MIT
@@ -174,6 +177,7 @@ function t(i18n, key, vars = {}) {
 // 程序版本
 const program = new Command();
 
+// 根命令兼容早期 `--image` / `--text` 形式；两个输入模式互斥，避免一次调用隐式读取两类来源。
 program
   .name('unicode-art')
   .description('Convert text and images to Unicode character art')
@@ -529,7 +533,7 @@ function getCommandOptions(command) {
 /**
  * 🟢 处理图片转换命令
  *
- * @lang zh-CN 读取图片输入、合并配置、应用 Node 图片后端选择，并将 Core 转换结果输出到文件或终端。
+ * @lang zh-CN 读取用户显式指定的本地图片输入、合并配置、应用 Node 图片后端选择，并将 Core 转换结果输出到显式文件或终端。
  * @lang en Reads image input, merges configuration, applies the Node image-backend choice, and writes the Core conversion result to a file or terminal.
  *
  * @param {string} input - <lang key="cli.image.param.input"><zh-CN>本地图片文件路径。</zh-CN><en>Local image file path.</en></lang>
@@ -538,14 +542,14 @@ function getCommandOptions(command) {
  * @throws {Error} <lang key="cli.image.throws"><zh-CN>当配置、图片输入、后端或输出路径无效时抛出。</zh-CN><en>Thrown when configuration, image input, backend selection, or output path is invalid.</en></lang>
  */
 async function handleImageCommand(input, options) {
-  // 加载配置文件
+  // 配置来源只允许显式文件、cosmiconfig 本地发现或 `--no-config`；不从网络拉取配置。
   const config = await loadConfig(options.config);
   
   // 加载语言（命令行 > 配置文件 > 默认）
   const lang = options.lang || config.i18n?.lang || config.lang || 'zh-CN';
   const i18n = loadLanguage(lang);
   
-  // 合并配置（命令行 > 配置文件 > 默认值）
+  // 配置优先级：命令行 > 配置文件 > CLI 默认值；Core 仍负责最终结构校验。
   const fullConfig = mergeConfig(config, options);
   const runtimeConfig = extractRuntimeConfig(fullConfig);
   fullConfig.locale = lang;
@@ -559,7 +563,7 @@ async function handleImageCommand(input, options) {
   try {
     applyImageBackend(runtimeConfig.imageBackend);
 
-    // 调用core库
+    // 图片路径直接交给 Core 的 Node adapter；CLI 本层不解释远程 URL 或 shell 片段。
     const result = await imageToArt(input, validatedConfig);
     
     const duration = Date.now() - startTime;
@@ -576,7 +580,7 @@ async function handleImageCommand(input, options) {
 /**
  * 🟢 处理文本转换命令
  *
- * @lang zh-CN 读取文本或标准输入、合并配置，并将 Core 文本转换结果输出到文件或终端。
+ * @lang zh-CN 读取文本或标准输入、合并配置，并将 Core 文本转换结果输出到显式文件或终端；输入文本永远只作为待渲染内容。
  * @lang en Reads text or standard input, merges configuration, and writes the Core text-conversion result to a file or terminal.
  *
  * @param {string} text - <lang key="cli.text.param.text"><zh-CN>文本参数；`-` 表示从标准输入读取。</zh-CN><en>Text argument; `-` reads from standard input.</en></lang>
@@ -585,7 +589,7 @@ async function handleImageCommand(input, options) {
  * @throws {Error} <lang key="cli.text.throws"><zh-CN>当配置、文本输入或输出路径无效时抛出。</zh-CN><en>Thrown when configuration, text input, or output path is invalid.</en></lang>
  */
 async function handleTextCommand(text, options) {
-  // 加载配置文件
+  // 文本参数和 stdin 都只作为渲染素材，不会被当作命令、路径或脚本执行。
   const config = await loadConfig(options.config);
   const inputText = readTextInput(text);
   
@@ -593,7 +597,7 @@ async function handleTextCommand(text, options) {
   const lang = options.lang || config.i18n?.lang || config.lang || 'zh-CN';
   const i18n = loadLanguage(lang);
   
-  // 合并配置
+  // 配置优先级：命令行 > 配置文件 > CLI 默认值；文本模式同样复用 Core 校验。
   const fullConfig = mergeConfig(config, options);
   fullConfig.locale = lang;
   
@@ -604,7 +608,7 @@ async function handleTextCommand(text, options) {
   const startTime = Date.now();
   
   try {
-    // 调用core库
+    // 仅调用 Core 转换，不在 CLI 侧执行输入文本或扩展逻辑。
     const result = await textToArt(inputText, validatedConfig);
     
     const duration = Date.now() - startTime;
@@ -1165,7 +1169,7 @@ function assertResourceManifestDate(value, label) {
 /**
  * 🟢 加载配置文件
  *
- * @lang zh-CN 按显式路径或 cosmiconfig 规则读取 CLI 配置；`false` 禁用自动发现并返回空对象。
+ * @lang zh-CN 按显式路径或 cosmiconfig 规则读取本地 CLI 配置；`false` 禁用自动发现并返回空对象。
  * @lang en Loads CLI configuration from an explicit path or cosmiconfig discovery; `false` disables discovery and returns an empty object.
  *
  * @param {string|false|undefined} configPath - <lang key="cli.loadConfig.param.path"><zh-CN>显式配置路径、`false` 或未指定。</zh-CN><en>Explicit configuration path, `false`, or omitted.</en></lang>
@@ -1182,10 +1186,10 @@ async function loadConfig(configPath) {
     let result;
     
     if (configPath) {
-      // 加载指定路径的配置文件
+      // 加载用户显式指定路径的配置文件；cosmiconfig 负责本地文件解析。
       result = await explorer.load(configPath);
     } else {
-      // 自动查找配置文件
+      // 自动查找也限制在本地项目目录层级，不引入远程配置来源。
       result = await explorer.search();
     }
     
@@ -1215,7 +1219,7 @@ async function loadConfig(configPath) {
 function mergeConfig(fileConfig, cliOptions) {
   const merged = normalizeConfig(fileConfig);
   
-  // 命令行参数覆盖配置文件
+  // 配置优先级固定为命令行 > 配置文件 > 默认值，便于 CLI、npm 脚本和回归测试稳定复现。
   if (hasOption(cliOptions, 'height')) merged.height = requireFiniteNumber(cliOptions.height, 'height');
   if (hasOption(cliOptions, 'width')) merged.width = requireFiniteNumber(cliOptions.width, 'width');
   
@@ -1664,7 +1668,7 @@ function inferOutputTarget(format) {
  * @throws {Error} <lang key="cli.outputResult.throws"><zh-CN>当输出路径不可创建或写入失败时抛出。</zh-CN><en>Thrown when an output path cannot be created or written.</en></lang>
  */
 async function outputResult(result, outputPath, printToTerminal, i18n) {
-  // 如果指定了输出文件，写入文件
+  // 唯一的普通转换文件写入点：只有用户显式给出 `--output` 时才创建目录和写入文件。
   if (outputPath) {
     const dir = path.dirname(outputPath);
     if (!fs.existsSync(dir)) {
@@ -1675,7 +1679,7 @@ async function outputResult(result, outputPath, printToTerminal, i18n) {
     console.log(chalk.green(t(i18n, 'commands.output.saved', { path: outputPath })));
   }
   
-  // 打印到终端
+  // 未指定输出文件时默认走 stdout；指定输出文件后仅在 `--print` 请求下同时打印。
   if (printToTerminal || !outputPath) {
     console.log('\n' + result.content);
   }

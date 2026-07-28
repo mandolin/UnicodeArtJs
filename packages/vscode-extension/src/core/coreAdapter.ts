@@ -15,6 +15,7 @@ import { normalizeVisualFontFamily } from '../config/fontOptions';
  *
  * 🔹 隔离 Extension 配置模型与 `unicode-art-js` Core API。
  * 🔹 便于命令、WebView 和后续测试复用同一套配置转换逻辑。
+ * 🔹 适配器只做参数映射和 Core 调用，不负责 VS Code 编辑器写入或工作区文件写入。
  */
 export interface CoreAdapter {
   /** 将选中文本或 Converter 文本转换为字符画。 */
@@ -48,6 +49,7 @@ type CoreUnifiedConfig = Partial<ArtConfig> & {
 export function createCoreAdapter(): CoreAdapter {
   return {
     async convertText(text: string, config: ExtensionArtConfig): Promise<ArtResult> {
+      // 空选区已在命令层拦截；这里保留空字符串兜底，确保 Core 文本渲染路径可预测。
       return textToArt(text.length === 0 ? ' ' : text, toCoreConfig(config));
     },
     async convertImage(imagePath: string, config: ExtensionArtConfig): Promise<ArtResult> {
@@ -58,6 +60,7 @@ export function createCoreAdapter(): CoreAdapter {
 
 function toCoreConfig(config: ExtensionArtConfig): Partial<ArtConfig> {
   const visualFontFamily = normalizeVisualFontFamily(config.visualFont || config.font);
+  // VS Code 输出始终请求 plain text，并显式带上 outputTarget: 'vscode'，由 resultWriter 决定插入/复制/新文档。
   const coreConfig: CoreUnifiedConfig = {
     height: config.height,
     width: config.width,

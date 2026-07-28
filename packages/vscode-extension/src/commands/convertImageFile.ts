@@ -14,7 +14,8 @@ const IMAGE_FILTERS = {
  * 🟢 转换本地图片文件为字符画
  *
  * 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。
- * 🔹 当前版本只接受本地 `file` URI，远程工作区资源需要后续独立适配。
+ * 🔹 当前版本只接受本地 `file` URI，远程工作区资源需要后续独立适配，避免远程 URI 权限与路径信任边界混淆。
+ * 🔹 结果写入仍复用 `writeResult`；没有活动编辑器时只打开未保存的新文本文档。
  *
  * @param context - VS Code 扩展上下文。
  * @param logger - 扩展输出日志器。
@@ -47,6 +48,7 @@ export async function convertImageFile(
         const result = await createCoreAdapter().convertImage(imageUri.fsPath, config);
         const editor = vscode.window.activeTextEditor;
         if (editor) {
+          // 集中写入边界：图片转换不会自行构造 WorkspaceEdit 或写工作区文件。
           await writeResult(editor, result.content, config.insertMode);
         } else {
           await openNewDocument(result.content);

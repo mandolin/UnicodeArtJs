@@ -34,6 +34,7 @@ const canceledRequests = new WeakMap<vscode.WebviewPanel, Set<string>>();
  *
  * 🔹 入口先执行协议校验，再按消息类型分派到转换、模板、复制、插入和保存流程。
  * 🔹 图片数据先写入扩展 globalStorage 下的临时文件，再交给 Core Node 图像路径处理。
+ * 🔹 WebView payload 不被当成本机任意路径或可信配置；路径选择、保存位置和编辑器写入都由扩展宿主 API gate。
  *
  * @param panel - Converter WebView 面板。
  * @param message - WebView 发送的未知输入。
@@ -122,6 +123,7 @@ export async function handleWebviewMessage(
         );
         await post(panel, { type: 'progress', payload: { stage: 'loadImage', progress: 0.15 } });
 
+        // 图片 data URL 先落到扩展 globalStorage 的临时文件，再交给 Core Node adapter；finally 会删除临时副本。
         tempUri = await writeTempImage(context, message.payload.imageData, message.payload.fileName);
         await post(panel, { type: 'progress', payload: { stage: 'convertImage', progress: 0.35 } });
 
@@ -156,6 +158,7 @@ export async function handleWebviewMessage(
       break;
     }
     case 'cancel':
+      // 取消是协作式的：已进入 Core 的同步转换不强制中断，只在返回后丢弃过期 requestId 的结果。
       markRequestCanceled(panel, message.payload.requestId);
       logger.info(`WebView conversion cancel requested. requestId=${message.payload.requestId}`);
       await post(panel, { type: 'notice', payload: { message: t('message.cancelingConversion') } });
@@ -181,12 +184,14 @@ export async function handleWebviewMessage(
         return;
       }
       logger.info(`WebView insert requested. mode=${message.payload.mode}, chars=${message.payload.content.length}`);
+      // WebView 不直接修改文档；插入仍通过与命令入口共用的 writeResult 写入边界。
       await writeResult(editor, message.payload.content, message.payload.mode);
       await post(panel, { type: 'notice', payload: { message: t('message.inserted') } });
       break;
     }
     case 'save':
       logger.info(`WebView save requested. format=${message.payload.format}, chars=${message.payload.content.length}`);
+      // 保存路径只能来自 VS Code showSaveDialog，WebView payload 不能指定任意本机路径。
       if (await saveContent(message.payload.content, message.payload.format, message.payload.glyphFont)) {
         logger.info(`WebView save completed. format=${message.payload.format}`);
         await post(panel, { type: 'notice', payload: { message: t('message.savedFile') } });
