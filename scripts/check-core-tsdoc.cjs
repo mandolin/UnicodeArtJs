@@ -14,7 +14,7 @@ const repositoryRoot = path.resolve(__dirname, '..');
 const configPath = path.join(repositoryRoot, 'tsdoc.core.json');
 const outputDirectory = path.join(repositoryRoot, '.generated-docs', 'tsdoc', 'core');
 const resultPath = path.join(outputDirectory, 'tsdoc.producer-result.json');
-const expectedRunnerVersion = '0.1.2';
+const expectedRunnerVersion = '0.1.3';
 const expectedArtifactKinds = [
   'generated-js',
   'ordinary-source-map',
@@ -27,7 +27,7 @@ const expectedArtifactKinds = [
 /**
  * 每项同时锁定公开入口、TSDoc artifact 路径与核心符号。
  * `pure.ts` 是纯再导出入口，若干 adapter 文件当前以导出常量对象或常量别名为主。
- * 这些形态在 HIA 0.1.2 fixture scanner 中可能不会形成独立符号，故显式允许空符号。
+ * 这些形态在 HIA fixture scanner 中可能不会形成独立符号，故显式允许空符号。
  */
 const expectedInputs = [
   {

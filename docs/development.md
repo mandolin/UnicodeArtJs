@@ -98,9 +98,9 @@ npm run docs:architecture:check
 
 生成结果位于被 Git 忽略的 `.generated-docs/`。CLI 文档包括本地 HTML、双语索引、搜索索引、源码链接元数据和 HIA integration JSON。`docs:cli:check` 会从干净目录重新生成，并检查双语输出、关键 doclet 与 GitHub 源码链接。
 
-Core 的 TypeScript 文档已接入 `@hia-doc/tsdoc-runner@0.1.2`。其 40 个输入文件覆盖主要公开导出图，并生成可校验的中间 artifact；`docs:tsdoc:core:check` 会验证导出覆盖、诊断和 source map 隐私。该产物不是已经部署的 API 文档站，公开站点聚合将在后续文档阶段完成。
+Core 的 TypeScript 文档已接入 `@hia-doc/tsdoc-runner@0.1.3`。其 40 个输入文件覆盖主要公开导出图，并生成可校验的中间 artifact；`docs:tsdoc:core:check` 会验证导出覆盖、诊断和 source map 隐私。该产物不是已经部署的 API 文档站，公开站点聚合将在后续文档阶段完成。
 
-VS Code Extension 的 TypeScript 文档也已接入 `@hia-doc/tsdoc-runner@0.1.2`。其 16 个输入文件覆盖命令、配置、模板、Core adapter、WebView 协议、HTML/CSP、i18n 和日志边界；`docs:tsdoc:vscode:check` 会验证导出覆盖、诊断和 source map 隐私。扩展的架构与数据边界见 [VS Code Extension 集成与数据边界](vscode-extension-integration.md)。
+VS Code Extension 的 TypeScript 文档也已接入 `@hia-doc/tsdoc-runner@0.1.3`。其 16 个输入文件覆盖命令、配置、模板、Core adapter、WebView 协议、HTML/CSP、i18n 和日志边界；`docs:tsdoc:vscode:check` 会验证导出覆盖、诊断和 source map 隐私。扩展的架构与数据边界见 [VS Code Extension 集成与数据边界](vscode-extension-integration.md)。
 
 HIA target docs adoption gate 使用 `docs/hia/hia-project-docs.json` 记录项目级文档接入形态，并通过 `npm run docs:hia:target:check` 复核 HIA runner 版本、Core / VS Code TSDoc producer result、CI / release gate 接线和源码隐私边界。该命令假定 TSDoc 产物已经由 `docs:tsdoc:*:check` 或 `docs:all:check` 生成；需要从零重建时运行 `npm run docs:hia:target:all`。
 

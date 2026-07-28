@@ -13,7 +13,7 @@ const repositoryRoot = path.resolve(__dirname, '..');
 const configPath = path.join(repositoryRoot, 'tsdoc.vscode-extension.json');
 const outputDirectory = path.join(repositoryRoot, '.generated-docs', 'tsdoc', 'vscode-extension');
 const resultPath = path.join(outputDirectory, 'tsdoc.producer-result.json');
-const expectedRunnerVersion = '0.1.2';
+const expectedRunnerVersion = '0.1.3';
 const expectedArtifactKinds = [
   'generated-js',
   'ordinary-source-map',

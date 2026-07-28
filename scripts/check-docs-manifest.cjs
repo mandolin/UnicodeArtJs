@@ -18,23 +18,23 @@ const expectedEntries = {
     documentationKind: 'hia-tsdoc',
     artifactCount: 240,
     inputCount: 40,
-    producerVersion: '0.1.2'
+    producerVersion: '0.1.3'
   },
   'cli-jsdoc': {
     documentationKind: 'hia-jsdoc',
     nodeCount: 37,
-    pluginVersion: '0.1.1'
+    pluginVersion: '0.1.2'
   },
   'web-jsdoc': {
     documentationKind: 'hia-jsdoc',
     nodeCount: 10,
-    pluginVersion: '0.1.1'
+    pluginVersion: '0.1.2'
   },
   'vscode-tsdoc': {
     documentationKind: 'hia-tsdoc',
     artifactCount: 96,
     inputCount: 16,
-    producerVersion: '0.1.2'
+    producerVersion: '0.1.3'
   }
 };
 

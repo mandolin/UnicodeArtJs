@@ -55,7 +55,7 @@
 - `@lang zh-CN` 与 `@lang en` 必须成对出现，且描述同一行为，不得一边承诺功能而另一边遗漏限制。
 - 参数、返回值和公开错误说明使用 `<lang key="..."><zh-CN>...</zh-CN><en>...</en></lang>`。key 使用小写命名空间，例如 `core.textToArt.param.text`、`cli.parseBox.returns`。
 - JSDoc 类型必须是当前工具可解析的写法。对象返回值使用 `{{height: number, width: number}}`，不要写成 `{ height: number, width: number }`。
-- JavaScript 以 HIA JSDoc 为当前生成入口。Core 的 TypeScript 使用 `@hia-doc/tsdoc-runner@0.1.2` 生成可校验的中间文档数据；它尚不是对外部署的 API 文档站，最终站点聚合由后续文档阶段负责。
+- JavaScript 以 HIA JSDoc 为当前生成入口。Core 的 TypeScript 使用 `@hia-doc/tsdoc-runner@0.1.3` 生成可校验的中间文档数据；它尚不是对外部署的 API 文档站，最终站点聚合由后续文档阶段负责。
 
 ## Core TSDoc 中间文档
 

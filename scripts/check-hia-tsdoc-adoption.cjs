@@ -111,8 +111,8 @@ assertNoForbiddenFragments(hiaConfigText, 'docs/hia/hia-project-docs.json');
 assertCondition(hiaConfig.schemaVersion === '0.1.0-draft', 'HIA project docs schema version changed.');
 assertCondition(hiaConfig.projectId === 'unicodeartjs', 'HIA project id must be unicodeartjs.');
 assertCondition(hiaConfig.projectKind === 'typescript-workspace', 'HIA project kind must be typescript-workspace.');
-assertCondition(hiaConfig.packageBaseline?.['@hia-doc/tsdoc-runner'] === '0.1.2',
-  'HIA package baseline must pin @hia-doc/tsdoc-runner@0.1.2.');
+assertCondition(hiaConfig.packageBaseline?.['@hia-doc/tsdoc-runner'] === '0.1.3',
+  'HIA package baseline must pin @hia-doc/tsdoc-runner@0.1.3.');
 assertCondition(packageJson.devDependencies?.['@hia-doc/tsdoc-runner'] === hiaConfig.packageBaseline['@hia-doc/tsdoc-runner'],
   'package.json devDependency must match HIA package baseline.');
 

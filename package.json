@@ -111,8 +111,8 @@
   },
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "devDependencies": {
-    "@hia-doc/tsdoc-runner": "0.1.2",
-    "@mandolin/jsdoc-plugin-hia-sys": "0.1.1",
+    "@hia-doc/tsdoc-runner": "0.1.3",
+    "@mandolin/jsdoc-plugin-hia-sys": "0.1.2",
     "@mandolin/jsdoc-theme-hia": "0.1.1",
     "@types/node": "20.19.43",
     "@types/vscode": "1.90.0",
