@@ -27,7 +27,7 @@ const expectedEntries = {
   },
   'web-jsdoc': {
     documentationKind: 'hia-jsdoc',
-    nodeCount: 8,
+    nodeCount: 10,
     pluginVersion: '0.1.1'
   },
   'vscode-tsdoc': {
