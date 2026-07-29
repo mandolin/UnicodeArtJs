@@ -6,14 +6,28 @@
 
 ## 适用范围
 
-以下改动必须同步补充或复核注释：
+以下改动必须从首次写入起同步补充或复核中英双语注释：
 
+- 每个 package / module 边界、公开或内部语义节点（class、type、interface、function、method、constructor、重要 constant，以及有独立职责、约束或副作用的私有单元）。
 - 公开导出的函数、类型、枚举、配置字段、错误码和协议字段。
 - 影响跨端行为的配置归一化、默认值、兼容别名和稳定性状态。
 - 采样、匹配、字体度量、宽字素计算、语义布局、安全校验等非显然逻辑。
 - Node、浏览器、VS Code 或独立应用之间存在行为差异的 adapter 和宿主边界。
+- 有副作用、I/O、缓存、资源生命周期、并发、取消、错误恢复或降级的逻辑。
 
-显而易见的局部赋值、单行判断和私有实现细节不应为了增加注释数量而重复解释。
+修改既有模块时执行 touch-improve：同步补齐本次触及的模块职责、公共 API、关键不变量和已经发现的错误注释。尚未触及的存量缺口会单独治理；它不是降低新代码注释要求的理由。
+
+## HIA ROP 与普通代码注释
+
+UnicodeArtJs 对新增或结构性修改的代码采用 Reading-Oriented Programming（ROP）基线。读者应可主要通过注释逐层理解节点职责、流程、局部状态和风险，而不必先逆向推理每一个表达式。
+
+- 每个代码语义节点都要有紧邻声明的中英双语文档化注释。JavaScript 使用 JSDoc，TypeScript 使用 TSDoc-compatible block。
+- 节点内部的流程块、关键子块、分支、转换和资源生命周期都要有紧邻的中英双语普通注释；如果子块仍有独立流程，应继续分层说明。
+- 基本每个非显然局部变量和每句非明显自明语句都要有紧邻的中英双语解释，说明领域角色、来源、可变性、单位、状态变化、不变量、隐私边界或风险。变量名、类型和赋值组合确实已足够自明时可省略；“大概能猜到”不是理由。
+- 注释说明“为何存在、改变什么、下一步依赖什么”，不能机械翻译赋值、循环或条件 token，也不能用“处理数据”“执行逻辑”等空泛文案代替说明。
+- 生成器、模板、源模型与输出代码之间存在映射时，上游和下游分别覆盖其职责、关键转换、约束和人工接管边界；一条笼统上游注释不能替代多个下游节点或流程块的可读解释。
+
+JS/TS 的当前 canonical 语言标识为 `@lang zh-CN`、`@lang en` 与字段或普通注释内的 `<lang><zh-CN>…</zh-CN><en>…</en></lang>`。中英文必须表达同一事实。`@langSrc`、`key`、`src`、DLR 与固有术语 parser 的 resolver 尚未作为本项目已冻结能力；不得假定其可用，更不得因其未冻结而省略源码中的两种语言。
 
 ## 术语表
 
@@ -29,6 +43,11 @@
 | 语义文档 | semantic document | `semantic-document@1` 的版本化 JSON/DSL 内容模型，不是任意 HTML 或脚本执行载体。 |
 | Unicode 艺术字字体 | Unicode Art Font (UAF) | `unicode-art-font@1` 的版本化字形数据格式，不等同于操作系统字体文件。 |
 | adapter | adapter | 为 Node、浏览器或宿主环境提供输入、画布、解码、输出等平台能力的边界层。 |
+| Unicode 显示宽度 | Unicode display width | 字素在目标文本环境中占用的列宽语义；与代码单元数或 UTF-8 字节数不同。 |
+| 字素簇 | grapheme cluster | 面向用户感知的 Unicode 文本单元；它不等同于本项目“字素（glyph cell）”这一输出网格单元。 |
+| 字体回退 | font fallback | 首选字体不具备目标字形或环境不可用时，显示系统选择替代字体的行为。 |
+| ANSI 转义序列 | ANSI escape sequence | 终端控制和样式使用的转义字节序列；必须与普通输出文本和安全边界区分。 |
+| 终端能力 | terminal capability | 终端对颜色、宽度、字符集或控制序列等行为的实际支持范围。 |
 
 配置、README、CLI 帮助、Web UI 和 VS Code 文案出现这些概念时，应优先采用表中的中文和英文。旧字段名如 `font` 只能在说明兼容迁移时出现，并必须指明其对应的现代字段。
 
@@ -55,7 +74,7 @@
 - `@lang zh-CN` 与 `@lang en` 必须成对出现，且描述同一行为，不得一边承诺功能而另一边遗漏限制。
 - 参数、返回值和公开错误说明使用 `<lang key="..."><zh-CN>...</zh-CN><en>...</en></lang>`。key 使用小写命名空间，例如 `core.textToArt.param.text`、`cli.parseBox.returns`。
 - JSDoc 类型必须是当前工具可解析的写法。对象返回值使用 `{{height: number, width: number}}`，不要写成 `{ height: number, width: number }`。
-- JavaScript 以 HIA JSDoc 为当前生成入口。Core 的 TypeScript 使用 `@hia-doc/tsdoc-runner@0.1.3` 生成可校验的中间文档数据；它尚不是对外部署的 API 文档站，最终站点聚合由后续文档阶段负责。
+- JavaScript 以 HIA JSDoc 为当前生成入口。Core 的 TypeScript 使用 `@hia-doc/tsdoc-runner@0.1.3` 生成可校验的中间文档数据；GitHub Pages 的“开发文档”页会把四条文档线投影为可浏览的公开符号索引。索引不替代平台、稳定性和配置说明，入口与 Recipes 的对应关系见 [API Reference 与 Recipes](api-reference.md)。
 
 ## Core TSDoc 中间文档
 
@@ -105,7 +124,7 @@ npm run docs:all:check
 npm run docs:quality:check
 ```
 
-`docs:all` 会生成 CLI、Web、Core TSDoc 和 VS Code TSDoc 的本地中间产物，并写出 `.generated-docs/documentation-manifest.json`。该清单记录每条文档线的生成器版本、产物数量、公开说明页和检查命令。随后脚本会生成 `packages/web/public/docs/manifest.json`，作为 GitHub Pages“开发文档”页可读取的公开字段快照。
+`docs:all` 会生成 CLI、Web、Core TSDoc 和 VS Code TSDoc 的本地中间产物，并写出 `.generated-docs/documentation-manifest.json`。该清单记录每条文档线的生成器版本、产物数量、公开说明页和检查命令。随后脚本会生成 `packages/web/public/docs/manifest.json`，作为 GitHub Pages“开发文档”页可读取的公开字段快照和符号索引来源。
 
 `docs:all:check` 会重新生成所有文档产物，运行各单项检查、术语契约检查、文档质量检查、统一清单检查和公开快照检查。内部清单不会提交到仓库；公开快照会提交给 Web 站点使用，但不能引用私有规划资料、会话日志或内部审计文件。详细说明见[文档生成流水线](documentation-pipeline.md)。
 
@@ -138,6 +157,7 @@ Core 的能力状态以 `getCoreCapabilities()` 返回的事实为准。README�
 4. 示例是否能在当前公开依赖和已提交 fixture 下运行或被测试覆盖。
 5. 变更是否同步更新了对应的 README、CLI 帮助、Web/VS Code 文案或能力查询结果。
 6. 运行 `npm run docs:contract:check` 和 `npm run docs:quality:check`；修改 Core 公开 TypeScript 契约时，再运行 `npm run docs:tsdoc:core:check`；修改 VS Code Extension 宿主边界时，再运行 `npm run docs:tsdoc:vscode:check`；涉及 CLI 或 Web 文档试点时，再运行对应的 `docs:*:check`。
-7. 进入合并、发布或文档站聚合前运行 `npm run docs:all:check`，确认统一清单仍能复现四条文档线。
+7. 对本次触及的函数、类型、流程块、非显然局部变量和语句进行 ROP 人工复核，确认双语注释解释真实语义而不是复述 token；同时将新增固有术语登记到本页术语表。
+8. 进入合并、发布或文档站聚合前运行 `npm run docs:all:check`，确认统一清单仍能复现四条文档线。
 
 该检查只覆盖当前冻结的最低契约，不能替代对算法、翻译和跨平台表现的人工审查。

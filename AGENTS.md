@@ -23,7 +23,8 @@
 ## Project Rules
 
 - HIA-Documentation-Sys 通知采用拉取机制；新阶段、恢复或文档化相关任务前，应主动读取 `K:\Project\Github_mandolin\HIA-Documentation-Sys\work-zone\notify\`。
-- 新增或修改关键代码时，尽量补充准确的中文注释；公共 API、配置、协议、IR、复杂算法和安全/隐私边界优先补中英双语 JSDoc/TSDoc。
+- 自 2026-07-29 起，新增或结构性修改的代码必须严格遵守 `work-zone/docs/hia-rop-bilingual-comment-policy.md` 与 HIA《项目初始化指南》第 7 节：每个代码语义节点均有紧邻、完整且语义对等的中英双语文档化注释；节点内部的流程块、基本每个非显然局部变量和每句非明显自明语句均有紧邻的中英双语普通注释。注释必须解释职责、意图、状态变化、约束或风险，不能机械复述 token。JS/TS 使用既有合法的 `@lang zh-CN`、`@lang en` 与 inline `<lang>` 形式；不得因提取器、DLR 或术语 parser 尚未冻结而遗漏语言侧或发明临时标签。修改旧模块须执行 touch-improve，补齐本次触及的模块职责、公共 API 与关键不变量。
+- 存量注释的全量治理不回填为已完成的 P24/P25；其 coverage inventory 与一至两个独立治理周期的立项时机已登记为 deferred，须在合适节点由维护者确认后另行规划。
 - 新增第三方依赖前必须先记录用途和许可证；核心默认优先 MIT、Apache-2.0、BSD、ISC、OFL 等宽松许可。
 - 如果发现主仓或 WorkZone 已积累较多有效改动但尚未提交，应提醒维护者考虑分批提交。
 - 对较大任务记录连续时间片日志，优先写入 `work-zone/ai/codex/chatlog/YYYY-MM-DD/`；日志记录可公开的工程过程、关键判断和验证结果，不记录私有思维链。
