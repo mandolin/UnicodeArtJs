@@ -614,7 +614,7 @@
             <button class="btn" id="editorCellCanvasResetViewport" type="button" data-i18n="cellcanvas.resetViewport">重置视口</button>
           </div>
           <p class="field-help" id="editorCellCanvasViewportSummary"></p>
-          <div class="editor-tool-feedback" id="editorCellCanvasToolFeedback" data-state="info" data-tool="cellcanvas.tool.select" aria-live="polite">
+          <div class="editor-tool-feedback" id="editorCellCanvasToolFeedback" data-state="info" data-tool="cellcanvas.tool.select" role="status" aria-live="polite" aria-atomic="true">
             <div class="editor-tool-feedback-row">
               <span data-i18n="cellcanvas.feedback.tool">工具</span>
               <strong id="editorCellCanvasActiveTool" data-i18n="cellcanvas.tool.select">选择</strong>
@@ -636,7 +636,7 @@
       <section class="editor-preview-section" aria-label="编辑器预览" data-i18n-aria-label="editor.previewRegion">
         <div class="editor-preview-toolbar">
           <div>
-            <span class="preview-info" id="editorStatus" aria-live="polite" data-i18n="editor.ready">就绪</span>
+            <span class="preview-info" id="editorStatus" role="status" aria-live="polite" aria-atomic="true" data-i18n="editor.ready">就绪</span>
             <span class="editor-format-label" id="editorFormatLabel">document</span>
           </div>
           <div class="editor-toolbar-actions">

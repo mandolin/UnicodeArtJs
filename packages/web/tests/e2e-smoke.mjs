@@ -851,11 +851,40 @@ async function main() {
       }
     });
 
-    await test('localizes editor controls and exposes preview region semantics', async () => {
+    /**
+     * @lang zh-CN
+     * 验证编辑器预览区域和异步状态反馈同时保留可本地化的可访问性语义。
+     *
+     * 本用例只检查静态 ARIA 契约；状态文本仍由现有 i18n 与渲染路径负责更新。
+     * @lang en
+     * Verify that the editor preview region and asynchronous status feedback retain
+     * localizable accessibility semantics together.
+     *
+     * This case checks only the static ARIA contract; existing i18n and rendering
+     * paths remain responsible for updating status text.
+     */
+    await test('localizes editor controls and exposes preview and live-status semantics', async () => {
       await page.selectOption('#languageSelect', 'en-US');
       await page.waitForFunction(() => document.querySelector('#editorKind option[value="document"]')?.textContent === 'Layout document');
       const regionLabel = await page.getAttribute('.editor-preview-container', 'aria-label');
       if (regionLabel !== 'Editor preview') throw new Error('Editor preview region was not localized');
+
+      // <lang><zh-CN>一次读取两类状态区域，确保编辑器进度与 CellCanvas 工具反馈都能被完整播报。</zh-CN><en>Read both status regions together so editor progress and CellCanvas tool feedback can both be announced atomically.</en></lang>
+      const liveStatus = await page.evaluate(() => ({
+        editorRole: document.querySelector('#editorStatus')?.getAttribute('role'),
+        editorLive: document.querySelector('#editorStatus')?.getAttribute('aria-live'),
+        editorAtomic: document.querySelector('#editorStatus')?.getAttribute('aria-atomic'),
+        toolRole: document.querySelector('#editorCellCanvasToolFeedback')?.getAttribute('role'),
+        toolLive: document.querySelector('#editorCellCanvasToolFeedback')?.getAttribute('aria-live'),
+        toolAtomic: document.querySelector('#editorCellCanvasToolFeedback')?.getAttribute('aria-atomic'),
+      }));
+      if (liveStatus.editorRole !== 'status' || liveStatus.editorLive !== 'polite' || liveStatus.editorAtomic !== 'true') {
+        throw new Error(`Editor live-status semantics were incomplete: ${JSON.stringify(liveStatus)}`);
+      }
+      if (liveStatus.toolRole !== 'status' || liveStatus.toolLive !== 'polite' || liveStatus.toolAtomic !== 'true') {
+        throw new Error(`CellCanvas tool live-status semantics were incomplete: ${JSON.stringify(liveStatus)}`);
+      }
+
       await page.selectOption('#languageSelect', 'zh-CN');
       await page.waitForFunction(() => document.querySelector('#editorKind option[value="document"]')?.textContent === '布局文档');
     });
@@ -1452,6 +1481,68 @@ async function main() {
       if (!fallbackSummary.includes('20x10')) {
         throw new Error(`DOM grid fallback summary was not synchronized: ${fallbackSummary}`);
       }
+    });
+
+    /**
+     * @lang zh-CN
+     * 使用有限但重复的键盘导航来模拟较长编辑会话，并验证错误后的可恢复焦点。
+     *
+     * 它不是长时浏览器 soak test；屏幕阅读器与数小时会话的观察留给 P26.6 人工验收。
+     * @lang en
+     * Use bounded, repeated keyboard navigation to model a longer edit session and
+     * verify recoverable focus after an error.
+     *
+     * This is not a long-running browser soak test; screen-reader and multi-hour
+     * observations remain for P26.6 manual acceptance.
+     */
+    await test('keeps CellCanvas keyboard focus and live error recovery intact across a bounded edit session', async () => {
+      await page.selectOption('#editorKind', 'cellcanvas');
+      const validSource = createBlankCellCanvasDraftSource(6, 3);
+      await page.fill('#editorSource', validSource);
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="6"][data-cellcanvas-height="3"]', {
+        timeout: 5000,
+      });
+
+      // <lang><zh-CN>轨迹始终位于画布内，反复切换方向以覆盖连续键盘导航后的焦点保持。</zh-CN><en>The route stays inside the canvas and changes direction repeatedly to cover focus retention after sustained keyboard navigation.</en></lang>
+      const keyboardRoute = [
+        ['ArrowRight', 1, 0], ['ArrowRight', 2, 0], ['ArrowRight', 3, 0], ['ArrowRight', 4, 0],
+        ['ArrowDown', 4, 1], ['ArrowLeft', 3, 1], ['ArrowLeft', 2, 1], ['ArrowLeft', 1, 1], ['ArrowLeft', 0, 1],
+        ['ArrowDown', 0, 2], ['ArrowRight', 1, 2], ['ArrowRight', 2, 2], ['ArrowRight', 3, 2], ['ArrowRight', 4, 2],
+      ];
+      await page.focus('[data-cellcanvas-x="0"][data-cellcanvas-y="0"]');
+      for (const [key, x, y] of keyboardRoute) {
+        // <lang><zh-CN>每一步都断言真实活动元素，避免仅凭状态文本将焦点丢失误判为成功。</zh-CN><en>Assert the actual active element at every step so lost focus cannot be mistaken for success from status text alone.</en></lang>
+        await page.keyboard.press(key);
+        await waitForFocusedCellCanvasCell(page, x, y);
+      }
+
+      await page.fill('#editorSource', '{"broken":');
+      await page.click('#editorRender');
+      await page.waitForFunction(() => document.querySelector('#editorStatus')?.dataset.state === 'error');
+
+      // <lang><zh-CN>错误状态必须仍是完整的礼貌 live region，且无效输入不得在恢复前被静默改写。</zh-CN><en>The error state must remain a complete polite live region, and invalid input must not be silently rewritten before recovery.</en></lang>
+      const errorState = await page.evaluate(() => ({
+        source: document.querySelector('#editorSource')?.value,
+        state: document.querySelector('#editorStatus')?.dataset.state,
+        role: document.querySelector('#editorStatus')?.getAttribute('role'),
+        live: document.querySelector('#editorStatus')?.getAttribute('aria-live'),
+        atomic: document.querySelector('#editorStatus')?.getAttribute('aria-atomic'),
+      }));
+      if (errorState.source !== '{"broken":' || errorState.state !== 'error') {
+        throw new Error(`Bounded session did not retain the visible source error: ${JSON.stringify(errorState)}`);
+      }
+      if (errorState.role !== 'status' || errorState.live !== 'polite' || errorState.atomic !== 'true') {
+        throw new Error(`Bounded session lost live error semantics: ${JSON.stringify(errorState)}`);
+      }
+
+      await page.fill('#editorSource', validSource);
+      await page.click('#editorRender');
+      await page.waitForSelector('[data-cellcanvas-grid][data-cellcanvas-width="6"][data-cellcanvas-height="3"]', {
+        timeout: 5000,
+      });
+      await page.focus('[data-cellcanvas-x="4"][data-cellcanvas-y="2"]');
+      await waitForFocusedCellCanvasCell(page, 4, 2);
     });
 
     await test('recovers CellCanvas editor after invalid source and project files', async () => {
