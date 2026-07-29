@@ -1,4 +1,4 @@
-# VSCode Extension Release Checklist
+# VS Code Extension Release Checklist
 
 ## Preflight
 
@@ -35,7 +35,7 @@ For the stable channel, run `mise exec -- npm run package`, then publish without
 ## Post Publish
 
 - Confirm the Marketplace page is reachable.
-- Install from Marketplace in a clean VSCode profile.
+- Install from Marketplace in a clean VS Code profile.
 - Verify the command palette commands.
 - Verify editor context menu.
 - Verify Explorer image context menu.

@@ -1,7 +1,7 @@
 # Node Runtime Component Inventory
 
 This document records the native runtime components redistributed by the Node
-Core package and the VSCode extension. It is intentionally version-specific:
+Core package and the VS Code extension. It is intentionally version-specific:
 upgrading a native package or adding a platform requires a fresh review.
 
 It is an engineering inventory rather than legal advice.

@@ -1,6 +1,6 @@
 # 文档生成流水线
 
-UnicodeArtJs 使用一套受控的本地文档流水线生成开发者文档中间产物。该流水线目前服务于本地开发、CI 检查和后续公开文档站聚合；生成目录不提交到仓库。
+UnicodeArtJs 使用一套受控的本地文档流水线生成开发者文档中间产物。该流水线服务于本地开发、CI 检查以及 GitHub Pages 的公开字段投影；生成目录不提交到仓库。
 
 ## 覆盖范围
 
@@ -47,7 +47,7 @@ npm run docs:all:check
 packages/web/public/docs/manifest.json
 ```
 
-该快照只保留包名、版本、接口面、文档类型、公开文档链接、检查命令和指标摘要；不会包含 `.generated-docs/`、内部工作区、本机绝对路径或会话记录。GitHub Pages 的“开发文档”页直接读取这份 JSON。
+该快照只保留包名、版本、接口面、文档类型、公开文档链接、检查命令、指标摘要和受限的符号索引；不会包含 `.generated-docs/`、内部工作区、本机绝对路径、源码正文或会话记录。GitHub Pages 的“开发文档”页直接读取这份 JSON。公开索引与手写指南、Recipes 的对应关系见 [API Reference 与 Recipes](api-reference.md)。
 
 ## CI 与发布门禁
 

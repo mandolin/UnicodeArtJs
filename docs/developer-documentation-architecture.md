@@ -17,7 +17,7 @@ UnicodeArtJs 的开发者文档站面向三类读者：想快速使用工具的�
 | 分区 | 用途 | 当前主要页面 |
 | --- | --- | --- |
 | Quickstart | 最短安装、运行和预览路径。 | `README.md`、`docs/quickstart.md`、`docs/recipes.md` |
-| API Reference | Core、CLI、Web、VS Code Extension 的 API、注释质量和生成状态。 | `docs/code-documentation.md`、`docs/documentation-quality.md`、`docs/documentation-pipeline.md` |
+| API Reference | Core、CLI、Web、VS Code Extension 的公开索引、手写指南、示例覆盖和注释质量。 | `docs/api-reference.md`、`docs/code-documentation.md`、`docs/documentation-quality.md`、`docs/documentation-pipeline.md` |
 | Integration | 宿主、浏览器、Web、Web Studio experimental 入口、VS Code、桌面、侧载和 Compatible 应用集成边界。 | `docs/host-integration.md`、`docs/host-sideload-boundary.md`、`docs/web-integration.md`、`docs/vscode-extension-integration.md`、`docs/desktop-host-baseline.md` |
 | Configuration | 字体、宽字素、语言、输出环境和配置模型。 | `docs/config-model-vnext.md`、`docs/glyph-width-layout.md`、`docs/font-behavior.md` |
 | Extension | UAEM、官方扩展、语义布局、UAF、静态画廊、资源发现和创作生态。 | `docs/extension-sdk.md`、`docs/extension-manifest.md`、`docs/semantic-uaf-beta.md`、`docs/uaf-authoring.md`、`docs/semantic-document-authoring.md`、`docs/creative-ecosystem.md`、`docs/gallery.md`、`docs/resource-discovery-experimental.md` |
@@ -28,7 +28,7 @@ UnicodeArtJs 的开发者文档站面向三类读者：想快速使用工具的�
 ## 导航原则
 
 - 首页先回答“能做什么、怎么开始、在哪里试用”。
-- API Reference 只承诺公开入口和稳定性，不把中间产物误写成最终 API 站。
+- API Reference 只承诺公开入口和稳定性；GitHub Pages 提供公开字段投影与符号索引，不把本地中间产物误写成需要提交的 API 站。
 - Integration 页面解释宿主边界，避免把 Web、CLI、VS Code 和桌面应用混成一个运行环境。
 - Compatibility 页面优先解释风险和限制，而不是把所有边界藏在发布说明里。
 - Contribute 页面只放公开可执行流程，不包含内部计划、日志和临时审计过程。

@@ -177,6 +177,7 @@ Core、CLI、Web 和 VS Code 默认路径采用“清洁分发”策略，依赖
 - 迁移指南：[docs/migration-guide.md](docs/migration-guide.md)
 - 发布材料与发布后核验：[docs/release-materials.md](docs/release-materials.md)
 - 文档质量与注释抽查：[docs/documentation-quality.md](docs/documentation-quality.md)
+- API Reference 与 Recipes：[docs/api-reference.md](docs/api-reference.md)
 - 常见使用 Recipes：[docs/recipes.md](docs/recipes.md)
 - 声明式扩展清单说明：[docs/extension-manifest.md](docs/extension-manifest.md)
 - 声明式扩展作者指南：[docs/extension-authoring.md](docs/extension-authoring.md)

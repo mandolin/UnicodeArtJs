@@ -85,4 +85,4 @@ npm run docs:tsdoc:vscode:check
 
 生成目录为 `.generated-docs/tsdoc/vscode-extension/`，不提交到仓库。检查脚本会验证输入数量、artifact 数量、诊断、导出注释覆盖、关键符号和 source map 隐私。
 
-当前生成范围覆盖 Extension 生命周期、命令、配置、模板、Core adapter、输出写入、WebView 协议、WebView 消息处理、HTML/CSP、i18n、状态栏和日志器。最终公开 API 文档站仍由后续统一文档聚合阶段处理。
+当前生成范围覆盖 Extension 生命周期、命令、配置、模板、Core adapter、输出写入、WebView 协议、WebView 消息处理、HTML/CSP、i18n、状态栏和日志器。GitHub Pages 的“开发文档”页已提供这条文档线的受限公开符号索引；用户操作路径和其它文档线的对应关系见 [API Reference 与 Recipes](api-reference.md)。

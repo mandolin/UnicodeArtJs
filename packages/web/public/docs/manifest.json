@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-28T02:46:20.832Z",
+  "generatedAt": "2026-07-28T16:14:17.639Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -49,8 +49,12 @@
       {
         "id": "api-reference",
         "title": "API Reference",
-        "docCount": 3,
+        "docCount": 4,
         "docs": [
+          {
+            "path": "docs/api-reference.md",
+            "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/api-reference.md"
+          },
           {
             "path": "docs/code-documentation.md",
             "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/docs/code-documentation.md"

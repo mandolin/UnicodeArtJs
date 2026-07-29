@@ -1,6 +1,6 @@
 # Release Gate and Version Graph
 
-The repository-level release gate checks Core, CLI, Web, and the VSCode extension with one repeatable command before a publish or release candidate.
+The repository-level release gate checks Core, CLI, Web, and the VS Code extension with one repeatable command before a publish or release candidate.
 
 ## Command
 
@@ -25,7 +25,7 @@ npm run release:verify:publish
 | `unicode-art-js` | `1.2.1` | npm | root workspace package |
 | `unicode-art-cli` | `1.0.2` | npm | `file:../core` during development; switch to `^1.2.1` for publish |
 | `@unicode-art/web` | `0.1.0-alpha` | GitHub Pages / source package | `file:../core` |
-| `unicode-art-js-vscode` | `0.3.0` | VSCode Marketplace stable channel | `^1.2.1` |
+| `unicode-art-js-vscode` | `0.3.0` | VS Code Marketplace stable channel | `^1.2.1` |
 
 ## What The Gate Checks
 
@@ -52,7 +52,7 @@ npm run release:verify:publish
 - `support:check` can validate the support guide, known limitations page, Issue Forms, and public label catalog.
 - `public-entry:check` can validate public README links, package metadata, package README support links, and repository entrypoints.
 - `stability:check` can validate the experimental stability matrix against `getCoreCapabilities()`.
-- `config-model:check` can validate the shared configuration model across Core, CLI, Web, and the VSCode extension.
+- `config-model:check` can validate the shared configuration model across Core, CLI, Web, and the VS Code extension.
 - `glyph-width:check` can validate glyph-width layout documentation, the shared calculator helper, critical call sites, and regression test coverage.
 - `semantic-uaf-beta:check` can validate the UAF / semantic-document beta contract, canonical fixtures, Core rendering, CLI consumption, and Web fixture coverage.
 - `uaf-authoring:check` can validate the UAF author guide, official line font, beta fixture, Core rendering, CLI font validation, and author-facing entry links.
@@ -85,7 +85,7 @@ npm --workspace packages/cli run core:dep:local
 npm install
 ```
 
-The VSCode extension uses npm Core by default because VSIX packaging is more stable without workspace symlinks. Its package command still stages a local Core tarball internally so an unpublished Core candidate can be verified before release.
+The VS Code extension uses npm Core by default because VSIX packaging is more stable without workspace symlinks. Its package command still stages a local Core tarball internally so an unpublished Core candidate can be verified before release.
 
 Release notes, package-level tag naming, and post-release verification steps are standardized in
 [`docs/release-materials.md`](release-materials.md). Its static guard is `release-materials:check`.

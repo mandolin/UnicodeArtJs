@@ -1,5 +1,5 @@
 {
-  "extension.description": "在 VSCode 中将图片和文本转换为 Unicode 字符画。",
+  "extension.description": "在 VS Code 中将图片和文本转换为 Unicode 字符画。",
   "command.openConverter": "UnicodeArtJs: 打开 Converter",
   "command.convertSelection": "UnicodeArtJs: 生成字符画",
   "command.convertSelectionWithOptions": "UnicodeArtJs: 生成字符画并选择选项",

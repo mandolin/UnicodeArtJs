@@ -101,6 +101,8 @@ for (const relativePath of [
   'packages/cli/README.md',
   'packages/web/README.md',
   'packages/vscode-extension/README.md',
+  'packages/vscode-extension/package.nls.json',
+  'packages/vscode-extension/package.nls.zh-cn.json',
   '.github/ISSUE_TEMPLATE/config.yml',
   '.github/labels.yml'
 ]) {
@@ -182,6 +184,16 @@ for (const [relativePath, expected] of Object.entries({
   }
 })) {
   assertPackageMetadata(relativePath, expected);
+}
+
+for (const relativePath of [
+  'packages/vscode-extension/package.nls.json',
+  'packages/vscode-extension/package.nls.zh-cn.json'
+]) {
+  const localizedManifest = readJson(relativePath);
+  assertCondition(typeof localizedManifest['extension.description'] === 'string', `${relativePath} 缺少 extension.description。`);
+  assertCondition(localizedManifest['extension.description'].includes('VS Code'), `${relativePath} 的 extension.description 必须使用 VS Code 产品名。`);
+  assertCondition(!localizedManifest['extension.description'].includes('VSCode'), `${relativePath} 的 extension.description 不应使用 VSCode。`);
 }
 
 const packageReadmeRequirements = {

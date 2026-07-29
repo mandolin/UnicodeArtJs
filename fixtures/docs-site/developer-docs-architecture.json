@@ -22,6 +22,7 @@
       "id": "api-reference",
       "title": "API Reference",
       "requiredDocs": [
+        "docs/api-reference.md",
         "docs/code-documentation.md",
         "docs/documentation-quality.md",
         "docs/documentation-pipeline.md"

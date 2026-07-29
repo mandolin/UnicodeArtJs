@@ -78,6 +78,7 @@ function checkRecipeDoc() {
 
   const recipeReferences = [
     'quickstart.md',
+    'api-reference.md',
     'examples/node/text-banner.mjs',
     'examples/node/image-file.mjs',
     'examples/node/semantic-document.mjs',

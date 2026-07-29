@@ -1,6 +1,6 @@
 # UnicodeArtJs Recipes
 
-这页收集常见使用场景的可复制示例。示例尽量使用已发布 API、已提交 fixture 和开源字体名称，不依赖本机私有路径、密钥或网络下载。
+这页收集常见使用场景的可复制示例。示例尽量使用已发布 API、已提交 fixture 和开源字体名称，不依赖本机私有路径、密钥或网络下载。需要按符号查看当前生成范围、源码链接或宿主边界时，先看 [API Reference 与 Recipes](api-reference.md)。
 
 在线工具站：<https://mandolin.github.io/UnicodeArtJs/>
 
@@ -42,6 +42,14 @@ node examples/node/uaf-font.mjs
 ```bash
 npm run recipes:check
 ```
+
+## API / Recipe 覆盖关系
+
+- Core 的文本、图片、语义文档和 UAF 入口各有一个可执行 Node 示例。
+- CLI 的文本、图片和声明式扩展代表命令由 `recipes:check` 执行。
+- Web 与 VS Code Extension 的用户操作以本页流程和对应集成指南为准；可浏览的公开符号索引在在线工具站的“开发文档”页。
+
+完整的四条文档线、手写指南与示例映射见 [API Reference 与 Recipes](api-reference.md)。
 
 ## Core：文本生成字符画
 

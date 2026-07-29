@@ -97,6 +97,7 @@ npm run recipes:check
 ## 下一步
 
 - 更多可复制场景：[Recipes](recipes.md)
+- 公开符号索引、手写指南与示例关系：[API Reference 与 Recipes](api-reference.md)
 - 配置字段和兼容别名：[配置模型 vNext](config-model-vnext.md)
 - 字体回退和浏览器差异：[字体行为与浏览器回退](font-behavior.md)
 - 支持入口和问题报告：[支持与反馈](support.md)

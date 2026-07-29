@@ -1,5 +1,5 @@
 {
-  "extension.description": "Convert images and text to Unicode art inside VSCode.",
+  "extension.description": "Convert images and text to Unicode art inside VS Code.",
   "command.openConverter": "UnicodeArtJs: Open Converter",
   "command.convertSelection": "UnicodeArtJs: Generate Unicode Art",
   "command.convertSelectionWithOptions": "UnicodeArtJs: Generate Unicode Art With Options",
