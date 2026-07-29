@@ -1753,6 +1753,14 @@ async function main() {
       if (projectCapsule.documents?.[0]?.draft?.document?.canvas?.width !== 3) {
         throw new Error('Studio project capsule did not preserve the CellCanvas draft');
       }
+      // <lang><zh-CN>内部项目下载只建立“下载已请求”参照；它不宣称浏览器已将文件持久化到某个路径。</zh-CN><en>An internal-project download establishes only a “download requested” reference; it does not claim the browser persisted a file at any path.</en></lang>
+      const projectDownloadState = await page.evaluate(() => ({
+        dirty: document.querySelector('#editorWorkspaceState')?.getAttribute('data-source-dirty'),
+        origin: document.querySelector('#editorWorkspaceState')?.getAttribute('data-recovery-origin'),
+      }));
+      if (projectDownloadState.dirty !== 'false' || projectDownloadState.origin !== 'download-requested') {
+        throw new Error(`Project download did not establish a current source checkpoint: ${JSON.stringify(projectDownloadState)}`);
+      }
       await page.setInputFiles('#editorCellCanvasProjectFile', {
         name: 'downloaded-studio-project.uart-project.json',
         mimeType: 'application/json',
@@ -1764,6 +1772,14 @@ async function main() {
         undefined,
         { timeout: 5000 },
       );
+      // <lang><zh-CN>重新选择同一下载物后，参照来源必须变成已验证导入，证明恢复提示不把导入与下载混为一谈。</zh-CN><en>After reselecting the same download, origin must become a validated import, proving the recovery prompt does not conflate imports with downloads.</en></lang>
+      const projectImportState = await page.evaluate(() => ({
+        dirty: document.querySelector('#editorWorkspaceState')?.getAttribute('data-source-dirty'),
+        origin: document.querySelector('#editorWorkspaceState')?.getAttribute('data-recovery-origin'),
+      }));
+      if (projectImportState.dirty !== 'false' || projectImportState.origin !== 'imported-file') {
+        throw new Error(`Project reload did not establish a validated-import checkpoint: ${JSON.stringify(projectImportState)}`);
+      }
 
       const draft = JSON.parse(await page.inputValue('#editorSource'));
       const projectEnvelope = {
@@ -1806,14 +1822,59 @@ async function main() {
       if (after !== before) throw new Error('Invalid import replaced the editor source');
     });
 
+    /**
+     * @lang zh-CN
+     * 验证源码下载内容与浏览器本地快照脏状态的生命周期，不把下载请求误写为文件落盘保证。
+     * @lang en
+     * Verify source-download content and the browser-local snapshot dirty-state lifecycle without treating a download request as a file-persistence guarantee.
+     */
     await test('exports the current canonical JSON source', async () => {
       await page.selectOption('#editorKind', 'document');
       await page.click('#editorLoadPreset');
+      // <lang><zh-CN>先确认新载入的示例已偏离旧参照，避免“初始即干净”掩盖后续下载状态转换。</zh-CN><en>First confirm the newly loaded preset diverged from an old reference, preventing an initially clean state from masking the later download transition.</en></lang>
+      const beforeDownloadState = await page.evaluate(() => ({
+        dirty: document.querySelector('#editorWorkspaceState')?.getAttribute('data-source-dirty'),
+        origin: document.querySelector('#editorWorkspaceState')?.getAttribute('data-recovery-origin'),
+      }));
+      if (beforeDownloadState.dirty !== 'true') {
+        throw new Error(`A changed editor source must be dirty before a snapshot download: ${JSON.stringify(beforeDownloadState)}`);
+      }
+      // <lang><zh-CN>等待真实下载事件后再读取内容，确保 checkpoint 对应用户触发的下载而非仅按钮点击。</zh-CN><en>Wait for the real download event before reading content so the checkpoint corresponds to a user-triggered download, not merely a button click.</en></lang>
       const download = page.waitForEvent('download');
       await page.click('#editorExport');
       const file = await download;
       if (!file.suggestedFilename().endsWith('.uadoc.json')) {
         throw new Error(`Unexpected editor export filename: ${file.suggestedFilename()}`);
+      }
+      const exportedSource = await readDownloadText(file);
+      const currentSource = await page.inputValue('#editorSource');
+      if (exportedSource !== currentSource) {
+        throw new Error('Canonical JSON download did not contain the current editor source');
+      }
+      // <lang><zh-CN>下载内容与输入框一致后，参照必须立即变为当前下载请求；两项断言共同防止只更新 UI 而未下载真实 source。</zh-CN><en>After downloaded content matches the input, the reference must immediately become the current download request; together the assertions prevent updating only UI without downloading real source.</en></lang>
+      const afterDownloadState = await page.evaluate(() => ({
+        dirty: document.querySelector('#editorWorkspaceState')?.getAttribute('data-source-dirty'),
+        origin: document.querySelector('#editorWorkspaceState')?.getAttribute('data-recovery-origin'),
+      }));
+      if (afterDownloadState.dirty !== 'false' || afterDownloadState.origin !== 'download-requested') {
+        throw new Error(`Source download did not establish a current snapshot checkpoint: ${JSON.stringify(afterDownloadState)}`);
+      }
+
+      // <lang><zh-CN>在下载后追加无语义空白，使同一源码类型的参照进入 stale 状态而不引入另一个格式变量。</zh-CN><en>Append semantically neutral whitespace after download to make the same source kind stale without introducing another format variable.</en></lang>
+      await page.fill('#editorSource', `${currentSource}\n`);
+      await page.waitForFunction(
+        () => document.querySelector('#editorWorkspaceState')?.getAttribute('data-source-dirty') === 'true',
+        undefined,
+        { timeout: 3000 },
+      );
+      // <lang><zh-CN>读取 stale 提示文本及属性，确保修改后既保留来源又向用户说明需要再次导出。</zh-CN><en>Read stale prompt text and attributes to ensure an edit retains origin while telling the user another export is needed.</en></lang>
+      const staleDownloadState = await page.evaluate(() => ({
+        text: document.querySelector('#editorWorkspaceState')?.textContent || '',
+        dirty: document.querySelector('#editorWorkspaceState')?.getAttribute('data-source-dirty'),
+        origin: document.querySelector('#editorWorkspaceState')?.getAttribute('data-recovery-origin'),
+      }));
+      if (staleDownloadState.origin !== 'download-requested' || !/修改|changed/i.test(staleDownloadState.text)) {
+        throw new Error(`Changed source did not expose the stale download prompt: ${JSON.stringify(staleDownloadState)}`);
       }
     });
 

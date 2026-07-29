@@ -181,6 +181,11 @@ const UI_MESSAGES = {
     'editor.fileActions': '导入导出',
     'editor.import': '导入 JSON',
     'editor.export': '导出 JSON',
+    'editor.workspaceStateNoCheckpoint': '本地草稿会写入当前浏览器；尚未建立当前源码的下载或已验证导入参照。请导出 JSON，或对 CellCanvas 保存内部项目。',
+    'editor.workspaceStateCurrentDownload': '本地草稿会写入当前浏览器；当前源码与最近一次下载请求的 JSON 或内部项目快照一致。',
+    'editor.workspaceStateCurrentImport': '本地草稿会写入当前浏览器；当前源码与最近一次已验证导入的文件一致。',
+    'editor.workspaceStateStaleDownload': '本地草稿会写入当前浏览器；当前源码已在最近一次下载请求后修改。请再次导出 JSON，或对 CellCanvas 保存内部项目。',
+    'editor.workspaceStateStaleImport': '本地草稿会写入当前浏览器；当前源码已在最近一次已验证导入后修改。请导出 JSON，或对 CellCanvas 保存内部项目。',
     'editor.extension': '扩展清单（开发者）',
     'editor.extensionInspect': '检查 UAEM JSON',
     'editor.extensionHelp': '只解析所选清单并评估 Web 兼容性；不会读取同目录资源、安装或执行扩展代码。',
@@ -244,6 +249,7 @@ const UI_MESSAGES = {
     'editor.status.rendered': '渲染完成',
     'editor.status.error': '无效：{message}',
     'editor.status.imported': '已导入并校验',
+    'editor.status.sourceExported': '当前源码 JSON 已发起下载',
     'editor.status.templateSaved': '本地模板已保存',
     'editor.status.templateDeleted': '本地模板已删除',
     'editor.status.templateNameRequired': '请先填写模板名称',
@@ -718,6 +724,11 @@ const UI_MESSAGES = {
     'editor.fileActions': 'Import and export',
     'editor.import': 'Import JSON',
     'editor.export': 'Export JSON',
+    'editor.workspaceStateNoCheckpoint': 'The local draft is written to this browser; no download or validated-import reference exists for the current source. Export JSON, or save an internal project for CellCanvas.',
+    'editor.workspaceStateCurrentDownload': 'The local draft is written to this browser; the current source matches the latest requested JSON or internal-project download.',
+    'editor.workspaceStateCurrentImport': 'The local draft is written to this browser; the current source matches the latest validated imported file.',
+    'editor.workspaceStateStaleDownload': 'The local draft is written to this browser; the current source changed after the latest download request. Export JSON again, or save an internal project for CellCanvas.',
+    'editor.workspaceStateStaleImport': 'The local draft is written to this browser; the current source changed after the latest validated import. Export JSON, or save an internal project for CellCanvas.',
     'editor.extension': 'Extension manifest (developer)',
     'editor.extensionInspect': 'Inspect UAEM JSON',
     'editor.extensionHelp': 'Only parses the chosen manifest and evaluates Web compatibility. It does not read sibling resources, install, or execute extension code.',
@@ -778,6 +789,7 @@ const UI_MESSAGES = {
     'editor.status.rendered': 'Rendered',
     'editor.status.error': 'Invalid: {message}',
     'editor.status.imported': 'Imported and validated',
+    'editor.status.sourceExported': 'Current source JSON download requested',
     'editor.status.templateSaved': 'Local template saved',
     'editor.status.templateDeleted': 'Local template deleted',
     'editor.status.templateNameRequired': 'Enter a template name first',
@@ -1337,6 +1349,7 @@ const DOM = {
   editorImport: '#editorImport',
   editorImportFile: '#editorImportFile',
   editorExport: '#editorExport',
+  editorWorkspaceState: '#editorWorkspaceState',
   editorExtensionInspect: '#editorExtensionInspect',
   editorExtensionFile: '#editorExtensionFile',
   editorExtensionStatus: '#editorExtensionStatus',
@@ -1887,7 +1900,19 @@ function getEditorBuiltinTemplates() {
   ];
 }
 
-/** P3.4 的浏览器本地工作区结构。 */
+/**
+ * @lang zh-CN
+ * 创建 source-first 编辑器的浏览器本地工作区及下载/导入快照参照。
+ *
+ * 工作区只存于当前浏览器；快照参照仅用于说明当前源码是否已在用户发起的
+ * 下载或已验证导入之后发生变化，绝不作为文件已落盘、格式稳定或信任校验结论。
+ * @lang en
+ * Create the source-first editor's browser-local workspace and download/import snapshot references.
+ *
+ * The workspace lives only in the current browser. Snapshot references only indicate whether
+ * source changed after a user-requested download or validated import; they never prove a file
+ * was persisted, format stability, or trust validation.
+ */
 function createDefaultEditorWorkspace() {
   const templates = getEditorBuiltinTemplates();
   return {
@@ -1896,7 +1921,79 @@ function createDefaultEditorWorkspace() {
     fontSource: templates.find((template) => template.id === 'font-line').source,
     cellCanvasSource: JSON.stringify(createDefaultCellCanvasDraft(), null, 2),
     fontSample: 'A?',
+    // <lang><zh-CN>每种源码保留独立轻量参照，避免复制完整草稿而放大 localStorage 配额风险。</zh-CN><en>Keep an independent lightweight reference per source kind to avoid duplicating full drafts and increasing localStorage quota risk.</en></lang>
+    recoveryCheckpoints: createEditorRecoveryCheckpoints(),
   };
+}
+
+/**
+ * @lang zh-CN
+ * 创建或净化浏览器工作区中的轻量源码快照参照。
+ *
+ * 输入来自可被用户修改的 localStorage，因此只接受固定内容类型、固定来源和
+ * 字符串 fingerprint。fingerprint 仅服务 UI 脏状态比较，不可用于安全、完整性或
+ * 资源信任判断。
+ * @lang en
+ * Create or sanitize lightweight source-snapshot references inside the browser workspace.
+ *
+ * Input comes from user-modifiable localStorage, so only fixed content kinds, fixed origins,
+ * and string fingerprints are accepted. A fingerprint serves UI dirty-state comparison only;
+ * it cannot be used for security, integrity, or resource-trust decisions.
+ *
+ * @param {unknown} [value] Previously stored checkpoint candidates.
+ * @returns {Record<string, {fingerprint: string, origin: string}>} Safe mutable checkpoints.
+ */
+function createEditorRecoveryCheckpoints(value = undefined) {
+  // <lang><zh-CN>每个种类都从空参照开始，缺失或损坏存储不能继承任意旧状态。</zh-CN><en>Every kind starts from an empty reference so missing or malformed storage cannot inherit arbitrary old state.</en></lang>
+  const checkpoints = {
+    document: { fingerprint: '', origin: 'none' },
+    font: { fingerprint: '', origin: 'none' },
+    cellcanvas: { fingerprint: '', origin: 'none' },
+  };
+
+  // <lang><zh-CN>只遍历固定种类，阻止 localStorage 扩展工作区对象的键空间。</zh-CN><en>Iterate only fixed kinds so localStorage cannot expand the workspace object's key space.</en></lang>
+  Object.keys(checkpoints).forEach((kind) => {
+    // <lang><zh-CN>候选条目只作为显示参照，不保留源码正文、文件名、路径或任意元数据。</zh-CN><en>A candidate is display-only; it retains no source body, filename, path, or arbitrary metadata.</en></lang>
+    const candidate = value && typeof value === 'object' ? value[kind] : null;
+    if (!candidate || typeof candidate !== 'object') return;
+
+    // <lang><zh-CN>指纹必须是字符串，来源只允许由本控制器写入的两个明确生命周期节点。</zh-CN><en>The fingerprint must be a string, and origin is limited to the two explicit lifecycle nodes written by this controller.</en></lang>
+    const fingerprint = typeof candidate.fingerprint === 'string' ? candidate.fingerprint : '';
+    const origin = candidate.origin === 'download-requested' || candidate.origin === 'imported-file'
+      ? candidate.origin
+      : 'none';
+    if (fingerprint && origin !== 'none') checkpoints[kind] = { fingerprint, origin };
+  });
+
+  return checkpoints;
+}
+
+/**
+ * @lang zh-CN
+ * 为编辑器源码生成轻量、非安全的内容参照。
+ *
+ * 此 FNV-1a 变体包含源码长度，足以让本地 UI 判断下载/导入之后是否发生常规编辑；
+ * 碰撞可能性意味着它绝不能取代加密哈希、文件验证、持久化确认或资源信任链。
+ * @lang en
+ * Generate a lightweight, non-security content reference for editor source.
+ *
+ * This FNV-1a variant includes source length, enough for local UI to detect ordinary edits
+ * after a download/import. Collision risk means it must never replace a cryptographic hash,
+ * file verification, persistence confirmation, or a resource trust chain.
+ *
+ * @param {string} source Current source text.
+ * @returns {string} Versioned local UI fingerprint.
+ */
+function createEditorSourceFingerprint(source) {
+  // <lang><zh-CN>调用方通常提供字符串；防御性归一化保证损坏本地状态不会让渲染器抛错。</zh-CN><en>Callers normally provide strings; defensive normalization keeps damaged local state from throwing during rendering.</en></lang>
+  const text = typeof source === 'string' ? source : '';
+  // <lang><zh-CN>使用固定 FNV-1a 种子，只为稳定的本地比较，不把它呈现为安全摘要。</zh-CN><en>Use the fixed FNV-1a seed only for stable local comparison, never presenting it as a security digest.</en></lang>
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index += 1) {
+    // <lang><zh-CN>按 UTF-16 code unit 累积，长度和版本前缀使后续算法迁移可识别。</zh-CN><en>Accumulate UTF-16 code units; the length and version prefix keep later algorithm migrations identifiable.</en></lang>
+    hash = Math.imul(hash ^ text.charCodeAt(index), 0x01000193);
+  }
+  return `fnv1a32-v1:${text.length}:${(hash >>> 0).toString(16).padStart(8, '0')}`;
 }
 
 /**
@@ -1939,6 +2036,8 @@ class EditorController {
     this.setStudioAiStatus('editor.aiReady');
     this.setStudioDiagnosticsStatus('editor.diagnosticsReady');
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+    // <lang><zh-CN>初始化完成后立即呈现迁移后的快照状态，避免首帧把浏览器草稿误说成文件保存。</zh-CN><en>Render migrated snapshot state immediately after initialization so the first frame cannot portray a browser draft as a saved file.</en></lang>
+    this.renderWorkspaceState();
   }
 
   bindEvents($doc) {
@@ -2049,6 +2148,8 @@ class EditorController {
     this.renderStudioResourceEntryOptions();
     this.renderStudioResourcePipelineSummary();
     this.renderCellCanvasToolFeedback();
+    // <lang><zh-CN>快照提示含本地化文本；语言切换后必须同步重渲染，不能遗留上一种语言的保存边界。</zh-CN><en>The snapshot prompt contains localized text, so a language switch must rerender it and cannot retain the previous locale's save boundary.</en></lang>
+    this.renderWorkspaceState();
     if (!this.result) this.setStatus('editor.ready');
   }
 
@@ -2070,11 +2171,26 @@ class EditorController {
     return this.workspace.documentSource;
   }
 
+  /**
+   * @lang zh-CN
+   * 写入当前内容类型的源码、同步浏览器本地草稿，并刷新快照脏状态。
+   *
+   * 这不会请求网络、写入用户文件或将源码视为已导出；它只更新当前浏览器的
+   * 工作区和与下载/导入参照的本地比较结果。
+   * @lang en
+   * Write source for the current content kind, synchronize the browser-local draft, and refresh snapshot dirty state.
+   *
+   * This requests no network, writes no user file, and does not treat source as exported. It only updates
+   * the current browser workspace and its local comparison with download/import references.
+   *
+   * @param {string} source New source text for the active workspace kind.
+   */
   updateCurrentSource(source) {
     if (this.workspace.kind === 'font') this.workspace.fontSource = source;
     else if (this.workspace.kind === 'cellcanvas') this.workspace.cellCanvasSource = source;
     else this.workspace.documentSource = source;
     this.persistWorkspace();
+    this.renderWorkspaceState();
   }
 
   changeKind(kind) {
@@ -2088,13 +2204,26 @@ class EditorController {
     this.populateSavedTemplateSelect();
     this.result = null;
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+    this.renderWorkspaceState();
   }
 
   /**
+   * @lang zh-CN
    * 将已由同源画廊读取的 canonical JSON 交给 source-first 编辑器。
    *
    * 画廊不保留可编辑副本，也不绕过 Core 校验：作品源文件进入编辑器后仍须
-   * 按通常流程校验、渲染和保存。本方法只负责明确的本地工作区交接。
+   * 按通常流程校验、渲染和保存。本方法只负责明确的本地工作区交接，并刻意
+   * 不把画廊来源伪装为用户持有的下载或导入快照。
+   * @lang en
+   * Hand canonical JSON already read by the same-origin gallery to the source-first editor.
+   *
+   * The gallery retains no editable copy and does not bypass Core validation: source still follows the
+   * usual validation, rendering, and save flow. This method only performs an explicit local-workspace handoff
+   * and deliberately does not portray a gallery origin as a download or user-held imported snapshot.
+   *
+   * @param {string} kind Gallery resource kind.
+   * @param {string} source Canonical JSON source supplied by the reviewed gallery flow.
+   * @param {string} [sample] Optional font preview text.
    */
   openExternalSource(kind, source, sample) {
     const workspaceKind = kind === 'unicode-art-font'
@@ -2117,6 +2246,7 @@ class EditorController {
     this.refreshLocale();
     this.result = null;
     this.setPreviewPlaceholder(this.t('editor.previewPlaceholder'));
+    this.renderWorkspaceState();
   }
 
   syncControlsFromWorkspace() {
@@ -3531,15 +3661,25 @@ class EditorController {
   }
 
   /**
-   * 将 CellCanvas 草稿写回工作区与源码框。
+   * @lang zh-CN
+   * 将 CellCanvas 草稿写回工作区与源码框，并更新下载/导入快照脏状态。
    *
-   * @param {object} draft 更新后的 CellCanvas 草稿。
+   * 草稿仍只保存到当前浏览器；本方法不会导出项目、自动写文件或把投影视为
+   * 可恢复的 source snapshot。
+   * @lang en
+   * Commit a CellCanvas draft to the workspace and source field, then update download/import snapshot dirty state.
+   *
+   * The draft still persists only in the current browser. This method exports no project, writes no file
+   * automatically, and never treats a projection as a recoverable source snapshot.
+   *
+   * @param {object} draft Updated CellCanvas draft.
    */
   commitCellCanvasDraft(draft) {
     const source = JSON.stringify(draft, null, 2);
     this.workspace.cellCanvasSource = source;
     $(DOM.editorSource).val(source);
     this.persistWorkspace();
+    this.renderWorkspaceState();
   }
 
   /**
@@ -4184,6 +4324,20 @@ class EditorController {
     this.setStatus('editor.status.templateDeleted', {}, 'success');
   }
 
+  /**
+   * @lang zh-CN
+   * 读取用户显式选择的 JSON 文件，校验后替换当前编辑器源码并建立已验证导入参照。
+   *
+   * 只有验证成功的文件才会更新工作区；失败时保留原 source 与既有快照参照，
+   * 不读取相邻目录、不上传内容，也不将导入文件复制到可公开项目数据中。
+   * @lang en
+   * Read a user-explicit JSON file, replace editor source after validation, and establish a validated-import reference.
+   *
+   * Only a valid file updates the workspace. Failures retain the previous source and snapshot reference;
+   * this reads no adjacent directory, uploads no content, and copies no imported file into public project data.
+   *
+   * @param {Event} event File-input change event.
+   */
   async importFile(event) {
     const file = event.target.files?.[0];
     $(DOM.editorImportFile).val('');
@@ -4209,6 +4363,7 @@ class EditorController {
       this.validateSource(effectiveSource, kind);
       this.workspace.kind = kind;
       this.updateCurrentSource(effectiveSource);
+      this.markCurrentSourceRecoveryCheckpoint('imported-file');
       this.syncControlsFromWorkspace();
       this.refreshLocale();
       this.result = null;
@@ -4268,6 +4423,18 @@ class EditorController {
     }
   }
 
+  /**
+   * @lang zh-CN
+   * 请求下载当前 canonical JSON 源码，并把当前内容记为下载快照参照。
+   *
+   * 浏览器负责实际保存位置和是否落盘；因此参照只记录“已发起下载”，不声称
+   * 文件必然持久化、可被重新导入或属于稳定格式。
+   * @lang en
+   * Request a download of the current canonical JSON source and record the current content as a download snapshot reference.
+   *
+   * The browser owns the actual destination and persistence decision. The reference therefore records only
+   * that a download was requested; it does not claim the file persisted, can be reimported, or is a stable format.
+   */
   exportSource() {
     const extension = this.workspace.kind === 'font'
       ? 'uafont.json'
@@ -4276,6 +4443,8 @@ class EditorController {
         : 'uadoc.json';
     const blob = new Blob([this.getCurrentSource()], { type: 'application/json;charset=utf-8' });
     this.appController.downloadBlob(blob, `unicode-art-${this.workspace.kind}.${extension}`);
+    this.markCurrentSourceRecoveryCheckpoint('download-requested');
+    this.setStatus('editor.status.sourceExported', {}, 'success');
   }
 
   embedFontInDocument() {
@@ -4432,10 +4601,16 @@ class EditorController {
   }
 
   /**
-   * 保存 Studio project 内部项目文件候选。
+   * @lang zh-CN
+   * 请求下载 Studio project 内部项目快照，并将当前 CellCanvas 源码标为下载参照。
    *
-   * 下载名使用 `.uart-project.json`，明确这是 Studio Alpha 内部项目包络。
-   * 文件仍不属于公开稳定格式，后续才会补跨宿主兼容矩阵和迁移策略。
+   * 下载名使用 `.uart-project.json`，明确这是 Studio Alpha 内部项目包络。浏览器
+   * 决定实际保存位置和是否落盘；该 UI 参照不构成稳定格式、跨宿主兼容或持久化保证。
+   * @lang en
+   * Request a download of an internal Studio project snapshot and mark current CellCanvas source as a download reference.
+   *
+   * The `.uart-project.json` name identifies an internal Studio Alpha envelope. The browser decides actual
+   * destination and persistence; this UI reference provides no stable-format, cross-host, or persistence guarantee.
    */
   saveCellCanvasProject() {
     if (this.workspace.kind !== 'cellcanvas') return;
@@ -4455,6 +4630,7 @@ class EditorController {
       });
       const blob = new Blob([JSON.stringify(capsule, null, 2)], { type: 'application/json;charset=utf-8' });
       this.appController.downloadBlob(blob, 'unicode-art-studio.uart-project.json');
+      this.markCurrentSourceRecoveryCheckpoint('download-requested');
       this.setStatus('editor.status.projectSaved', {}, 'success');
     } catch (error) {
       this.handleEditorError(error);
@@ -4462,12 +4638,18 @@ class EditorController {
   }
 
   /**
-   * 从用户显式选择的内部项目文件加载 CellCanvas 草稿。
+   * @lang zh-CN
+   * 从用户显式选择的内部项目文件加载 CellCanvas 草稿，并建立已验证导入参照。
    *
-   * 浏览器只读取当前 file input 交给它的文件，不会读取相邻目录，也不会
-   * 自动安装或解析外部资源。
+   * 浏览器只读取当前 file input 交给它的文件，不会读取相邻目录，也不会自动
+   * 安装或解析外部资源。解析或验证失败时保留当前 source 和既有快照参照。
+   * @lang en
+   * Load a CellCanvas draft from a user-explicit internal project file and establish a validated-import reference.
    *
-   * @param {Event} event 文件选择事件。
+   * The browser reads only the current file-input selection, never an adjacent directory, and never auto-installs
+   * or resolves external resources. Parse or validation failure retains current source and its previous snapshot reference.
+   *
+   * @param {Event} event File-input change event.
    */
   async openCellCanvasProjectFile(event) {
     const file = event.target.files?.[0];
@@ -4480,6 +4662,7 @@ class EditorController {
       const source = JSON.stringify(draft, null, 2);
       this.workspace.kind = 'cellcanvas';
       this.updateCurrentSource(source);
+      this.markCurrentSourceRecoveryCheckpoint('imported-file');
       this.syncControlsFromWorkspace();
       this.refreshLocale();
       this.result = null;
@@ -4499,6 +4682,120 @@ class EditorController {
     $(DOM.editorStatus)
       .text(this.t(key, params))
       .attr('data-state', state);
+  }
+
+  /**
+   * @lang zh-CN
+   * 读取当前内容类型的受限下载/导入快照参照。
+   *
+   * 引用只来自已净化的浏览器工作区；返回空值表示当前源码没有可比较的
+   * 下载或已验证导入节点，不能推断为数据丢失或未通过内容校验。
+   * @lang en
+   * Read the constrained download/import snapshot reference for the active content kind.
+   *
+   * The reference comes only from the sanitized browser workspace. An empty result means current source has
+   * no comparable download or validated-import node; it cannot imply data loss or failed content validation.
+   *
+   * @returns {{fingerprint: string, origin: string}} Current safe checkpoint.
+   */
+  getCurrentSourceRecoveryCheckpoint() {
+    // <lang><zh-CN>工作区迁移后仍可能缺少字段；这里返回空参照而非让展示层依赖旧结构。</zh-CN><en>A migrated workspace may still lack the field, so return an empty reference instead of making presentation depend on old structure.</en></lang>
+    const checkpoint = this.workspace.recoveryCheckpoints?.[this.workspace.kind];
+    if (!checkpoint || typeof checkpoint.fingerprint !== 'string') {
+      return { fingerprint: '', origin: 'none' };
+    }
+    return {
+      fingerprint: checkpoint.fingerprint,
+      origin: checkpoint.origin === 'download-requested' || checkpoint.origin === 'imported-file'
+        ? checkpoint.origin
+        : 'none',
+    };
+  }
+
+  /**
+   * @lang zh-CN
+   * 判断当前源码是否已偏离最近的下载或已验证导入快照参照。
+   *
+   * 这是本地 UI 的脏状态，不等于未持久化、文件系统时间戳、内容校验、资源撤回
+   * 或格式兼容结论。
+   * @lang en
+   * Determine whether current source diverged from its latest download or validated-import snapshot reference.
+   *
+   * This is local UI dirty state, not a conclusion about persistence, filesystem timestamps, content validation,
+   * resource revocation, or format compatibility.
+   *
+   * @returns {boolean} True when no usable checkpoint exists or the source differs from it.
+   */
+  isCurrentSourceDirty() {
+    const checkpoint = this.getCurrentSourceRecoveryCheckpoint();
+    if (!checkpoint.fingerprint || checkpoint.origin === 'none') return true;
+    return checkpoint.fingerprint !== createEditorSourceFingerprint(this.getCurrentSource());
+  }
+
+  /**
+   * @lang zh-CN
+   * 将当前源码记录为用户发起下载或已验证导入后的轻量快照参照。
+   *
+   * 不保存完整源码副本，避免放大 localStorage 配额；来源仅接受控制器自己的
+   * 两个固定生命周期值，其他值降级为空参照。
+   * @lang en
+   * Record current source as a lightweight reference after a user-requested download or validated import.
+   *
+   * No full source copy is stored, avoiding localStorage quota growth. Origins accept only the controller's two
+   * fixed lifecycle values; every other value degrades to an empty reference.
+   *
+   * @param {'download-requested'|'imported-file'} origin Checkpoint lifecycle origin.
+   */
+  markCurrentSourceRecoveryCheckpoint(origin) {
+    // <lang><zh-CN>仅这两个来源能改变 UI 参照，防止调用方把预览、投影或资源检查误标成可恢复快照。</zh-CN><en>Only these two origins may change the UI reference, preventing callers from mislabeling previews, projections, or resource checks as recoverable snapshots.</en></lang>
+    const safeOrigin = origin === 'download-requested' || origin === 'imported-file' ? origin : 'none';
+    if (safeOrigin === 'none') return;
+
+    // <lang><zh-CN>按当前类型写入指纹，其他类型的下载参照保持不变。</zh-CN><en>Write the fingerprint for the active kind while preserving download references for the other kinds.</en></lang>
+    this.workspace.recoveryCheckpoints = createEditorRecoveryCheckpoints(this.workspace.recoveryCheckpoints);
+    this.workspace.recoveryCheckpoints[this.workspace.kind] = {
+      fingerprint: createEditorSourceFingerprint(this.getCurrentSource()),
+      origin: safeOrigin,
+    };
+    this.persistWorkspace();
+    this.renderWorkspaceState();
+  }
+
+  /**
+   * @lang zh-CN
+   * 渲染浏览器本地草稿与下载/导入快照的区别状态。
+   *
+   * 文案明确浏览器本地保存不等于文件已落盘；不使用 live region，避免每个输入字符
+   * 都造成屏幕阅读器播报。状态通过可访问文本和 data 属性供人工与 E2E 检查。
+   * @lang en
+   * Render the distinction between the browser-local draft and its download/import snapshot state.
+   *
+   * Copy makes clear that browser-local persistence does not prove a file was written. It avoids a live region
+   * so every keystroke does not trigger screen-reader speech; accessible text and data attributes support manual and E2E checks.
+   */
+  renderWorkspaceState() {
+    // <lang><zh-CN>初始化前 DOM 可能尚不可用；静默返回使本地状态迁移不依赖页面构建时序。</zh-CN><en>The DOM may not exist before initialization; return silently so local-state migration does not depend on page construction order.</en></lang>
+    const $state = $(DOM.editorWorkspaceState);
+    if ($state.length === 0) return;
+
+    // <lang><zh-CN>先读取同一内容类型的受限参照并计算差异；二者都不读取文件系统或用户下载位置。</zh-CN><en>Read the constrained reference for the same content kind and calculate divergence first; neither operation reads the filesystem or a user download location.</en></lang>
+    const checkpoint = this.getCurrentSourceRecoveryCheckpoint();
+    const dirty = this.isCurrentSourceDirty();
+    // <lang><zh-CN>来源和差异共同决定提示：没有参照、导入后未改、下载后未改、以及两类变更后状态必须可区分。</zh-CN><en>Origin and divergence jointly determine the prompt: no reference, unchanged import, unchanged download, and both changed states stay distinguishable.</en></lang>
+    const key = !checkpoint.fingerprint || checkpoint.origin === 'none'
+      ? 'editor.workspaceStateNoCheckpoint'
+      : dirty
+        ? checkpoint.origin === 'download-requested'
+          ? 'editor.workspaceStateStaleDownload'
+          : 'editor.workspaceStateStaleImport'
+        : checkpoint.origin === 'download-requested'
+          ? 'editor.workspaceStateCurrentDownload'
+          : 'editor.workspaceStateCurrentImport';
+    $state
+      .text(this.t(key))
+      .attr('data-state', dirty ? 'warning' : 'success')
+      .attr('data-source-dirty', String(dirty))
+      .attr('data-recovery-origin', checkpoint.origin);
   }
 
   /** 更新独立扩展清单检查状态，不改变编辑器源文件或预览状态。 */
