@@ -29,7 +29,7 @@ UnicodeArtJs Web 是一个浏览器端字符画工具站，可以把图片或文
 
 选择内置示例后可直接校验或渲染。模板只保存在当前浏览器的 `localStorage` 中，不会上传到服务器；需要跨设备保存时，请使用“导出 JSON”。导入文件会先经过 Core 校验，格式无效时不会替换当前编辑内容。
 
-该工作台是 source-first 工作台：JSON 是唯一的可交换格式。目前不提供云同步、远程字体、第三方艺术字素材市场或自动文件写入。`.uart-project.json` / `studio-project@0` 只作为 Web Studio Alpha 的内部项目包络使用，暂不作为公开稳定格式宣传。
+该工作台是 source-first 工作台：JSON 是唯一的可交换格式。目前不提供云同步、远程字体、第三方艺术字素材市场或自动文件写入。`.uart-project.json` / `studio-project@0` 只作为 Web Studio Alpha 的内部项目包络使用，暂不作为公开稳定格式宣传。升级浏览器、清理站点数据或切换设备前，请按[迁移指南中的 Web Studio experimental 工作台说明](../../docs/migration-guide.md#web-studio-experimental-工作台)先导出并确认可恢复的 source。
 
 编辑器中的“扩展清单（开发者）”只读取用户选择的一份 UAEM JSON，并调用 Core 判断
 格式、声明能力和 Web 兼容性。浏览器不会因此读取同目录资源，也不会安装或执行扩展代码；

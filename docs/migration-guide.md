@@ -49,6 +49,19 @@
 4. URL 图片读取受 CORS 限制。需要稳定导入时，优先使用本地文件、Blob、ImageBitmap 或宿主 adapter。
 5. Browser Core 的取消是协作式；UI 可以防止旧结果覆盖新预览，但不能保证中断已经进入同步计算的阶段。
 
+## Web Studio experimental 工作台
+
+Web Studio 是 source-first 的实验工作台，不是稳定项目格式或跨宿主同步服务。升级页面、切换浏览器或清理浏览器数据前，按下列顺序保护可恢复的内容：
+
+1. 先导出所需的 source JSON 或对应的 TXT、HTML、PNG 等投影，并在浏览器外确认下载确实完成。页面显示过下载请求不等于文件已经落盘。
+2. 浏览器内存和 `localStorage` 草稿只适用于当前浏览器；不要把它当成跨设备、跨 profile 或长期备份。
+3. `studio-project@0` / `.uart-project.json` 仅用于当前 Web Studio 的内部项目恢复。它可以帮助恢复测试或本地草稿，但不应作为公开交换格式或长期兼容承诺。
+4. 导入时只选择自己明确保存的文件。无效 source 或项目文件应保留当前可用内容；出现验证错误时不要用未知文件覆盖草稿。
+5. 清理站点存储、重置浏览器 profile 或切换设备前，先导出并确认恢复文件。没有备份时，应停止该操作而不是假定浏览器草稿可恢复。
+6. 资源导入、AI 提案和未来宿主写入仍需显式确认；它们不构成自动同步、自动安装或自动写文件。
+
+有关页面内部边界见 [Web 集成与数据边界](web-integration.md#web-studio-experimental-入口)；当前稳定性状态见 [实验能力稳定性矩阵](experimental-stability.md)。
+
 ## VS Code Extension 迁移清单
 
 1. 安装或更新 VSIX 后，如果命令没有出现，先运行 `Developer: Reload Window`。

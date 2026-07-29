@@ -35,6 +35,12 @@ UnicodeArtJs 会把公开能力分为 stable、experimental、reserved 和 legac
 | `web.gallery.staticIndex` | GitHub Pages 静态画廊索引、审核作品和投稿流程。 | Stable 候选 | 冻结索引字段、审核 checklist、作品类型扩展策略和内容政策边界。 |
 | `web.studio.experimentalWorkbench` | GitHub Pages 的 **Studio 实验**入口、source-first 编辑、CellCanvas 投影、资源导入提案、AI mock proposal 和本地 benchmark 诊断。 | 继续 experimental | 完成多宿主消费 smoke、真实创作人工验证、项目包络迁移策略、provider/checked apply 宿主责任和 public docs 边界复核；当前不承诺 stable project format。 |
 
+### Web Studio 候选评估边界
+
+Web Studio 仍为 **继续 experimental**。在对外使用 “Beta candidate” 前，除了自动测试和构建外，还需要可复核的人工辅助技术、浏览器缩放/字体、下载/恢复与长时创作观察，以及只针对 Web 的明确准入决定。缺失、阻塞或尚未执行的人工观察不能由自动 smoke 补写为通过。
+
+即使未来形成 Web-first Beta candidate，它也不表示 `studio-project@0`、`.uart-project.json`、`@unicode-art/studio-kit`、资源导入协议或 AI proposal 已成为稳定公共 API；也不能外推到 Core、CLI、VS Code、Tauri 或 Electron。
+
 ## 资源发现公开试点
 
 | 能力 ID | 当前范围 | 稳定化去向 | 进入下一状态前需要完成 |

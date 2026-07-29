@@ -65,6 +65,7 @@ GitHub Pages 顶部的 **Studio 实验** 是公开可见的 experimental 创作�
 - `studio-project@0` 和 `.uart-project.json` 仍是内部项目包络，不是 stable public format。
 - `@unicode-art/studio-kit` 继续保持 private；Web 当前只通过主仓内部依赖消费共享逻辑。
 - 草稿和模板只保存在当前浏览器内存或 `localStorage`，不会自动上传。
+- 工作台可提示当前 source 是否偏离最近一次下载请求或已验证导入；该提示只服务于本地恢复判断。下载请求不等于浏览器已保存文件，浏览器本地草稿也不等于跨设备备份。
 - 下载和上传只由用户显式触发；浏览器不会访问本机绝对路径或相邻目录。
 - 资源入口只读取同源、已审核资源清单，并在导入前执行 hash、撤回和维护者签名检查。
 - AI 提案预览当前使用 deterministic mock provider；不会联网、不会读取源码全文、不会直接写项目。
@@ -79,6 +80,7 @@ GitHub Pages 顶部的 **Studio 实验** 是公开可见的 experimental 创作�
 - 静态画廊只接受同源 `gallery/` 根目录内的审核 JSON。索引解析器会拒绝路径穿越、远程 URL、未知资源类型和未声明字段；展示文本使用 `textContent`，不拼接为 HTML。
 - 资源发现页默认只展示摘要、hash、维护者签名和撤回状态。把资源导入编辑器前，会重新读取同源资源、复核 size / sha256、确认未撤回并验证 `maintainer-signed` 签名；校验失败、浏览器不支持签名验证或用户取消时，不替换当前编辑器内容。
 - HTML 导出必须对字符画内容转义；浏览器文件、剪贴板和 Canvas 导出仍受对应浏览器的权限和安全策略约束。
+- 清理站点存储、重置 profile 或切换设备前，使用者应先导出需要保留的 source，并在浏览器外确认文件存在；内部项目包络不能替代稳定的跨宿主迁移格式。
 
 ## jQuery 与构建
 

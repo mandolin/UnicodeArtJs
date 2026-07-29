@@ -82,6 +82,27 @@ npm run public-entry:check
 npm run docs:all:check
 ```
 
+## Web Studio experimental 变更与候选评估
+
+Web Studio 目前仍是公开可见的 experimental 工作台。页面可以提供 source-first 编辑、CellCanvas、导入导出、资源提案和本地诊断，但这不表示已经发布稳定 Studio、稳定项目格式或全宿主 Beta。
+
+只更新 Web Studio 的说明、迁移提示或站点入口时，发布材料应保持以下事实：
+
+- 当前范围只涵盖 Web；不能外推到 Core、CLI、VS Code、Tauri 或 Electron。
+- `studio-project@0` / `.uart-project.json` 是内部项目包络，不能作为长期交换格式或版本兼容承诺。
+- 浏览器本地草稿和一次下载请求不等同于用户已确认的文件备份；跨浏览器或清理站点数据前，应先导出并确认所需文件。
+- 资源、AI 提案和任何写入仍遵循显式确认与宿主边界；不写成自动安装、自动写文件或 provider direct apply。
+
+如未来准备公开 Beta candidate 文案，先完成实际辅助技术、浏览器缩放/字体、文件保存与恢复等人工观察，并由维护者作出明确准入决定。材料准备、自动 smoke 或单一浏览器通过本身都不是 Beta candidate 声明。
+
+候选评估前的材料清单：
+
+1. 当前版本的 Web 自动 gate、构建和公开文档检查已通过。
+2. 人工观察记录已脱敏，明确列出 pass、fail 或 blocked；缺失的观察不能写成通过。
+3. 已确认 source model、内部项目包络、资源/AI review-only 和 host-owned write 边界没有被改变。
+4. 迁移说明清楚说明 source JSON、导出投影、内部项目包络和浏览器本地草稿的不同用途。
+5. 对外文案仍写 Web Studio experimental，直到有针对 Web 的明确候选决定；不发布 npm 包、VSIX、GitHub Release 或稳定格式声明。
+
 ## 渠道入口一致性
 
 在发布或只改公开入口的合并前，按以下顺序核对各渠道。仓库内的 README、包 metadata 和发布材料可以随提交更新；npm、Marketplace、GitHub About 与 Pages 的实时状态必须在发布后重新读取，不能由本地检查代替。
