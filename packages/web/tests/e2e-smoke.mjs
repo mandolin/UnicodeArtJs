@@ -66,7 +66,31 @@ async function createTestServer() {
   };
 }
 
+/**
+ * @lang zh-CN
+ * 按受控优先级启动 E2E 浏览器：显式可执行文件、Playwright channel、内置 Chromium，
+ * 最后才在 Windows 上回退到 Edge。
+ *
+ * 显式路径只由本地测试命令提供，不写入仓库、项目 capsule 或公开证据。
+ * @lang en
+ * Launch the E2E browser in controlled priority order: explicit executable, Playwright
+ * channel, bundled Chromium, then an Edge fallback on Windows.
+ *
+ * An explicit path is supplied only by a local test command and is never written into
+ * the repository, a project capsule, or public evidence.
+ *
+ * @returns {Promise<import('playwright').Browser>} 已启动的无头浏览器。
+ */
 async function launchBrowser() {
+  // <lang><zh-CN>允许 P26.4 对已安装浏览器复跑同一 smoke，同时保持默认 CI 路径不变。</zh-CN><en>Allow P26.4 to replay the same smoke in installed browsers while keeping the default CI path unchanged.</en></lang>
+  const executablePath = process.env.PLAYWRIGHT_EXECUTABLE_PATH;
+  if (executablePath) {
+    return await chromium.launch({
+      executablePath,
+      headless: true,
+    });
+  }
+
   if (process.env.PLAYWRIGHT_CHANNEL) {
     return await chromium.launch({
       channel: process.env.PLAYWRIGHT_CHANNEL,
@@ -993,6 +1017,18 @@ async function main() {
       );
     });
 
+    /**
+     * @lang zh-CN
+     * 在固定 180×90 synthetic CellMap 上验证本浏览器的 benchmark 阈值和 projection 边界。
+     *
+     * 这是可重复的本地 smoke 阈值，不是跨设备性能保证，也不把诊断数据写回 source。
+     * @lang en
+     * Verify benchmark thresholds and projection boundaries in this browser on the fixed
+     * 180×90 synthetic CellMap.
+     *
+     * This is a repeatable local smoke threshold, not a cross-device performance guarantee,
+     * and it never writes diagnostic data back to source.
+     */
     await test('runs Studio benchmark diagnostics from CellCanvas staging shell', async () => {
       await page.click('.mode-btn[data-mode="editor"]');
       await page.waitForSelector('#editorWorkbench:not([hidden])', { timeout: 5000 });
@@ -1022,8 +1058,8 @@ async function main() {
       if (!benchmarkState.report.includes('canvas2d:')) {
         throw new Error('Studio benchmark did not include Canvas 2D metrics');
       }
-      if (!['success', 'warning'].includes(benchmarkState.state)) {
-        throw new Error(`Studio benchmark status was not completed: ${benchmarkState.status}`);
+      if (benchmarkState.state !== 'success') {
+        throw new Error(`Studio benchmark threshold did not pass: ${benchmarkState.status}`);
       }
     });
 
