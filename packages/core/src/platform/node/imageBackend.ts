@@ -1,14 +1,17 @@
 /**
  * ============================================================================
- * 🟦 Node 图像后端注册表
+ * 🟦 Node image-backend registry / Node 图像后端注册表
  * ============================================================================
  *
- * 🔶 模块职责
- * 为 Node 环境图片加载/缩放提供可替换后端边界。
+ * 🔶 Module responsibility / 模块职责
+ * Provides a replaceable backend boundary for image loading and resizing in Node environments.
+ * 为 Node 环境中的图片加载和缩放提供可替换的后端边界。
  *
- * 🔶 默认策略
+ * 🔶 Default strategy / 默认策略
  * Core 默认使用宽松许可证口径下的 `napi-rs` 后端；`sharp` 仅作为 legacy
  * adapter 名称保留，调用方需要自行安装 sharp 并显式选择后才会加载。
+ * Core defaults to the permissively licensed `napi-rs` backend. The `sharp` name remains a
+ * legacy adapter option and loads only after callers install sharp themselves and select it explicitly.
  * ============================================================================
  */
 
@@ -36,13 +39,22 @@ export type NodeImageBackendName = 'sharp' | 'napi-rs';
  * @public
  */
 export interface NodeImageBackend {
-  /** 后端名称，用于诊断和测试。 */
+  /**
+   * Backend name for diagnostics and tests.
+   * 后端名称，用于诊断和测试。
+   */
   readonly name: string;
 
-  /** 从本地文件或后端支持的输入中读取灰度图像数据。 */
+  /**
+   * Loads grayscale image data from a local file or backend-supported input.
+   * 从本地文件或后端支持的输入中读取灰度图像数据。
+   */
   loadImage(input: string): Promise<CoreImageData>;
 
-  /** 可选的灰度图像缩放能力。 */
+  /**
+   * Optionally resizes grayscale image data.
+   * 可选的灰度图像缩放能力。
+   */
   resizeImage?(
     image: CoreImageData,
     targetWidth: number,
@@ -55,13 +67,19 @@ export interface NodeImageBackend {
 
 //#region 🟦 后端注册表
 
+// Built-in adapters share the Core-compatible backend contract.
+// 内置 adapter 共用与 Core 兼容的后端契约。
 const BUILTIN_NODE_IMAGE_BACKENDS: Record<NodeImageBackendName, NodeImageBackend> = {
   'napi-rs': napiRsImageBackend,
   sharp: sharpImageBackend
 };
 
+// Reset always returns to napi-rs so the default remains deterministic.
+// reset 始终回到 napi-rs，确保默认行为可预测。
 const DEFAULT_NODE_IMAGE_BACKEND: NodeImageBackend = napiRsImageBackend;
 
+// This module-local state changes only through the registry API.
+// 该模块局部状态只能通过注册表 API 改变。
 let activeNodeImageBackend: NodeImageBackend = DEFAULT_NODE_IMAGE_BACKEND;
 
 /**
