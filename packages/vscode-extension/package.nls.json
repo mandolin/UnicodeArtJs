@@ -1,5 +1,6 @@
 {
   "extension.description": "Convert images and text to Unicode art inside VS Code.",
+  "capabilities.untrustedWorkspaces": "Text conversion remains available in Restricted Mode. Image conversion and workspace overrides for font or glyph-width settings require a trusted workspace.",
   "command.openConverter": "UnicodeArtJs: Open Converter",
   "command.convertSelection": "UnicodeArtJs: Generate Unicode Art",
   "command.convertSelectionWithOptions": "UnicodeArtJs: Generate Unicode Art With Options",

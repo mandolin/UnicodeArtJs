@@ -1,3 +1,9 @@
+/**
+ * Mediates every side effect requested by the Converter WebView.
+ *
+ * @lang zh-CN 本模块在不可信 WebView 与配置、原生图片解码、临时文件、剪贴板、编辑器和保存对话框之间实施协议、Workspace Trust 与宿主 API 门禁。
+ * @lang en This module enforces protocol, Workspace Trust, and host-API gates between the untrusted WebView and configuration, native image decoding, temporary files, clipboard, editor, and save-dialog side effects.
+ */
 import * as vscode from 'vscode';
 import { mergeExtensionConfig } from '../config/configMerge';
 import { resolveArtConfig } from '../config/configResolver';
@@ -30,16 +36,15 @@ const LOCALES: ExtensionArtConfig['locale'][] = ['zh-CN', 'en-US'];
 const canceledRequests = new WeakMap<vscode.WebviewPanel, Set<string>>();
 
 /**
- * 🟢 处理 Converter WebView 发来的消息
+ * Handles one unknown message from the Converter WebView.
  *
- * 🔹 入口先执行协议校验，再按消息类型分派到转换、模板、复制、插入和保存流程。
- * 🔹 图片数据先写入扩展 globalStorage 下的临时文件，再交给 Core Node 图像路径处理。
- * 🔹 WebView payload 不被当成本机任意路径或可信配置；路径选择、保存位置和编辑器写入都由扩展宿主 API gate。
- *
- * @param panel - Converter WebView 面板。
- * @param message - WebView 发送的未知输入。
- * @param context - VS Code 扩展上下文。
- * @param logger - 扩展输出日志器。
+ * @param panel - Host-owned <lang><zh-CN>Converter WebView 面板</zh-CN><en>Converter WebView panel</en></lang>.
+ * @param message - Unknown <lang><zh-CN>WebView 输入</zh-CN><en>WebView input</en></lang>.
+ * @param context - Host-owned <lang><zh-CN>VS Code 扩展上下文</zh-CN><en>VS Code extension context</en></lang>.
+ * @param logger - Local <lang><zh-CN>扩展输出日志器</zh-CN><en>extension output logger</en></lang>; portable evidence must not capture its body.
+ * @returns <lang><zh-CN>消息被拒绝或对应宿主动作完成后兑现的 Promise。</zh-CN><en>Promise fulfilled after rejection or completion of the corresponding host action.</en></lang>
+ * @lang zh-CN 入口先执行完整协议校验，再按消息类型分派；WebView 不能直接指定本机路径、任意配置或编辑器写入 API。
+ * @lang en The entry performs complete protocol validation before dispatch; the WebView cannot directly specify local paths, arbitrary configuration, or editor-write APIs.
  */
 export async function handleWebviewMessage(
   panel: vscode.WebviewPanel,
@@ -107,9 +112,10 @@ export async function handleWebviewMessage(
       break;
     }
     case 'convertImage': {
-      if (!message.payload.imageData) {
-        logger.warn('WebView image conversion rejected: missing image data.');
-        await postError(panel, t('message.missingImage'), 'missingImage');
+      // <lang><zh-CN>WebView 图片会进入原生解码和临时文件生命周期，因此 Restricted Mode 在任何字节写入前拒绝该能力。</zh-CN><en>WebView images enter native decoding and a temporary-file lifecycle, so Restricted Mode rejects this capability before any byte is written.</en></lang>
+      if (!vscode.workspace.isTrusted) {
+        logger.warn('WebView image conversion rejected: workspace is not trusted.');
+        await postError(panel, t('message.workspaceTrustRequiredForImages'), 'workspaceTrustRequired');
         return;
       }
 
@@ -118,12 +124,12 @@ export async function handleWebviewMessage(
         const requestId = message.payload.requestId;
         const config = mergeExtensionConfig(resolveArtConfig(context), message.payload.config);
         logger.info(
-          `WebView image conversion requested. file=${message.payload.fileName ?? 'unnamed'}, ` +
-          `type=${message.payload.mimeType ?? 'unknown'}, size=${message.payload.fileSize ?? 0}, preset=${config.preset}`
+          `WebView image conversion requested. type=${message.payload.mimeType}, ` +
+          `size=${message.payload.fileSize}, preset=${config.preset}`
         );
         await post(panel, { type: 'progress', payload: { stage: 'loadImage', progress: 0.15 } });
 
-        // 图片 data URL 先落到扩展 globalStorage 的临时文件，再交给 Core Node adapter；finally 会删除临时副本。
+        // <lang><zh-CN>data URL 只落到扩展 globalStorage 的随机临时文件；Core 返回或抛错后 finally 都会删除该副本。</zh-CN><en>The data URL lands only in a randomized file under extension globalStorage; finally deletes the copy whether Core returns or throws.</en></lang>
         tempUri = await writeTempImage(context, message.payload.imageData, message.payload.fileName);
         await post(panel, { type: 'progress', payload: { stage: 'convertImage', progress: 0.35 } });
 
@@ -158,7 +164,7 @@ export async function handleWebviewMessage(
       break;
     }
     case 'cancel':
-      // 取消是协作式的：已进入 Core 的同步转换不强制中断，只在返回后丢弃过期 requestId 的结果。
+      // <lang><zh-CN>取消是协作式的：已进入 Core 的同步转换不强制中断，只在返回后丢弃匹配 requestId 的过期结果。</zh-CN><en>Cancellation is cooperative: synchronous Core work is not forcefully interrupted; its stale result is discarded after return by matching requestId.</en></lang>
       markRequestCanceled(panel, message.payload.requestId);
       logger.info(`WebView conversion cancel requested. requestId=${message.payload.requestId}`);
       await post(panel, { type: 'notice', payload: { message: t('message.cancelingConversion') } });
@@ -184,14 +190,14 @@ export async function handleWebviewMessage(
         return;
       }
       logger.info(`WebView insert requested. mode=${message.payload.mode}, chars=${message.payload.content.length}`);
-      // WebView 不直接修改文档；插入仍通过与命令入口共用的 writeResult 写入边界。
+      // <lang><zh-CN>WebView 不直接修改文档；插入继续通过与命令入口共用的 writeResult 写入边界。</zh-CN><en>The WebView never edits a document directly; insertion continues through the shared writeResult boundary used by commands.</en></lang>
       await writeResult(editor, message.payload.content, message.payload.mode);
       await post(panel, { type: 'notice', payload: { message: t('message.inserted') } });
       break;
     }
     case 'save':
       logger.info(`WebView save requested. format=${message.payload.format}, chars=${message.payload.content.length}`);
-      // 保存路径只能来自 VS Code showSaveDialog，WebView payload 不能指定任意本机路径。
+      // <lang><zh-CN>保存路径只能来自 VS Code showSaveDialog；协议没有供 WebView 指定任意本机路径的字段。</zh-CN><en>The save path can come only from VS Code showSaveDialog; the protocol exposes no field for an arbitrary local path.</en></lang>
       if (await saveContent(message.payload.content, message.payload.format, message.payload.glyphFont)) {
         logger.info(`WebView save completed. format=${message.payload.format}`);
         await post(panel, { type: 'notice', payload: { message: t('message.savedFile') } });

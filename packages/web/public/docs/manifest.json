@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-08-02T05:57:06.070Z",
+  "generatedAt": "2026-08-02T18:05:43.125Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -2151,11 +2151,11 @@
             "name": "convertImageFile",
             "kind": "function",
             "signature": "convertImageFile(context: vscode.ExtensionContext, logger: ExtensionLogger, resource?: vscode.Uri)",
-            "summary": "🟢 转换本地图片文件为字符画 🔹 可由 Explorer 右键菜单传入资源，也可从命令面板弹出文件选择器。 🔹 当前版本只接受本地 `file` URI，远程工作区资源需要后续独立适配，避免远程 URI 权限与路径信任边界混淆。 🔹 结果写入仍复用 `writeResult`；没有活动编辑器时只打开未保存的新文本文档。",
+            "summary": "The entry accepts only local file URIs in trusted workspaces; results pass through the shared writeResult boundary, and without an editor it creates only an unsaved document.",
             "source": {
               "path": "packages/vscode-extension/src/commands/convertImageFile.ts",
-              "line": 24,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertImageFile.ts#L24"
+              "line": 29,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/commands/convertImageFile.ts#L29"
             }
           },
           {
@@ -2355,11 +2355,11 @@
             "name": "getLocale",
             "kind": "function",
             "signature": "getLocale()",
-            "summary": "🟢 获取 VS Code 扩展当前语言 🔹 根据 `vscode.env.language` 在中文和英文之间选择。",
+            "summary": "Every Chinese locale currently falls back to Simplified Chinese; all other languages fall back to English.",
             "source": {
               "path": "packages/vscode-extension/src/i18n.ts",
-              "line": 261,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L261"
+              "line": 269,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L269"
             }
           },
           {
@@ -2367,11 +2367,11 @@
             "name": "t",
             "kind": "function",
             "signature": "t(key: string, params: Record<string, string | number> = {})",
-            "summary": "🟢 获取本地化消息 🔹 用于命令、通知和 WebView 宿主消息；Core 错误信息仍由 Core locale 处理。",
+            "summary": "This function serves commands, notifications, and WebView host messages; Core errors remain owned by the Core locale.",
             "source": {
               "path": "packages/vscode-extension/src/i18n.ts",
-              "line": 274,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L274"
+              "line": 282,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L282"
             }
           },
           {
@@ -2379,11 +2379,11 @@
             "name": "getWebviewMessages",
             "kind": "function",
             "signature": "getWebviewMessages()",
-            "summary": "🟢 获取 WebView 消息表 🔹 初始化 Converter 面板时发送给前端脚本，避免 WebView 自行推断 VS Code 语言。",
+            "summary": "The host sends this table with readyAck so the WebView never infers the VS Code language itself.",
             "source": {
               "path": "packages/vscode-extension/src/i18n.ts",
-              "line": 287,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L287"
+              "line": 295,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/i18n.ts#L295"
             }
           },
           {
@@ -2439,11 +2439,11 @@
             "name": "handleWebviewMessage",
             "kind": "function",
             "signature": "handleWebviewMessage(panel: vscode.WebviewPanel, message: unknown, context: vscode.ExtensionContext, logger: ExtensionLogger)",
-            "summary": "🟢 处理 Converter WebView 发来的消息 🔹 入口先执行协议校验，再按消息类型分派到转换、模板、复制、插入和保存流程。 🔹 图片数据先写入扩展 globalStorage 下的临时文件，再交给 Core Node 图像路径处理。 🔹 WebView payload 不被当成本机任意路径或可信配置；路径选择、保存位置和编辑器写入都由扩展宿主 API gate。",
+            "summary": "The entry performs complete protocol validation before dispatch; the WebView cannot directly specify local paths, arbitrary configuration, or editor-write APIs.",
             "source": {
               "path": "packages/vscode-extension/src/webview/messaging.ts",
-              "line": 44,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/messaging.ts#L44"
+              "line": 49,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/messaging.ts#L49"
             }
           },
           {
@@ -2463,11 +2463,11 @@
             "name": "isWebviewMessage",
             "kind": "function",
             "signature": "isWebviewMessage(value: unknown)",
-            "summary": "🟢 校验 WebView 消息 🔹 只校验协议结构和必要字段；配置字段继续由后续合并和 Core 校验处理。 🔹 WebView 消息即使来自扩展 bundled HTML 也按不可信输入处理，不能直接作为文件路径、CSS 或编辑器写入指令。",
+            "summary": "This gate rejects extra fields and ambiguous configuration so messages cannot acquire undeclared semantics in later branches.",
             "source": {
               "path": "packages/vscode-extension/src/webview/protocol.ts",
-              "line": 119,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/protocol.ts#L119"
+              "line": 156,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/vscode-extension/src/webview/protocol.ts#L156"
             }
           }
         ]

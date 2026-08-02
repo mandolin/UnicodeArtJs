@@ -41,6 +41,14 @@ Context menus:
   - `UnicodeArtJs: Open Converter`
 - Right-click a `png`, `jpg`, `jpeg`, `webp`, or `bmp` file in Explorer to convert it.
 
+## Workspace Trust
+
+The extension has limited support for VS Code Restricted Mode:
+
+- Selected-text conversion and Converter text mode remain available.
+- Local image conversion is disabled until the workspace is trusted because image bytes enter a native decoder and a temporary-file lifecycle.
+- Workspace overrides for visual/glyph fonts and reserved glyph-width rules are ignored in Restricted Mode. User-level settings remain available.
+
 ## Quick Start
 
 1. Select text in an editor.
@@ -136,12 +144,15 @@ npm run inspect:vsix
 
 `npm run package` builds the extension through an isolated staging directory, so the VSIX uses packaged Core files instead of monorepo workspace links.
 
+Production install selects native binaries for the build host. Treat a locally built VSIX as platform-specific: build, inspect, install, activate, and label a separate artifact for each supported target. The payload file set is reproducible from the same inputs, but the outer ZIP is not currently byte-for-byte reproducible because entry timestamps vary.
+
 Manual verification before publishing is tracked in [`docs/manual-test-checklist.md`](docs/manual-test-checklist.md).
 
 ## Notes
 
 - The WebView uses local bundled assets only. It does not load CDN scripts.
 - Image conversion currently supports local PNG, JPEG, WebP, and BMP files. GIF, SVG, and TIFF require a future optional adapter or an external conversion step.
+- Output Channel diagnostics are local troubleshooting data. Remove paths, workspace names, input content, and environment details before sharing logs publicly.
 - For best output display, use a strict mixed-width monospace font when viewing generated art.
 
 ## Support

@@ -215,10 +215,11 @@ const sampleRequirements = {
     '输出宿主固定为 VS Code'
   ],
   'packages/vscode-extension/src/webview/protocol.ts': [
-    'WebView 初始化状态',
-    '所有消息必须先通过 `isWebviewMessage` 校验',
-    '@param value',
-    '@returns `true` 表示可按 `WebviewMessage` 处理'
+    // <lang><zh-CN>这些锚点固定 P30.7 后的完整消息白名单，防止文档回退为只检查必要字段的旧边界。</zh-CN><en>These anchors pin the complete post-P30.7 message allowlist so documentation cannot regress to the old required-fields-only boundary.</en></lang>
+    '宿主在收到 ready 后发送此快照',
+    '每个分支由 isWebviewMessage 执行精确字段',
+    '@param value - Unknown',
+    '仅当消息的字段集合、类型、枚举、范围和长度均受支持时返回 true'
   ],
   'packages/web/src/main.js': [
     '当前版本不支持上传',

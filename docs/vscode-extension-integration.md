@@ -32,7 +32,7 @@ Converter WebView 通过 `src/webview/protocol.ts` 定义消息类型：
 - WebView 到宿主：`ready`、`convertText`、`convertImage`、`cancel`、`savePreset`、`copy`、`insert`、`save`。
 - 宿主到 WebView：`readyAck`、`progress`、`result`、`templateState`、`error`、`notice`。
 
-宿主收到 WebView 消息后先调用 `isWebviewMessage()` 做结构校验。该校验只确认消息类型和必要字段，配置值仍交给扩展配置合并和 Core 校验处理。
+宿主收到 WebView 消息后先调用 `isWebviewMessage()` 做完整协议校验。该 gate 会拒绝额外字段、未知枚举、越界数值、过长文本、带路径分隔符的图片名、MIME 与 data URL 不一致，以及超出当前 Converter 简单配置面的字段。通过协议并不跳过后续配置合并和 Core 校验；两层分别负责宿主消息边界与转换语义。
 
 图片模式会把 WebView 传来的 data URL 写入扩展 `globalStorageUri/webview-images` 下的临时文件，再把本地路径交给 Core Node 图像后端。转换结束后临时文件会被删除。WebView 文件选择器同样只暴露 PNG、JPEG/JPG、WebP 和 BMP，避免 UI 暗示默认 Core 已支持额外格式。
 
@@ -47,6 +47,20 @@ WebView HTML 由 `src/webview/html.ts` 生成，并采用以下限制：
 - 不加载 CDN 或远程脚本。
 
 HTML 导出会转义生成内容，并对用户提供的字素字体 CSS 字体族做字符级清理。该处理用于降低 WebView 输入直接写入 HTML/CSS 的风险；它不等同于通用 HTML sanitizer。
+
+### Workspace Trust 与 Restricted Mode
+
+扩展在清单中显式声明 `capabilities.untrustedWorkspaces.supported: "limited"`：
+
+- 受限模式仍允许选中文本转换和 Converter 的文本模式；这些路径不读取工作区文件。
+- Explorer 图片菜单仅在 `isWorkspaceTrusted` 时出现；命令入口和 WebView 宿主还会各自复核 `vscode.workspace.isTrusted`，未信任时不会选择、写临时副本或调用原生图片解码。
+- `font`、`visualFont`、`glyphFont`、`glyphWidthProfile` 和 `wideCharRegex` 的工作区级覆盖在 Restricted Mode 中被 VS Code 忽略，避免未信任工作区改变字体文件/字体规则或正则边界。用户级设置仍可使用。
+
+开发扩展宿主可以通过专用启动参数绕过已安装扩展的默认信任行为，因此测试记录必须同时写明安装方式、workspace trust 与实际触发路径，不能仅凭开发窗口中的命令可见性判断公开能力。
+
+### 诊断与可分享证据
+
+UnicodeArtJs 输出通道是维护者本机诊断面，不是默认可公开的测试 artifact。常规转换日志只记录来源类别、规模、preset、行列和耗时，不主动记录图片绝对路径或文件名；异常对象仍可能包含运行时生成的本机细节。分享 issue、CI 附件或回归证据前应删除绝对路径、用户名、工作区名、输入正文和异常堆栈中的环境信息。自动 VSIX 生命周期 evidence 只记录版本、hash、布尔状态和宿主标量，不收集输出通道正文。
 
 ## 配置与模板
 

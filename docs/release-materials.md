@@ -118,6 +118,7 @@ Web Studio 目前仍是公开可见的 experimental 工作台。页面可以提�
 ```bash
 npm view unicode-art-js version license homepage repository bugs --json --registry=https://registry.npmjs.org/
 npm view unicode-art-cli version license homepage repository bugs --json --registry=https://registry.npmjs.org/
+mise exec -- node packages/vscode-extension/node_modules/@vscode/vsce/vsce show mandolin.unicode-art-js-vscode --json
 ```
 
 涉及仓库设置的 About 文本、Homepage 或 topics 时，只有具备仓库设置权限的维护者可以更新；应在对应发布记录中保留变更后的页面 URL 与复核时间。
@@ -184,6 +185,9 @@ vsce publish --packagePath ".\\unicode-art-js-vscode-<version>.vsix"
 - Marketplace 的显示名和简短描述使用 `VS Code` 产品名，并与 extension README 保持一致。
 - 在干净 VS Code profile 安装或更新扩展。
 - 右键菜单、命令面板、Converter、模板保存和插入动作能正常执行。
+- 在未信任工作区复核文本能力仍可用、图片能力被拦截，且字体/字素规则的工作区覆盖不会生效。
+- 记录 VSIX 的目标 OS/架构、实际 VS Code/ABI、size、SHA-256 和安装生命周期；只在一个构建主机产生的原生依赖闭包不得写成通用跨平台产物。
+- 复核 payload manifest 的内容一致性；当前外层 ZIP 时间戳未归一化，不得写成逐位可复现。
 - 为该版本创建或确认包级 tag，例如 `vscode-v0.3.0`。
 
 ## GitHub Pages

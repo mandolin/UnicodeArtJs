@@ -1,3 +1,9 @@
+/**
+ * Provides host-owned English and Simplified Chinese messages.
+ *
+ * @lang zh-CN 本模块根据 VS Code 界面语言选择命令、通知与 WebView 文案；消息不包含用户输入或本机路径。
+ * @lang en This module selects command, notification, and WebView copy from the VS Code UI language; messages contain no user input or local paths.
+ */
 import * as vscode from 'vscode';
 
 type Locale = 'zh-CN' | 'en-US';
@@ -19,6 +25,7 @@ const messages: Record<Locale, Record<string, string>> = {
     'message.conversionCanceled': 'Conversion canceled.',
     'message.cancelingConversion': 'Canceling conversion...',
     'message.missingImage': 'Please choose an image file before converting.',
+    'message.workspaceTrustRequiredForImages': 'Trust this workspace before converting image files.',
     'message.localImageOnly': 'Only local image files can be converted for now.',
     'message.unsupportedMessage': 'Unsupported WebView message.',
     'message.textConversionFailed': 'Text conversion failed: {message}',
@@ -142,6 +149,7 @@ const messages: Record<Locale, Record<string, string>> = {
     'message.conversionCanceled': '转换已取消。',
     'message.cancelingConversion': '正在取消转换...',
     'message.missingImage': '请先选择图片文件再转换。',
+    'message.workspaceTrustRequiredForImages': '请先信任此工作区，再转换图片文件。',
     'message.localImageOnly': '当前版本仅支持转换本地图片文件。',
     'message.unsupportedMessage': '不支持的 WebView 消息。',
     'message.textConversionFailed': '文本转换失败: {message}',
@@ -252,24 +260,24 @@ const messages: Record<Locale, Record<string, string>> = {
 };
 
 /**
- * 🟢 获取 VS Code 扩展当前语言
+ * Resolves the extension-layer locale from VS Code UI language.
  *
- * 🔹 根据 `vscode.env.language` 在中文和英文之间选择。
- *
- * @returns 扩展层 locale。
+ * @returns <lang><zh-CN>当前扩展层支持的 zh-CN 或 en-US locale。</zh-CN><en>The currently supported extension-layer zh-CN or en-US locale.</en></lang>
+ * @lang zh-CN 所有中文方言标识当前统一回落到简体中文，其余语言回落到英文。
+ * @lang en Every Chinese locale currently falls back to Simplified Chinese; all other languages fall back to English.
  */
 export function getLocale(): Locale {
   return vscode.env.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US';
 }
 
 /**
- * 🟢 获取本地化消息
+ * Formats one host-owned localized message.
  *
- * 🔹 用于命令、通知和 WebView 宿主消息；Core 错误信息仍由 Core locale 处理。
- *
- * @param key - 消息键。
- * @param params - 插值参数。
- * @returns 本地化后的消息文本。
+ * @param key - Stable <lang><zh-CN>消息键</zh-CN><en>message key</en></lang>.
+ * @param params - Scalar <lang><zh-CN>插值参数</zh-CN><en>interpolation parameters</en></lang>.
+ * @returns <lang><zh-CN>按当前 VS Code 语言格式化后的文本。</zh-CN><en>Text formatted for the current VS Code language.</en></lang>
+ * @lang zh-CN 该函数用于命令、通知和 WebView 宿主消息；Core 错误仍由 Core locale 处理。
+ * @lang en This function serves commands, notifications, and WebView host messages; Core errors remain owned by the Core locale.
  */
 export function t(key: string, params: Record<string, string | number> = {}): string {
   const locale = getLocale();
@@ -278,11 +286,11 @@ export function t(key: string, params: Record<string, string | number> = {}): st
 }
 
 /**
- * 🟢 获取 WebView 消息表
+ * Returns the host-selected message table for Converter initialization.
  *
- * 🔹 初始化 Converter 面板时发送给前端脚本，避免 WebView 自行推断 VS Code 语言。
- *
- * @returns 当前 locale 对应的消息字典。
+ * @returns <lang><zh-CN>当前 locale 对应的只读使用消息字典。</zh-CN><en>Message dictionary for read-only use by the current locale.</en></lang>
+ * @lang zh-CN 宿主把该表随 readyAck 发送给前端，避免 WebView 自行推断 VS Code 语言。
+ * @lang en The host sends this table with readyAck so the WebView never infers the VS Code language itself.
  */
 export function getWebviewMessages(): Record<string, string> {
   const locale = getLocale();

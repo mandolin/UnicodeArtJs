@@ -1,3 +1,7 @@
+/**
+ * @lang zh-CN 校验 VS Code 扩展清单的命令注册、菜单、配置、本地化和 Restricted Mode 契约保持一致。
+ * @lang en Validate that the VS Code extension manifest keeps commands, menus, configuration, localization, and Restricted Mode contracts aligned.
+ */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -72,6 +76,27 @@ test('manifest localization keys are present in default and zh-CN nls files', ()
     assert.equal(Object.hasOwn(packageNls, key), true, `${key} is missing from package.nls.json`);
     assert.equal(Object.hasOwn(packageNlsZhCn, key), true, `${key} is missing from package.nls.zh-cn.json`);
   }
+});
+
+test('restricted workspaces expose text conversion only and restrict sensitive overrides', () => {
+  // <lang><zh-CN>扩展显式声明 limited，避免 VS Code 默认策略与开发宿主行为造成能力误判。</zh-CN><en>The extension declares limited explicitly so VS Code defaults and development-host behavior cannot create capability ambiguity.</en></lang>
+  const policy = packageJson.capabilities?.untrustedWorkspaces;
+  const restrictedConfigurations = new Set(policy?.restrictedConfigurations ?? []);
+  const explorerImageMenu = packageJson.contributes.menus['explorer/context']
+    .find((item) => item.command === 'unicodeArtJs.convertImageFile');
+
+  assert.equal(policy?.supported, 'limited');
+  assert.equal(policy?.description, '%capabilities.untrustedWorkspaces%');
+  for (const key of [
+    'unicodeArtJs.font',
+    'unicodeArtJs.visualFont',
+    'unicodeArtJs.glyphFont',
+    'unicodeArtJs.glyphWidthProfile',
+    'unicodeArtJs.wideCharRegex',
+  ]) {
+    assert.equal(restrictedConfigurations.has(key), true, `${key} must be restricted`);
+  }
+  assert.equal(explorerImageMenu.when.includes('isWorkspaceTrusted'), true);
 });
 
 test('configuration keys are consumed by config resolver', () => {

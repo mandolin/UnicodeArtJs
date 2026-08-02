@@ -29,7 +29,7 @@ UnicodeArtJs 的 Core、命令行、网页、VS Code 插件和桌面应用并不
 | Browser Core | `unicode-art-js/browser@1.2.1`；Chrome 120+ | 浏览器高层转换入口仍标为 experimental；不同浏览器和字体的像素渲染可有轻微差异。 |
 | CLI | 已发布的 `unicode-art-cli@1.0.2` 使用 `unicode-art-js` 的 `1.2.x` 发布线 | CLI 与 Core 通过共享 fixture 保持输出契约。发布新版 CLI 前应把依赖范围调整为当前 Core 发布线并执行发布门禁。 |
 | Web | GitHub Pages 使用同仓 Browser Core | 推荐 Chrome 120+、Edge 120+ 或其他 Chromium 浏览器。字体是否可用由本机系统与浏览器字体策略决定。 |
-| VS Code 插件 | VS Code 1.90+；插件发行物声明自己的 Core semver 范围 | 安装页显示的版本是可安装版本；扩展每次发布前必须验证 VSIX 内的 Core 依赖、字体显示和选区插入流程。 |
+| VS Code 插件 | 清单声明 VS Code 1.90+；每次 evidence 另行记录实际宿主版本、OS/架构和 ABI | 安装页显示的版本是可安装版本；扩展每次发布前必须验证 VSIX 内的 Core 依赖、字体显示、选区插入、Restricted Mode 和安装/卸载流程。当前原生依赖闭包随构建主机选择，单个平台的 VSIX evidence 不能外推为通用跨平台产物。 |
 | UnicodeArt App | 桌面候选线 `0.1.x` 使用 `unicode-art-js@^1.2.1`，锁文件固定当前验证版本 | 属于 Compatible 档位；Windows Beta 发布前仍需完成安装器、NOTICE、SBOM、干净系统安装和卸载验证。 |
 
 Electron UniArt 目前仅保留独立宿主接入契约，没有对外提供安装包；它不属于可安装版本矩阵。

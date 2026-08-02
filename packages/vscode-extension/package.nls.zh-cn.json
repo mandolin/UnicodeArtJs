@@ -1,5 +1,6 @@
 {
   "extension.description": "在 VS Code 中将图片和文本转换为 Unicode 字符画。",
+  "capabilities.untrustedWorkspaces": "受限模式下仍可使用文本转换；图片转换以及字体、字素宽度设置的工作区级覆盖需要先信任工作区。",
   "command.openConverter": "UnicodeArtJs: 打开 Converter",
   "command.convertSelection": "UnicodeArtJs: 生成字符画",
   "command.convertSelectionWithOptions": "UnicodeArtJs: 生成字符画并选择选项",
