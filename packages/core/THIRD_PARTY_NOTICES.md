@@ -70,14 +70,63 @@ endorsement.
 
 ## @napi-rs/image 1.14.0
 
-Copyright (c) the `@napi-rs/image` contributors.
+Copyright (c) 2020-present LongYinan and the `@napi-rs/image`
+contributors.
 
 Licensed under the MIT License; the MIT terms reproduced for
-`@napi-rs/canvas` above apply here as well. Its stable UnicodeArtJs input path
-is limited to PNG, JPEG, WebP, and BMP. The audited native dependency family uses
-permissive licenses, including MIT, Apache-2.0, BSD-3-Clause, and Zlib for the
-relevant image codecs and bindings. SVG, TIFF, and other extended formats are
-not part of this package's stable Core contract.
+`@napi-rs/canvas` above apply here as well. The package is fixed to upstream
+commit `9e93ec3ee7158163f874579471882bec07cf4572`.
+
+The complete machine-readable source-resolution audit is shipped next to this
+notice as `NATIVE_COMPONENTS.json`. It records 172 normal/build components,
+their resolved versions and SPDX expressions, and membership in the 13 targets
+declared by `@napi-rs/image@1.14.0`. The redistribution-facing anchors are:
+
+| Component | Version | License |
+| --- | --- | --- |
+| `napi_rs_image` | `0.0.0` at the fixed upstream commit | MIT repository license |
+| `napi`, `napi-derive`, `napi-build` | `3.12.0`, `3.6.2`, `2.4.0` | MIT |
+| `image`, `fast_image_resize` | `0.25.10`, `6.1.0` | MIT OR Apache-2.0 |
+| `jpeg-decoder`, `zune-jpeg` | `0.3.2`, `0.5.15` | MIT OR Apache-2.0; MIT OR Apache-2.0 OR Zlib |
+| `png`, `lodepng`, `oxipng` | `0.18.1`, `3.12.2`, `10.1.1` | MIT OR Apache-2.0; Zlib; MIT |
+| `libwebp-sys` / libwebp | `0.14.4` | MIT wrapper; bundled library BSD-3-Clause |
+| `mozjpeg-sys` / MozJPEG | `2.2.3` | IJG AND Zlib AND BSD-3-Clause |
+| `libavif`, `libavif-sys`, `libaom-sys` | `0.14.0`, `0.17.0+libavif.1.0.4`, `0.17.2+libaom.3.11.0` | BSD-2-Clause |
+| `resvg`, `usvg`, `svgtypes`, `tiny-skia` | `0.47.0`, `0.47.0`, `0.16.1`, `0.12.0` | Apache-2.0 OR MIT; `tiny-skia` BSD-3-Clause |
+| `rexif`, `rgb`, `tiff` | `0.7.5`, `0.8.53`, `0.11.3` | MIT |
+| `unicode-ident` | `1.0.24` | (MIT OR Apache-2.0) AND Unicode-3.0 |
+| `windows` | `0.62.2` | MIT OR Apache-2.0 |
+| `objc2`, `objc2-image-io` | `0.6.4`, `0.3.2` | MIT; Zlib OR Apache-2.0 OR MIT |
+
+Relevant native-library notices include:
+
+- **libwebp**: Copyright (c) 2010, Google Inc. All rights reserved. Licensed
+  under the BSD 3-Clause license. Source and full terms:
+  https://chromium.googlesource.com/webm/libwebp.
+- **libavif**: Copyright 2019 Joe Drago. All rights reserved. Licensed under
+  the BSD 2-Clause license. Source and full terms:
+  https://github.com/AOMediaCodec/libavif.
+- **libavif-rs**: Copyright 2020 Charles Samuels and Paolo Barbolini. Licensed
+  under the BSD 2-Clause license. Source and full terms:
+  https://github.com/njaard/libavif-rs.
+- **lodepng**: Copyright 2014-2017 Kornel Lesiński and 2005-2016 Lode
+  Vandevenne. Licensed under the Zlib license. Source and full terms:
+  https://github.com/kornelski/lodepng-rust.
+- **MozJPEG / mozjpeg-sys**: licensed under the combined IJG, Zlib, and BSD
+  3-Clause terms recorded by `mozjpeg-sys@2.2.3`. Source and full terms:
+  https://github.com/mozilla/mozjpeg and
+  https://crates.io/crates/mozjpeg-sys/2.2.3.
+- **Unicode identifier data**: `unicode-ident@1.0.24` carries Unicode-3.0 in
+  addition to its MIT-or-Apache choice. Copyright and permission terms are
+  maintained by Unicode, Inc. at https://www.unicode.org/license.txt.
+
+Its stable UnicodeArtJs input path is limited to PNG, JPEG, WebP, and BMP.
+SVG, TIFF, AVIF, HEIC, and other extended capabilities in the upstream native
+source graph are not part of this package's stable Core contract, but remain in
+this notice because redistribution follows the packaged binary rather than the
+subset of methods invoked by Core. The upstream commit does not contain a
+`Cargo.lock`; `NATIVE_COMPONENTS.json` is therefore a fixed source-resolution
+audit snapshot, not a bit-exact SBOM for the published native binaries.
 
 ## UnicodeArtJs
 

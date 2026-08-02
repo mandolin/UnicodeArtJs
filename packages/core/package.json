@@ -29,7 +29,8 @@
     "dist/",
     "README.md",
     "LICENSE",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "NATIVE_COMPONENTS.json"
   ],
   "publishConfig": {
     "access": "public",

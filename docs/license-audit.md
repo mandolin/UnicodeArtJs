@@ -38,6 +38,19 @@ Core 当前默认使用两个固定版本的 NAPI 原生运行时：
 栈包含 Skia（BSD-3-Clause）、FreeType（FTL）、HarfBuzz（MIT-style）和 ICU
 数据（Unicode-3.0），因此 Core 和 VSIX 都随包提供第三方通知。
 
+`@napi-rs/image@1.14.0` 还随 Core 提供机器可读的
+[`NATIVE_COMPONENTS.json`](../packages/core/NATIVE_COMPONENTS.json)。该映射固定 npm
+`gitHead` `9e93ec3ee7158163f874579471882bec07cf4572`，覆盖其声明的 13 个发布目标和
+172 个 normal/build 组件，并记录版本、SPDX 表达式与目标归属。重点分发声明包括
+libwebp（BSD-3-Clause）、libavif/libaom（BSD-2-Clause）、lodepng（Zlib）、
+mozjpeg（IJG AND Zlib AND BSD-3-Clause）以及 `unicode-ident` 的 Unicode-3.0 条款。
+
+上游固定提交没有 `Cargo.lock`，因此这是一份 2026-08-02 Cargo 1.97.1
+source-resolution 审计快照，而不是已发布 `.node` / `.wasm` 的逐位构建 SBOM。
+发布物升级版本、改变平台或改变 SPDX `OR` 许可证选择时必须重新解析和审计，不能沿用
+当前结论。当前 13 目标映射没有缺失 license，也没有 GPL、AGPL、LGPL-only、MPL、EPL
+或 CDDL 表达式；该判断仍属于工程风险控制，不构成法律意见。
+
 完整的固定版本、证据边界与再审计规则见
 [`runtime-sbom.md`](runtime-sbom.md)。这里的结论仅覆盖当前默认路径和已声明
 的稳定格式，不替代未来平台包、原生包升级或扩展格式的审计。
@@ -102,6 +115,8 @@ UnicodeArtJs 是 MIT 许可的独立 TypeScript/JavaScript 实现。兼容性工
 3. 确认依赖是否会被打包、再分发，或只在本地开发时运行。
 4. 记录引入理由、替代方案和许可证结论。
 5. 执行 clean install、pack/VSIX 内容检查和许可证扫描。
-6. 为依赖选择 Clean、Compatible 或 Experimental 档位；无法明确判断时先标记为待审查，不以猜测代替结论。
+6. 执行 `npm run native-components:check`，确认随包 component map、NOTICE、SBOM
+   与 VSIX 短声明一致。
+7. 为依赖选择 Clean、Compatible 或 Experimental 档位；无法明确判断时先标记为待审查，不以猜测代替结论。
 
 许可证审查是工程风险控制，不构成法律意见。对 LGPL、专用工具许可、字体再分发或商业发行有疑问时，应结合实际分发方式进一步确认。

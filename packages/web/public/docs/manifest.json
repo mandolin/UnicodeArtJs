@@ -1,7 +1,7 @@
 {
   "contract": "unicodeartjs-public-docs-site-manifest",
   "contractVersion": "0.1.0",
-  "generatedAt": "2026-07-28T16:14:17.639Z",
+  "generatedAt": "2026-08-02T05:57:06.070Z",
   "homepage": "https://mandolin.github.io/UnicodeArtJs/",
   "repository": "https://github.com/mandolin/UnicodeArtJs",
   "docsHomeUrl": "https://github.com/mandolin/UnicodeArtJs/tree/main/docs",
@@ -1038,8 +1038,8 @@
             "summary": "Loads or resolves a browser font family for visual-font or glyph-font rendering. 为视觉字体或字素字体渲染加载或解析浏览器字体 family。普通 family 名会直接返回；字体 URL、 二进制数据和 Blob 类来源会在支持 `FontFace` 时加载并登记到 `document.fonts`。URL 仍受网络 与 CORS 策略约束。",
             "source": {
               "path": "packages/core/src/platform/browser/browserPlatformAdapter.ts",
-              "line": 915,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/browser/browserPlatformAdapter.ts#L915"
+              "line": 961,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/browser/browserPlatformAdapter.ts#L961"
             }
           },
           {
@@ -1050,8 +1050,8 @@
             "summary": "Returns the active Node image backend. 获取当前 Node 图像后端。默认值为 `napi-rs`，除非调用方显式切换。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 74,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L74"
+              "line": 92,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L92"
             }
           },
           {
@@ -1062,8 +1062,8 @@
             "summary": "Resolves a built-in Node image backend by name. 按名称获取内置 Node 图像后端；未知名称会抛出普通 `Error`，因为这是后端注册表层面的 编程错误。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 86,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L86"
+              "line": 104,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L104"
             }
           },
           {
@@ -1074,8 +1074,8 @@
             "summary": "Sets the active Node image backend. 设置当前 Node 图像后端。传入字符串时只能选择内置后端；传入对象时调用方负责该后端的 许可证、依赖安装和输出语义。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 102,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L102"
+              "line": 120,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L120"
             }
           },
           {
@@ -1086,8 +1086,8 @@
             "summary": "Resets the active Node image backend to the default `napi-rs` implementation. 重置为默认 `napi-rs` 后端，常用于测试隔离或临时 legacy 后端使用后恢复。",
             "source": {
               "path": "packages/core/src/platform/node/imageBackend.ts",
-              "line": 115,
-              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L115"
+              "line": 133,
+              "url": "https://github.com/mandolin/UnicodeArtJs/blob/main/packages/core/src/platform/node/imageBackend.ts#L133"
             }
           },
           {

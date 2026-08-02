@@ -6,6 +6,7 @@ notice is included at:
 
 ```text
 extension/node_modules/unicode-art-js/THIRD_PARTY_NOTICES.md
+extension/node_modules/unicode-art-js/NATIVE_COMPONENTS.json
 ```
 
 The extension package also carries this short notice so the VSIX has an
@@ -14,7 +15,11 @@ immediately visible redistribution boundary:
 - `@napi-rs/canvas@1.0.2` (MIT), with Skia (BSD-3-Clause), FreeType (FTL),
   HarfBuzz (MIT-style), and ICU data (Unicode-3.0) notices.
 - `@napi-rs/image@1.14.0` (MIT), used for the Core stable PNG/JPEG/WebP/BMP
-  image-input path.
+  image-input path. Its fixed-source audit map contains 172 normal/build
+  components across the package's 13 declared targets. Redistribution-facing
+  entries include libwebp (BSD-3-Clause), libavif/libaom (BSD-2-Clause),
+  lodepng (Zlib), mozjpeg (IJG AND Zlib AND BSD-3-Clause), and Unicode-3.0
+  data terms from `unicode-ident`.
 
 UnicodeArtJs itself is MIT licensed. It does not redistribute fonts.
 

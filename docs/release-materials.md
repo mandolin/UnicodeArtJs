@@ -71,6 +71,7 @@ VS Code 使用者可从 VS Code Marketplace 更新 `UnicodeArtJs` 扩展。
 
 ```bash
 npm run release:gate
+npm run native-components:check
 npm run release:verify:publish
 ```
 
@@ -224,6 +225,7 @@ npm run web-resource-discovery:check
 npm run host-sideload:check
 npm run docs:public-site:check
 npm run release-materials:check
+npm run native-components:check
 npm run docs:hia:target:check
 npm run release:gate
 ```

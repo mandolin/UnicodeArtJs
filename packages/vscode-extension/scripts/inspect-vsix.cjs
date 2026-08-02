@@ -60,16 +60,34 @@ if (!hasNapiCanvas || !hasNapiCanvasNative) {
   process.exit(1);
 }
 
-const requiredNotices = [
+// <lang><zh-CN>把完整 native component map 与两份 NOTICE 一起作为 VSIX 合规材料，避免只打包短声明。</zh-CN><en>Treat the complete native component map and both NOTICE files as VSIX compliance material so packaging cannot retain only the short notice.</en></lang>
+const requiredComplianceFiles = [
   'extension/THIRD_PARTY_NOTICES.md',
-  'extension/node_modules/unicode-art-js/THIRD_PARTY_NOTICES.md'
+  'extension/node_modules/unicode-art-js/THIRD_PARTY_NOTICES.md',
+  'extension/node_modules/unicode-art-js/NATIVE_COMPONENTS.json'
 ];
 
-for (const noticePath of requiredNotices) {
-  if (!entries.includes(noticePath)) {
-    console.error(`Required third-party notice was not found in VSIX: ${noticePath}`);
+for (const compliancePath of requiredComplianceFiles) {
+  if (!entries.includes(compliancePath)) {
+    console.error(`Required third-party compliance file was not found in VSIX: ${compliancePath}`);
     process.exit(1);
   }
+}
+
+// <lang><zh-CN>直接读取 VSIX 内映射，确保打包到扩展的不是同名空文件或旧 schema。</zh-CN><en>Read the map from the VSIX so a same-named empty file or stale schema cannot satisfy the entry check.</en></lang>
+const nativeComponentEntry = zipEntries.find(
+  (entry) => entry.name === 'extension/node_modules/unicode-art-js/NATIVE_COMPONENTS.json'
+);
+const nativeComponentMap = JSON.parse(readZipTextEntry(vsixBuffer, nativeComponentEntry));
+
+if (
+  nativeComponentMap.schema !== 'unicodeartjs-native-component-map@1' ||
+  nativeComponentMap.runtimePackage !== '@napi-rs/image' ||
+  nativeComponentMap.runtimeVersion !== '1.14.0' ||
+  nativeComponentMap.componentCount !== 172
+) {
+  console.error('VSIX native component map does not match the audited @napi-rs/image@1.14.0 contract.');
+  process.exit(1);
 }
 
 const packageEntry = zipEntries.find((entry) => entry.name === 'extension/package.json');

@@ -104,6 +104,7 @@ const requiredReleaseMaterialTexts = [
   'unsigned-draft',
   'Wait for deployed resource discovery files',
   'npm run release:gate',
+  'npm run native-components:check',
   'npm run release:verify:publish',
   'npm view unicode-art-js version',
   'npm view unicode-art-cli version',

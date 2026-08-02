@@ -10,7 +10,7 @@ It is an engineering inventory rather than legal advice.
 
 | Component | Fixed version | Role | License boundary |
 | --- | --- | --- | --- |
-| `@napi-rs/image` | `1.14.0` | Node image decode and resize for PNG, JPEG, WebP, BMP | npm package MIT; audited codec/binding path uses permissive licenses |
+| `@napi-rs/image` | `1.14.0` | Node image decode and resize for PNG, JPEG, WebP, BMP | npm package MIT; 13-target source-resolution map contains 172 normal/build components with declared permissive license choices |
 | `@napi-rs/canvas` | `1.0.2` | Node text rasterization through `@napi-rs/canvas/node-canvas` | npm package MIT; Skia-based platform binary |
 | Skia | upstream component of the Canvas binary | 2D rasterization | BSD-3-Clause |
 | FreeType | upstream component of the Canvas binary | glyph rasterization | FreeType License (FTL) |
@@ -23,6 +23,40 @@ hashes. Core's `THIRD_PARTY_NOTICES.md` is included in the Core npm tarball;
 the VSIX includes notices both at its root and inside the staged Core package.
 The default image-format boundary and future adapter routes are tracked in
 [`optional-input-adapters.md`](optional-input-adapters.md).
+
+## `@napi-rs/image` Native Component Map
+
+Core also ships [`NATIVE_COMPONENTS.json`](../packages/core/NATIVE_COMPONENTS.json).
+It maps 172 normal/build components to versions, SPDX license expressions, and
+the 13 native/WASI targets declared by `@napi-rs/image@1.14.0`. The map is based
+on upstream commit `9e93ec3ee7158163f874579471882bec07cf4572` and a Cargo 1.97.1
+resolution performed on 2026-08-02. Development-only dependencies are excluded.
+
+The upstream commit does not contain a `Cargo.lock`. The generated audit lock has
+SHA-256 `2eee2fcfc3f932fb76873545651457ba17213c44942ba1cf520cb97cbbcbf881`,
+so the map is a fixed source-resolution audit snapshot, not a claim that the
+published native binaries are bit-exactly reproducible from that lock.
+
+The redistribution-facing codec and binding anchors are:
+
+| Component | Resolved version | Declared license | Role / boundary |
+| --- | --- | --- | --- |
+| `napi_rs_image` | `0.0.0` at the fixed upstream commit | MIT repository license | Native addon workspace crate |
+| `napi` / `napi-derive` / `napi-build` | `3.12.0` / `3.6.2` / `2.4.0` | MIT | Node-API binding and build support |
+| `image` / `fast_image_resize` | `0.25.10` / `6.1.0` | MIT OR Apache-2.0 | Decode, pixel conversion, and resize |
+| `jpeg-decoder` / `zune-jpeg` | `0.3.2` / `0.5.15` | MIT OR Apache-2.0; MIT OR Apache-2.0 OR Zlib | JPEG decode paths |
+| `png` / `lodepng` / `oxipng` | `0.18.1` / `3.12.2` / `10.1.1` | MIT OR Apache-2.0; Zlib; MIT | PNG decode/encode and optimization |
+| `libwebp-sys` | `0.14.4` | MIT wrapper; bundled libwebp notice is BSD-3-Clause | WebP native codec binding |
+| `mozjpeg-sys` | `2.2.3` | IJG AND Zlib AND BSD-3-Clause | MozJPEG native codec binding |
+| `libavif` / `libavif-sys` / `libaom-sys` | `0.14.0` / `0.17.0+libavif.1.0.4` / `0.17.2+libaom.3.11.0` | BSD-2-Clause | Extended AVIF code present in the upstream build graph |
+| `resvg` / `usvg` / `svgtypes` / `tiny-skia` | `0.47.0` / `0.47.0` / `0.16.1` / `0.12.0` | Apache-2.0 OR MIT; BSD-3-Clause for `tiny-skia` | Extended SVG code present in the upstream build graph |
+| `unicode-ident` | `1.0.24` | (MIT OR Apache-2.0) AND Unicode-3.0 | Unicode identifier tables used by proc-macro dependencies |
+| `windows` | `0.62.2` | MIT OR Apache-2.0 | Windows-only WIC binding; no HEVC codec is redistributed |
+| `objc2` / `objc2-image-io` | `0.6.4` / `0.3.2` | MIT; Zlib OR Apache-2.0 OR MIT | macOS-only ImageIO binding; no HEVC codec is redistributed |
+
+The native source graph contains capabilities beyond UnicodeArtJs's stable
+PNG/JPEG/WebP/BMP API. They remain in the notice map because redistribution
+obligations follow the packaged binary, not only the methods invoked by Core.
 
 ## Explicitly Excluded From The Default Path
 
@@ -43,6 +77,11 @@ Core npm package's default runtime, CLI's normal install, or the VSIX.
 - `@napi-rs/image@1.14.0` identifies commit
   `9e93ec3ee7158163f874579471882bec07cf4572`, declares MIT, and is limited by
   Core to the stable input formats above.
+- The 13-target Cargo source-resolution map contains no missing license field
+  after applying the upstream repository MIT license to `napi_rs_image`; no
+  GPL, AGPL, LGPL-only, MPL, EPL, or CDDL expression appears in that resolved
+  published-target set. SPDX `OR` expressions are evaluated through a Clean
+  permissive choice; changing that choice requires a new review.
 - The Windows x64 Canvas platform package contains a Skia native module and
   `icudtl.dat`; it does not ship separate Cairo/Pango/libvips files. The
   release gate scans package manifests, lockfiles, and VSIX entries to reject
@@ -60,6 +99,8 @@ Run the repository release gate before publishing:
 ```bash
 npm run release:gate
 ```
+
+The focused static check is `npm run native-components:check`.
 
 It verifies the native package versions, rejects legacy default dependencies,
 executes real Node text-rendering smoke tests in both the workspace and a

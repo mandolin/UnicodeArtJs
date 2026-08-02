@@ -1,0 +1,3480 @@
+{
+  "schema": "unicodeartjs-native-component-map@1",
+  "runtimePackage": "@napi-rs/image",
+  "runtimeVersion": "1.14.0",
+  "upstreamRepository": "https://github.com/Brooooooklyn/Image",
+  "upstreamGitHead": "9e93ec3ee7158163f874579471882bec07cf4572",
+  "resolver": {
+    "tool": "cargo",
+    "version": "1.97.1",
+    "resolvedAt": "2026-08-02",
+    "upstreamLockfileCommitted": false,
+    "generatedLockSha256": "2eee2fcfc3f932fb76873545651457ba17213c44942ba1cf520cb97cbbcbf881"
+  },
+  "scope": {
+    "includedEdges": [
+      "normal",
+      "build"
+    ],
+    "excludedEdges": [
+      "dev"
+    ],
+    "targetTriples": [
+      "x86_64-apple-darwin",
+      "x86_64-pc-windows-msvc",
+      "aarch64-pc-windows-msvc",
+      "x86_64-unknown-linux-gnu",
+      "aarch64-apple-darwin",
+      "aarch64-linux-android",
+      "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-linux-musl",
+      "armv7-unknown-linux-gnueabihf",
+      "x86_64-unknown-linux-musl",
+      "x86_64-unknown-freebsd",
+      "i686-pc-windows-msvc",
+      "wasm32-wasip1-threads"
+    ],
+    "limitation": "Source-resolution audit snapshot; not a bit-exact SBOM for the published native binaries."
+  },
+  "targetPackageCounts": {
+    "darwin-x64": 158,
+    "win32-x64-msvc": 165,
+    "win32-arm64-msvc": 165,
+    "linux-x64-gnu": 155,
+    "darwin-arm64": 158,
+    "android-arm64": 153,
+    "linux-arm64-gnu": 155,
+    "linux-arm64-musl": 155,
+    "linux-arm-gnueabihf": 155,
+    "linux-x64-musl": 155,
+    "freebsd-x64": 155,
+    "win32-ia32-msvc": 165,
+    "wasm32-wasi": 153
+  },
+  "componentCount": 172,
+  "components": [
+    {
+      "name": "adler2",
+      "version": "2.0.1",
+      "license": "0BSD OR MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "aho-corasick",
+      "version": "1.1.4",
+      "license": "Unlicense OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "arrayref",
+      "version": "0.3.9",
+      "license": "BSD-2-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "arrayvec",
+      "version": "0.7.8",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "autocfg",
+      "version": "1.5.1",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "base64",
+      "version": "0.22.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "bindgen",
+      "version": "0.72.1",
+      "license": "BSD-3-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "bitflags",
+      "version": "2.13.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "bitvec",
+      "version": "1.1.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "bytemuck",
+      "version": "1.25.2",
+      "license": "Zlib OR Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "byteorder-lite",
+      "version": "0.1.0",
+      "license": "Unlicense OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "cc",
+      "version": "1.4.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "cexpr",
+      "version": "0.6.0",
+      "license": "Apache-2.0/MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "cfg-if",
+      "version": "1.0.4",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "clang-sys",
+      "version": "1.9.1",
+      "license": "Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "cmake",
+      "version": "0.1.58",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "color_quant",
+      "version": "1.1.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "convert_case",
+      "version": "0.11.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "core_maths",
+      "version": "0.1.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "crc32fast",
+      "version": "1.5.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "crossbeam-deque",
+      "version": "0.8.7",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "crossbeam-epoch",
+      "version": "0.9.20",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "crossbeam-utils",
+      "version": "0.8.22",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "ctor",
+      "version": "1.0.12",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "data-url",
+      "version": "0.3.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "document-features",
+      "version": "0.2.12",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "dunce",
+      "version": "1.0.5",
+      "license": "CC0-1.0 OR MIT-0 OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "either",
+      "version": "1.17.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "equivalent",
+      "version": "1.0.2",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "euclid",
+      "version": "0.22.14",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "fast_image_resize",
+      "version": "6.1.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "fax",
+      "version": "0.2.7",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "fdeflate",
+      "version": "0.3.7",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "find-msvc-tools",
+      "version": "0.1.9",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "flate2",
+      "version": "1.1.9",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "float-cmp",
+      "version": "0.9.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "fontconfig-parser",
+      "version": "0.5.8",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl"
+      ]
+    },
+    {
+      "name": "fontdb",
+      "version": "0.23.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "funty",
+      "version": "2.0.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-channel",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-core",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-executor",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-io",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-macro",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-sink",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-task",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "futures-util",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "getrandom",
+      "version": "0.4.3",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "gif",
+      "version": "0.14.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "glob",
+      "version": "0.3.4",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "half",
+      "version": "2.7.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "hashbrown",
+      "version": "0.17.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "image",
+      "version": "0.25.10",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "image-webp",
+      "version": "0.2.4",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "imagesize",
+      "version": "0.14.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "indexmap",
+      "version": "2.14.0",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "itertools",
+      "version": "0.13.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "jobserver",
+      "version": "0.1.35",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "jpeg-decoder",
+      "version": "0.3.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "kurbo",
+      "version": "0.13.1",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libaom-sys",
+      "version": "0.17.2+libaom.3.11.0",
+      "license": "BSD-2-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libavif",
+      "version": "0.14.0",
+      "license": "BSD-2-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libavif-sys",
+      "version": "0.17.0+libavif.1.0.4",
+      "license": "BSD-2-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libc",
+      "version": "0.2.189",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libdeflate-sys",
+      "version": "1.25.2",
+      "license": "Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libdeflater",
+      "version": "1.25.2",
+      "license": "Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libloading",
+      "version": "0.8.9",
+      "license": "ISC",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libloading",
+      "version": "0.9.0",
+      "license": "ISC",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libm",
+      "version": "0.2.16",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "libwebp-sys",
+      "version": "0.14.4",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "litrs",
+      "version": "1.0.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "lodepng",
+      "version": "3.12.2",
+      "license": "Zlib",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "log",
+      "version": "0.4.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "memchr",
+      "version": "2.8.3",
+      "license": "Unlicense OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "memmap2",
+      "version": "0.9.11",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "minimal-lexical",
+      "version": "0.2.1",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "miniz_oxide",
+      "version": "0.8.9",
+      "license": "MIT OR Zlib OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "moxcms",
+      "version": "0.8.1",
+      "license": "BSD-3-Clause OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "mozjpeg-sys",
+      "version": "2.2.3",
+      "license": "IJG AND Zlib AND BSD-3-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "napi",
+      "version": "3.12.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "napi_rs_image",
+      "version": "0.0.0",
+      "license": "MIT",
+      "source": "upstream-workspace",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "napi-build",
+      "version": "2.4.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "napi-derive",
+      "version": "3.6.2",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "napi-derive-backend",
+      "version": "6.1.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "napi-sys",
+      "version": "3.3.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "nohash-hasher",
+      "version": "0.2.0",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "nom",
+      "version": "7.1.3",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "num_cpus",
+      "version": "1.17.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "num-complex",
+      "version": "0.4.6",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "num-traits",
+      "version": "0.2.19",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "objc2",
+      "version": "0.6.4",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "darwin-arm64",
+        "darwin-x64"
+      ]
+    },
+    {
+      "name": "objc2-core-foundation",
+      "version": "0.3.2",
+      "license": "Zlib OR Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "darwin-arm64",
+        "darwin-x64"
+      ]
+    },
+    {
+      "name": "objc2-core-graphics",
+      "version": "0.3.2",
+      "license": "Zlib OR Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "darwin-arm64",
+        "darwin-x64"
+      ]
+    },
+    {
+      "name": "objc2-encode",
+      "version": "4.1.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "darwin-arm64",
+        "darwin-x64"
+      ]
+    },
+    {
+      "name": "objc2-image-io",
+      "version": "0.3.2",
+      "license": "Zlib OR Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "darwin-arm64",
+        "darwin-x64"
+      ]
+    },
+    {
+      "name": "once_cell",
+      "version": "1.21.4",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "oxipng",
+      "version": "10.1.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "pico-args",
+      "version": "0.5.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "pin-project-lite",
+      "version": "0.2.17",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "pkg-config",
+      "version": "0.3.33",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "png",
+      "version": "0.18.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "polycool",
+      "version": "0.4.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "prettyplease",
+      "version": "0.2.37",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "proc-macro2",
+      "version": "1.0.107",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "pxfm",
+      "version": "0.1.30",
+      "license": "BSD-3-Clause OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "quick-error",
+      "version": "2.0.1",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "quote",
+      "version": "1.0.47",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "radium",
+      "version": "0.7.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "rayon",
+      "version": "1.12.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "rayon-core",
+      "version": "1.13.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "regex",
+      "version": "1.13.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "regex-automata",
+      "version": "0.4.16",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "regex-syntax",
+      "version": "0.8.11",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "resvg",
+      "version": "0.47.0",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "rexif",
+      "version": "0.7.5",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "rgb",
+      "version": "0.8.53",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "roxmltree",
+      "version": "0.20.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl"
+      ]
+    },
+    {
+      "name": "roxmltree",
+      "version": "0.21.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "rustc-hash",
+      "version": "2.1.3",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "rustybuzz",
+      "version": "0.20.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "semver",
+      "version": "1.0.28",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "shlex",
+      "version": "1.3.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "shlex",
+      "version": "2.0.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "simd-adler32",
+      "version": "0.3.10",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "simplecss",
+      "version": "0.2.2",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "siphasher",
+      "version": "1.0.3",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "slab",
+      "version": "0.4.12",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "slotmap",
+      "version": "1.1.1",
+      "license": "Zlib",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "smallvec",
+      "version": "1.15.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "strict-num",
+      "version": "0.1.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "svgtypes",
+      "version": "0.16.1",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "syn",
+      "version": "2.0.119",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "syn",
+      "version": "3.0.3",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "tap",
+      "version": "1.0.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "thiserror",
+      "version": "2.0.19",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "thiserror-impl",
+      "version": "2.0.19",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "tiff",
+      "version": "0.11.3",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "tiny-skia",
+      "version": "0.12.0",
+      "license": "BSD-3-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "tiny-skia-path",
+      "version": "0.12.0",
+      "license": "BSD-3-Clause",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "tinyvec",
+      "version": "1.12.0",
+      "license": "Zlib OR Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "tinyvec_macros",
+      "version": "0.1.1",
+      "license": "MIT OR Apache-2.0 OR Zlib",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "ttf-parser",
+      "version": "0.25.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-bidi",
+      "version": "0.3.18",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-bidi-mirroring",
+      "version": "0.4.0",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-ccc",
+      "version": "0.4.0",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-ident",
+      "version": "1.0.24",
+      "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-properties",
+      "version": "0.1.4",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-script",
+      "version": "0.5.8",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-segmentation",
+      "version": "1.13.3",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "unicode-vo",
+      "version": "0.1.0",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "usvg",
+      "version": "0.47.0",
+      "license": "Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "version_check",
+      "version": "0.9.5",
+      "license": "MIT/Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "weezl",
+      "version": "0.1.12",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows",
+      "version": "0.62.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-collections",
+      "version": "0.3.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-core",
+      "version": "0.62.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-future",
+      "version": "0.3.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-implement",
+      "version": "0.60.2",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-interface",
+      "version": "0.59.3",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-link",
+      "version": "0.2.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-numerics",
+      "version": "0.3.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-result",
+      "version": "0.4.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-strings",
+      "version": "0.5.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "windows-threading",
+      "version": "0.2.1",
+      "license": "MIT OR Apache-2.0",
+      "source": "crates.io",
+      "targets": [
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "wyz",
+      "version": "0.5.1",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "xmlwriter",
+      "version": "0.1.0",
+      "license": "MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "zerocopy",
+      "version": "0.8.55",
+      "license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "zerocopy-derive",
+      "version": "0.8.55",
+      "license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "zlib-rs",
+      "version": "0.6.6",
+      "license": "Zlib",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "zune-core",
+      "version": "0.5.1",
+      "license": "MIT OR Apache-2.0 OR Zlib",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    },
+    {
+      "name": "zune-jpeg",
+      "version": "0.5.15",
+      "license": "MIT OR Apache-2.0 OR Zlib",
+      "source": "crates.io",
+      "targets": [
+        "android-arm64",
+        "darwin-arm64",
+        "darwin-x64",
+        "freebsd-x64",
+        "linux-arm-gnueabihf",
+        "linux-arm64-gnu",
+        "linux-arm64-musl",
+        "linux-x64-gnu",
+        "linux-x64-musl",
+        "wasm32-wasi",
+        "win32-arm64-msvc",
+        "win32-ia32-msvc",
+        "win32-x64-msvc"
+      ]
+    }
+  ]
+}

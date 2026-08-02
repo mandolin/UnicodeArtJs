@@ -10,7 +10,7 @@ From the repository root:
 npm run release:gate
 ```
 
-The command runs package checks, documentation checks, recipe/example checks, static gallery checks, static resource-discovery hash checks, resource trust-chain checks, Web resource-discovery entry checks, release-material checks, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
+The command runs package checks, documentation checks, recipe/example checks, static gallery checks, static resource-discovery hash checks, resource trust-chain checks, Web resource-discovery entry checks, release-material checks, native component/license alignment, Core and CLI pack dry-runs, isolated VSIX packaging, VSIX content inspection, and final release fact verification.
 
 For npm/Marketplace publish preparation after switching all publish-time dependencies to npm versions:
 
@@ -65,6 +65,7 @@ npm run release:verify:publish
 - `optional-adapters:check` can validate 可选输入格式 (optional input format) and adapter policy, Core default image formats, VS Code image entrypoints, Compatible documentation links, and release-gate integration.
 - `performance-release:check` can validate the public performance baseline, `benchmark:core` command wiring, CI step, release surfaces, and version decision rules.
 - `release-materials:check` can validate [`docs/release-materials.md`](release-materials.md), release note templates, npm / Marketplace / GitHub Pages post-release checks, resource discovery trust-chain reminders, and package-level tag reminders.
+- `native-components:check` validates the packaged 13-target `@napi-rs/image` component-version-license map, Core/VSIX notices, runtime SBOM, and the explicit non-bit-exact audit limitation.
 
 The audited runtime inventory and redistribution notices are documented in
 [`runtime-sbom.md`](runtime-sbom.md).

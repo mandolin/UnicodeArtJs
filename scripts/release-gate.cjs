@@ -442,6 +442,8 @@ function checkPublicDocs() {
   assertGate(!/\bW-art-P\d+(?:\.\d+)?\b/.test(releaseMaterialsDoc), 'Release materials doc must not expose internal planning stage identifiers.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/canvas@1.0.2'), 'Runtime inventory must pin @napi-rs/canvas@1.0.2.');
   assertGate(runtimeSbomDoc.includes('@napi-rs/image@1.14.0'), 'Runtime inventory must pin @napi-rs/image@1.14.0.');
+  assertGate(runtimeSbomDoc.includes('NATIVE_COMPONENTS.json'), 'Runtime inventory must link the packaged native component map.');
+  assertGate(runtimeSbomDoc.includes('fixed source-resolution audit snapshot') && runtimeSbomDoc.includes('bit-exactly reproducible'), 'Runtime inventory must preserve the non-bit-exact SBOM limitation.');
   assertGate(optionalInputAdaptersDoc.includes('PNG / JPEG / JPG / WebP / BMP'), 'Optional input adapter doc must list default Clean formats.');
   assertGate(optionalInputAdaptersDoc.includes('UNSUPPORTED_FORMAT'), 'Optional input adapter doc must describe unsupported-format behavior.');
   assertGate(optionalInputAdaptersDoc.includes('Compatible Adapter'), 'Optional input adapter doc must describe Compatible adapter route.');

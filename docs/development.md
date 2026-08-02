@@ -47,6 +47,16 @@ npm run check:vscode
 
 `release:gate` 是当前推荐的发布前总入口，会额外执行 Core/CLI pack dry-run、VSIX 隔离打包、VSIX 内容扫描、版本/依赖图检查和共享 fixture 校验。更多说明见 [发布门禁与版本图](release-gate.md)。
 
+修改 Node 原生包版本、Core/VSIX 第三方声明或运行时 SBOM 时，还应单独运行：
+
+```bash
+npm run native-components:check
+```
+
+该命令会校验 Core 随包 `NATIVE_COMPONENTS.json`、13 个发布目标、172 个 normal/build
+组件，以及 Core NOTICE、VSIX NOTICE 和公开 SBOM 的一致性。它是静态门禁，不重新访问
+Cargo registry，也不把 source-resolution audit snapshot 表述成已发布 binary 的逐位 SBOM。
+
 ## 性能与发布计划
 
 Core benchmark 用于观察关键匹配流程的耗时趋势：
