@@ -158,7 +158,7 @@ describe('browserPlatformAdapter', () => {
       ])
     });
 
-    expect(Array.from(image.data)).toEqual([76, 150]);
+    expect(Array.from(image.data)).toEqual([76, 149]);
   });
 
   test('renders text through browser canvas APIs', async () => {

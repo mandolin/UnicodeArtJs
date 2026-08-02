@@ -763,6 +763,16 @@ function validateCoreImageData(imageData: CoreImageData): void {
   }
 }
 
+/**
+ * Converts RGBA pixels to Core grayscale after compositing transparency over white.
+ *
+ * 将 RGBA 像素先合成到白底，再转换为 Core 灰度值；这与默认 Node 图像后端的透明语义一致。
+ *
+ * @param rgbaData - RGBA pixel bytes. RGBA 像素字节。
+ * @param width - Image width. 图像宽度。
+ * @param height - Image height. 图像高度。
+ * @returns Core-compatible grayscale bytes. 与 Core 兼容的灰度字节。
+ */
 function rgbaToGrayscale(
   rgbaData: Uint8ClampedArray | Uint8Array,
   width: number,
@@ -773,14 +783,50 @@ function rgbaToGrayscale(
 
   for (let i = 0; i < pixelCount; i++) {
     const offset = i * 4;
-    grayData[i] = rgbToGrayscale(rgbaData[offset], rgbaData[offset + 1], rgbaData[offset + 2]);
+    const alpha = rgbaData[offset + 3];
+    // Composite every color channel before grayscale conversion so transparent dark pixels remain white.
+    // 灰度转换前先合成各颜色通道，确保透明深色像素仍表现为白色。
+    grayData[i] = rgbToGrayscale(
+      compositeOverWhite(rgbaData[offset], alpha),
+      compositeOverWhite(rgbaData[offset + 1], alpha),
+      compositeOverWhite(rgbaData[offset + 2], alpha)
+    );
   }
 
   return grayData;
 }
 
+/**
+ * Converts RGB bytes with the deterministic integer BT.601 approximation used by Core.
+ * 使用 Core 的确定性整数 BT.601 近似把 RGB 字节转换为灰度值。
+ *
+ * @param r - Red channel. 红色通道。
+ * @param g - Green channel. 绿色通道。
+ * @param b - Blue channel. 蓝色通道。
+ * @returns A grayscale byte. 灰度字节。
+ */
 function rgbToGrayscale(r: number, g: number, b: number): number {
-  return Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+  return (77 * r + 150 * g + 29 * b) >> 8;
+}
+
+/**
+ * Composites one color channel over an opaque white background.
+ * 把单个颜色通道合成到不透明白色背景上。
+ *
+ * @param value - Source color-channel byte. 源颜色通道字节。
+ * @param alpha - Source alpha byte. 源 alpha 字节。
+ * @returns The composited channel byte. 合成后的通道字节。
+ */
+function compositeOverWhite(value: number, alpha: number): number {
+  if (alpha >= 255) {
+    return value;
+  }
+
+  if (alpha <= 0) {
+    return 255;
+  }
+
+  return Math.round((value * alpha + 255 * (255 - alpha)) / 255);
 }
 
 function resizeGrayscaleToNormalized(

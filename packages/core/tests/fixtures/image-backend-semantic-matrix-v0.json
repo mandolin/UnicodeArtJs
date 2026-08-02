@@ -1,0 +1,22 @@
+{
+  "schema": "unicodeartjs-image-backend-semantic-matrix@0",
+  "formats": ["png", "jpeg", "webp", "bmp"],
+  "rgbaCases": [
+    { "id": "opaque-red", "rgba": [255, 0, 0, 255], "expectedGray": 76 },
+    { "id": "opaque-green", "rgba": [0, 255, 0, 255], "expectedGray": 149 },
+    { "id": "transparent-black", "rgba": [0, 0, 0, 0], "expectedGray": 255 },
+    { "id": "half-alpha-red", "rgba": [255, 0, 0, 128], "expectedGray": 165 }
+  ],
+  "resize": {
+    "interpolations": ["nearest", "bilinear", "bicubic", "lanczos"],
+    "constantGray": 93,
+    "source": { "width": 2, "height": 2 },
+    "target": { "width": 5, "height": 3 }
+  },
+  "errors": [
+    { "id": "missing-file", "expectedCode": "IMAGE_LOAD_FAILED" },
+    { "id": "unsupported-format", "expectedCode": "UNSUPPORTED_FORMAT" },
+    { "id": "invalid-browser-core-image", "expectedCode": "INVALID_INPUT" },
+    { "id": "custom-backend-without-resize", "expectedCode": "IMAGE_PROCESSING_FAILED" }
+  ]
+}
