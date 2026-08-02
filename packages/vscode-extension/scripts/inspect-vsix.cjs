@@ -22,6 +22,7 @@ if (!vsixPath) {
 const vsixBuffer = fs.readFileSync(vsixPath);
 const zipEntries = listZipEntries(vsixBuffer);
 const entries = zipEntries.map((entry) => entry.name);
+assertProductionPackageSurface(entries);
 const forbiddenPatterns = [
   /(^|\/)node_modules\/sharp\//,
   /(^|\/)node_modules\/@img\/sharp/i,
@@ -37,6 +38,66 @@ if (forbidden.length > 0) {
   console.error('Forbidden legacy native runtime files found in VSIX:');
   forbidden.slice(0, 50).forEach((entry) => console.error(`  - ${entry}`));
   process.exit(1);
+}
+
+/**
+ * @lang zh-CN
+ * 校验 VSIX 只包含声明的 portable production graph、各一个 canvas/image 平台包，并且不携带 source map。
+ * @lang en
+ * Validate that the VSIX contains only the declared portable production graph, one canvas and one
+ * image platform package, and no source maps.
+ *
+ * @param {string[]} entries VSIX entry 名称 / VSIX entry names.
+ * @returns {void}
+ */
+function assertProductionPackageSurface(entries) {
+  // <lang><zh-CN>VSCE 的依赖收集可绕过扩展文件 ignore；因此实物检查必须独立拒绝任意嵌套 map。</zh-CN><en>VSCE dependency collection can bypass extension-file ignores, so artifact inspection independently rejects every nested map.</en></lang>
+  const sourceMaps = entries.filter((entry) => entry.endsWith('.map'));
+  if (sourceMaps.length > 0) {
+    console.error(`VSIX must not contain source maps, found ${sourceMaps.length}.`);
+    process.exit(1);
+  }
+
+  // <lang><zh-CN>从真实 node_modules entry 归并 package root，避免以目录计数代替依赖闭包。</zh-CN><en>Fold real node_modules entries into package roots instead of treating directory counts as a dependency closure.</en></lang>
+  const packageRoots = new Set();
+  for (const entry of entries) {
+    const match = /^extension\/node_modules\/(@[^/]+\/[^/]+|[^/]+)\//.exec(entry);
+    if (match) packageRoots.add(match[1]);
+  }
+
+  const portableRoots = [
+    '@napi-rs/canvas',
+    '@napi-rs/image',
+    'cwise-compiler',
+    'iota-array',
+    'is-buffer',
+    'ndarray',
+    'ndarray-ops',
+    'unicode-art-js',
+    'uniq'
+  ];
+  // <lang><zh-CN>portable base 必须完整；平台包名称由构建 OS 决定，不能硬编码为当前 Windows。</zh-CN><en>The portable base must be complete; platform package names depend on the build OS and must not be hard-coded to current Windows.</en></lang>
+  const missingPortable = portableRoots.filter((root) => !packageRoots.has(root));
+  const canvasPlatformRoots = [...packageRoots].filter((root) => /^@napi-rs\/canvas-/.test(root));
+  const imagePlatformRoots = [...packageRoots].filter((root) => /^@napi-rs\/image-/.test(root));
+  const unexpectedRoots = [...packageRoots].filter(
+    (root) => !portableRoots.includes(root) && !/^@napi-rs\/(?:canvas|image)-/.test(root)
+  );
+
+  if (
+    missingPortable.length > 0 ||
+    canvasPlatformRoots.length !== 1 ||
+    imagePlatformRoots.length !== 1 ||
+    unexpectedRoots.length > 0 ||
+    packageRoots.size !== 11
+  ) {
+    console.error('VSIX production package surface does not match the audited 9-base + 2-platform closure.');
+    console.error(`  missing portable: ${missingPortable.join(', ') || '<none>'}`);
+    console.error(`  canvas platform: ${canvasPlatformRoots.join(', ') || '<none>'}`);
+    console.error(`  image platform: ${imagePlatformRoots.join(', ') || '<none>'}`);
+    console.error(`  unexpected: ${unexpectedRoots.join(', ') || '<none>'}`);
+    process.exit(1);
+  }
 }
 
 const hasCore = entries.some((entry) => /(^|\/)node_modules\/unicode-art-js\//.test(entry));
